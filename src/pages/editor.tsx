@@ -253,17 +253,23 @@ export const EditorPage = withSuspensable(() => {
         resetEditor({
           operation: toEditorOperation(parsedOperation),
           metadata: {
-            visibility:
-              operationData.status === CopilotInfoStatusEnum.Public
-                ? 'public'
-                : 'private',
-            sourceType:
-              operationData.metadata?.sourceType === 'repost'
-                ? 'repost'
-                : 'original',
-            repostAuthor: operationData.metadata?.repostAuthor ?? '',
-            repostPlatform: operationData.metadata?.repostPlatform ?? '',
-            repostUrl: operationData.metadata?.repostUrl ?? '',
+            // 神秘代码导入：默认仅自己可见
+            visibility: 'private',
+            // 修正：导入后本次编辑视为“搬运”；
+            // 若原作业为搬运则沿用原作业元数据；否则填充上传者/平台/链接。
+            sourceType: 'repost',
+            repostAuthor:
+              (operationData.metadata?.sourceType === 'repost'
+                ? operationData.metadata?.repostAuthor
+                : operationData.uploader) ?? '',
+            repostPlatform:
+              (operationData.metadata?.sourceType === 'repost'
+                ? operationData.metadata?.repostPlatform
+                : '作业站') ?? '',
+            repostUrl:
+              (operationData.metadata?.sourceType === 'repost'
+                ? operationData.metadata?.repostUrl
+                : `https://share.maayuan.top/?op=${operationData.id}`) ?? '',
           },
         })
         importedShortcodeRef.current = importShortcode
