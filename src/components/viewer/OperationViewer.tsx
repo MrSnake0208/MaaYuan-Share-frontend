@@ -719,6 +719,47 @@ function OperationViewerInner({
               {operation.uploader}
             </UserName>
           </FactItem>
+
+          {/* 作业来源（仅当为“搬运”时显示） */}
+          {operation.metadata?.sourceType === 'repost' && (
+            <FactItem
+              relaxed
+              className="items-start"
+              title={t.components.editor2.InfoEditor.source}
+              icon="share"
+            >
+              <div className="flex flex-col gap-1 text-gray-800 dark:text-slate-100">
+                <div className="flex items-center gap-2">
+                  <Tag minimal intent="warning">
+                    {t.components.editor2.InfoEditor.source_repost}
+                  </Tag>
+                </div>
+                {operation.metadata?.repostAuthor && (
+                  <div className="text-sm">
+                    {t.components.editor2.InfoEditor.repost_author}: {operation.metadata.repostAuthor}
+                  </div>
+                )}
+                {operation.metadata?.repostPlatform && (
+                  <div className="text-sm">
+                    {t.components.editor2.InfoEditor.repost_platform}: {operation.metadata.repostPlatform}
+                  </div>
+                )}
+                {operation.metadata?.repostUrl && (
+                  <div className="text-sm break-all">
+                    {t.components.editor2.InfoEditor.repost_link}: 
+                    <a
+                      className="underline hover:no-underline"
+                      href={operation.metadata.repostUrl}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      {operation.metadata.repostUrl}
+                    </a>
+                  </div>
+                )}
+              </div>
+            </FactItem>
+          )}
         </div>
       </div>
 
