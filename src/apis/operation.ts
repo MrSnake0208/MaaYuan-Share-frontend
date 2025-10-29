@@ -111,21 +111,30 @@ export function useOperations({
         return { data: [], hasNext: false, total: 0 }
       }
 
-      const res = await new OperationApi({
-        sendToken: 'optional',
-        requireData: true,
-      }).queriesCopilot(req)
+      // 使用 Raw 接口拿到未加工 JSON，确保 metadata 不丢失
+      const api = new OperationApi({ sendToken: 'optional', requireData: true })
+      const rawResponse = await api.queriesCopilotRaw(req)
+      const rawJson = (await rawResponse.raw.json()) as {
+        data?: { data?: any[]; has_next?: boolean; page?: number; total?: number }
+      }
+      const payload = rawJson?.data ?? { data: [], has_next: false, total: 0 }
 
-      let parsedOperations: Operation[] = res.data.data.map((operation) => ({
-        ...operation,
-        parsedContent: toCopilotOperation(operation),
-      }))
+      let parsedOperations: Operation[] = (payload.data ?? []).map((item) => {
+        const baseInfo = CopilotInfoFromJSON(item)
+        return {
+          ...baseInfo,
+          metadata: mapResponseMetadata(item?.metadata),
+          parsedContent: toCopilotOperation(baseInfo),
+        }
+      })
 
       // 如果 revalidateFirstPage=false，从第二页开始可能会有重复数据，需要去重
       parsedOperations = uniqBy(parsedOperations, (o) => o.id)
 
       return {
-        ...res.data,
+        hasNext: !!payload.has_next,
+        page: payload.page ?? req.page,
+        total: payload.total ?? 0,
         data: parsedOperations,
       }
     },
