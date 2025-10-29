@@ -40,7 +40,7 @@ import {
   useState,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { copyShortCode } from 'services/operation'
+import { copyShortCode,handleDownloadJSON } from 'services/operation'
 
 import { FactItem } from 'components/FactItem'
 import { Paragraphs } from 'components/Paragraphs'
@@ -317,11 +317,11 @@ export const OperationViewer: ComponentType<{
                 </Popover2>
               )}
 
-              {/* <Button
+              <Button
                 icon="download"
                 text={t.components.viewer.OperationViewer.download_json}
                 onClick={() => handleDownloadJSON(operation.parsedContent)}
-              /> */}
+              />
 
               <Button
                 icon="clipboard"

@@ -410,34 +410,41 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
                 }}
                 onBlur={() => edit()}
               />
+              
             </FormGroup>
             <FormGroup
               contentClassName="grow"
               label={t.components.editor2.InfoEditor.repost_platform}
               labelInfo="*"
             >
-              <InputGroup
-                large
-                fill
-                placeholder={
-                  t.components.editor2.InfoEditor.repost_platform_placeholder
-                }
-                value={metadata.repostPlatform ?? ''}
-                onChange={(e) => {
-                  const value = e.target.value
-                  edit(() => {
-                    setMetadata((prev) => {
-                      prev.repostPlatform = value
+              <div className="bp4-html-select bp4-fill bp4-large">
+                <select
+                  value={metadata.repostPlatform ?? ''}
+                  onChange={(e) => {
+                    const value = e.currentTarget.value
+                    edit(() => {
+                      setMetadata((prev) => {
+                        prev.repostPlatform = value
+                      })
+                      return {
+                        action: 'set-repost-platform',
+                        desc: i18n.actions.editor2.set_repost_platform,
+                        squashBy: '',
+                      }
                     })
-                    return {
-                      action: 'set-repost-platform',
-                      desc: i18n.actions.editor2.set_repost_platform,
-                      squashBy: '',
-                    }
-                  })
-                }}
-                onBlur={() => edit()}
-              />
+                  }}
+                  onBlur={() => edit()}
+                >
+                  <option value="" disabled>
+                    {t.components.editor2.InfoEditor.repost_platform_placeholder}
+                  </option>
+                  <option value="小红书">小红书</option>
+                  <option value="作业站">作业站</option>
+                  <option value="微博">微博</option>
+                  <option value="B站">B站</option>
+                  <option value="抖音">抖音</option>
+                </select>
+              </div>
             </FormGroup>
             <FormGroup
               contentClassName="grow"

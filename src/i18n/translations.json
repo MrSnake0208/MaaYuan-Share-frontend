@@ -3081,8 +3081,8 @@
           "zh_tw": "管理"
         },
         "download_json": {
-          "cn": "下载原 JSON",
-          "zh_tw": "下載原 JSON"
+          "cn": "下载 JSON",
+          "zh_tw": "下載 JSON"
         },
         "copy_secret_code": {
           "cn": "复制神秘代码",
