@@ -20,6 +20,7 @@ import {
   updateOperation,
   useOperation,
 } from '../apis/operation'
+import type { OperationMetadataPayload } from '../apis/operation'
 import { withSuspensable } from '../components/Suspensable'
 import { AppToaster } from '../components/Toaster'
 import {
@@ -27,6 +28,7 @@ import {
   editorAtoms,
   historyAtom,
 } from '../components/editor2/editor-state'
+import type { EditorMetadata } from '../components/editor2/types'
 import { toEditorOperation } from '../components/editor2/reconciliation'
 import { toSimingOperationRemote } from '../components/editor2/siming-export'
 import { parseOperationLoose } from '../components/editor2/validation/schema'
@@ -120,6 +122,63 @@ export const EditorPage = withSuspensable(() => {
   const importShortcode = searchParams.get('shortcode')
   const importedShortcodeRef = useRef<string | null>(null)
 
+  const validateMetadata = useCallback(
+    (metadata: EditorMetadata) => {
+      if (metadata.sourceType !== 'repost') {
+        return { ok: true as const }
+      }
+      const missingFields: string[] = []
+      if (!metadata.repostAuthor?.trim()) {
+        missingFields.push(t.components.editor2.InfoEditor.repost_author)
+      }
+      if (!metadata.repostPlatform?.trim()) {
+        missingFields.push(t.components.editor2.InfoEditor.repost_platform)
+      }
+      if (!metadata.repostUrl?.trim()) {
+        missingFields.push(t.components.editor2.InfoEditor.repost_link)
+      }
+      if (missingFields.length > 0) {
+        return {
+          ok: false as const,
+          message: t.pages.editor.validation.metadata_missing({
+            fields: missingFields.join('、'),
+          }),
+        }
+      }
+      try {
+        // eslint-disable-next-line no-new
+        new URL(metadata.repostUrl!.trim())
+      } catch {
+        return {
+          ok: false as const,
+          message: t.pages.editor.validation.metadata_invalid_url,
+        }
+      }
+      return { ok: true as const }
+    },
+    [t],
+  )
+
+  const buildMetadataPayload = useCallback(
+    (metadata: EditorMetadata): OperationMetadataPayload => {
+      const tidy = (value?: string) => {
+        const normalized = value?.trim()
+        return normalized && normalized.length > 0 ? normalized : undefined
+      }
+      const sourceType = metadata.sourceType ?? 'original'
+      if (sourceType !== 'repost') {
+        return { sourceType: 'original' }
+      }
+      return {
+        sourceType: 'repost',
+        repostAuthor: tidy(metadata.repostAuthor),
+        repostPlatform: tidy(metadata.repostPlatform),
+        repostUrl: tidy(metadata.repostUrl),
+      }
+    },
+    [],
+  )
+
   if (process.env.NODE_ENV === 'development') {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useAtomDevtools(historyAtom, { name: 'editorStateAtom' })
@@ -129,6 +188,7 @@ export const EditorPage = withSuspensable(() => {
     // 将后端返回的预计算关卡信息注入全局，供 InfoEditor 使用
     setEditorPreLevel(apiOperation?.preLevel)
     if (apiOperation) {
+      const serverMetadata = apiOperation?.metadata
       resetEditor({
         operation: toEditorOperation(
           parseOperationLoose(JSON.parse(apiOperation.content)),
@@ -138,6 +198,11 @@ export const EditorPage = withSuspensable(() => {
             apiOperation.status === CopilotInfoStatusEnum.Public
               ? 'public'
               : 'private',
+          sourceType:
+            serverMetadata?.sourceType === 'repost' ? 'repost' : 'original',
+          repostAuthor: serverMetadata?.repostAuthor ?? '',
+          repostPlatform: serverMetadata?.repostPlatform ?? '',
+          repostUrl: serverMetadata?.repostUrl ?? '',
         },
       })
     } else {
@@ -192,6 +257,13 @@ export const EditorPage = withSuspensable(() => {
               operationData.status === CopilotInfoStatusEnum.Public
                 ? 'public'
                 : 'private',
+            sourceType:
+              operationData.metadata?.sourceType === 'repost'
+                ? 'repost'
+                : 'original',
+            repostAuthor: operationData.metadata?.repostAuthor ?? '',
+            repostPlatform: operationData.metadata?.repostPlatform ?? '',
+            repostUrl: operationData.metadata?.repostUrl ?? '',
           },
         })
         importedShortcodeRef.current = importShortcode
@@ -239,6 +311,16 @@ export const EditorPage = withSuspensable(() => {
         }
         const baseOperation = result.data
         const editorOperation = get(editorAtoms.operation)
+        const editorMetadata = get(editorAtoms.metadata)
+        const metadataValidation = validateMetadata(editorMetadata)
+        if (!metadataValidation.ok) {
+          AppToaster.show({
+            message: metadataValidation.message,
+            intent: 'danger',
+          })
+          return false
+        }
+        const metadataPayload = buildMetadataPayload(editorMetadata)
         // 解析所选关卡，便于洞窟时设置 cave_type
         const selectedLevel = levels
           ? findLevelByStageName(
@@ -317,7 +399,7 @@ export const EditorPage = withSuspensable(() => {
           { level: levelForExport },
         )
         const status =
-          get(editorAtoms.metadata).visibility === 'public'
+          editorMetadata.visibility === 'public'
             ? CopilotInfoStatusEnum.Public
             : CopilotInfoStatusEnum.Private
 
@@ -327,6 +409,7 @@ export const EditorPage = withSuspensable(() => {
               id,
               content: JSON.stringify(operation),
               status,
+              metadata: metadataPayload,
             })
             AppToaster.show({
               message: i18n.pages.editor.edit.success,
@@ -337,6 +420,7 @@ export const EditorPage = withSuspensable(() => {
             const newId = await createOperation({
               content: JSON.stringify(operation),
               status,
+              metadata: metadataPayload,
             })
             AppToaster.show({
               message: i18n.pages.editor.create.success,
@@ -356,7 +440,7 @@ export const EditorPage = withSuspensable(() => {
         )
         return true
       },
-      [id, levels, navigate],
+      [buildMetadataPayload, id, levels, navigate, validateMetadata],
     ),
   )
 

@@ -22,6 +22,7 @@ import { LevelSelect } from './LevelSelect'
 import { editorAtoms, useEdit } from './editor-state'
 import { OperatorSidebarInInfo } from './operator/OperatorSidebarInInfo'
 import { DEFAULT_SIMING_ACTION_DELAYS } from './siming/constants'
+import { EditorSourceType } from './types'
 import { CopilotOperation, getLabeledPath } from './validation/schema'
 
 interface InfoEditorProps {
@@ -196,6 +197,9 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
     })
   }, [assignLevelMeta, edit, fallbackLevel, info.stageName, setInfo])
 
+  const currentSourceType = metadata.sourceType ?? 'original'
+  const isRepost = currentSourceType === 'repost'
+
   return (
     <div
       className={clsx(
@@ -341,6 +345,131 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
           onBlur={() => edit()}
         />
         <FieldError path="doc.details" />
+      </FormGroup>
+      <FormGroup
+        contentClassName="grow"
+        label={t.components.editor2.InfoEditor.source}
+        labelInfo="*"
+      >
+        <RadioGroup
+          inline
+          selectedValue={currentSourceType}
+          onChange={(e) => {
+            const nextSourceType = e.currentTarget.value as EditorSourceType
+            edit(() => {
+              setMetadata((prev) => {
+                prev.sourceType = nextSourceType
+                if (nextSourceType === 'original') {
+                  prev.repostAuthor = ''
+                  prev.repostPlatform = ''
+                  prev.repostUrl = ''
+                }
+              })
+              return {
+                action: 'set-source-type',
+                desc: i18n.actions.editor2.set_source_type,
+                squashBy: '',
+              }
+            })
+          }}
+        >
+          <Radio className="!mt-0" value="original">
+            {t.components.editor2.InfoEditor.source_original}
+          </Radio>
+          <Radio className="!mt-0" value="repost">
+            {t.components.editor2.InfoEditor.source_repost}
+          </Radio>
+        </RadioGroup>
+
+        {isRepost && (
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
+            <FormGroup
+              contentClassName="grow"
+              label={t.components.editor2.InfoEditor.repost_author}
+              labelInfo="*"
+            >
+              <InputGroup
+                large
+                fill
+                placeholder={
+                  t.components.editor2.InfoEditor.repost_author_placeholder
+                }
+                value={metadata.repostAuthor ?? ''}
+                onChange={(e) => {
+                  const value = e.target.value
+                  edit(() => {
+                    setMetadata((prev) => {
+                      prev.repostAuthor = value
+                    })
+                    return {
+                      action: 'set-repost-author',
+                      desc: i18n.actions.editor2.set_repost_author,
+                      squashBy: '',
+                    }
+                  })
+                }}
+                onBlur={() => edit()}
+              />
+            </FormGroup>
+            <FormGroup
+              contentClassName="grow"
+              label={t.components.editor2.InfoEditor.repost_platform}
+              labelInfo="*"
+            >
+              <InputGroup
+                large
+                fill
+                placeholder={
+                  t.components.editor2.InfoEditor.repost_platform_placeholder
+                }
+                value={metadata.repostPlatform ?? ''}
+                onChange={(e) => {
+                  const value = e.target.value
+                  edit(() => {
+                    setMetadata((prev) => {
+                      prev.repostPlatform = value
+                    })
+                    return {
+                      action: 'set-repost-platform',
+                      desc: i18n.actions.editor2.set_repost_platform,
+                      squashBy: '',
+                    }
+                  })
+                }}
+                onBlur={() => edit()}
+              />
+            </FormGroup>
+            <FormGroup
+              contentClassName="grow"
+              label={t.components.editor2.InfoEditor.repost_link}
+              labelInfo="*"
+            >
+              <InputGroup
+                large
+                fill
+                type="url"
+                placeholder={
+                  t.components.editor2.InfoEditor.repost_link_placeholder
+                }
+                value={metadata.repostUrl ?? ''}
+                onChange={(e) => {
+                  const value = e.target.value
+                  edit(() => {
+                    setMetadata((prev) => {
+                      prev.repostUrl = value
+                    })
+                    return {
+                      action: 'set-repost-url',
+                      desc: i18n.actions.editor2.set_repost_url,
+                      squashBy: '',
+                    }
+                  })
+                }}
+                onBlur={() => edit()}
+              />
+            </FormGroup>
+          </div>
+        )}
       </FormGroup>
       <FormGroup
         contentClassName="grow"

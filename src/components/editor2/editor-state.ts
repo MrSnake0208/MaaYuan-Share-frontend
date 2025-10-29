@@ -41,11 +41,24 @@ const defaultOperation = parseOperationLoose({
   version: CopilotDocV1.VERSION,
 })
 
+export const DEFAULT_EDITOR_METADATA: EditorMetadata = {
+  visibility: 'public',
+  sourceType: 'original',
+  repostAuthor: '',
+  repostPlatform: '',
+  repostUrl: '',
+}
+
+const normalizeMetadata = (
+  metadata?: Partial<EditorMetadata> | null,
+): EditorMetadata => ({
+  ...DEFAULT_EDITOR_METADATA,
+  ...(metadata ?? {}),
+})
+
 export const defaultEditorState: EditorState = {
   operation: toEditorOperation(defaultOperation),
-  metadata: {
-    visibility: 'public',
-  },
+  metadata: normalizeMetadata(),
 }
 
 const sourceEditorTextAtom = atom(
@@ -137,7 +150,7 @@ const operationAtom = atom(
     set(actionsAtom, actions)
   },
 )
-const metadataAtom = atom<EditorMetadata>({ visibility: 'public' })
+const metadataAtom = atom<EditorMetadata>(normalizeMetadata())
 const editorAtom = atom(
   (get): EditorState => ({
     operation: get(operationAtom),
@@ -148,7 +161,7 @@ const editorAtom = atom(
       update = update(get(editorAtom))
     }
     set(operationAtom, update.operation)
-    set(metadataAtom, update.metadata)
+    set(metadataAtom, normalizeMetadata(update.metadata))
   },
 )
 
