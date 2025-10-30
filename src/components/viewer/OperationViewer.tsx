@@ -52,7 +52,7 @@ import { EDifficultyLevel } from 'components/entity/ELevel'
 import { OperationRating } from 'components/viewer/OperationRating'
 import { OpRatingType, Operation } from 'models/operation'
 import { toShortCode } from 'models/shortCode'
-import { authAtom } from 'store/auth'
+import { authAtom, isAdmin } from 'store/auth'
 import { wrapErrorMessage } from 'utils/wrapErrorMessage'
 
 import { useLevels } from '../../apis/level'
@@ -295,7 +295,7 @@ export const OperationViewer: ComponentType<{
             <div className="flex-1" />
 
             <div className="flex flex-wrap items-center gap-2 md:gap-4">
-              {operation.uploaderId === auth.userId && (
+              {(operation.uploaderId === auth.userId || isAdmin(auth)) && (
                 // 使用 Portal 渲染，避免被头部容器裁剪/遮挡；提升层级与全局样式一致
                 <Popover2
                   content={
