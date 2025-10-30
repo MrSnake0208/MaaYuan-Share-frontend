@@ -244,6 +244,8 @@ export const editorAtoms = {
   activeActionIdAtom: atom<string | undefined>(undefined),
   sourceEditorIsOpen: atom(false),
   sourceEditorText: sourceEditorTextAtom,
+  // 当通过神秘代码导入后，锁定作业来源编辑
+  metadataLocked: atom(false),
   // this atom will cause some memory leak as it does not clean up until the editor is reset,
   // but generally it's not a big deal
 
@@ -265,6 +267,8 @@ export const editorAtoms = {
       )
       set(editorGlobalErrorsAtom, [])
       set(editorEntityErrorsAtom, {})
+      // 复位来源锁定状态
+      set(editorAtoms.metadataLocked, false)
     },
   ),
 }

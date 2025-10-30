@@ -36,6 +36,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
   const edit = useEdit()
   const t = useTranslation()
   const selectedOperators = useAtomValue(editorAtoms.operators)
+  const metadataLocked = useAtomValue(editorAtoms.metadataLocked)
 
   useEffect(() => {
     if (info.difficulty === undefined) {
@@ -355,6 +356,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
           inline
           selectedValue={currentSourceType}
           onChange={(e) => {
+            if (metadataLocked) return
             const nextSourceType = e.currentTarget.value as EditorSourceType
             edit(() => {
               setMetadata((prev) => {
@@ -373,10 +375,10 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
             })
           }}
         >
-          <Radio className="!mt-0" value="original">
+          <Radio className="!mt-0" value="original" disabled={metadataLocked}>
             {t.components.editor2.InfoEditor.source_original}
           </Radio>
-          <Radio className="!mt-0" value="repost">
+          <Radio className="!mt-0" value="repost" disabled={metadataLocked}>
             {t.components.editor2.InfoEditor.source_repost}
           </Radio>
         </RadioGroup>
@@ -395,6 +397,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
                   t.components.editor2.InfoEditor.repost_author_placeholder
                 }
                 value={metadata.repostAuthor ?? ''}
+                disabled={metadataLocked}
                 onChange={(e) => {
                   const value = e.target.value
                   edit(() => {
@@ -420,6 +423,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
               <div className="bp4-html-select bp4-fill bp4-large">
                 <select
                   value={metadata.repostPlatform ?? ''}
+                  disabled={metadataLocked}
                   onChange={(e) => {
                     const value = e.currentTarget.value
                     edit(() => {
@@ -459,6 +463,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
                   t.components.editor2.InfoEditor.repost_link_placeholder
                 }
                 value={metadata.repostUrl ?? ''}
+                disabled={metadataLocked}
                 onChange={(e) => {
                   const value = e.target.value
                   edit(() => {

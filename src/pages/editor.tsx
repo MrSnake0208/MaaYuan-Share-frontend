@@ -117,6 +117,7 @@ export const EditorPage = withSuspensable(() => {
   }).data
   const t = useTranslation()
   const resetEditor = useSetAtom(editorAtoms.reset)
+  const setMetadataLocked = useSetAtom(editorAtoms.metadataLocked)
   const { data: levels } = useLevels({ suspense: false })
   const [searchParams, setSearchParams] = useSearchParams()
   const importShortcode = searchParams.get('shortcode')
@@ -272,6 +273,8 @@ export const EditorPage = withSuspensable(() => {
                 : `https://share.maayuan.top/?op=${operationData.id}`) ?? '',
           },
         })
+        // 神秘代码导入：锁定作业来源编辑，保护原作者
+        setMetadataLocked(true)
         importedShortcodeRef.current = importShortcode
       } catch (error) {
         console.warn(error)

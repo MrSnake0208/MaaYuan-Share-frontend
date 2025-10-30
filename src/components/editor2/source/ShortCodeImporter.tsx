@@ -23,6 +23,7 @@ export const ShortCodeImporter: FC<{
   const [dialogOpen, setDialogOpen] = useState(false)
   const [pending, setPending] = useState(false)
   const setMetadata = useSetAtom(editorAtoms.metadata)
+  const setMetadataLocked = useSetAtom(editorAtoms.metadataLocked)
 
   const {
     handleSubmit,
@@ -97,6 +98,8 @@ export const ShortCodeImporter: FC<{
             : `https://share.maayuan.top/?op=${id}`,
         }
       })
+      // 锁定作业来源，保护原作者
+      setMetadataLocked(true)
       setDialogOpen(false)
     } catch (e) {
       console.warn(e)
