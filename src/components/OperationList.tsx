@@ -16,10 +16,18 @@ import { AddToOperationSetButton } from './operation-set/AddToOperationSet'
 interface OperationListProps extends UseOperationsParams {
   multiselect?: boolean
   onUpdate?: (params: { total: number }) => void
+  /**
+   * 扩展：在多选模式下渲染额外的批量操作按钮（如批量删除）。
+   * 仅在 multiselect=true 时生效。
+   */
+  renderMultiSelectActions?: (params: {
+    selectedOperations: Operation[]
+    clearSelection: () => void
+  }) => ReactNode
 }
 
 export const OperationList: ComponentType<OperationListProps> = withSuspensable(
-  ({ multiselect, onUpdate, ...params }) => {
+  ({ multiselect, onUpdate, renderMultiSelectActions, ...params }) => {
     const t = useTranslation()
     const neoLayout = useAtomValue(neoLayoutAtom)
 
@@ -137,6 +145,10 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
               >
                 {t.components.OperationList.add_to_job_set}
               </AddToOperationSetButton>
+              {renderMultiSelectActions?.({
+                selectedOperations,
+                clearSelection: () => setSelectedOperations([]),
+              })}
             </div>
           </Callout>
         )}
