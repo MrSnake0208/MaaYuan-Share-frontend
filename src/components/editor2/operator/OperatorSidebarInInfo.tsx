@@ -105,14 +105,14 @@ export const OperatorSidebarInInfo: FC<OperatorSidebarInInfoProps> = ({
             aria-label={panelTitle}
             className={clsx(
               // 面板层级设为更高，避免被其它 fixed 元素覆盖
-              'fixed bottom-20 right-4 z-[60] flex w-[min(520px,calc(100vw-2rem))] flex-col gap-3 overflow-hidden rounded-xl bg-white/95 dark:bg-slate-900/95 shadow-lg',
+              'fixed bottom-20 right-4 z-[60] flex w-[min(85vw,calc(100vw-2rem))] flex-col gap-3 overflow-hidden rounded-xl bg-white/95 dark:bg-slate-900/95 shadow-lg',
               'transition-all duration-200 ease-out',
               // 展开态需避免 transform，否则 dnd-kit 会使用错误坐标
               open
                 ? 'opacity-100'
                 : 'translate-y-4 opacity-0 pointer-events-none',
             )}
-            style={{ height: 'min(720px, calc(100vh - 6rem))' }}
+            style={{ height: 'min(900px, calc(100vh - 6rem))' }}
           >
             <div className="panel-shadow flex shrink-0 items-center justify-between rounded-lg  px-4 py-2 dark:bg-gray-900/90">
               <span className="font-semibold">{panelTitle}</span>
@@ -124,11 +124,11 @@ export const OperatorSidebarInInfo: FC<OperatorSidebarInInfoProps> = ({
               />
             </div>
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-              <div className="flex-1 h-full overflow-hidden">
+              <div className="flex-[1_1_0%] min-h-0 overflow-hidden">
                 <OperatorSheet />
               </div>
               <div className="h-1 bg-white dark:bg-[#383e47]" />
-              <div className="flex-1 h-full overflow-auto">
+              <div className="flex-[1.3_1_0%] min-h-0 overflow-auto">
                 <OperatorEditor />
               </div>
             </div>

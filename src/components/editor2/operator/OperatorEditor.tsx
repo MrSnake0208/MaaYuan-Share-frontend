@@ -92,11 +92,6 @@ export const OperatorEditor: FC = memo(() => {
         <CreateOperatorButton />
       </div>
       <div className="grow md:overflow-auto px-4 pt-4">
-        {/* 必填提示：密探为必填，手动展示星号 */}
-        <div className="mb-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
-          {t.components.editor2.label.opers._item}
-          <span className="ml-1 text-slate-600">*</span>
-        </div>
         <OperatorError />
         {operatorAtoms.length === 0 ? (
           <NonIdealState
@@ -107,13 +102,14 @@ export const OperatorEditor: FC = memo(() => {
           <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
             <Droppable id={globalContainerId} data={{ type: 'operator-list' }}>
               <SortableContext items={operatorIds}>
-                <ul className="flex flex-wrap gap-4">
+                <ul className="flex flex-wrap gap-4 list-none p-0 m-0">
                   {operatorAtoms.map((operatorAtom) => (
                     <AtomRenderer
                       atom={operatorAtom}
                       key={operatorAtom.toString()}
                       render={(operator, { onChange }) => (
                         <Sortable
+                          className=""
                           id={operator.id}
                           data={{
                             type: 'operator',

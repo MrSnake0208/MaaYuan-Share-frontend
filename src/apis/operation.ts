@@ -115,7 +115,12 @@ export function useOperations({
       const api = new OperationApi({ sendToken: 'optional', requireData: true })
       const rawResponse = await api.queriesCopilotRaw(req)
       const rawJson = (await rawResponse.raw.json()) as {
-        data?: { data?: any[]; has_next?: boolean; page?: number; total?: number }
+        data?: {
+          data?: any[]
+          has_next?: boolean
+          page?: number
+          total?: number
+        }
       }
       const payload = rawJson?.data ?? { data: [], has_next: false, total: 0 }
 
@@ -131,9 +136,11 @@ export function useOperations({
       // 如果 revalidateFirstPage=false，从第二页开始可能会有重复数据，需要去重
       parsedOperations = uniqBy(parsedOperations, (o) => o.id)
 
+      const requestPage = 'page' in req ? req.page : undefined
+
       return {
         hasNext: !!payload.has_next,
-        page: payload.page ?? req.page,
+        page: payload.page ?? requestPage,
         total: payload.total ?? 0,
         data: parsedOperations,
       }

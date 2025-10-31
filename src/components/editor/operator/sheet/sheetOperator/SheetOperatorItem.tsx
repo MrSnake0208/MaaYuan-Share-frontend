@@ -107,19 +107,23 @@ export const SheetOperatorItem: FC<SheetOperatorItemProp> = ({
   return (
     <Card
       className={clsx(
-        'flex items-center w-full h-full relative cursor-pointer flex-col',
-        selectedInView && 'scale-90 bg-gray-200',
+        'flex flex-col items-center justify-start w-full h-full relative cursor-pointer rounded-xl p-2 gap-1 transition-transform duration-150',
+        selectedInView && 'scale-[0.96] bg-gray-200',
       )}
       elevation={grouped ? 0 : 2}
       interactive={!selectedInView}
       onClick={onOperatorSelect}
     >
       <>
-        <OperatorAvatar className="mt-3" name={name} size="verylarge" />
+        <OperatorAvatar
+          className="mt-1"
+          name={name}
+          size="verylarge"
+          sourceSize={96}
+        />
         <p
           className={clsx(
-            'mt-1 font-bold leading-tight text-center',
-            'break-words', // Allow text to break to next line
+            'font-semibold leading-tight text-center text-xs sm:text-sm break-words',
           )}
         >
           {useLocalizedOperatorName(name)}
@@ -127,7 +131,7 @@ export const SheetOperatorItem: FC<SheetOperatorItemProp> = ({
 
         {selected && (
           <div
-            className="absolute top-2 right-2"
+            className="absolute top-1.5 right-1.5"
             onClick={(e) => e.stopPropagation()}
             role="presentation"
           >

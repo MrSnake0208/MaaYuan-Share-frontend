@@ -65,6 +65,28 @@ export const ProfClassification: FC<ProfClassification> = () => {
     ],
     [t],
   )
+  const aggregatedSubProfs = useMemo(() => {
+    const seen = new Set<string>()
+    const subs: {
+      id: string
+      name: string
+      name_en?: string
+    }[] = []
+    formattedProfessions
+      .filter(
+        (prof) => !(Object.values(DEFAULTPROFID) as string[]).includes(prof.id),
+      )
+      .forEach((prof) => {
+        prof.sub?.forEach((sub) => {
+          if (!seen.has(sub.id)) {
+            seen.add(sub.id)
+            subs.push(sub)
+          }
+        })
+      })
+    return subs
+  }, [formattedProfessions])
+
   const subProfs = useMemo(() => {
     return [
       {
@@ -83,19 +105,21 @@ export const ProfClassification: FC<ProfClassification> = () => {
           t.components.editor.operator.sheet.sheetOperator
             .ProfClassificationWithFilters.selected,
       },
-      ...(formattedProfessions.find(({ id }) => id === selectedProf[0])?.sub ||
-        []),
+      ...((Object.values(DEFAULTPROFID) as string[]).includes(selectedProf[0])
+        ? aggregatedSubProfs
+        : formattedProfessions.find(({ id }) => id === selectedProf[0])?.sub ||
+          []),
     ]
-  }, [selectedProf, formattedProfessions, t])
+  }, [aggregatedSubProfs, selectedProf, formattedProfessions, t])
 
   return (
     <div>
-      <UlWithArrow className="px-4 py-2 gap-4 " key={selectedProf[0]}>
+      <UlWithArrow className="px-3 py-1 gap-3" key={selectedProf[0]}>
         {subProfs.map((subProf) => (
           <li key={subProf.id} className="flex items-center justify-center">
             <H4
               className={clsx(
-                'truncate cursor-pointer opacity-50 hover:underline hover:opacity-90 m-0',
+                'truncate cursor-pointer opacity-60 hover:underline hover:opacity-90 m-0 !text-xs sm:!text-sm',
                 selectedProf.includes(subProf.id) && '!opacity-100 underline',
               )}
               onClick={() =>
@@ -113,7 +137,7 @@ export const ProfClassification: FC<ProfClassification> = () => {
         ))}
       </UlWithArrow>
       <Divider className="m-0" />
-      <UlWithArrow className="py-1">
+      <UlWithArrow className="px-3 py-1.5 gap-2">
         {formattedProfessions.map((prof) => (
           <ProfIcon
             key={prof.id}
@@ -151,20 +175,23 @@ const ProfIcon: FC<ProfIconProp> = ({
 }) => {
   return (
     <li
-      className="grow cursor-pointer relative flex justify-center items-center p-2 min-w-[48px]"
+      className="grow cursor-pointer relative flex flex-col items-center justify-center gap-1 py-1 px-2 min-w-[56px]"
       title={name}
       role="presentation"
       onClick={onProfClick}
     >
       {selected && (
-        <div className="w-full h-1 bg-black dark:bg-white absolute bottom-full left-0 rounded" />
+        <div className="w-full h-0.5 bg-black dark:bg-white absolute bottom-full left-0 rounded" />
       )}
       {(Object.values(DEFAULTPROFID) as string[]).includes(profId) ? (
-        <H5 className="!text-xs sm:!text-base truncate m-0">{name}</H5>
+        <H5 className="!text-xs sm:!text-sm truncate m-0">{name}</H5>
       ) : (
         <img
           {...restImgProps}
-          className="dark:invert-0"
+          className={clsx(
+            'w-8 h-6 object-contain dark:invert-0',
+            restImgProps.className,
+          )}
           src={'/assets/prof-icons/' + profId + '.png'}
           alt=""
           title={name}
