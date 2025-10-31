@@ -77,7 +77,7 @@ export const AdBannerCarousel: FC<AdBannerCarouselProps> = ({
             <img
               src={item.image}
               alt={item.alt || 'ad'}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               draggable={false}
             />
           </a>
