@@ -24,10 +24,15 @@ interface OperationListProps extends UseOperationsParams {
     selectedOperations: Operation[]
     clearSelection: () => void
   }) => ReactNode
+  /**
+   * 客户端过滤：根据 metadata.sourceType 过滤（original | repost）
+   * 若未指定则不过滤。
+   */
+  sourceTypeFilter?: 'original' | 'repost'
 }
 
 export const OperationList: ComponentType<OperationListProps> = withSuspensable(
-  ({ multiselect, onUpdate, renderMultiSelectActions, ...params }) => {
+  ({ multiselect, onUpdate, renderMultiSelectActions, sourceTypeFilter, ...params }) => {
     const t = useTranslation()
     const neoLayout = useAtomValue(neoLayoutAtom)
 
@@ -63,6 +68,13 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
       }
     }
 
+    // 根据需要进行客户端过滤（例如按来源：原创/搬运）
+    const displayedOperations = sourceTypeFilter
+      ? operations.filter(
+          (op) => op.metadata?.sourceType === sourceTypeFilter,
+        )
+      : operations
+
     const items: ReactNode = neoLayout ? (
       <ul
         className="grid gap-4 items-stretch"
@@ -70,7 +82,7 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
           gridTemplateColumns: 'repeat(auto-fill, minmax(20rem, 1fr)',
         }}
       >
-        {operations.map((operation) => (
+        {displayedOperations.map((operation) => (
           <NeoOperationCard
             operation={operation}
             key={operation.id}
@@ -82,7 +94,7 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
       </ul>
     ) : (
       <ul>
-        {operations.map((operation) => (
+        {displayedOperations.map((operation) => (
           <OperationCard operation={operation} key={operation.id} />
         ))}
       </ul>
@@ -121,7 +133,7 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
                 <Button
                   minimal
                   icon="tick"
-                  onClick={() => updateSelection(operations, [])}
+                  onClick={() => updateSelection(displayedOperations, [])}
                 >
                   {t.components.OperationList.select_all}
                 </Button>
@@ -155,7 +167,7 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
 
         {items}
 
-        {isReachingEnd && operations.length === 0 && (
+        {isReachingEnd && displayedOperations.length === 0 && (
           <NonIdealState
             icon="slash"
             title={t.components.OperationList.no_jobs_found}
@@ -163,7 +175,7 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
           />
         )}
 
-        {isReachingEnd && operations.length !== 0 && (
+        {isReachingEnd && displayedOperations.length !== 0 && (
           <div className="mt-8 w-full tracking-wider text-center select-none text-slate-500">
             {t.components.OperationList.reached_bottom}
           </div>
