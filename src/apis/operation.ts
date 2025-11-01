@@ -111,6 +111,11 @@ export function useOperations({
           desc: descending,
           copilotIds: operationIds,
           uploaderId,
+          // 直接在 key 对象中携带 tags，方便 fetcher 透传给后端；
+          // SWR 的去重逻辑依然依赖 __tagsKey，避免大数组作为 key 影响性能
+          tags: Array.isArray(tags) && tags.length
+            ? tags.map((s) => (s || '').trim()).filter(Boolean)
+            : undefined,
           // 仅用于 SWR key 的稳定性，不会发送到后端
           __tagsKey: tagsKey,
         },
@@ -145,9 +150,17 @@ export function useOperations({
 
       let parsedOperations: Operation[] = (payload.data ?? []).map((item) => {
         const baseInfo = CopilotInfoFromJSON(item)
+        // 后端返回的 tags 位于顶层（item.tags），需注入到 metadata 以便前端统一从 metadata.tags 读取
+        const metadata = mapResponseMetadata(item?.metadata)
+        if (Array.isArray(item?.tags)) {
+          const cleaned = item.tags
+            .map((s: unknown) => (typeof s === 'string' ? s.trim() : ''))
+            .filter((s: string) => s.length > 0)
+          if (cleaned.length) metadata.tags = cleaned
+        }
         return {
           ...baseInfo,
-          metadata: mapResponseMetadata(item?.metadata),
+          metadata,
           parsedContent: toCopilotOperation(baseInfo),
         }
       })

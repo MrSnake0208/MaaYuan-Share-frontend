@@ -193,10 +193,9 @@ export const EditorPage = withSuspensable(() => {
     [],
   )
 
-  if (process.env.NODE_ENV === 'development') {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useAtomDevtools(historyAtom, { name: 'editorStateAtom' })
-  }
+  // 统一遵循 Hooks 规则：避免条件调用，保证调用顺序一致
+  // devtools 在非开发环境通常不会生效，但保持调用安全无副作用
+  useAtomDevtools(historyAtom, { name: 'editorStateAtom' })
 
   useLayoutEffect(() => {
     // 将后端返回的预计算关卡信息注入全局，供 InfoEditor 使用
