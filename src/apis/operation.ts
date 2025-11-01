@@ -127,12 +127,12 @@ export function useOperations({
       const api = new OperationApi({ sendToken: 'optional', requireData: true })
       // 后端已确定新增 tags: string[] 且按 AND 筛选
       // 由于生成的类型暂未包含 tags 字段，这里构造 payload 并以 any 透传
-      const payload: any = { ...req }
-      if ('__tagsKey' in payload) delete payload.__tagsKey
+      const payload_front: any = { ...req }
+      if ('__tagsKey' in payload_front) delete payload_front.__tagsKey
       if (Array.isArray(tags) && tags.length) {
-        payload.tags = tags
+        payload_front.tags = tags
       }
-      const rawResponse = await api.queriesCopilotRaw(payload)
+      const rawResponse = await api.queriesCopilotRaw(payload_front)
       const rawJson = (await rawResponse.raw.json()) as {
         data?: {
           data?: any[]
