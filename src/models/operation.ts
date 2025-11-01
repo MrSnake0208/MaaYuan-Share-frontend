@@ -20,7 +20,6 @@ export type Operation = CopilotInfo & {
 
 // 与后端 v2 对齐的关卡类型（向后兼容 v1，game 可选）
 export type Level = {
-  game?: string
   levelId: string
   stageId: string
   catOne: string

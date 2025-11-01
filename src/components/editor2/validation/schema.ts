@@ -30,7 +30,6 @@ const level_meta = z
     stage_id: z.string().optional(),
     level_id: z.string().optional(),
     name: z.string().optional(),
-    game: z.string().optional(),
     cat_one: z.string().optional(),
     cat_two: z.string().optional(),
     cat_three: z.string().optional(),
