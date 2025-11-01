@@ -165,8 +165,10 @@ export const EditorPage = withSuspensable(() => {
         return normalized && normalized.length > 0 ? normalized : undefined
       }
       const sourceType = metadata.sourceType ?? 'original'
+      const normalizedSourceType: 'original' | 'repost' =
+        sourceType === 'repost' ? 'repost' : 'original'
       const base = {
-        sourceType: sourceType === 'repost' ? 'repost' : 'original' as const,
+        sourceType: normalizedSourceType,
         // 去重并清洗标签
         tags: Array.isArray(metadata.tags)
           ? Array.from(

@@ -343,6 +343,19 @@ function mapResponseMetadata(raw: any | undefined): OperationMetadata {
     const trimmed = value.trim()
     return trimmed.length > 0 ? trimmed : undefined
   }
+
+  // 当后端未提供 metadata（null/undefined）时，不推断来源类型，
+  // 保持为空以避免前端为标题加上前缀（例如“【原创】”）。
+  if (raw == null) {
+    return {
+      // 故意不设置 sourceType，以便 UI 判空时不显示前缀
+      repostAuthor: undefined,
+      repostPlatform: undefined,
+      repostUrl: undefined,
+      tags: undefined,
+    } as OperationMetadata
+  }
+
   const source =
     (typeof raw?.sourceType === 'string' ? raw.sourceType : undefined) ??
     (typeof raw?.source_type === 'string' ? raw.source_type : undefined)

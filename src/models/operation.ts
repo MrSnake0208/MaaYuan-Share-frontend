@@ -3,7 +3,7 @@ import { CopilotInfo } from 'maa-copilot-client'
 import { CopilotDocV1 } from 'models/copilot.schema'
 
 export type OperationMetadata = {
-  sourceType: 'original' | 'repost'
+  sourceType?: 'original' | 'repost'
   repostAuthor?: string
   repostPlatform?: string
   repostUrl?: string
