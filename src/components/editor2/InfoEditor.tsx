@@ -282,7 +282,6 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
               }
             })
           }}
-          disabled={metadataLocked}
         />
       </FormGroup>
       <FormGroup
