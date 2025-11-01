@@ -24,6 +24,7 @@ import { OperatorSidebarInInfo } from './operator/OperatorSidebarInInfo'
 import { DEFAULT_SIMING_ACTION_DELAYS } from './siming/constants'
 import { EditorSourceType } from './types'
 import { CopilotOperation, getLabeledPath } from './validation/schema'
+import { TagsFilter } from '../TagsFilter'
 
 interface InfoEditorProps {
   className?: string
@@ -260,6 +261,29 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
           }}
         />
         <FieldError path="stage_name" />
+      </FormGroup>
+
+      {/* Tags 编辑（多选 AND） */}
+      <FormGroup
+        contentClassName="grow"
+        label={t.components.editor2.InfoEditor.tags}
+      >
+        <TagsFilter
+          value={metadata.tags ?? []}
+          onChange={(next) => {
+            edit(() => {
+              setMetadata((prev) => {
+                prev.tags = next
+              })
+              return {
+                action: 'set-tags',
+                desc: i18n.actions.editor2.set_tags,
+                squashBy: '',
+              }
+            })
+          }}
+          disabled={metadataLocked}
+        />
       </FormGroup>
       <FormGroup
         contentClassName="grow"

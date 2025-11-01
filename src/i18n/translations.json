@@ -121,6 +121,10 @@
         "cn": "切换司命预设",
         "zh_tw": "切換司命預設"
       },
+      "set_tags": {
+        "cn": "修改标签",
+        "zh_tw": "修改標籤"
+      },
       "set_action_target": {
         "cn": "修改动作的目标",
         "zh_tw": "修改動作的目標"
@@ -592,10 +596,15 @@
           "cn": "原链接",
           "zh_tw": "原連結"
         },
-        "repost_link_placeholder": {
-          "cn": "请粘贴原帖链接",
-          "zh_tw": "請貼上原帖連結"
-        }
+      "repost_link_placeholder": {
+        "cn": "请粘贴原帖链接",
+        "zh_tw": "請貼上原帖連結"
+      }
+      ,
+      "tags": {
+        "cn": "标签",
+        "zh_tw": "標籤"
+      }
       },
       "LevelSelect": {
         "related_levels": {

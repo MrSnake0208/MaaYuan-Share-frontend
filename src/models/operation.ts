@@ -7,6 +7,8 @@ export type OperationMetadata = {
   repostAuthor?: string
   repostPlatform?: string
   repostUrl?: string
+  // 新增：平台标签（如：如鸢、代号鸢）。用于首页筛选与编辑器维护
+  tags?: string[]
 }
 
 export type Operation = CopilotInfo & {

@@ -47,6 +47,7 @@ export const DEFAULT_EDITOR_METADATA: EditorMetadata = {
   repostAuthor: '',
   repostPlatform: '',
   repostUrl: '',
+  tags: [],
 }
 
 const normalizeMetadata = (

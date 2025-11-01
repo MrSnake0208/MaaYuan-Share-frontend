@@ -112,6 +112,8 @@ export interface EditorMetadata {
   repostAuthor?: string
   repostPlatform?: string
   repostUrl?: string
+  // 新增：平台标签（与首页筛选一致）
+  tags?: string[]
 }
 
 export interface EditorState {

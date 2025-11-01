@@ -265,6 +265,8 @@ export interface OperationMetadataPayload {
   repostAuthor?: string
   repostPlatform?: string
   repostUrl?: string
+  // 新增：平台标签（多选 AND）
+  tags?: string[]
 }
 
 type CopilotCUDRequestWithMetadata = CopilotCUDRequest & {
@@ -297,12 +299,23 @@ function prepareRequestBody(payload: CopilotCUDRequestWithMetadata) {
     repostAuthor: metadata.repostAuthor?.trim() || undefined,
     repostPlatform: metadata.repostPlatform?.trim() || undefined,
     repostUrl: metadata.repostUrl?.trim() || undefined,
+    // 仅保留非空字符串的标签，去重
+    tags: Array.isArray(metadata.tags)
+      ? Array.from(
+          new Set(
+            metadata.tags
+              .map((s) => (s ?? '').trim())
+              .filter((s) => s.length > 0),
+          ),
+        )
+      : undefined,
   }
   if (
     sanitized.sourceType === 'original' &&
     !sanitized.repostAuthor &&
     !sanitized.repostPlatform &&
-    !sanitized.repostUrl
+    !sanitized.repostUrl &&
+    !sanitized.tags?.length
   ) {
     const { metadata: _removed, ...rest } = payload
     return rest
@@ -330,6 +343,12 @@ function mapResponseMetadata(raw: any | undefined): OperationMetadata {
     repostPlatform:
       clean(raw?.repostPlatform) ?? clean(raw?.repost_platform) ?? undefined,
     repostUrl: clean(raw?.repostUrl) ?? clean(raw?.repost_url) ?? undefined,
+    // 支持从后端读取 tags（数组字符串）
+    tags: Array.isArray(raw?.tags)
+      ? raw.tags
+          .map((s: unknown) => (typeof s === 'string' ? s.trim() : ''))
+          .filter((s: string) => s.length > 0)
+      : undefined,
   }
 }
 

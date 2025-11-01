@@ -167,11 +167,24 @@ export const EditorPage = withSuspensable(() => {
         return normalized && normalized.length > 0 ? normalized : undefined
       }
       const sourceType = metadata.sourceType ?? 'original'
+      const base = {
+        sourceType: sourceType === 'repost' ? 'repost' : 'original' as const,
+        // 去重并清洗标签
+        tags: Array.isArray(metadata.tags)
+          ? Array.from(
+              new Set(
+                metadata.tags
+                  .map((s) => (s ?? '').trim())
+                  .filter((s) => s.length > 0),
+              ),
+            )
+          : undefined,
+      }
       if (sourceType !== 'repost') {
-        return { sourceType: 'original' }
+        return base
       }
       return {
-        sourceType: 'repost',
+        ...base,
         repostAuthor: tidy(metadata.repostAuthor),
         repostPlatform: tidy(metadata.repostPlatform),
         repostUrl: tidy(metadata.repostUrl),
@@ -204,6 +217,7 @@ export const EditorPage = withSuspensable(() => {
           repostAuthor: serverMetadata?.repostAuthor ?? '',
           repostPlatform: serverMetadata?.repostPlatform ?? '',
           repostUrl: serverMetadata?.repostUrl ?? '',
+          tags: serverMetadata?.tags ?? [],
         },
       })
     } else {
