@@ -75,9 +75,20 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
     }
 
     // 根据需要进行客户端过滤（例如按来源：原创/搬运）
-    const displayedOperations = sourceTypeFilter
-      ? operations.filter((op) => op.metadata?.sourceType === sourceTypeFilter)
-      : operations
+    const displayedOperations = (
+      sourceTypeFilter
+        ? operations.filter((op) => op.metadata?.sourceType === sourceTypeFilter)
+        : operations
+    ).filter((op) => {
+      if (!params.tags?.length) return true
+      const itemTags = Array.isArray(op.metadata?.tags)
+        ? (op.metadata?.tags as string[])
+        : []
+      const normalized = params.tags
+        .map((s) => (s || '').trim())
+        .filter(Boolean)
+      return normalized.every((t) => itemTags.includes(t))
+    })
 
     const items: ReactNode = neoLayout ? (
       <ul
