@@ -214,7 +214,6 @@ export namespace CopilotDocV1 {
     stageId?: string
     levelId?: string
     name?: string
-    game?: string
     catOne?: string
     catTwo?: string
     catThree?: string

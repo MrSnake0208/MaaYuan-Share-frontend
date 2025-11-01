@@ -352,7 +352,6 @@ export const LevelSelect: FC<LevelSelectProps> = ({
       const trimmedName = level.name?.trim() || level.stageId
       return {
         ...level,
-        game: '',
         catOne: selectedCategory?.trim() || level.catOne || '',
         catTwo: trimmedName,
         catThree: '',

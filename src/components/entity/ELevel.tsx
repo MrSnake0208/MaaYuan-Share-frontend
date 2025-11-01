@@ -13,7 +13,6 @@ export const NeoELevel: FC<{
   level: Level
 }> = ({ level }) => {
   const t = useTranslation()
-  const { game } = level
   let { catOne, catTwo } = level
 
   if (isCustomLevel(level)) {
@@ -25,9 +24,7 @@ export const NeoELevel: FC<{
     <Tag className="transition border border-solid !text-xs tracking-tight !px-2 !py-1 !my-1 leading-none !min-h-0 bg-slate-200 border-slate-300 text-slate-700 dark:bg-slate-900 dark:text-slate-100">
       <div className="flex items-center">
         <div className="flex whitespace-pre">
-          {/* 按需显示：game | catOne | catTwo */}
-          <span className="inline-block font-bold my-auto">{game}</span>
-          {' | '}
+          {/* 按需显示：catOne | catTwo */}
           <span className="text-xs">{catOne}</span>
           {catTwo && (
             <>

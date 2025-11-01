@@ -54,7 +54,6 @@ const buildCamelLevelMeta = (
       stageId: level.stageId,
       levelId: level.levelId,
       name: level.name,
-      game: level.game,
       catOne: level.catOne,
       catTwo: level.catTwo,
       catThree: level.catThree,
@@ -85,7 +84,6 @@ const toSnakeLevelMeta = (meta: CamelLevelMeta) =>
         stage_id: meta.stageId,
         level_id: meta.levelId,
         name: meta.name,
-        game: meta.game,
         cat_one: meta.catOne,
         cat_two: meta.catTwo,
         cat_three: meta.catThree,
@@ -366,7 +364,6 @@ export const EditorPage = withSuspensable(() => {
         if (selectedLevel) {
           // eslint-disable-next-line no-console
           console.log('[CreateOperation] level meta:', {
-            game: selectedLevel.game,
             catOne: selectedLevel.catOne,
             catTwo: selectedLevel.catTwo,
             catThree: selectedLevel.catThree,
@@ -413,7 +410,6 @@ export const EditorPage = withSuspensable(() => {
                 stageId: camelLevelMeta.stageId ?? '',
                 levelId: camelLevelMeta.levelId ?? '',
                 name: camelLevelMeta.name ?? '',
-                game: camelLevelMeta.game ?? '',
                 catOne: camelLevelMeta.catOne ?? '',
                 catTwo: camelLevelMeta.catTwo ?? '',
                 catThree: camelLevelMeta.catThree ?? '',

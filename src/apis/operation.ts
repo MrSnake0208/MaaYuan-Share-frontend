@@ -244,7 +244,6 @@ export async function getOperation(req: { id: number }): Promise<Operation> {
   const preLevel = (() => {
     const stageId = d.stageId ?? d.stage_id
     const levelId = d.levelId ?? d.level_id ?? stageId ?? ''
-    const game = d.game ?? ''
     const name = d.name ?? ''
     const catOne = d.catOne ?? d.cat_one ?? ''
     const catTwo = d.catTwo ?? d.cat_two ?? ''
@@ -253,7 +252,6 @@ export async function getOperation(req: { id: number }): Promise<Operation> {
       return undefined
     }
     return {
-      game,
       levelId,
       stageId: stageId ?? '',
       catOne,

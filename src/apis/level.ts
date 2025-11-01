@@ -20,7 +20,6 @@ async function fetchLevelsV2() {
   }
   // 将后端蛇形命名字段转换为前端使用的驼峰命名
   const mapped = (data as any[]).map((it) => ({
-    game: it.game ?? '',
     levelId: it.levelId ?? it.level_id ?? '',
     stageId: it.stageId ?? it.stage_id ?? '',
     catOne: it.catOne ?? it.cat_one ?? '',
