@@ -22,7 +22,10 @@ export const TagsFilter: FC<Props> = ({ className, value, onChange, disabled }) 
   }
 
   return (
-    <div className={clsx('inline-flex items-center gap-1', className)}>
+    <div
+      className={clsx('inline-flex items-center gap-1', className)}
+      style={{ display: 'none' }}
+    >
       <ButtonGroup minimal className="flex flex-wrap items-center gap-1">
         {TAGS.map((tag) => (
           <Button
@@ -53,4 +56,3 @@ export const TagsFilter: FC<Props> = ({ className, value, onChange, disabled }) 
 TagsFilter.displayName = 'TagsFilter'
 
 export default TagsFilter
-

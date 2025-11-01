@@ -112,7 +112,7 @@ export const NeoOperationCard = ({
                 }
               />
               {/* 平台标签：仅在拥有对应标签时显示；复用现有标签结构/类名，仅覆盖颜色 */}
-              <span className="ml-1">
+              <span className="ml-1 inline-flex items-center gap-1">
                 {hasTag('代号鸢') && (
                   <Tag className="transition border border-solid !text-xs tracking-tight !px-2 !py-1 !my-1 leading-none !min-h-0 bg-slate-200 border-slate-300 text-slate-700 dark:bg-slate-900 dark:text-slate-100" style={{ backgroundColor: '#d20f39', color: '#d20f39' }}>
                     <div className="flex items-center">
@@ -268,7 +268,7 @@ export const OperationCard = ({ operation }: { operation: Operation }) => {
                     difficulty={operation.parsedContent.difficulty}
                   />
                   {/* 平台标签：仅在拥有对应标签时显示；复用现有标签结构/类名，仅覆盖颜色 */}
-                  <span className="ml-1">
+                  <span className="ml-1 inline-flex items-center gap-2">
                     {hasTag('代号鸢') && (
                       <Tag className="transition border border-solid !text-xs tracking-tight !p-1 leading-none !min-h-0 dark:bg-slate-900 dark:text-slate-100" style={{ backgroundColor: '#d20f39', color: '#d20f39' }}>
                         <div className="flex items-center">
