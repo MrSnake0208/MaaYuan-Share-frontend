@@ -100,8 +100,6 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
     }
   }, [info.levelMeta, preLevel])
 
-  const normalizedGame = fallbackLevel?.game?.trim() ?? ''
-  const defaultGame = normalizedGame.length > 0 ? normalizedGame : '代号鸢'
   const defaultCategory =
     fallbackLevel?.catOne?.trim() ||
     fallbackLevel?.catTwo?.trim() ||
@@ -222,7 +220,6 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
           difficulty={info.difficulty ?? OpDifficulty.UNKNOWN}
           value={info.stageName}
           fallbackLevel={fallbackLevel}
-          defaultGame={defaultGame}
           defaultCategory={defaultCategory}
           onChange={(stageId, level) => {
             edit(() => {

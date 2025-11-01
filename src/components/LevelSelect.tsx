@@ -41,7 +41,7 @@ export const LevelSelect: FC<LevelSelectProps> = ({
   const fuse = useMemo(
     () =>
       new Fuse(levels, {
-        keys: ['game', 'name', 'catTwo', 'catThree', 'stageId'],
+        keys: ['name', 'catTwo', 'catThree', 'stageId'],
         threshold: 0.3,
       }),
     [levels],

@@ -13,8 +13,6 @@ interface Props {
   value?: string
   onChange: (stageId: string) => void
   onFilter?: (keyword: string) => void
-  // 外部默认 game（如首页快捷筛选触发时传入）
-  defaultGame?: string
 }
 
 // 一个按钮样式的 Level 选择器：
@@ -25,7 +23,6 @@ export const LevelSelectButton: FC<Props> = ({
   value,
   onChange,
   onFilter,
-  defaultGame,
 }) => {
   const t = useTranslation()
   const { data: levels } = useLevels()
@@ -62,7 +59,6 @@ export const LevelSelectButton: FC<Props> = ({
         value={value}
         onChange={onChange}
         onFilter={onFilter}
-        defaultGame={defaultGame}
       />
     </>
   )

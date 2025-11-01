@@ -28,6 +28,8 @@ export interface UseOperationsParams {
   descending?: boolean
   keyword?: string
   levelKeyword?: string
+  // 新增：tags 多选 AND 筛选
+  tags?: string[]
   operator?: OperatorFilterParams
   operationIds?: number[]
   uploaderId?: string
@@ -43,6 +45,7 @@ export function useOperations({
   descending = true,
   keyword,
   levelKeyword,
+  tags,
   operator,
   operationIds,
   uploaderId,
@@ -84,6 +87,13 @@ export function useOperations({
         }
       }
 
+      // 注意：去掉 satisfies 以便加入自定义扩展字段（如 tagsKey）
+      // SWR Key 中加入 tagsKey 以确保 tags 变化触发重新请求
+      const tagsKey = (Array.isArray(tags) ? tags : [])
+        .map((s) => (s || '').trim())
+        .filter(Boolean)
+        .join('|')
+
       return [
         'operations',
         {
@@ -101,7 +111,9 @@ export function useOperations({
           desc: descending,
           copilotIds: operationIds,
           uploaderId,
-        } satisfies QueriesCopilotRequest,
+          // 仅用于 SWR key 的稳定性，不会发送到后端
+          __tagsKey: tagsKey,
+        },
       ]
     },
     async ([, req]) => {
@@ -113,7 +125,14 @@ export function useOperations({
 
       // 使用 Raw 接口拿到未加工 JSON，确保 metadata 不丢失
       const api = new OperationApi({ sendToken: 'optional', requireData: true })
-      const rawResponse = await api.queriesCopilotRaw(req)
+      // 后端已确定新增 tags: string[] 且按 AND 筛选
+      // 由于生成的类型暂未包含 tags 字段，这里构造 payload 并以 any 透传
+      const payload: any = { ...req }
+      if ('__tagsKey' in payload) delete payload.__tagsKey
+      if (Array.isArray(tags) && tags.length) {
+        payload.tags = tags
+      }
+      const rawResponse = await api.queriesCopilotRaw(payload)
       const rawJson = (await rawResponse.raw.json()) as {
         data?: {
           data?: any[]

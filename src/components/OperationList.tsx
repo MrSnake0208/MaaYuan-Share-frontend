@@ -200,6 +200,7 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
     )
   },
   {
-    retryOnChange: ['orderBy', 'keyword', 'levelKeyword', 'operator'],
+    // tags 变化应触发重试
+    retryOnChange: ['orderBy', 'keyword', 'levelKeyword', 'operator', 'tags'],
   },
 )

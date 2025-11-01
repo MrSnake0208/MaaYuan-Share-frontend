@@ -179,11 +179,7 @@ function getCategoryPriority(level: Level) {
 }
 
 export function compareLevelsForDisplay(a: Level, b: Level) {
-  const gameA = (a.game || '').trim()
-  const gameB = (b.game || '').trim()
-  if (gameA !== gameB) {
-    return gameA.localeCompare(gameB)
-  }
+  // 去除 game 优先级，按分类优先级 → levelId → stageId 排序
   const categoryDiff = getCategoryPriority(a) - getCategoryPriority(b)
   if (categoryDiff !== 0) {
     return categoryDiff

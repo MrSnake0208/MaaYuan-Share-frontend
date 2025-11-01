@@ -27,7 +27,6 @@ import { formatError } from '../../utils/error'
 import { useDebouncedQuery } from '../../utils/useDebouncedQuery'
 import { Suggest } from '../Suggest'
 import { DifficultyPicker } from './DifficultyPicker'
-import GameSelectDialog from './GameSelectDialog'
 
 interface LevelSelectProps {
   className?: string
@@ -42,15 +41,11 @@ interface LevelSelectProps {
   // 当选择了“游戏”或“分类”时，上抛一个用于筛选的关键字
   onFilterChange?: (
     keyword: string,
-    meta?: { game?: string; catOne?: string },
+    meta?: { catOne?: string },
   ) => void
-  // 可选：当没有已选关卡时，为弹层提供上次筛选的默认游戏/分类，便于回显
-  defaultGame?: string
   defaultCategory?: string
   // 自定义 Portal 容器，确保下拉菜单渲染在 Overlay 容器内，避免被判定为“外部点击”
   portalContainer?: HTMLElement | undefined | null
-  // 是否使用“游戏”对话框；在上层已是 Dialog 时可关闭，避免嵌套
-  useGameDialog?: boolean
 }
 
 export const LevelSelect: FC<LevelSelectProps> = ({
@@ -63,33 +58,12 @@ export const LevelSelect: FC<LevelSelectProps> = ({
   onChange,
   onDifficultyChange,
   onFilterChange,
-  defaultGame,
   defaultCategory,
   portalContainer,
-  useGameDialog = true,
   ...inputProps
 }) => {
   const t = useTranslation()
   const relatedLevelsLabel = i18n.components.editor2.LevelSelect.related_levels
-  const NO_GAME_LABEL = '未分类'
-  const USE_GAME_DIALOG = !!useGameDialog
-  const normalizeGame = (game?: string) => {
-    const g = (game || '').trim()
-    return g || NO_GAME_LABEL
-  }
-  const normalizedDefaultGame = normalizeGame(defaultGame)
-  // 让“通用”能在选择“如鸢”或“代号鸢”时一并被搜索/筛选到
-  const matchesGame = useCallback(
-    (levelGame: string | undefined, selected: string | undefined) => {
-      const ng = normalizeGame(levelGame)
-      const sg = (selected || '').trim()
-      if (!sg) return true
-      if (ng === sg) return true
-      if (ng === '通用' && (sg === '如鸢' || sg === '代号鸢')) return true
-      return false
-    },
-    [],
-  )
   // we are going to manually handle loading state so we could show the skeleton state easily,
   // without swapping the actual element.
   const { data, error: fetchError, isLoading } = useLevels()
@@ -104,7 +78,7 @@ export const LevelSelect: FC<LevelSelectProps> = ({
   const fuse = useMemo(
     () =>
       new Fuse(levels, {
-        keys: ['game', 'name', 'catOne', 'catTwo', 'catThree', 'stageId'],
+        keys: ['name', 'catOne', 'catTwo', 'catThree', 'stageId'],
         threshold: 0.3,
       }),
     [levels],
@@ -147,126 +121,27 @@ export const LevelSelect: FC<LevelSelectProps> = ({
     [relatedLevelsLabel],
   )
 
-  // 第一层：游戏分类
-  const games = useMemo(() => {
-    const seen = new Set<string>()
-    const result: string[] = []
-    for (const level of levels) {
-      const g = normalizeGame(level.game)
-      if (!seen.has(g)) {
-        seen.add(g)
-        result.push(g)
-      }
-    }
-    if (selectedLevel && !isCustomLevel(selectedLevel)) {
-      const g = normalizeGame(selectedLevel.game)
-      if (g && !seen.has(g)) {
-        seen.add(g)
-        result.push(g)
-      }
-    }
-    return result
-  }, [levels, selectedLevel])
-
-  const [selectedGame, setSelectedGame] = useState<string>(() => {
-    if (selectedLevel) {
-      return normalizeGame(selectedLevel.game)
-    }
-    // 没有关卡时，尝试使用父组件传入的默认游戏以便回显
-    return normalizedDefaultGame
-  })
-  const previousDefaultGameRef = useRef(normalizedDefaultGame)
-  const manuallySelectedGameRef = useRef<'system' | 'user'>('system')
-
-  // 游戏选择对话框开关
-  const [gameDialogOpen, setGameDialogOpen] = useState(false)
-
-  useEffect(() => {
-    const prevDefaultGame = previousDefaultGameRef.current
-    previousDefaultGameRef.current = normalizedDefaultGame
-
-    if (selectedLevel) {
-      return
-    }
-    if (!normalizedDefaultGame) {
-      return
-    }
-    setSelectedGame((prev) => {
-      const userOverride = manuallySelectedGameRef.current === 'user'
-      if (userOverride) {
-        return prev ?? normalizedDefaultGame
-      }
-      const normalizedPrev = (prev ?? '').trim()
-      const normalizedPrevDefault = (prevDefaultGame ?? '').trim()
-      if (!normalizedPrev) {
-        manuallySelectedGameRef.current = 'system'
-        return normalizedDefaultGame
-      }
-      if (
-        normalizedPrev === normalizedPrevDefault &&
-        normalizedPrev !== normalizedDefaultGame
-      ) {
-        manuallySelectedGameRef.current = 'system'
-        return normalizedDefaultGame
-      }
-      return prev ?? normalizedDefaultGame
-    })
-  }, [normalizedDefaultGame, selectedLevel])
-
-  // 取消自动选择首个游戏，避免“强制重置”
-
-  const gameOptions = useMemo(() => {
-    if (!selectedGame) return games
-    if (games.includes(selectedGame)) return games
-    return [...games, selectedGame]
-  }, [games, selectedGame])
-
-  const levelsInGame = useMemo(
-    () =>
-      selectedGame
-        ? levels.filter((l) => matchesGame(l.game, selectedGame))
-        : levels,
-    [levels, selectedGame, matchesGame],
-  )
-
-  // 当选中关卡变化时，必要时同步游戏筛选到该关卡所属游戏
-  // 仅在当前未选择游戏（或为“未分类”占位）时同步，避免用户手动更改被覆盖
-  useEffect(() => {
-    if (selectedLevel && !isCustomLevel(selectedLevel)) {
-      const g = normalizeGame(selectedLevel.game)
-      if (g && (!selectedGame || selectedGame === NO_GAME_LABEL)) {
-        manuallySelectedGameRef.current = 'system'
-        setSelectedGame(g)
-      }
-    }
-  }, [selectedLevel, selectedGame])
+  // 已移除游戏层，不再构建游戏维度选项
 
   const categories = useMemo(() => {
     const seen = new Set<string>()
     const result: string[] = []
-    for (const level of levelsInGame) {
+    for (const level of levels) {
       const category = getLevelCategory(level)
       if (!seen.has(category)) {
         seen.add(category)
         result.push(category)
       }
     }
-    // 仅当“已选关卡”属于当前选中的游戏时，才补充其分类；
-    // 若选中的是“如鸢/代号鸢”，亦包含其“通用”关卡的分类（matchesGame）。
     if (selectedLevel && !isCustomLevel(selectedLevel)) {
       const category = getLevelCategory(selectedLevel)
-      const levelGame = normalizeGame(selectedLevel.game)
-      if (
-        selectedGame &&
-        matchesGame(levelGame, selectedGame) &&
-        !seen.has(category)
-      ) {
+      if (!seen.has(category)) {
         seen.add(category)
         result.push(category)
       }
     }
     return result
-  }, [getLevelCategory, levelsInGame, matchesGame, selectedGame, selectedLevel])
+  }, [getLevelCategory, levels, selectedLevel])
 
   const normalizedDefaultCategory = (defaultCategory ?? '').trim()
   const [selectedCategory, setSelectedCategory] = useState<string>(() => {
@@ -344,7 +219,6 @@ export const LevelSelect: FC<LevelSelectProps> = ({
       const searchResults = fuse
         .search(trimmedQuery)
         .map((el) => el.item)
-        .filter((l) => !selectedGame || matchesGame(l.game, selectedGame))
       const filteredResults = selectedCategory
         ? searchResults.filter(
             (level) => getLevelCategory(level) === selectedCategory,
@@ -406,10 +280,8 @@ export const LevelSelect: FC<LevelSelectProps> = ({
     }
 
     const levelsInCategory = selectedCategory
-      ? levelsInGame.filter(
-          (level) => getLevelCategory(level) === selectedCategory,
-        )
-      : levelsInGame
+      ? levels.filter((level) => getLevelCategory(level) === selectedCategory)
+      : levels
 
     return ensureIncludesSelected(levelsInCategory)
   }, [
@@ -418,12 +290,9 @@ export const LevelSelect: FC<LevelSelectProps> = ({
     fuse,
     getLevelCategory,
     levels,
-    levelsInGame,
-    matchesGame,
     relatedLevelsLabel,
     selectedCategory,
     selectedLevel,
-    selectedGame,
   ])
 
   useEffect(() => {
@@ -480,117 +349,21 @@ export const LevelSelect: FC<LevelSelectProps> = ({
       if (!isCustomLevel(level)) {
         return level
       }
-      const normalizedGame =
-        selectedGame && selectedGame !== NO_GAME_LABEL ? selectedGame : ''
       const trimmedName = level.name?.trim() || level.stageId
       return {
         ...level,
-        game: normalizedGame,
+        game: '',
         catOne: selectedCategory?.trim() || level.catOne || '',
         catTwo: trimmedName,
         catThree: '',
       }
     },
-    [selectedCategory, selectedGame],
+    [selectedCategory],
   )
 
   return (
     <div className={clsx('flex flex-col gap-2', className)}>
       <div className="flex w-full flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1 flex-1 min-w-[180px] max-w-[240px]">
-          {USE_GAME_DIALOG ? (
-            <>
-              <Button
-                large
-                rightIcon="double-caret-vertical"
-                className="w-full !justify-between"
-                disabled={disabled || isLoading || gameOptions.length === 0}
-                onClick={() => setGameDialogOpen(true)}
-                title={selectedGame || NO_GAME_LABEL}
-              >
-                {selectedGame || NO_GAME_LABEL}
-              </Button>
-              <GameSelectDialog
-                isOpen={gameDialogOpen}
-                onClose={() => setGameDialogOpen(false)}
-                items={gameOptions}
-                value={selectedGame || null}
-                onSelect={(game) => {
-                  if (!game || game === selectedGame) return
-                  manuallySelectedGameRef.current = 'user'
-                  setSelectedGame(game)
-                  // 重置后面两个选项：分类 与 关卡输入/选择
-                  setSelectedCategory('')
-                  setActiveItem(null)
-                  updateQuery('', true)
-                  if (!disabled) {
-                    // 无条件清空选中关卡，避免跨游戏保留无效值
-                    onChange('')
-                  }
-                  // 选择“游戏”时仅按游戏发起筛选（分类已被重置）
-                  const gameForQuery = game === NO_GAME_LABEL ? '' : game
-                  const kw = gameForQuery
-                  onFilterChange?.(kw, { game: gameForQuery || undefined })
-                }}
-              />
-            </>
-          ) : (
-            <Suggest<string>
-              items={gameOptions}
-              itemsEqual={(a, b) => a === b}
-              selectedItem={selectedGame || null}
-              disabled={disabled || isLoading || gameOptions.length === 0}
-              className="w-full"
-              itemListPredicate={(search, items) => {
-                const normalized = (search ?? '').trim().toLowerCase()
-                if (!normalized) {
-                  return items
-                }
-                return items.filter((item) =>
-                  item.toLowerCase().includes(normalized),
-                )
-              }}
-              itemRenderer={(item, { handleClick, handleFocus, modifiers }) => {
-                if (modifiers.matchesPredicate === false) return null
-                return (
-                  <MenuItem
-                    roleStructure="listoption"
-                    key={item}
-                    className={clsx(modifiers.active && Classes.ACTIVE)}
-                    text={item}
-                    onClick={handleClick}
-                    onFocus={handleFocus}
-                    onMouseDown={onOptionMouseDown}
-                    selected={item === selectedGame}
-                    disabled={modifiers.disabled}
-                  />
-                )
-              }}
-              inputValueRenderer={(item) => item ?? ''}
-              onItemSelect={(game) => {
-                if (!game || game === selectedGame) return
-                manuallySelectedGameRef.current = 'user'
-                setSelectedGame(game)
-                setSelectedCategory('')
-                setActiveItem(null)
-                updateQuery('', true)
-                if (!disabled) onChange('')
-                const gameForQuery = game === NO_GAME_LABEL ? '' : game
-                const kw = gameForQuery
-                onFilterChange?.(kw, { game: gameForQuery || undefined })
-              }}
-              inputProps={{
-                large: true,
-                placeholder: '游戏',
-              }}
-              popoverProps={{
-                minimal: true,
-                captureDismiss: true,
-                portalContainer: portalContainer ?? undefined,
-              }}
-            />
-          )}
-        </div>
         <div className="flex flex-col gap-1 flex-1 min-w-[200px] max-w-[260px]">
           <Suggest<string>
             items={categoryOptions}
@@ -637,12 +410,9 @@ export const LevelSelect: FC<LevelSelectProps> = ({
               if (!disabled) {
                 onChange('')
               }
-              // 选择“分类”时触发一次筛选查询（按 当前游戏 + 分类 拼接）
-              const kw = [selectedGame, category].filter(Boolean).join(' ')
-              onFilterChange?.(kw, {
-                game: selectedGame || undefined,
-                catOne: category,
-              })
+              // 选择“分类”时触发一次筛选查询（仅分类关键字）
+              const kw = category
+              onFilterChange?.(kw, { catOne: category })
             }}
             inputProps={{
               large: true,
@@ -670,7 +440,6 @@ export const LevelSelect: FC<LevelSelectProps> = ({
             query={query}
             onQueryChange={(query) => updateQuery(query, false)}
             onReset={() => {
-              manuallySelectedGameRef.current = 'user'
               setActiveItem(null)
               setSelectedCategory('')
               if (!disabled) {

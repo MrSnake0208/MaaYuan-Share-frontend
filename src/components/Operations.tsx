@@ -28,6 +28,8 @@ import { LevelSelectButton } from './LevelSelectButton'
 import { OperatorFilter, useOperatorFilter } from './OperatorFilter'
 import { withSuspensable } from './Suspensable'
 import { UserFilter } from './UserFilter'
+import { TagsFilter } from './TagsFilter'
+import { mapQuickPresetToTags } from '../constants/tags'
 
 export const Operations: ComponentType = withSuspensable(() => {
   const t = useTranslation()
@@ -50,8 +52,8 @@ export const Operations: ComponentType = withSuspensable(() => {
   const [multiselect, setMultiselect] = useState(false)
   // 独立保存已选中的具体关卡，用于按钮展示与弹层回显
   const [selectedStageId, setSelectedStageId] = useState<string>('')
-  // 记录由快捷筛选选择的当前 game，用于打开关卡选择时作为默认值
-  const [selectedGame, setSelectedGame] = useState<string | undefined>()
+  // tags 多选 AND
+  const [tags, setTags] = useState<string[]>([])
 
   return (
     <>
@@ -146,52 +148,53 @@ export const Operations: ComponentType = withSuspensable(() => {
                     // 主动触发一次刷新，确保立刻发起查询
                     refreshOperations()
                   }}
-                  defaultGame={selectedGame}
                 />
-                {/* 快捷筛选：如鸢 / 代号鸢 */}
+                {/* 快捷筛选：如鸢 / 代号鸢 / 通用（AND） */}
                 <ButtonGroup
                   minimal
                   className="flex flex-wrap items-center gap-1"
                 >
                   {[
-                    {
-                      label: '只看如鸢',
-                      value: '如鸢',
-                      icon: IconNames.MANUAL,
-                    },
-                    {
-                      label: '只看代号鸢',
-                      value: '代号鸢',
-                      icon: IconNames.GLOBE,
-                    },
-                  ].map(({ label, value, icon }) => (
-                    <Button
-                      key={label}
-                      className="bp4-button bp4-minimal !px-3"
-                      icon={icon}
-                      active={(queryParams.levelKeyword || '') === value}
-                      onClick={() => {
-                        const isActive =
-                          (queryParams.levelKeyword || '') === value
-                        // 清空已选具体关卡，仅按游戏关键字筛选
-                        setSelectedStageId('')
-                        // 记录当前快捷筛选的 game，打开关卡选择时作为默认 game
-                        setSelectedGame(isActive ? undefined : value)
-                        setQueryParams((old) => ({
-                          ...old,
-                          // 仅以“游戏名”作为 levelKeyword，避免过度收窄（不附加“通用”）
-                          levelKeyword: isActive ? undefined : value,
-                          // 同时清空自由关键字，避免叠加条件导致无结果
-                          keyword: isActive ? old.keyword : undefined,
-                        }))
-                        // 立刻刷新列表
-                        refreshOperations()
-                      }}
-                    >
-                      {label}
-                    </Button>
-                  ))}
+                    { label: '只看如鸢', value: '如鸢', icon: IconNames.MANUAL },
+                    { label: '只看代号鸢', value: '代号鸢', icon: IconNames.GLOBE },
+                    { label: '通用', value: '通用', icon: IconNames.LAYERS } as const,
+                  ].map(({ label, value, icon }) => {
+                    const quickTags = mapQuickPresetToTags(value)
+                    const isActive =
+                      tags.length === quickTags.length &&
+                      quickTags.every((t) => tags.includes(t))
+                    return (
+                      <Button
+                        key={label}
+                        className="bp4-button bp4-minimal !px-3"
+                        icon={icon}
+                        active={isActive}
+                        onClick={() => {
+                          const next = isActive ? [] : quickTags
+                          setSelectedStageId('')
+                          setTags(next)
+                          setQueryParams((old) => ({
+                            ...old,
+                            levelKeyword: undefined,
+                            keyword: undefined,
+                          }))
+                          refreshOperations()
+                        }}
+                      >
+                        {label}
+                      </Button>
+                    )
+                  })}
                 </ButtonGroup>
+                {/* Tags 多选 AND 过滤器 */}
+                <TagsFilter
+                  value={tags}
+                  onChange={(next) => {
+                    setTags(next)
+                    setSelectedStageId('')
+                    refreshOperations()
+                  }}
+                />
                 <UserFilter
                   user={selectedUser}
                   onChange={(user) => {
@@ -295,6 +298,7 @@ export const Operations: ComponentType = withSuspensable(() => {
         {tab === 'operation' && (
           <OperationList
             {...queryParams}
+            tags={tags}
             multiselect={multiselect}
             operator={operatorFilter.enabled ? operatorFilter : undefined}
             // 按热度排序时列表前几页的变化不会太频繁，可以不刷新第一页，节省点流量
