@@ -265,6 +265,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
       <FormGroup
         contentClassName="grow"
         label={t.components.editor2.InfoEditor.tags}
+        labelInfo="*"
       >
         <TagsFilter
           value={metadata.tags ?? []}
@@ -285,6 +286,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
       <FormGroup
         contentClassName="grow"
         label={t.components.editor2.SelectorPanel.operator}
+        labelInfo="*"
       >
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex flex-wrap gap-2">
