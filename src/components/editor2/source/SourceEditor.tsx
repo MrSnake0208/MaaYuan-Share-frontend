@@ -285,13 +285,13 @@ export const SourceEditorButton: FC<SourceEditorButtonProps> = memo(
 
     return (
       <>
-        <Button
+        {/* <Button
           className={className}
           icon="manually-entered-data"
           text={t.components.editor2.SourceEditor.edit_json}
           {...buttonProps}
           onClick={() => setIsOpen(true)}
-        />
+        /> */}
         <Confirm
           intent="danger"
           confirmButtonText={t.common.close}
