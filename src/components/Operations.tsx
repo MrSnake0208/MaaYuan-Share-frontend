@@ -186,8 +186,9 @@ export const Operations: ComponentType = withSuspensable(() => {
                     )
                   })}
                 </ButtonGroup>
-                {/* Tags 多选 AND 过滤器 */}
+                {/* Tags 多选 AND 过滤器（首页隐藏） */}
                 <TagsFilter
+                  className="hidden"
                   value={tags}
                   onChange={(next) => {
                     setTags(next)
