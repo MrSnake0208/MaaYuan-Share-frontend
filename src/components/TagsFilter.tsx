@@ -41,7 +41,7 @@ export const TagsFilter: FC<Props> = ({ className, value, onChange, disabled }) 
             key={tag}
             interactive
             className={clsx(
-              'transition border border-solid !text-xs tracking-tight !p-1 leading-none !min-h-0 self-center',
+              'transition border border-solid !text-xs tracking-tight !px-2 !py-1 !my-1 leading-none !min-h-0',
               !disabled && 'cursor-pointer',
               disabled && 'pointer-events-none opacity-50',
               // 未选中态：描边 + 浅底色
