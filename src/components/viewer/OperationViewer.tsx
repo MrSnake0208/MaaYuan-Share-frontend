@@ -40,7 +40,7 @@ import {
   useState,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { copyShortCode, handleDownloadJSON } from 'services/operation'
+import { copyShortCode, handleLazyDownloadJSON } from 'services/operation'
 
 import { FactItem } from 'components/FactItem'
 import { Paragraphs } from 'components/Paragraphs'
@@ -320,7 +320,12 @@ export const OperationViewer: ComponentType<{
               <Button
                 icon="download"
                 text={t.components.viewer.OperationViewer.download_json}
-                onClick={() => handleDownloadJSON(operation.parsedContent)}
+                onClick={() =>
+                  handleLazyDownloadJSON(
+                    operation.id,
+                    operation.parsedContent.doc.title,
+                  )
+                }
               />
 
               <Button
