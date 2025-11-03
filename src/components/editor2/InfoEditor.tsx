@@ -258,7 +258,49 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
             })
           }}
         />
+        {/* 分类回显：catOne / catTwo / catThree */}
+        {info.levelMeta && (
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+            {info.levelMeta.catOne?.trim() && (
+              <Tag minimal>{info.levelMeta.catOne}</Tag>
+            )}
+            {info.levelMeta.catTwo?.trim() && (
+              <Tag minimal>{info.levelMeta.catTwo}</Tag>
+            )}
+            {info.levelMeta.catThree?.trim() && (
+              <Tag minimal intent="primary">{info.levelMeta.catThree}</Tag>
+            )}
+          </div>
+        )}
         <FieldError path="stage_name" />
+      </FormGroup>
+
+      {/* 第三层分类（catThree）编辑 */}
+      <FormGroup
+        contentClassName="grow"
+        label={t.components.editor2.InfoEditor.cat_three_label}
+      >
+        <InputGroup
+          large
+          fill
+          placeholder={t.components.editor2.InfoEditor.cat_three_placeholder}
+          value={info.levelMeta?.catThree ?? ''}
+          onChange={(e) => {
+            const value = e.target.value
+            edit(() => {
+              setInfo((prev) => {
+                if (!prev.levelMeta) prev.levelMeta = {}
+                prev.levelMeta.catThree = value
+              })
+              return {
+                action: 'update-cat-three',
+                desc: i18n.actions.editor2.set_level,
+                squashBy: '',
+              }
+            })
+          }}
+          onBlur={() => edit()}
+        />
       </FormGroup>
 
       {/* Tags 编辑（多选 AND） */}
