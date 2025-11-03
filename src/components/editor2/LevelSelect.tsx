@@ -11,6 +11,7 @@ import {
   useMemo,
   useRef,
   useState,
+  ReactNode,
 } from 'react'
 
 import { useLevels } from '../../apis/level'
@@ -46,6 +47,8 @@ interface LevelSelectProps {
   defaultCategory?: string
   // 自定义 Portal 容器，确保下拉菜单渲染在 Overlay 容器内，避免被判定为“外部点击”
   portalContainer?: HTMLElement | undefined | null
+  // 额外的右侧内容（如第三层分类输入），将渲染在同一行的最右侧
+  rightExtra?: ReactNode
 }
 
 export const LevelSelect: FC<LevelSelectProps> = ({
@@ -60,6 +63,7 @@ export const LevelSelect: FC<LevelSelectProps> = ({
   onFilterChange,
   defaultCategory,
   portalContainer,
+  rightExtra,
   ...inputProps
 }) => {
   const t = useTranslation()
@@ -501,6 +505,11 @@ export const LevelSelect: FC<LevelSelectProps> = ({
             }}
           />
         </div>
+        {rightExtra && (
+          <div className="flex flex-col gap-1 flex-1 min-w-[200px] max-w-[260px]">
+            {rightExtra}
+          </div>
+        )}
       </div>
       {/* 当 cat_one 为“活动”时，显示难度选择 */}
       {selectedLevel?.catOne === '活动' && (

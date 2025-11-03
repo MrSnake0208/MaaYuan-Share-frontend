@@ -50,13 +50,14 @@ const buildCamelLevelMeta = (
   existing?: CamelLevelMeta,
 ): CamelLevelMeta => {
   if (level) {
+    // 保留用户在编辑器中对 catThree 的输入，避免被所选关卡默认值覆盖
     return {
       stageId: level.stageId,
       levelId: level.levelId,
       name: level.name,
       catOne: level.catOne,
       catTwo: level.catTwo,
-      catThree: level.catThree,
+      catThree: existing?.catThree ?? level.catThree,
       width: level.width,
       height: level.height,
     }
