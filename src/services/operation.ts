@@ -5,7 +5,7 @@ import { CopilotDocV1 } from '../models/copilot.schema'
 import { ShortCodeContent, toShortCode } from '../models/shortCode'
 import { formatError } from '../utils/error'
 import { OperationApi } from '../utils/maa-copilot-client'
-import { snakeCaseKeysUnicodeExceptSubtrees, snakeCaseKeysUnicode } from '../utils/object'
+import { snakeCaseKeysUnicodeExceptSubtrees } from '../utils/object'
 import { wrapErrorMessage } from '../utils/wrapErrorMessage'
 
 export const stripOperationExportFields = (
