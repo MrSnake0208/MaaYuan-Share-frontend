@@ -11,7 +11,7 @@ import {
 import clsx from 'clsx'
 import { useAtomValue } from 'jotai'
 import { useImmerAtom } from 'jotai-immer'
-import { memo, useCallback, useEffect, useMemo } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Paths } from 'type-fest'
 
 import { i18n, useTranslation } from '../../i18n/i18n'
@@ -198,6 +198,38 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
   const currentSourceType = metadata.sourceType ?? 'original'
   const isRepost = currentSourceType === 'repost'
 
+  // 记录用户是否主动编辑过 catThree，以避免后续被默认值覆盖
+  const catThreeEditedRef = useRef(false)
+
+  // 当关卡或 catThree 变化时，将 catThree 按关卡 key 持久化到 localStorage
+  useEffect(() => {
+    const key = `prts-editor-catThree:${info.stageName ?? ''}`
+    const value = info.levelMeta?.catThree ?? ''
+    try {
+      // 仅当有 stageName 时进行存储
+      if ((info.stageName ?? '').trim().length) {
+        window.localStorage.setItem(key, value)
+      }
+    } catch {}
+  }, [info.levelMeta?.catThree, info.stageName])
+
+  // 当切换关卡时，尝试恢复之前编辑过的 catThree
+  useEffect(() => {
+    const key = `prts-editor-catThree:${info.stageName ?? ''}`
+    try {
+      if ((info.stageName ?? '').trim().length) {
+        const stored = window.localStorage.getItem(key)
+        if (stored !== null) {
+          setInfo((prev) => {
+            if (!prev.levelMeta) prev.levelMeta = {}
+            prev.levelMeta.catThree = stored
+          })
+          catThreeEditedRef.current = true
+        }
+      }
+    } catch {}
+  }, [info.stageName, setInfo])
+
   return (
     <div
       className={clsx(
@@ -223,8 +255,8 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
           onChange={(stageId, level) => {
             edit(() => {
               setInfo((prev) => {
+                const previousCatThree = prev.levelMeta?.catThree
                 prev.stageName = stageId
-
                 if (level && !prev.doc.title) {
                   // 如果没有标题，则使用关卡名作为标题
                   const normalizedName = level.name?.trim()
@@ -233,8 +265,15 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
                     : level.stageId
                 }
                 prev.levelMeta = assignLevelMeta(level, stageId)
+                // 若用户编辑过 catThree，则保留用户输入，避免被默认值覆盖
+                if (catThreeEditedRef.current) {
+                  if (!prev.levelMeta) prev.levelMeta = {}
+                  prev.levelMeta.catThree = previousCatThree ?? ''
+                }
                 if (!level) {
-                  prev.levelMeta = prev.levelMeta?.stageId
+                  // 若未选择关卡但已有用户输入的 catThree，也保留 levelMeta
+                  const hasUserCatThree = (prev.levelMeta?.catThree ?? '').trim().length > 0
+                  prev.levelMeta = prev.levelMeta?.stageId || hasUserCatThree
                     ? prev.levelMeta
                     : undefined
                 }
@@ -257,9 +296,49 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
               }
             })
           }}
+          rightExtra={
+            <InputGroup
+              large
+              fill
+              placeholder={t.components.editor2.InfoEditor.cat_three_placeholder}
+              value={info.levelMeta?.catThree ?? ''}
+              onChange={(e) => {
+                const value = e.target.value
+                catThreeEditedRef.current = true
+                edit(() => {
+                  setInfo((prev) => {
+                    if (!prev.levelMeta) prev.levelMeta = {}
+                    prev.levelMeta.catThree = value
+                  })
+                  return {
+                    action: 'update-cat-three',
+                    desc: i18n.actions.editor2.set_level,
+                    squashBy: '',
+                  }
+                })
+              }}
+              onBlur={() => edit()}
+            />
+          }
         />
+        {/* 分类回显：catOne / catTwo / catThree */}
+        {info.levelMeta && (
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+            {info.levelMeta.catOne?.trim() && (
+              <Tag minimal>{info.levelMeta.catOne}</Tag>
+            )}
+            {info.levelMeta.catTwo?.trim() && (
+              <Tag minimal>{info.levelMeta.catTwo}</Tag>
+            )}
+            {info.levelMeta.catThree?.trim() && (
+              <Tag minimal intent="primary">{info.levelMeta.catThree}</Tag>
+            )}
+          </div>
+        )}
         <FieldError path="stage_name" />
       </FormGroup>
+
+      {/* catThree 已并入与关卡类别/名称同一行显示，见 LevelSelect.rightExtra */}
 
       {/* Tags 编辑（多选 AND） */}
       <FormGroup

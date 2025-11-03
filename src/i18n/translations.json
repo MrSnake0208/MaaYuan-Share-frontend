@@ -484,6 +484,14 @@
           "cn": "作业信息",
           "zh_tw": "作業信息"
         },
+        "cat_three_label": {
+          "cn": "三级分类",
+          "zh_tw": "三級分類"
+        },
+        "cat_three_placeholder": {
+          "cn": "第三层分类（可选）",
+          "zh_tw": "第三層分類（可選）"
+        },
         "title": {
           "cn": "标题",
           "zh_tw": "標題"
