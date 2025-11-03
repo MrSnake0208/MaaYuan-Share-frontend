@@ -1,4 +1,4 @@
-import { Button, Classes, MenuItem } from '@blueprintjs/core'
+import { Classes, MenuItem } from '@blueprintjs/core'
 import { getCreateNewItem } from '@blueprintjs/select'
 
 import clsx from 'clsx'
@@ -444,7 +444,6 @@ export const LevelSelect: FC<LevelSelectProps> = ({
             onQueryChange={(query) => updateQuery(query, false)}
             onReset={() => {
               setActiveItem(null)
-              setSelectedCategory('')
               if (!disabled) {
                 onChange('')
               }

@@ -255,6 +255,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
           onChange={(stageId, level) => {
             edit(() => {
               setInfo((prev) => {
+                const prevMeta = prev.levelMeta
                 const previousCatThree = prev.levelMeta?.catThree
                 prev.stageName = stageId
                 if (level && !prev.doc.title) {
@@ -265,17 +266,25 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
                     : level.stageId
                 }
                 prev.levelMeta = assignLevelMeta(level, stageId)
-                // 若用户编辑过 catThree，则保留用户输入，避免被默认值覆盖
-                if (catThreeEditedRef.current) {
+                // 若选择了具体关卡且用户编辑过 catThree，则保留用户输入
+                if (level && catThreeEditedRef.current) {
                   if (!prev.levelMeta) prev.levelMeta = {}
                   prev.levelMeta.catThree = previousCatThree ?? ''
                 }
                 if (!level) {
-                  // 若未选择关卡但已有用户输入的 catThree，也保留 levelMeta
-                  const hasUserCatThree = (prev.levelMeta?.catThree ?? '').trim().length > 0
-                  prev.levelMeta = prev.levelMeta?.stageId || hasUserCatThree
-                    ? prev.levelMeta
-                    : undefined
+                  // 删除关卡名称时，保留已选择的分类，便于后续筛选
+                  const prevCatOne = prevMeta?.catOne?.trim() ?? ''
+                  const prevCatTwo = prevMeta?.catTwo?.trim() ?? ''
+                  const hasPrevCats = prevCatOne.length > 0 || prevCatTwo.length > 0
+                  if (hasPrevCats) {
+                    if (!prev.levelMeta) prev.levelMeta = {}
+                    if (prevCatOne) prev.levelMeta.catOne = prevCatOne
+                    if (prevCatTwo) prev.levelMeta.catTwo = prevCatTwo
+                    prev.levelMeta.catThree = ''
+                  } else {
+                    prev.levelMeta = undefined
+                  }
+                  catThreeEditedRef.current = false
                 }
               })
               return {
