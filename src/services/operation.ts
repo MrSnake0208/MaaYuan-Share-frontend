@@ -5,7 +5,7 @@ import { CopilotDocV1 } from '../models/copilot.schema'
 import { ShortCodeContent, toShortCode } from '../models/shortCode'
 import { formatError } from '../utils/error'
 import { OperationApi } from '../utils/maa-copilot-client'
-import { snakeCaseKeysUnicode } from '../utils/object'
+import { snakeCaseKeysUnicodeExceptSubtrees, snakeCaseKeysUnicode } from '../utils/object'
 import { wrapErrorMessage } from '../utils/wrapErrorMessage'
 
 export const stripOperationExportFields = (
@@ -32,7 +32,9 @@ const doTriggerDownloadJSON = (content: string, filename: string) => {
 
 export const handleDownloadJSON = (operationDoc: CopilotDocV1.Operation) => {
   // pretty print the JSON
-  const snakeCaseDoc = snakeCaseKeysUnicode(operationDoc as any) as Record<
+  const snakeCaseDoc = snakeCaseKeysUnicodeExceptSubtrees(
+    operationDoc as any,
+  ) as Record<
     string,
     unknown
   >
@@ -62,7 +64,10 @@ const getSnakeCaseOperationDoc = async (
 
   try {
     const rawDoc = JSON.parse(resp.data!.content) as Record<string, unknown>
-    return snakeCaseKeysUnicode(rawDoc as any) as Record<string, unknown>
+    return snakeCaseKeysUnicodeExceptSubtrees(rawDoc as any) as Record<
+      string,
+      unknown
+    >
   } catch (error) {
     console.error(error)
     AppToaster.show({
