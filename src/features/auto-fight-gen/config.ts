@@ -12,6 +12,10 @@ export interface AutoFightConfig {
   useColor: boolean
   colorList: string[]
   colorType: 'fill' | 'text'
+  // 默认“无色/透明/无填充”等价颜色（可由外部配置 import.defaultColor 覆盖）
+  defaultColorHex?: string
+  // 当前指向的敌人索引（用于首回合首动切换计算），未提供时默认 1
+  currentEnemyIndex?: number
   // 新增：用于“色块→内部令牌”的映射（保持顺序一致）
   paletteHexList?: string[]
   colorTokenList?: string[]
@@ -28,6 +32,8 @@ export const defaultAutoFightConfig: AutoFightConfig = {
   useColor: false,
   colorList: ['白', '蓝'],
   colorType: 'fill',
+  defaultColorHex: '#FFFFFF',
+  currentEnemyIndex: 1,
   paletteHexList: [],
   colorTokenList: [],
 }

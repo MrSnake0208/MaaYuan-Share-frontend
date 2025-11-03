@@ -104,6 +104,9 @@ const normalizeConfig = (
   ...overrides,
 })
 
+const getDefaultColorHex = (config: AutoFightConfig): string =>
+  (config.defaultColorHex || '#FFFFFF').toUpperCase()
+
 export const rgbToNamedColor = (r: number, g: number, b: number): string => {
   const rf = r / 255
   const gf = g / 255
@@ -173,12 +176,14 @@ const getCellFillRgbHex = (cell: CellObject): string | null => {
     s?: {
       fgColor?: { rgb?: string; theme?: number }
       fill?: {
+        patternType?: string
         fgColor?: { rgb?: string; theme?: number }
         bgColor?: { rgb?: string; theme?: number }
       }
     }
   }
   const s = anyCell?.s
+  // Excel 无填充：patternType === 'none' 或者缺失颜色字段
   const tryColors = [
     s?.fgColor?.rgb,
     s?.fill?.fgColor?.rgb,
@@ -210,17 +215,45 @@ const pickCellColor = (cell: CellObject, config: AutoFightConfig): string => {
   }
 
   // 填充模式：使用 paletteHexList 来确保“按原色块”精准区分
-  const fillHex = getCellFillRgbHex(cell)
-  if (!fillHex) return ''
+  const rawFillHex = getCellFillRgbHex(cell)
+  const defaultHex = getDefaultColorHex(config)
+  // 统一“无色/透明/无填充/白色”到 DEFAULT_COLOR 路径
+  const normalizedHex = (() => {
+    if (!rawFillHex) return defaultHex
+    const upper = rawFillHex.toUpperCase()
+    // alpha=0 或明确白色都应视为默认色路径；xlsx 读出 ARGB 的透明白会被规约为 #FFFFFF
+    if (upper === '#FFFFFF') return defaultHex
+    return upper
+  })()
+
   const palette = (config.paletteHexList ?? []).map((h) => h.toUpperCase())
   const tokens =
     config.colorTokenList && config.colorTokenList.length > 0
       ? config.colorTokenList
       : config.colorList
-  const idx = palette.indexOf(fillHex.toUpperCase())
+  let idx = palette.indexOf(normalizedHex)
   if (idx >= 0 && tokens[idx]) {
     // 返回单字符令牌（例如 A/B/C/...），便于后续解析与最短旋转
     return tokens[idx]
+  }
+  // 无法解析的颜色，记录告警并回退到 DEFAULT_COLOR
+  const fallbackIdx = palette.indexOf(defaultHex)
+  if (fallbackIdx >= 0 && tokens[fallbackIdx]) {
+    console.warn(
+      '[XlsxImporter] 未识别的颜色，回退到默认色',
+      rawFillHex,
+      '→',
+      defaultHex,
+    )
+    return tokens[fallbackIdx]
+  }
+  // 仍未找到映射，尽量保持不中断：若存在 token 列表，回退第一个
+  if (tokens.length > 0) {
+    console.warn(
+      '[XlsxImporter] 默认色未在调色板中，使用第一个令牌作为回退',
+      { defaultHex, palette },
+    )
+    return tokens[0]!
   }
   return ''
 }
@@ -344,6 +377,8 @@ export const detectXlsxPalette = (
   const range = utils.decode_range(rangeRef)
 
   const map = new Map<string, DetectedColor>() // key: rgb hex
+  const defaultHex = getDefaultColorHex(config)
+  let hasNoFillOrDefault = false
 
   for (let r = range.s.r; r <= range.e.r; r += 1) {
     if (config.useHeader && r === range.s.r) continue
@@ -351,8 +386,13 @@ export const detectXlsxPalette = (
       const cellAddress = utils.encode_cell({ r, c })
       const cell = sheet[cellAddress] as CellObject | undefined
       if (!cell) continue
-      const fillHex = getCellFillRgbHex(cell)
-      if (!fillHex) continue
+      const rawFillHex = getCellFillRgbHex(cell)
+      if (!rawFillHex) {
+        hasNoFillOrDefault = true
+        continue
+      }
+      // 白色或透明白等价为默认色
+      const fillHex = rawFillHex.toUpperCase() === '#FFFFFF' ? defaultHex : rawFillHex
       const hexNoHash = fillHex.replace('#', '')
       const r8 = parseInt(hexNoHash.slice(0, 2), 16)
       const g8 = parseInt(hexNoHash.slice(2, 4), 16)
@@ -362,6 +402,11 @@ export const detectXlsxPalette = (
         map.set(fillHex, { label, rgb: fillHex })
       }
     }
+  }
+
+  // 若存在无填充/透明，则确保默认色进入调色板（便于后续映射）
+  if (hasNoFillOrDefault && !map.has(defaultHex)) {
+    map.set(defaultHex, { label: hexToNamedColor(defaultHex), rgb: defaultHex })
   }
 
   return Array.from(map.values())
@@ -561,7 +606,12 @@ export const convertXlsxToAutoFightJson = (
   }
 
   const graph: AutoFightGraph = {}
+  // 首回合目标切换：如指定（或默认）当前指向，则使用其作为初始颜色基准
   let previousColor = ''
+  if (config.useColor && (config.colorList?.length ?? 0) > 0) {
+    const idx = Math.max(1, config.currentEnemyIndex ?? 1) - 1
+    previousColor = config.colorList[idx % config.colorList.length]
+  }
 
   rows.forEach((row, roundIdx) => {
     const round = roundIdx + 1

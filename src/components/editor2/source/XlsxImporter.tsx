@@ -31,7 +31,22 @@ export const XlsxImporter: FC<{ onImport: (content: string) => void }> = ({
     try {
       const buffer = await file.arrayBuffer()
       // 先检测 Excel 中的颜色（包含色块），若发现则进入颜色映射流程
-      const pal = detectXlsxPalette(buffer, { colorType: 'fill' })
+      // 读取默认颜色（import.defaultColor）作为无色/白色的等价映射
+      const defaultColorHex = ((): string => {
+        try {
+          const v = localStorage.getItem('import.defaultColor')
+          return (v && /^#?[0-9A-Fa-f]{6}$/.test(v))
+            ? (v.startsWith('#') ? v : `#${v}`)
+            : '#FFFFFF'
+        } catch {
+          return '#FFFFFF'
+        }
+      })()
+
+      const pal = detectXlsxPalette(buffer, {
+        colorType: 'fill',
+        defaultColorHex,
+      })
       if (pal.length > 0) {
         setPendingBuffer(buffer)
         setPendingFileName(file.name)
@@ -42,7 +57,7 @@ export const XlsxImporter: FC<{ onImport: (content: string) => void }> = ({
       }
 
       // 未发现颜色时，按旧流程直接转换
-      const json = convertXlsxToAutoFightJson(buffer)
+      const json = convertXlsxToAutoFightJson(buffer, { defaultColorHex })
       const jsonWithTitle = updateOperationDocTitle(json, file.name)
       onImport(jsonWithTitle)
       AppToaster.show({
@@ -71,12 +86,25 @@ export const XlsxImporter: FC<{ onImport: (content: string) => void }> = ({
       const tokens = colorOrder.map((_, idx) =>
         String.fromCharCode('A'.charCodeAt(0) + idx),
       )
+      // 读取默认颜色（import.defaultColor）
+      const defaultColorHex = ((): string => {
+        try {
+          const v = localStorage.getItem('import.defaultColor')
+          return (v && /^#?[0-9A-Fa-f]{6}$/.test(v))
+            ? (v.startsWith('#') ? v : `#${v}`)
+            : '#FFFFFF'
+        } catch {
+          return '#FFFFFF'
+        }
+      })()
+
       const json = convertXlsxToAutoFightJson(pendingBuffer, {
         useColor: true,
         colorType: 'fill',
         colorList: tokens,
         paletteHexList: colorOrder,
         colorTokenList: tokens,
+        defaultColorHex,
       })
       const jsonWithTitle = updateOperationDocTitle(json, pendingFileName)
       onImport(jsonWithTitle)
