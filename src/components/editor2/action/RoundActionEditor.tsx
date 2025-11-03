@@ -30,7 +30,7 @@ import type { BasicActionSymbol, ChipVariant } from './tokenUtils'
 import {
   CHIP_VARIANT_DOT_CLASS,
   SLOT_KEYS,
-  groupTokensBySlot,
+  groupTokensBySlotWithExtraAttribution,
   resolveChipVariant,
 } from './tokenUtils'
 
@@ -1134,7 +1134,8 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
                   )
                 }
 
-                const { slotMap, others } = groupTokensBySlot(actions)
+                const { slotMap, others, errors } =
+                  groupTokensBySlotWithExtraAttribution(actions)
                 const assignedSlots = SLOT_OPTIONS.filter((slot) =>
                   Boolean(slotAssignments?.[Number(slot)]?.name),
                 )
@@ -1255,8 +1256,20 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
                             </div>
                           </div>
 
-                          {others.length > 0 && (
+                          {(others.length > 0 || (errors?.length ?? 0) > 0) && (
                             <div className="rounded-md border border-dashed border-gray-200 dark:border-gray-600 p-3">
+                              {errors && errors.length > 0 && (
+                                <div className="mb-2 text-xs font-medium text-red-600 dark:text-red-400">
+                                  非法额外动作：
+                                  {errors
+                                    .map((e) =>
+                                      e.index >= 0
+                                        ? `第 ${e.index + 1} 条（${e.reason}）`
+                                        : e.reason,
+                                    )
+                                    .join('，')}
+                                </div>
+                              )}
                               <div className="text-xs font-medium text-gray-600 dark:text-gray-300">
                                 其他动作
                               </div>
