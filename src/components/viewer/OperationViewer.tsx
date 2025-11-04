@@ -644,12 +644,23 @@ function OperationViewerInner({
         <div className="flex flex-col">
           <FactItem title={t.components.viewer.OperationViewer.stage}>
             <EDifficultyLevel
-              level={
-                findLevelByStageName(
-                  levels,
-                  operation.parsedContent.stageName,
-                ) || createCustomLevel(operation.parsedContent.stageName)
-              }
+              level={(() => {
+                // 优先使用后端直出字段；回退到本地映射
+                const levelFromBackend =
+                  operation.preLevel ||
+                  findLevelByStageName(
+                    levels,
+                    operation.parsedContent.stageName,
+                  ) ||
+                  createCustomLevel(operation.parsedContent.stageName)
+                // 标签显示规则：{catOne} | {name}
+                const displayLevel = {
+                  ...levelFromBackend,
+                  // 与 OperationCard 保持一致：使用 name 渲染第二部分
+                  catTwo: levelFromBackend.name,
+                }
+                return displayLevel
+              })()}
               difficulty={operation.parsedContent.difficulty}
             />
           </FactItem>
