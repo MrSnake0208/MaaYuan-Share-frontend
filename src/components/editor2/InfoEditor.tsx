@@ -381,18 +381,6 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
         labelInfo="*"
       >
         <div className="flex items-center gap-3 flex-wrap">
-          <Switch
-            checked={operatorsLocked}
-            onChange={(e) =>
-              setOperatorsLocked((e.target as HTMLInputElement).checked)
-            }
-            label={"锁定所有密探"}
-          />
-          {operatorsLocked && (
-            <Tag minimal intent="warning" icon="lock">
-              已锁定
-            </Tag>
-          )}
           <div className="flex flex-wrap gap-2">
             {selectedOperators.length === 0 ? (
               <Tag minimal>
@@ -410,6 +398,18 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
             )}
           </div>
           <OperatorSidebarInInfo />
+                    <Switch
+            checked={operatorsLocked}
+            onChange={(e) =>
+              setOperatorsLocked((e.target as HTMLInputElement).checked)
+            }
+            label={"锁定所有密探"}
+          />
+          {operatorsLocked && (
+            <Tag minimal intent="warning" icon="lock">
+              已锁定
+            </Tag>
+          )}
         </div>
       </FormGroup>
       {/* 隐藏适用难度选择，保留字段以兼容旧数据 */}
