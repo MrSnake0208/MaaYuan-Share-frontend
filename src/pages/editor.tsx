@@ -1,4 +1,4 @@
-import { useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { useAtomDevtools } from 'jotai-devtools'
 import { useAtomCallback } from 'jotai/utils'
 import { CopilotInfoStatusEnum } from 'maa-copilot-client'
@@ -117,6 +117,8 @@ export const EditorPage = withSuspensable(() => {
   const t = useTranslation()
   const resetEditor = useSetAtom(editorAtoms.reset)
   const setMetadataLocked = useSetAtom(editorAtoms.metadataLocked)
+  const operatorsLocked = useAtomValue(editorAtoms.operatorsLocked)
+  const currentOperation = useAtomValue(editorAtoms.operation)
   const { data: levels } = useLevels({ suspense: false })
   const [searchParams, setSearchParams] = useSearchParams()
   const importShortcode = searchParams.get('shortcode')
@@ -264,9 +266,24 @@ export const EditorPage = withSuspensable(() => {
           operationContent as unknown as Record<string, unknown>,
         )
         const parsedOperation = parseOperationLoose(sanitizedContent)
+        const importedOp = toEditorOperation(parsedOperation)
+        // 拦截：若开启密探锁定，则跳过对 opers/groups 的变更
+        let spyChangeAttempted = false
+        try {
+          const nextOpersJson = JSON.stringify(importedOp.opers ?? [])
+          const currOpersJson = JSON.stringify(currentOperation.opers ?? [])
+          const nextGroupsJson = JSON.stringify(importedOp.groups ?? [])
+          const currGroupsJson = JSON.stringify(currentOperation.groups ?? [])
+          spyChangeAttempted =
+            nextOpersJson !== currOpersJson || nextGroupsJson !== currGroupsJson
+        } catch {}
+        if (operatorsLocked) {
+          importedOp.opers = currentOperation.opers
+          importedOp.groups = currentOperation.groups
+        }
 
         resetEditor({
-          operation: toEditorOperation(parsedOperation),
+          operation: importedOp,
           metadata: {
             // 神秘代码导入：默认仅自己可见
             visibility: 'private',
@@ -299,6 +316,12 @@ export const EditorPage = withSuspensable(() => {
         })
         // 神秘代码导入：锁定作业来源编辑，保护原作者
         setMetadataLocked(true)
+        if (operatorsLocked && spyChangeAttempted) {
+          AppToaster.show({
+            intent: 'warning',
+            message: '已开启密探锁定，密探变更已跳过（详见报告）',
+          })
+        }
         importedShortcodeRef.current = importShortcode
       } catch (error) {
         console.warn(error)

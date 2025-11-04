@@ -100,6 +100,8 @@ const ImportOperationButton = (buttonProps: ButtonProps) => {
   const edit = useEdit()
   const setOperation = useSetAtom(editorAtoms.operation)
   const setSourceEditorText = useSetAtom(editorAtoms.sourceEditorText)
+  const operatorsLocked = useAtomValue(editorAtoms.operatorsLocked)
+  const currentOperation = useAtomValue(editorAtoms.operation)
   const [isOpen, setIsOpen] = useState(false)
 
   const handleImport = (content: string) => {
@@ -108,6 +110,22 @@ const ImportOperationButton = (buttonProps: ButtonProps) => {
       const parsed = JSON.parse(content)
       const operationLoose = parseOperationLoose(parsed)
       const newOperation = toEditorOperation(operationLoose)
+
+      // 拦截：若开启密探锁定，则跳过对 opers/groups 的变更
+      let spyChangeAttempted = false
+      try {
+        const nextOpersJson = JSON.stringify(newOperation.opers ?? [])
+        const currOpersJson = JSON.stringify(currentOperation.opers ?? [])
+        const nextGroupsJson = JSON.stringify(newOperation.groups ?? [])
+        const currGroupsJson = JSON.stringify(currentOperation.groups ?? [])
+        spyChangeAttempted =
+          nextOpersJson !== currOpersJson || nextGroupsJson !== currGroupsJson
+      } catch {}
+      if (operatorsLocked) {
+        newOperation.opers = currentOperation.opers
+        newOperation.groups = currentOperation.groups
+      }
+
       const formatted = JSON.stringify(toMaaOperation(newOperation), null, 2)
 
       edit((get, set, skip) => {
@@ -124,6 +142,13 @@ const ImportOperationButton = (buttonProps: ButtonProps) => {
       })
 
       setSourceEditorText(formatted)
+
+      if (operatorsLocked && spyChangeAttempted) {
+        AppToaster.show({
+          intent: 'warning',
+          message: '已开启密探锁定，密探变更已跳过（详见报告）',
+        })
+      }
     } catch (error) {
       console.warn('Failed to import operation JSON', error)
       const message =

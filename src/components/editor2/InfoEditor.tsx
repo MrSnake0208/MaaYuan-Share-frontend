@@ -4,12 +4,13 @@ import {
   InputGroup,
   Radio,
   RadioGroup,
+  Switch,
   Tag,
   TextArea,
 } from '@blueprintjs/core'
 
 import clsx from 'clsx'
-import { useAtomValue } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { useImmerAtom } from 'jotai-immer'
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Paths } from 'type-fest'
@@ -38,6 +39,9 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
   const t = useTranslation()
   const selectedOperators = useAtomValue(editorAtoms.operators)
   const metadataLocked = useAtomValue(editorAtoms.metadataLocked)
+  const [operatorsLocked, setOperatorsLocked] = useAtom(
+    editorAtoms.operatorsLocked,
+  )
 
   useEffect(() => {
     if (info.difficulty === undefined) {
@@ -377,6 +381,18 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
         labelInfo="*"
       >
         <div className="flex items-center gap-3 flex-wrap">
+          <Switch
+            checked={operatorsLocked}
+            onChange={(e) =>
+              setOperatorsLocked((e.target as HTMLInputElement).checked)
+            }
+            label={"锁定所有密探"}
+          />
+          {operatorsLocked && (
+            <Tag minimal intent="warning" icon="lock">
+              已锁定
+            </Tag>
+          )}
           <div className="flex flex-wrap gap-2">
             {selectedOperators.length === 0 ? (
               <Tag minimal>
