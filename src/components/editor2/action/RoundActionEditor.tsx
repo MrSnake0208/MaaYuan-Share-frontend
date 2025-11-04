@@ -319,6 +319,20 @@ function ensureRoundKey(roundKey: string, input: RoundActionsInput) {
   }
 }
 
+// 根据现有回合顺序，重新从 1 开始连续编号
+function reindexRoundActions(input: RoundActionsInput): RoundActionsInput {
+  const sorted = Object.entries(input)
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(([, actions]) => actions)
+
+  const result: RoundActionsInput = {}
+  for (let i = 0; i < sorted.length; i += 1) {
+    // 保持不可变：复制每个 entry
+    result[String(i + 1)] = (sorted[i] ?? []).map((entry) => [...entry])
+  }
+  return result
+}
+
 function normalizeRoundActions(input: RoundActionsInput): RoundActionsInput {
   const cleaned: RoundActionsInput = {}
   Object.entries(input)
@@ -570,7 +584,8 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
       applyRoundActions((current) => {
         const next = cloneRoundActions(current)
         delete next[roundKey]
-        return next
+        // 删除后重新编号，确保后续回合序号依次递减 1
+        return reindexRoundActions(next)
       })
     },
     [applyRoundActions],
