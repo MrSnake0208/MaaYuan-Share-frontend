@@ -156,13 +156,16 @@ export const LevelSelect: FC<LevelSelectProps> = ({
     return normalizedDefaultCategory
   })
 
+  // 标记：用户是否手动选择过分类，避免后续默认值/下级选择回写覆盖
+  const categoryEditedRef = useRef(false)
+  // 标记：仅在初次挂载/首次有选中关卡时，从关卡类别回显一次到分类
+  const hydratedCategoryRef = useRef(false)
+
   useEffect(() => {
-    if (selectedLevel) {
-      return
-    }
-    if (!normalizedDefaultCategory) {
-      return
-    }
+    if (selectedLevel) return
+    if (!normalizedDefaultCategory) return
+    // 若用户已手动选择过分类，则不再用默认分类覆盖
+    if (categoryEditedRef.current) return
     setSelectedCategory(normalizedDefaultCategory)
   }, [normalizedDefaultCategory, selectedLevel])
 
@@ -186,7 +189,11 @@ export const LevelSelect: FC<LevelSelectProps> = ({
       if (selectedLevel && !isCustomLevel(selectedLevel)) {
         const category = getLevelCategory(selectedLevel)
         if (category && category !== selectedCategory) {
-          setSelectedCategory(category)
+          // 仅在尚未被用户手动选择且尚未水合过时，从关卡回显一次分类
+          if (!categoryEditedRef.current && !hydratedCategoryRef.current) {
+            setSelectedCategory(category)
+            hydratedCategoryRef.current = true
+          }
           // 将输入框填充为已选关卡的显示文案，便于直观看到当前选择
           updateQuery(formatLevelInputValue(selectedLevel), true)
         }
@@ -406,6 +413,8 @@ export const LevelSelect: FC<LevelSelectProps> = ({
               if (!category || category === selectedCategory) {
                 return
               }
+              // 用户主动选择分类
+              categoryEditedRef.current = true
               setSelectedCategory(category)
               setActiveItem(null)
               updateQuery('', true)
