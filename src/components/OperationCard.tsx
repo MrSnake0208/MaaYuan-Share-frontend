@@ -98,14 +98,24 @@ export const NeoOperationCard = ({
             </Tooltip2>
 
             <div className="flex items-center text-slate-900">
-              <NeoELevel
-                level={
+              {(() => {
+                // 优先使用后端直出字段（data.cat_one / data.name / ...）
+                const levelFromBackend =
+                  operation.preLevel ||
                   findLevelByStageName(
                     levels,
                     operation.parsedContent.stageName,
-                  ) || createCustomLevel(operation.parsedContent.stageName)
+                  ) ||
+                  createCustomLevel(operation.parsedContent.stageName)
+                // 标签显示规则：{catOne} | {name}
+                const displayLevel = {
+                  ...levelFromBackend,
+                  // 将原先显示的 catTwo 改为使用 name 字段渲染
+                  catTwo: levelFromBackend.name,
                 }
-              />
+                return <NeoELevel level={displayLevel} />
+              })()}
+              
               <EDifficulty
                 difficulty={
                   operation.parsedContent.difficulty ?? OpDifficulty.UNKNOWN
@@ -258,15 +268,27 @@ export const OperationCard = ({ operation }: { operation: Operation }) => {
                   </H4>
                 </div>
                 <H5 className="flex items-center text-slate-900 -mt-3">
-                  <EDifficultyLevel
-                    level={
+                  {(() => {
+                    // 优先使用后端直出字段
+                    const levelFromBackend =
+                      operation.preLevel ||
                       findLevelByStageName(
                         levels,
                         operation.parsedContent.stageName,
-                      ) || createCustomLevel(operation.parsedContent.stageName)
+                      ) ||
+                      createCustomLevel(operation.parsedContent.stageName)
+                    // 标签显示规则：{catOne} | {name}
+                    const displayLevel = {
+                      ...levelFromBackend,
+                      catTwo: levelFromBackend.name,
                     }
-                    difficulty={operation.parsedContent.difficulty}
-                  />
+                    return (
+                      <EDifficultyLevel
+                        level={displayLevel}
+                        difficulty={operation.parsedContent.difficulty}
+                      />
+                    )
+                  })()}
                   {/* 平台标签：仅在拥有对应标签时显示；复用现有标签结构/类名，仅覆盖颜色 */}
                   <span className="ml-1 inline-flex items-center gap-2">
                     {hasTag('代号鸢') && (

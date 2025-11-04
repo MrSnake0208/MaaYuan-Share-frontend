@@ -158,10 +158,32 @@ export function useOperations({
             .filter((s: string) => s.length > 0)
           if (cleaned.length) metadata.tags = cleaned
         }
+
+        // 基于后端直出字段构造预关卡信息，避免从 content 解析
+        const d: any = item
+        const stageId = d.stageId ?? d.stage_id
+        const levelId = d.levelId ?? d.level_id ?? stageId ?? ''
+        const name = d.name ?? ''
+        const catOne = d.catOne ?? d.cat_one ?? ''
+        const catTwo = d.catTwo ?? d.cat_two ?? ''
+        const catThree = d.catThree ?? d.cat_three ?? ''
+        const preLevel = !stageId && !catOne && !catTwo && !catThree && !name
+          ? undefined
+          : {
+              levelId,
+              stageId: stageId ?? '',
+              catOne,
+              catTwo,
+              catThree,
+              name,
+              width: 0,
+              height: 0,
+            }
         return {
           ...baseInfo,
           metadata,
           parsedContent: toCopilotOperation(baseInfo),
+          preLevel,
         }
       })
 
