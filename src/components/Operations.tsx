@@ -171,13 +171,7 @@ export const Operations: ComponentType = withSuspensable(() => {
                         active={isActive}
                         onClick={() => {
                           const next = isActive ? [] : quickTags
-                          setSelectedStageId('')
                           setTags(next)
-                          setQueryParams((old) => ({
-                            ...old,
-                            levelKeyword: undefined,
-                            keyword: undefined,
-                          }))
                           refreshOperations()
                         }}
                       >

@@ -115,6 +115,21 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
       </ul>
     )
 
+    useEffect(() => {
+      const pageSize = params.limit ?? 50
+      if (!params.tags?.length) return
+      if (!pageSize || displayedOperations.length >= pageSize) return
+      if (isReachingEnd || isValidating) return
+      setSize((size) => size + 1)
+    }, [
+      params.tags,
+      params.limit,
+      displayedOperations.length,
+      isReachingEnd,
+      isValidating,
+      setSize,
+    ])
+
     return (
       <>
         {multiselect && (
