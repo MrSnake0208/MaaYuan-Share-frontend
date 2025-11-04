@@ -238,7 +238,18 @@ export async function getOperation(req: { id: number }): Promise<Operation> {
   const rawJson = (await rawResponse.raw.json()) as { data?: any }
   const payload = rawJson?.data ?? {}
   const baseInfo = CopilotInfoFromJSON(payload)
+  // 基于后端返回的原始 metadata 构建前端使用的元数据
   const metadata = mapResponseMetadata(payload.metadata)
+  // 补充：后端可能将标签以顶层字段 `tags: string[]` 返回
+  // 为保持前端读取的一致性，将其注入到 metadata.tags 中
+  if (Array.isArray((payload as any)?.tags)) {
+    const cleaned = (payload as any).tags
+      .map((s: unknown) => (typeof s === 'string' ? s.trim() : ''))
+      .filter((s: string) => s.length > 0)
+    if (cleaned.length) {
+      metadata.tags = cleaned
+    }
+  }
 
   const d: any = payload
   const preLevel = (() => {

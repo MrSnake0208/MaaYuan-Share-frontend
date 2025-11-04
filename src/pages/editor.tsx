@@ -285,6 +285,16 @@ export const EditorPage = withSuspensable(() => {
               (operationData.metadata?.sourceType === 'repost'
                 ? operationData.metadata?.repostUrl
                 : `https://share.maayuan.top/?op=${operationData.id}`) ?? '',
+            // 补齐：导入标签（多选 AND），从后端返回/映射到的 metadata.tags 读取
+            tags: Array.isArray(operationData.metadata?.tags)
+              ? Array.from(
+                  new Set(
+                    (operationData.metadata?.tags ?? [])
+                      .map((s) => (s ?? '').trim())
+                      .filter((s) => s.length > 0),
+                  ),
+                )
+              : [],
           },
         })
         // 神秘代码导入：锁定作业来源编辑，保护原作者
