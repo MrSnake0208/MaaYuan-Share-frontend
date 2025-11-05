@@ -23,8 +23,8 @@ import type { BasicActionSymbol, SlotKey } from '../editor2/action/tokenUtils'
 import {
   CHIP_VARIANT_DOT_CLASS,
   SLOT_KEYS,
-  extractSlotFromToken,
   resolveChipVariant,
+  groupTokensBySlotWithExtraAttribution,
 } from '../editor2/action/tokenUtils'
 import { simingActionsToRoundActions } from '../editor2/siming-export'
 
@@ -580,48 +580,23 @@ function groupTokensForTable(
   tokens: DisplayToken[],
   slotAssignments: SlotAssignments,
 ) {
-  const slotMap: Partial<Record<SlotKey, DisplayToken[]>> = {}
-  const others: DisplayToken[] = []
-
-  tokens.forEach((token) => {
-    const slot = extractSlotFromToken(token.raw)
-    if (slot) {
-      if (!slotMap[slot]) {
-        slotMap[slot] = []
-      }
-      slotMap[slot]!.push(token)
-      return
-    }
-
-    const raw = token.raw.trim()
-    if (raw.startsWith('额外:')) {
-      const payload = raw.slice('额外:'.length)
-      const payloadNoSpace = payload.replace(/\s+/g, '')
-      const isLvbuSwitch =
-        payloadNoSpace.includes('吕布') || payloadNoSpace.includes('呂布')
-
-      if (isLvbuSwitch) {
-        let lvbuSlot: SlotKey | null = null
-        for (const [slotKey, assignment] of Object.entries(slotAssignments)) {
-          if (!assignment) continue
-          const name = `${assignment.name ?? ''} ${assignment.rawName ?? ''}`
-          if (name.includes('吕布') || name.includes('呂布')) {
-            lvbuSlot = slotKey as SlotKey
-            break
-          }
-        }
-        if (lvbuSlot) {
-          if (!slotMap[lvbuSlot]) slotMap[lvbuSlot] = []
-          slotMap[lvbuSlot]!.push(token)
-          return
-        }
-      }
-    }
-
-    others.push(token)
+  const rawActions: string[][] = tokens.map((t) => [t.raw])
+  const { slotMap, others } = groupTokensBySlotWithExtraAttribution(
+    rawActions,
+    { slotAssignments },
+  )
+  const mappedSlotMap: Partial<Record<SlotKey, DisplayToken[]>> = {}
+  ;(Object.keys(slotMap) as SlotKey[]).forEach((slot) => {
+    const entries = slotMap[slot] ?? []
+    mappedSlotMap[slot] = entries
+      .map((e) => tokens[e.index])
+      .filter(Boolean as unknown as (t: DisplayToken | undefined) => t is DisplayToken)
   })
+  const mappedOthers: DisplayToken[] = others
+    .map((e) => tokens[e.index])
+    .filter(Boolean as unknown as (t: DisplayToken | undefined) => t is DisplayToken)
 
-  return { slotMap, others }
+  return { slotMap: mappedSlotMap, others: mappedOthers }
 }
 
 function formatTokenSummary(rawToken: string, language: Language): string {

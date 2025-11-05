@@ -1149,8 +1149,10 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
                   )
                 }
 
-                const { slotMap, others, errors } =
-                  groupTokensBySlotWithExtraAttribution(actions)
+                const { slotMap, others, errors } = groupTokensBySlotWithExtraAttribution(
+                  actions,
+                  { slotAssignments: slotAssignments as any },
+                )
                 const assignedSlots = SLOT_OPTIONS.filter((slot) =>
                   Boolean(slotAssignments?.[Number(slot)]?.name),
                 )

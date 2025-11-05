@@ -107,8 +107,17 @@ export interface GroupWithAttributionResult {
  * 5) 非法额外动作类型（不在允许范围）报错并给出具体位置；
  * 6) 不改变原始顺序，仅做归属。
  */
+/**
+ * 将动作序列按“类表格视图”归属规则进行分组，并可选地根据密探归属吸附部分额外动作。
+ * - 额外动作（等待/切换左右）按邻近规则吸附到后续第一条号位项；末尾无号位项时回退到最近号位项；
+ * - 若提供 slotAssignments，则对特定密探相关的额外动作进行定向吸附（如：吕布切换、史子眇sp）。
+ */
 export function groupTokensBySlotWithExtraAttribution(
   actions: string[][],
+  options?: {
+    // 仅需 name/rawName，避免引入跨模块类型依赖
+    slotAssignments?: Partial<Record<number, { name?: string; rawName?: string }>>
+  },
 ): GroupWithAttributionResult {
   const slotMap: Partial<Record<SlotKey, TokenEntry[]>> = {}
   const others: TokenEntry[] = []
@@ -116,6 +125,8 @@ export function groupTokensBySlotWithExtraAttribution(
 
   const pendingExtras: TokenEntry[] = []
   let lastSeenSlot: SlotKey | null = null
+
+  const slotAssignments = options?.slotAssignments
 
   const isAllowedExtra = (token: string): boolean => {
     if (!token.startsWith('额外:')) return false
@@ -125,6 +136,12 @@ export function groupTokensBySlotWithExtraAttribution(
     if (payload === '左侧目标') return true
     if (payload === '右侧目标') return true
     if (payload.startsWith('等待')) return true // 等待 或 等待:ms
+    // 若提供 slotAssignments，则视“吕布”/“史子眇sp”为允许并执行定向吸附
+    const normalized = payload.replace(/\s+/g, '').toLowerCase()
+    if (!slotAssignments) return false
+    if (normalized.includes('吕布') || normalized.includes('呂布')) return true
+    if (normalized.includes('史子眇sp') || normalized.includes('史子渺sp') ||
+        (normalized.includes('sp') && (normalized.includes('史子眇') || normalized.includes('史子渺')))) return true
     return false
   }
 
@@ -150,6 +167,40 @@ export function groupTokensBySlotWithExtraAttribution(
     }
 
     if (token.startsWith('额外:')) {
+      const payload = token.slice('额外:'.length)
+      const normalized = payload.replace(/\s+/g, '').toLowerCase()
+
+      // 特定密探定向吸附：吕布 / 史子眇sp（当提供了 slotAssignments）
+      if (slotAssignments) {
+        // 吕布：归属到名字包含“吕布/呂布”的号位
+        if (normalized.includes('吕布') || normalized.includes('呂布')) {
+          const targetSlot = Object.entries(slotAssignments).find(([, a]) => {
+            const name = `${a?.name ?? ''} ${a?.rawName ?? ''}`
+            return name.includes('吕布') || name.includes('呂布')
+          })?.[0] as unknown as SlotKey | undefined
+          if (targetSlot) {
+            pushToSlot(targetSlot, { token, index })
+            return
+          }
+        }
+        // 史子眇sp：归属到名字包含“史子眇”（或变体“赴烛”）的号位
+        const isSpForShizimiao =
+          normalized.includes('史子眇sp') ||
+          normalized.includes('史子渺sp') ||
+          (normalized.includes('sp') &&
+            (normalized.includes('史子眇') || normalized.includes('史子渺')))
+        if (isSpForShizimiao) {
+          const targetSlot = Object.entries(slotAssignments).find(([, a]) => {
+            const name = `${a?.name ?? ''} ${a?.rawName ?? ''}`
+            return name.includes('史子眇') || name.includes('赴烛')
+          })?.[0] as unknown as SlotKey | undefined
+          if (targetSlot) {
+            pushToSlot(targetSlot, { token, index })
+            return
+          }
+        }
+      }
+
       if (isAllowedExtra(token)) {
         // 暂存，等待下一个号位项出现时整体归属
         pendingExtras.push({ token, index })
