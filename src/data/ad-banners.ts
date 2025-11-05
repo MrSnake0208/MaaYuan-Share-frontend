@@ -16,4 +16,9 @@ export const defaultAdBanners: AdBannerConfigItem[] = [
     link: 'https://pd.qq.com/s/hismsfiu8',
     alt: 'MaaYuan',
   },
+  {
+    image: '/辟雍.jpg',
+    link: '',
+    alt: '辟雍',
+  }
 ]
