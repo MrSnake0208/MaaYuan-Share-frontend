@@ -12,13 +12,20 @@ export const defaultAdBanners: AdBannerConfigItem[] = [
   //   alt: '雷电模拟器',
   // },
   {
-    image: '/周年庆.png',
-    link: 'https://pd.qq.com/s/hismsfiu8',
-    alt: 'MaaYuan',
+    image: '/麻圆MuMu合作-560x320.jpg',
+    link: 'https://adl.netease.com/d/g/a11/c/maayuan',
+    alt: 'MuMu',
   },
   {
     image: '/辟雍.jpg',
     link: '',
     alt: '辟雍',
-  }
+  },
+  {
+    image: '/周年庆.png',
+    link: 'https://pd.qq.com/s/hismsfiu8',
+    alt: 'MaaYuan',
+  },
+
+  
 ]
