@@ -14,73 +14,85 @@
           "desp": "轻骑状态的技能消耗能量+1，【霸道】和【死意】的持续回合+1",
           "ot_name": "辕门射戟",
           "color": "金",
-          "abbreviation": "辕门射戟"
+          "abbreviation": "辕门射戟",
+          "__abbrEdited": false
         },
         {
           "desp": "攻击力提升12%",
           "ot_name": "攻击力大幅提升",
           "color": "金",
-          "abbreviation": "攻击大幅"
+          "abbreviation": "攻击大幅",
+          "__abbrEdited": true
         },
         {
           "desp": "回合开始时，若敌方的人数大于等于2，则自身攻击力提升50%（1回合）",
           "ot_name": "豪杰纵横",
           "color": "金",
-          "abbreviation": "豪杰纵横"
+          "abbreviation": "豪杰纵横",
+          "__abbrEdited": false
         },
         {
           "desp": "战斗开始时轻骑和重骑形态均获得3点能量，且自身可以立刻切换形态",
           "ot_name": "以战养战",
           "color": "金",
-          "abbreviation": "以战养战"
+          "abbreviation": "以战养战",
+          "__abbrEdited": false
         },
         {
           "desp": "重骑形态下的普攻效果替换为：对当前目标造成265%攻击力的伤害，每层【悍】提升75%的伤害系数，之后消耗1层【悍】",
           "ot_name": "马踏血泥",
           "color": "金",
-          "abbreviation": "马踏血泥"
+          "abbreviation": "马踏血泥",
+          "__abbrEdited": false
         },
         {
           "desp": "轻骑形态普攻效果替换成：对敌方全体造成125%攻击力的伤害，幷获得1层【悍】（可叠加9层）。重骑形态技能效果替换成：对敌方全体造成980%/990%/1000%攻击力的伤害，每层【悍】提升80%伤害系数，若自身存在6层【悍】，额外造成一次同样伤害的攻击。随后自身清除所有【悍】",
           "ot_name": "骁骑赫怒",
           "color": "金",
-          "abbreviation": "骁骑赫怒"
+          "abbreviation": "骁骑赫怒",
+          "__abbrEdited": false
         },
         {
           "desp": "攻击力提升8%",
           "ot_name": "攻击力中幅提升",
           "color": "紫",
-          "abbreviation": "攻击中幅"
+          "abbreviation": "攻击中幅",
+          "__abbrEdited": true
         },
         {
           "desp": "防御时，恢复10%最大生命值的生命",
           "ot_name": "防御时恢复生命",
           "color": "紫",
-          "abbreviation": "防御回血"
+          "abbreviation": "防御回血",
+          "__abbrEdited": true
         },
         {
           "desp": "最大生命提升8%",
           "ot_name": "最大生命中幅提升",
           "color": "紫",
-          "abbreviation": "生命中幅"
+          "abbreviation": "生命中幅",
+          "__abbrEdited": true
         },
         {
           "desp": "生命值高于50%时，自身攻击力提升10%",
           "ot_name": "生命高时攻击提升",
           "color": "蓝",
-          "abbreviation": "血高攻高"
+          "abbreviation": "血高攻高",
+          "__abbrEdited": true
         },
         {
           "desp": "最大生命提升3%",
           "ot_name": "最大生命小幅提升",
           "color": "蓝",
-          "abbreviation": "生命小幅"
+          "abbreviation": "生命小幅",
+          "__abbrEdited": true
         },
         {
           "desp": "攻击力提升3%",
           "ot_name": "攻击力小幅提升",
           "color": "蓝",
-          "abbreviation": "攻击小幅"
+          "abbreviation": "攻击小幅",
+          "__abbrEdited": true
         }
       ]
     },
@@ -182,73 +194,85 @@
           "desp": "使用普攻操纵处于【夺权】状态的队友时，效果变为:对当前目标造成100%攻击力的普攻伤害，幷为其附加【头风】(可叠加20层)。【头风】：持续伤害，伤害量相当于施加者20%的攻击力",
           "ot_name": "羲和",
           "color": "金",
-          "abbreviation": "羲和"
+          "abbreviation": "羲和",
+          "__abbrEdited": false
         },
         {
           "desp": "处于【夺权】状态的队友每对敌人进行一次攻击，获得一层【速决】（可叠加，1回合）。群体攻击只会获得一层。【速决】：攻击力提升5%，普攻增伤提升5",
           "ot_name": "专权",
           "color": "金",
-          "abbreviation": "专权"
+          "abbreviation": "专权",
+          "__abbrEdited": false
         },
         {
           "desp": "攻击力提升12%",
           "ot_name": "攻击力大幅提升",
           "color": "金",
-          "abbreviation": "攻击大幅"
+          "abbreviation": "攻击大幅",
+          "__abbrEdited": true
         },
         {
           "desp": "<持衡>的效果变为:下拉防御后，如果有处于【夺权】状态的队友，则也会令其进入防御状态，并使其攻击力提升30%(1回合)",
           "ot_name": "事君同忧",
           "color": "金",
-          "abbreviation": "事君同忧"
+          "abbreviation": "事君同忧",
+          "__abbrEdited": false
         },
         {
           "desp": "使用技能操纵处于【夺权】状态的队友时，效果变为:对当前目标造成300/310/320%攻击力的技能伤害，随后该队友提升40持续伤害增伤(1回合)并获得1点能量",
           "ot_name": "日光",
           "color": "金",
-          "abbreviation": "日光"
+          "abbreviation": "日光",
+          "__abbrEdited": false
         },
         {
           "desp": "回合开始时，若敌人数量小于或等于2，我方全体的攻击力提升50%(1回合)",
           "ot_name": "临战",
           "color": "金",
-          "abbreviation": "临战"
+          "abbreviation": "临战",
+          "__abbrEdited": false
         },
         {
           "desp": "攻击力提升8%",
           "ot_name": "攻击力中幅提升",
           "color": "紫",
-          "abbreviation": "攻击中幅"
+          "abbreviation": "攻击中幅",
+          "__abbrEdited": true
         },
         {
           "desp": "防御时，恢复10%最大生命值的生命",
           "ot_name": "防御时恢复生命",
           "color": "紫",
-          "abbreviation": "防御回血"
+          "abbreviation": "防御回血",
+          "__abbrEdited": true
         },
         {
           "desp": "最大生命提升8%",
           "ot_name": "最大生命中幅提升",
           "color": "紫",
-          "abbreviation": "生命中幅"
+          "abbreviation": "生命中幅",
+          "__abbrEdited": true
         },
         {
           "desp": "最大生命提升3%",
           "ot_name": "最大生命小幅提升",
           "color": "蓝",
-          "abbreviation": "生命小幅"
+          "abbreviation": "生命小幅",
+          "__abbrEdited": true
         },
         {
           "desp": "攻击力提升3%",
           "ot_name": "攻击力小幅提升",
           "color": "蓝",
-          "abbreviation": "攻击小幅"
+          "abbreviation": "攻击小幅",
+          "__abbrEdited": true
         },
         {
           "desp": "生命值高于50%时，自身攻击力提升10%",
           "ot_name": "生命高时攻击提升",
           "color": "蓝",
-          "abbreviation": "血高攻高"
+          "abbreviation": "血高攻高",
+          "__abbrEdited": true
         }
       ]
     },
@@ -8911,6 +8935,187 @@
           "desp": "<收割>改为：对当前目标造成300%攻击力的触发伤害并施加1层【流血】（可叠加5层）。【流血】：普攻和触发伤害免伤降低5",
           "ot_name": "碧血",
           "abbreviation": "碧血"
+        }
+      ]
+    },
+    {
+      "id": "char_104_zhugeliang",
+      "name": "诸葛亮",
+      "rarity": 5,
+      "prof": "阳",
+      "subProf": "shenji",
+      "alias": "zhugeliang zgl “诸葛亮” 诸葛亮",
+      "name_en": "诸葛亮",
+      "discs": [
+        {
+          "__abbrEdited": true,
+          "ot_name": "飞龙在天",
+          "abbreviation": "飞龙在天",
+          "desp": "龙杖的卦象为<坤>时。我方密探每次行动后，都有20%的概率为目标附加一层持续伤害效果。龙盾、神纪、岐黄、诡道、破军的密探分别会附加【龙盾之筮】、【神纪之筮】、【岐黄之筮】、【诡道之筮】、【破军之筮】（均可叠加20层）。每种持续伤害效果的伤害量均为施加者30%的攻击力"
+        },
+        {
+          "__abbrEdited": false,
+          "ot_name": "天命所归",
+          "abbreviation": "天命所归",
+          "desp": "<唤星>唤到紫星时，下一次必定唤出橙星"
+        },
+        {
+          "__abbrEdited": false,
+          "ot_name": "沟通天地",
+          "abbreviation": "沟通天地",
+          "desp": "龙杖的卦象为<乾>时，战斗开始时，提升我方全体100%最大生命，但我方全体受到的治疗效果降低30%"
+        },
+        {
+          "__abbrEdited": false,
+          "ot_name": "往来建木",
+          "abbreviation": "往来建木",
+          "desp": "将龙杖的卦象切换为<坤>，更换自身的技能效果。自身最大生命降低15%，攻击力提升30%"
+        },
+        {
+          "__abbrEdited": false,
+          "ot_name": "利见",
+          "abbreviation": "利见",
+          "desp": "每3回合开始时，获得一层【龙气】"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "初始能量+1",
+          "abbreviation": "能量+1",
+          "desp": "初始能量+1",
+          "color": "紫"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "防御时恢复生命",
+          "abbreviation": "防御回血",
+          "color": "紫",
+          "desp": "防御时，恢复10%最大生命值的生命"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "最大生命中幅提升",
+          "abbreviation": "生命中幅",
+          "desp": "最大生命提升8%",
+          "color": "紫"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "攻击力中幅提升",
+          "abbreviation": "攻击中幅",
+          "desp": "攻击力提升8%",
+          "color": "紫"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "最大生命小幅提升",
+          "abbreviation": "生命小幅",
+          "color": "蓝",
+          "desp": "最大生命提升3%"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "攻击力小幅提升",
+          "abbreviation": "攻击小幅",
+          "desp": "攻击力提升3%",
+          "color": "蓝"
+        },
+        {
+          "__abbrEdited": true,
+          "color": "蓝",
+          "ot_name": "生命高时攻击提升",
+          "abbreviation": "血高攻高",
+          "desp": "生命值高于50%时，自身攻击力提升10%"
+        }
+      ]
+    },
+    {
+      "id": "char_105_simahui",
+      "name": "司马徽",
+      "rarity": 5,
+      "prof": "阴",
+      "subProf": "guidao",
+      "alias": "simahui smh “司马徽” 司马徽",
+      "name_en": "司马徽",
+      "discs": [
+        {
+          "__abbrEdited": false,
+          "ot_name": "皋涂山",
+          "abbreviation": "皋涂山",
+          "desp": "使用技能后进人防御状态，且自身可以额外行动一次，一回合最多生效5次"
+        },
+        {
+          "__abbrEdited": false,
+          "ot_name": "白泽",
+          "abbreviation": "白泽",
+          "desp": "自身普攻额外增加一层【镜影】，且葛洪使用技能后可以对当前目标额外附加1次【寄生】(3回合)"
+        },
+        {
+          "__abbrEdited": false,
+          "ot_name": "毕方",
+          "abbreviation": "毕方",
+          "desp": "回合开始时，使敌方生命高于90%的目标<印记>记录上限提升10%（可叠加3层）"
+        },
+        {
+          "__abbrEdited": false,
+          "ot_name": "鹿蜀",
+          "abbreviation": "鹿蜀",
+          "desp": "【镜影】不再记录伤害，而是使印记伤害免伤降低5"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "防御时恢复生命",
+          "abbreviation": "防御回血",
+          "color": "紫",
+          "desp": "防御时，恢复10%最大生命值的生命"
+        },
+        {
+          "__abbrEdited": true,
+          "color": "紫",
+          "ot_name": "初始能量+1",
+          "abbreviation": "能量+1",
+          "desp": "初始能量+1"
+        },
+        {
+          "__abbrEdited": true,
+          "color": "紫",
+          "ot_name": "最大生命中幅提升",
+          "abbreviation": "生命中幅",
+          "desp": "最大生命提升8%"
+        },
+        {
+          "__abbrEdited": true,
+          "color": "紫",
+          "ot_name": "攻击力中幅提升",
+          "abbreviation": "攻击中幅",
+          "desp": "攻击力提升8%"
+        },
+        {
+          "__abbrEdited": true,
+          "color": "蓝",
+          "ot_name": "生命高时攻击提升",
+          "abbreviation": "血高攻高",
+          "desp": "生命值高于50%时，自身攻击力提升10%"
+        },
+        {
+          "__abbrEdited": true,
+          "color": "蓝",
+          "ot_name": "最小生命小幅提升",
+          "abbreviation": "生命小幅",
+          "desp": "最大生命提升3%"
+        },
+        {
+          "__abbrEdited": true,
+          "color": "蓝",
+          "ot_name": "攻击力小幅提升",
+          "abbreviation": "攻击小幅",
+          "desp": "攻击力提升3%"
+        },
+        {
+          "__abbrEdited": true,
+          "color": "蓝",
+          "ot_name": "防御减伤提升",
+          "abbreviation": "防御减伤",
+          "desp": "防御时额外使自身防御系数提升10"
         }
       ]
     }
