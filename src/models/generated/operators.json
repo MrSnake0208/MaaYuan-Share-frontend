@@ -8980,7 +8980,7 @@
         {
           "__abbrEdited": true,
           "ot_name": "初始能量+1",
-          "abbreviation": "能量+1",
+          "abbreviation": "初始+1",
           "desp": "初始能量+1",
           "color": "紫"
         },
@@ -9072,7 +9072,7 @@
           "__abbrEdited": true,
           "color": "紫",
           "ot_name": "初始能量+1",
-          "abbreviation": "能量+1",
+          "abbreviation": "初始+1",
           "desp": "初始能量+1"
         },
         {
