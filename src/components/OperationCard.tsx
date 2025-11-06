@@ -8,7 +8,6 @@ import { copyShortCode, handleLazyDownloadJSON } from 'services/operation'
 
 import { RelativeTime } from 'components/RelativeTime'
 import { AddToOperationSetButton } from 'components/operation-set/AddToOperationSet'
-import { OperationRating } from 'components/viewer/OperationRating'
 import { OpDifficulty, Operation } from 'models/operation'
 
 import { useLevels } from '../apis/level'
@@ -157,12 +156,8 @@ export const NeoOperationCard = ({
             <OperatorTags operation={operation} />
             <div className="flex">
               <div className="flex items-center gap-1.5">
-                <Icon icon="star" />
-                <OperationRating
-                  className="text-sm"
-                  operation={operation}
-                  layout="horizontal"
-                />
+                <Icon icon="thumbs-up" />
+                <span className="text-sm tabular-nums">{operation.like}</span>
               </div>
               <div className="flex-1" />
 
@@ -318,12 +313,8 @@ export const OperationCard = ({ operation }: { operation: Operation }) => {
               {/* meta */}
               <div className="flex flex-wrap items-start gap-x-4 gap-y-1 text-zinc-500">
                 <div className="flex items-center gap-1.5">
-                  <Icon icon="star" />
-                  <OperationRating
-                    className="text-sm"
-                    operation={operation}
-                    layout="horizontal"
-                  />
+                  <Icon icon="thumbs-up" />
+                  <span className="text-sm tabular-nums">{operation.like}</span>
                 </div>
 
                 <Tooltip2
