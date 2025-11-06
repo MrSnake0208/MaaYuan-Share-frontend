@@ -305,7 +305,14 @@ function normalizeOperationLooseInput(raw: unknown): unknown {
   const hasKnownKey = keys.some((key) => KNOWN_OPERATION_KEYS.has(key))
   if (!hasKnownKey && keys.length > 0) {
     const entries = Object.values(raw)
-    if (entries.length > 0 && entries.every(isLikelySimingActionEntry)) {
+    const isAllLikely =
+      entries.length > 0 && entries.every(isLikelySimingActionEntry)
+    // 兼容：当 JSON 顶层包含少量“非动作”键（如“作业信息”“抄作业自定义延时”）时，
+    // 依然应识别为 Siming 动作表。只要包含至少一个“回合N行动M”或“检测回合N”键即判定为 Siming 结构。
+    const hasRoundLikeKeys = keys.some(
+      (k) => /^回合\d+行动\d+$/.test(k) || /^检测回合\d+$/.test(k),
+    )
+    if (isAllLikely || hasRoundLikeKeys) {
       return {
         siming_actions: Object.fromEntries(Object.entries(raw)),
         actions: [],
