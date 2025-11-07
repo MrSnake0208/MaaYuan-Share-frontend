@@ -49,7 +49,6 @@ import { withSuspensable } from 'components/Suspensable'
 import { AppToaster } from 'components/Toaster'
 import { DrawerLayout } from 'components/drawer/DrawerLayout'
 import { EDifficultyLevel } from 'components/entity/ELevel'
-import { OperationRating } from 'components/viewer/OperationRating'
 import { OpRatingType, Operation } from 'models/operation'
 import { toShortCode } from 'models/shortCode'
 import { authAtom, isAdmin } from 'store/auth'
@@ -668,9 +667,14 @@ export function OperationViewerInner({
           <FactItem
             relaxed
             className="items-start"
-            title={t.components.viewer.OperationViewer.task_rating}
+            title={'作业点赞数'}
           >
-            <OperationRating operation={operation} className="mr-2" />
+            <div className="flex items-center mr-2">
+              <Icon icon="thumbs-up" className="mr-1.5" />
+              <span className="tabular-nums text-gray-800 dark:text-slate-100 font-bold">
+                {operation.like}
+              </span>
+            </div>
 
             <ButtonGroup className="flex items-center ml-2">
               <Tooltip2 content="o(*≧▽≦)ツ" placement="bottom">
