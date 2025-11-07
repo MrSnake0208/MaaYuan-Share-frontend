@@ -4199,8 +4199,8 @@
       },
       "validation": {
         "metadata_missing": {
-          "cn": "请完整填写搬运来源信息：{{fields}}",
-          "zh_tw": "請完整填寫搬運來源資訊：{{fields}}"
+          "cn": "请完整填写信息：{{fields}}",
+          "zh_tw": "請完整填寫資訊：{{fields}}"
         },
         "metadata_invalid_url": {
           "cn": "原链接格式不正确，请确认后再试",

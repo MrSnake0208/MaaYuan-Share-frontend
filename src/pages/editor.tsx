@@ -126,19 +126,35 @@ export const EditorPage = withSuspensable(() => {
 
   const validateMetadata = useCallback(
     (metadata: EditorMetadata) => {
-      if (metadata.sourceType !== 'repost') {
-        return { ok: true as const }
-      }
       const missingFields: string[] = []
-      if (!metadata.repostAuthor?.trim()) {
-        missingFields.push(t.components.editor2.InfoEditor.repost_author)
+
+      // 标签必填：清洗后需至少 1 项
+      const cleanedTags = Array.isArray(metadata.tags)
+        ? Array.from(
+            new Set(
+              metadata.tags
+                .map((s) => (s ?? '').trim())
+                .filter((s) => s.length > 0),
+            ),
+          )
+        : []
+      if (cleanedTags.length === 0) {
+        missingFields.push(t.components.editor2.InfoEditor.tags)
       }
-      if (!metadata.repostPlatform?.trim()) {
-        missingFields.push(t.components.editor2.InfoEditor.repost_platform)
+
+      // 搬运稿额外必填字段校验
+      if (metadata.sourceType === 'repost') {
+        if (!metadata.repostAuthor?.trim()) {
+          missingFields.push(t.components.editor2.InfoEditor.repost_author)
+        }
+        if (!metadata.repostPlatform?.trim()) {
+          missingFields.push(t.components.editor2.InfoEditor.repost_platform)
+        }
+        if (!metadata.repostUrl?.trim()) {
+          missingFields.push(t.components.editor2.InfoEditor.repost_link)
+        }
       }
-      if (!metadata.repostUrl?.trim()) {
-        missingFields.push(t.components.editor2.InfoEditor.repost_link)
-      }
+
       if (missingFields.length > 0) {
         return {
           ok: false as const,
@@ -147,13 +163,17 @@ export const EditorPage = withSuspensable(() => {
           }),
         }
       }
-      try {
-        // eslint-disable-next-line no-new
-        new URL(metadata.repostUrl!.trim())
-      } catch {
-        return {
-          ok: false as const,
-          message: t.pages.editor.validation.metadata_invalid_url,
+
+      // 当为搬运稿时校验链接格式
+      if (metadata.sourceType === 'repost' && metadata.repostUrl?.trim()) {
+        try {
+          // eslint-disable-next-line no-new
+          new URL(metadata.repostUrl!.trim())
+        } catch {
+          return {
+            ok: false as const,
+            message: t.pages.editor.validation.metadata_invalid_url,
+          }
         }
       }
       return { ok: true as const }

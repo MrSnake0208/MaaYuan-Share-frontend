@@ -8,6 +8,7 @@ import { editorValidationAtom } from './validation'
 
 export const Validator = memo(() => {
   const operation = useAtomValue(editorAtoms.operation)
+  const metadata = useAtomValue(editorAtoms.metadata)
   const translations = useAtomValue(translationsAtom)
   const validate = useSetAtom(editorValidationAtom)
   const debouncedValidate = useMemo(() => debounce(validate, 500), [validate])
@@ -15,7 +16,7 @@ export const Validator = memo(() => {
   // re-validate when either operation or translations have changed
   useEffect(() => {
     debouncedValidate()
-  }, [operation, translations, debouncedValidate])
+  }, [operation, metadata, translations, debouncedValidate])
 
   return null
 })

@@ -42,6 +42,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
   const [operatorsLocked, setOperatorsLocked] = useAtom(
     editorAtoms.operatorsLocked,
   )
+  const globalErrors = useAtomValue(editorAtoms.visibleGlobalErrors)
 
   useEffect(() => {
     if (info.difficulty === undefined) {
@@ -374,6 +375,19 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
             })
           }}
         />
+        {globalErrors &&
+          globalErrors.filter((e) => e.path.join('.') === 'metadata.tags')
+            .length > 0 && (
+            <Callout intent="danger" icon={null} className="mt-1 p-2 text-xs">
+              {globalErrors
+                .filter((e) => e.path.join('.') === 'metadata.tags')
+                .map(({ path, message }) => (
+                  <p key={path.join()}>
+                    {getLabeledPath(path)}: {message}
+                  </p>
+                ))}
+            </Callout>
+          )}
       </FormGroup>
       <FormGroup
         contentClassName="grow"

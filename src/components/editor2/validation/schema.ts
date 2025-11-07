@@ -413,8 +413,31 @@ export function getLabel(path: PropertyKey[]) {
   if (isString(labelOrObject)) {
     return labelOrObject
   }
-  if ('_item' in labelOrObject) {
-    return labelOrObject._item as string
+  // 兼容：当路径不在 CopilotOperation 标签映射中时，labelOrObject 可能为 undefined
+  if (labelOrObject && typeof labelOrObject === 'object') {
+    // eslint-disable-next-line no-prototype-builtins
+    if ((labelOrObject as any).hasOwnProperty('_item')) {
+      return (labelOrObject as any)._item as string
+    }
+  }
+  // 额外映射：非 Operation 路径（如元数据）
+  const parts = path.filter(isString)
+  if (parts[0] === 'metadata') {
+    const key = parts[1]
+    switch (key) {
+      case 'tags':
+        return i18n.components.editor2.InfoEditor.tags
+      case 'repostAuthor':
+        return i18n.components.editor2.InfoEditor.repost_author
+      case 'repostPlatform':
+        return i18n.components.editor2.InfoEditor.repost_platform
+      case 'repostUrl':
+        return i18n.components.editor2.InfoEditor.repost_link
+      case 'sourceType':
+        return i18n.components.editor2.InfoEditor.source
+      case 'visibility':
+        return i18n.components.editor2.InfoEditor.visibility
+    }
   }
   return undefined
 }
