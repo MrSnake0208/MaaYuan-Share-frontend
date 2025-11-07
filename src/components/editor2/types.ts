@@ -28,6 +28,10 @@ export type EditorOperationBase = Simplify<
     minimumRequired: string
     doc: PartialDeep<CopilotDocV1.Doc>
     simingActionDelays?: SimingActionDelays
+    /**
+     * 活动关卡可指定的司命识别关键字（会在导出 Siming 配置时使用）
+     */
+    levelRecognitionName?: string
   }
 >
 

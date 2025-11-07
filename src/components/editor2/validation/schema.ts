@@ -18,6 +18,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 const version = z.number().optional()
 const stage_name = z.string().optional()
 const difficulty = z.enum(OpDifficulty).optional()
+const level_recognition_name = z.string().optional()
 const minimum_required = z
   .string()
   .regex(
@@ -255,6 +256,7 @@ export const operationLooseSchema = z.object({
   stage_name,
   difficulty,
   minimum_required,
+  level_recognition_name,
   level_meta,
   doc: doc.default({}),
   opers: z.array(operator).default([]),
@@ -268,6 +270,8 @@ const KNOWN_OPERATION_KEYS = new Set([
   'stage_name',
   'stageName',
   'difficulty',
+  'level_recognition_name',
+  'levelRecognitionName',
   'minimum_required',
   'minimumRequired',
   'level_meta',
@@ -334,6 +338,10 @@ function normalizeOperationLooseInput(raw: unknown): unknown {
     normalized['level_meta'] = camelLevelMeta
     delete normalized['levelMeta']
   }
+  if ('levelRecognitionName' in normalized) {
+    normalized['level_recognition_name'] = normalized['levelRecognitionName']
+    delete normalized['levelRecognitionName']
+  }
   const actions = normalized['actions']
 
   if (Array.isArray(actions)) {
@@ -383,6 +391,7 @@ export const operationSchema = z.object({
   stage_name: stage_name.unwrap(),
   difficulty,
   minimum_required,
+  level_recognition_name,
   level_meta,
   doc: docStrict,
   // 将 editorv2 中的“密探”(opers)设为必填：至少选择 1 名密探

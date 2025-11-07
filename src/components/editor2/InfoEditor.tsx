@@ -255,6 +255,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
         <LevelSelect
           difficulty={info.difficulty ?? OpDifficulty.UNKNOWN}
           value={info.stageName}
+          activityLevelRecognitionName={info.levelRecognitionName ?? ''}
           fallbackLevel={fallbackLevel}
           defaultCategory={defaultCategory}
           onChange={(stageId, level) => {
@@ -306,6 +307,18 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
               return {
                 action: 'set-difficulty',
                 desc: i18n.actions.editor2.set_difficulty,
+                squashBy: '',
+              }
+            })
+          }}
+          onActivityLevelRecognitionNameChange={(nextValue) => {
+            edit(() => {
+              setInfo((prev) => {
+                prev.levelRecognitionName = nextValue
+              })
+              return {
+                action: 'set-activity-recognition',
+                desc: i18n.actions.editor2.set_level,
                 squashBy: '',
               }
             })

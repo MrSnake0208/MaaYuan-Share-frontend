@@ -1,4 +1,4 @@
-import { Classes, MenuItem } from '@blueprintjs/core'
+import { Classes, InputGroup, MenuItem } from '@blueprintjs/core'
 import { getCreateNewItem } from '@blueprintjs/select'
 
 import clsx from 'clsx'
@@ -49,6 +49,8 @@ interface LevelSelectProps {
   portalContainer?: HTMLElement | undefined | null
   // 额外的右侧内容（如第三层分类输入），将渲染在同一行的最右侧
   rightExtra?: ReactNode
+  activityLevelRecognitionName?: string
+  onActivityLevelRecognitionNameChange?: (value: string) => void
 }
 
 export const LevelSelect: FC<LevelSelectProps> = ({
@@ -64,6 +66,8 @@ export const LevelSelect: FC<LevelSelectProps> = ({
   defaultCategory,
   portalContainer,
   rightExtra,
+  activityLevelRecognitionName,
+  onActivityLevelRecognitionNameChange,
   ...inputProps
 }) => {
   const t = useTranslation()
@@ -519,20 +523,46 @@ export const LevelSelect: FC<LevelSelectProps> = ({
           </div>
         )}
       </div>
-      {/* 当 cat_one 为“活动”时，显示难度选择 */}
-      {selectedLevel?.catOne === '活动' && (
-        <div className="flex items-baseline">
-          <span className="mr-2 text-xs font-medium text-slate-500">
-            {i18n.components.editor.OperationEditor.stage_difficulty}
-          </span>
-          <DifficultyPicker
-            stageName={value}
-            value={difficulty}
-            onChange={(val, programmatically) =>
-              onDifficultyChange?.(val, programmatically)
-            }
-          />
-        </div>
+      {/* 当 cat_one 为“活动”时，显示难度选择与识别名输入 */}
+      {selectedLevel?.catOne === '活动' &&
+        onActivityLevelRecognitionNameChange && (
+        <>
+          <div className="flex items-baseline">
+            <span className="mr-2 text-xs font-medium text-slate-500">
+              {i18n.components.editor.OperationEditor.stage_difficulty}
+            </span>
+            <DifficultyPicker
+              stageName={value}
+              value={difficulty}
+              forceEnable
+              onChange={(val, programmatically) =>
+                onDifficultyChange?.(val, programmatically)
+              }
+            />
+          </div>
+          <div className="mt-2 flex flex-col gap-1">
+            <span className="text-xs font-medium text-slate-500">
+              {t.components.editor2.LevelSelect.activity_level_recognition_label}
+            </span>
+            <InputGroup
+              large
+              placeholder={
+                t.components.editor2.LevelSelect
+                  .activity_level_recognition_placeholder
+              }
+              value={activityLevelRecognitionName ?? ''}
+              onChange={(e) =>
+                onActivityLevelRecognitionNameChange?.(e.target.value)
+              }
+            />
+            <span className="text-[10px] text-slate-500">
+              {
+                t.components.editor2.LevelSelect
+                  .activity_level_recognition_helper
+              }
+            </span>
+          </div>
+        </>
       )}
       {fetchError && (
         <span className="text-xs opacity-50">

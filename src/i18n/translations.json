@@ -646,6 +646,18 @@
         "load_error": {
           "cn": "加载关卡失败：{{error}}",
           "zh_tw": "加載關卡失敗：{{error}}"
+        },
+        "activity_level_recognition_label": {
+          "cn": "活动 OCR 识别关键字",
+          "zh_tw": "活動 OCR 識別關鍵字"
+        },
+        "activity_level_recognition_placeholder": {
+          "cn": "请输入要在活动界面中搜索的文本",
+          "zh_tw": "請輸入要在活動介面中搜索的文本"
+        },
+        "activity_level_recognition_helper": {
+          "cn": "用于生成“抄作业找到关卡”节点的 OCR 匹配文本",
+          "zh_tw": "用於生成「抄作業找到關卡」節點的 OCR 匹配文本"
         }
       },
       "DifficultyPicker": {
@@ -672,6 +684,10 @@
         "no_hard_mode": {
           "cn": "该关卡没有突袭难度，无需选择",
           "zh_tw": "該關卡沒有突襲難度，無需選擇"
+        },
+        "manual_hint": {
+          "cn": "活动关卡可手动指定难度",
+          "zh_tw": "活動關卡可手動指定難度"
         }
       },
       "Settings": {

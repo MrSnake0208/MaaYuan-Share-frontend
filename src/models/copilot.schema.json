@@ -11,6 +11,10 @@
     "doc": {
       "$ref": "#/definitions/doc"
     },
+    "level_recognition_name": {
+      "type": "string",
+      "description": "Custom Siming recognition keyword for event stages."
+    },
     "opers": {
       "type": "array",
       "description": "Operator list.",
