@@ -834,6 +834,19 @@ export async function toSimingOperationRemote(
     .map((value) => (typeof value === 'string' ? value.trim() : ''))
     .find((value) => value.length > 0)
     ?? ''
+  const editorActivityDifficultyOverride =
+    (editorOperation as any).activityDifficultyOverride ??
+    (editorOperation as any).activity_difficulty_override
+  const baseActivityDifficultyOverride =
+    (baseOperation as any).activity_difficulty_override ??
+    (baseOperation as any).activityDifficultyOverride
+  const normalizedActivityDifficultyOverride = [
+    editorActivityDifficultyOverride,
+    baseActivityDifficultyOverride,
+  ]
+    .map((value) => (typeof value === 'string' ? value.trim() : ''))
+    .find((value) => value.length > 0)
+    ?? ''
   const payload: any = {
     // 按新规则：优先使用 catTwo；若无则回退 stageName / 占位
     level_name: (opts?.level?.catTwo ?? stageName) || 'generated_config',
@@ -866,7 +879,35 @@ export async function toSimingOperationRemote(
     if (normalizedLevelRecognition) {
       payload.level_recognition_name = normalizedLevelRecognition
     }
-    // 难度映射：优先“普通”，否则“困难”，未知则留空
+    if (normalizedActivityDifficultyOverride) {
+      payload.difficulty = normalizedActivityDifficultyOverride
+    } else {
+      // 难度映射：优先“普通”，否则“困难”，未知则留空
+      const diff =
+        (editorOperation as any).difficulty ?? (baseOperation as any).difficulty
+      if (typeof diff === 'number') {
+        const hasRegular =
+          (diff & OpDifficultyBitFlag.REGULAR) === OpDifficultyBitFlag.REGULAR
+        const hasHard =
+          (diff & OpDifficultyBitFlag.HARD) === OpDifficultyBitFlag.HARD
+        if (hasRegular) {
+          payload.difficulty = '普通'
+        } else if (hasHard) {
+          payload.difficulty = '困难'
+        }
+      } else if (diff === OpDifficulty.REGULAR) {
+        payload.difficulty = '普通'
+      } else if (diff === OpDifficulty.HARD) {
+        payload.difficulty = '困难'
+      }
+    }
+  } else if (
+    opts?.level?.catOne === '兰台' ||
+    opts?.level?.catOne === '家具' ||
+    opts?.level?.catOne === '其他'
+  ) {
+    // 映射：兰台/家具/其他 -> level_type=其他，且需要难度
+    payload.level_type = '其他'
     const diff =
       (editorOperation as any).difficulty ?? (baseOperation as any).difficulty
     if (typeof diff === 'number') {
@@ -884,14 +925,11 @@ export async function toSimingOperationRemote(
     } else if (diff === OpDifficulty.HARD) {
       payload.difficulty = '困难'
     }
-  } else if (
-    opts?.level?.catOne === '兰台' ||
-    opts?.level?.catOne === '地宫' ||
-    opts?.level?.catOne === '家具' ||
-    opts?.level?.catOne === '其他'
-  ) {
-    // 映射：兰台/地宫/家具/其他 -> level_type=其他，且需要难度
+  } else if (opts?.level?.catOne === '地宫') {
     payload.level_type = '其他'
+    if (normalizedLevelRecognition) {
+      payload.level_recognition_name = normalizedLevelRecognition
+    }
     const diff =
       (editorOperation as any).difficulty ?? (baseOperation as any).difficulty
     if (typeof diff === 'number') {
@@ -935,8 +973,9 @@ export async function toSimingOperationRemote(
       if (!payload.level_recognition_name && normalizedLevelRecognition) {
         payload.level_recognition_name = normalizedLevelRecognition
       }
-      // 识别名优先已由 catTwo 设置，兜底时不再强制从关卡名推断
-      if (!payload.difficulty) {
+      if (normalizedActivityDifficultyOverride) {
+        payload.difficulty = normalizedActivityDifficultyOverride
+      } else if (!payload.difficulty) {
         if (raw.includes('普通')) payload.difficulty = '普通'
         else if (raw.includes('困难') || raw.includes('高难'))
           payload.difficulty = '困难'

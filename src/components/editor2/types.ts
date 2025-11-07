@@ -32,6 +32,10 @@ export type EditorOperationBase = Simplify<
      * 活动关卡可指定的司命识别关键字（会在导出 Siming 配置时使用）
      */
     levelRecognitionName?: string
+    /**
+     * 活动关卡自定义的难度描述，优先用于导出司命配置
+     */
+    activityDifficultyOverride?: string
   }
 >
 

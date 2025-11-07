@@ -15,6 +15,10 @@
       "type": "string",
       "description": "Custom Siming recognition keyword for event stages."
     },
+    "activity_difficulty_override": {
+      "type": "string",
+      "description": "Custom difficulty label for event stages when exporting Siming configuration."
+    },
     "opers": {
       "type": "array",
       "description": "Operator list.",

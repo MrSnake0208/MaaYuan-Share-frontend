@@ -19,6 +19,7 @@ const version = z.number().optional()
 const stage_name = z.string().optional()
 const difficulty = z.enum(OpDifficulty).optional()
 const level_recognition_name = z.string().optional()
+const activity_difficulty_override = z.string().optional()
 const minimum_required = z
   .string()
   .regex(
@@ -257,6 +258,7 @@ export const operationLooseSchema = z.object({
   difficulty,
   minimum_required,
   level_recognition_name,
+  activity_difficulty_override,
   level_meta,
   doc: doc.default({}),
   opers: z.array(operator).default([]),
@@ -272,6 +274,8 @@ const KNOWN_OPERATION_KEYS = new Set([
   'difficulty',
   'level_recognition_name',
   'levelRecognitionName',
+  'activity_difficulty_override',
+  'activityDifficultyOverride',
   'minimum_required',
   'minimumRequired',
   'level_meta',
@@ -342,6 +346,11 @@ function normalizeOperationLooseInput(raw: unknown): unknown {
     normalized['level_recognition_name'] = normalized['levelRecognitionName']
     delete normalized['levelRecognitionName']
   }
+  if ('activityDifficultyOverride' in normalized) {
+    normalized['activity_difficulty_override'] =
+      normalized['activityDifficultyOverride']
+    delete normalized['activityDifficultyOverride']
+  }
   const actions = normalized['actions']
 
   if (Array.isArray(actions)) {
@@ -392,6 +401,7 @@ export const operationSchema = z.object({
   difficulty,
   minimum_required,
   level_recognition_name,
+  activity_difficulty_override,
   level_meta,
   doc: docStrict,
   // 将 editorv2 中的“密探”(opers)设为必填：至少选择 1 名密探

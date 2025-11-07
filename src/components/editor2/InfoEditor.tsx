@@ -256,6 +256,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
           difficulty={info.difficulty ?? OpDifficulty.UNKNOWN}
           value={info.stageName}
           activityLevelRecognitionName={info.levelRecognitionName ?? ''}
+          activityDifficultyOverride={info.activityDifficultyOverride ?? ''}
           fallbackLevel={fallbackLevel}
           defaultCategory={defaultCategory}
           onChange={(stageId, level) => {
@@ -347,6 +348,18 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
               onBlur={() => edit()}
             />
           }
+          onActivityDifficultyOverrideChange={(nextValue) => {
+            edit(() => {
+              setInfo((prev) => {
+                prev.activityDifficultyOverride = nextValue
+              })
+              return {
+                action: 'set-activity-difficulty',
+                desc: i18n.actions.editor2.set_level,
+                squashBy: '',
+              }
+            })
+          }}
         />
         {/* 分类回显：catOne / catTwo / catThree */}
         {info.levelMeta && (

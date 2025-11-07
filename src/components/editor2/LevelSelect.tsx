@@ -51,6 +51,8 @@ interface LevelSelectProps {
   rightExtra?: ReactNode
   activityLevelRecognitionName?: string
   onActivityLevelRecognitionNameChange?: (value: string) => void
+  activityDifficultyOverride?: string
+  onActivityDifficultyOverrideChange?: (value: string) => void
 }
 
 export const LevelSelect: FC<LevelSelectProps> = ({
@@ -68,6 +70,8 @@ export const LevelSelect: FC<LevelSelectProps> = ({
   rightExtra,
   activityLevelRecognitionName,
   onActivityLevelRecognitionNameChange,
+  activityDifficultyOverride,
+  onActivityDifficultyOverrideChange,
   ...inputProps
 }) => {
   const t = useTranslation()
@@ -523,47 +527,84 @@ export const LevelSelect: FC<LevelSelectProps> = ({
           </div>
         )}
       </div>
-      {/* 当 cat_one 为“活动”时，显示难度选择与识别名输入 */}
-      {selectedLevel?.catOne === '活动' &&
-        onActivityLevelRecognitionNameChange && (
-        <>
-          <div className="flex items-baseline">
-            <span className="mr-2 text-xs font-medium text-slate-500">
-              {i18n.components.editor.OperationEditor.stage_difficulty}
-            </span>
-            <DifficultyPicker
-              stageName={value}
-              value={difficulty}
-              forceEnable
-              onChange={(val, programmatically) =>
-                onDifficultyChange?.(val, programmatically)
-              }
-            />
-          </div>
-          <div className="mt-2 flex flex-col gap-1">
-            <span className="text-xs font-medium text-slate-500">
-              {t.components.editor2.LevelSelect.activity_level_recognition_label}
-            </span>
-            <InputGroup
-              large
-              placeholder={
-                t.components.editor2.LevelSelect
-                  .activity_level_recognition_placeholder
-              }
-              value={activityLevelRecognitionName ?? ''}
-              onChange={(e) =>
-                onActivityLevelRecognitionNameChange?.(e.target.value)
-              }
-            />
-            <span className="text-[10px] text-slate-500">
-              {
-                t.components.editor2.LevelSelect
-                  .activity_level_recognition_helper
-              }
-            </span>
-          </div>
-        </>
-      )}
+      {(() => {
+        const isActivityLevel = selectedLevel?.catOne === '活动'
+        const isDungeonLevel = selectedLevel?.catOne === '地宫'
+
+        return (
+          <>
+            {isActivityLevel && (
+              <div className="flex items-baseline">
+                <span className="mr-2 text-xs font-medium text-slate-500">
+                  {i18n.components.editor.OperationEditor.stage_difficulty}
+                </span>
+                <DifficultyPicker
+                  stageName={value}
+                  value={difficulty}
+                  forceEnable
+                  onChange={(val, programmatically) =>
+                    onDifficultyChange?.(val, programmatically)
+                  }
+                />
+              </div>
+            )}
+
+            {isActivityLevel && onActivityDifficultyOverrideChange && (
+              <div className="mt-2 flex flex-col gap-1">
+                <span className="text-xs font-medium text-slate-500">
+                  {t.components.editor2.LevelSelect.activity_difficulty_label}
+                </span>
+                <InputGroup
+                  large
+                  placeholder={
+                    t.components.editor2.LevelSelect
+                      .activity_difficulty_placeholder
+                  }
+                  value={activityDifficultyOverride ?? ''}
+                  onChange={(e) =>
+                    onActivityDifficultyOverrideChange?.(e.target.value)
+                  }
+                />
+                <span className="text-[10px] text-slate-500">
+                  {
+                    t.components.editor2.LevelSelect
+                      .activity_difficulty_helper
+                  }
+                </span>
+              </div>
+            )}
+
+            {(isActivityLevel || isDungeonLevel) &&
+              onActivityLevelRecognitionNameChange && (
+                <div className="mt-2 flex flex-col gap-1">
+                  <span className="text-xs font-medium text-slate-500">
+                    {
+                      t.components.editor2.LevelSelect
+                        .activity_level_recognition_label
+                    }
+                  </span>
+                  <InputGroup
+                    large
+                    placeholder={
+                      t.components.editor2.LevelSelect
+                        .activity_level_recognition_placeholder
+                    }
+                    value={activityLevelRecognitionName ?? ''}
+                    onChange={(e) =>
+                      onActivityLevelRecognitionNameChange?.(e.target.value)
+                    }
+                  />
+                  <span className="text-[10px] text-slate-500">
+                    {
+                      t.components.editor2.LevelSelect
+                        .activity_level_recognition_helper
+                    }
+                  </span>
+                </div>
+              )}
+          </>
+        )
+      })()}
       {fetchError && (
         <span className="text-xs opacity-50">
           {t.components.editor2.LevelSelect.load_error({

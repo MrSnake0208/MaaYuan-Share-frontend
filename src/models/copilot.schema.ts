@@ -23,6 +23,10 @@ export namespace CopilotDocV1 {
      */
     levelRecognitionName?: string
     /**
+     * 活动关卡自定义难度描述，优先用于导出 Siming 配置
+     */
+    activityDifficultyOverride?: string
+    /**
      * 必填。除危机合约外，均为关卡中文名
      */
     stageName: string
