@@ -670,6 +670,10 @@
         "activity_difficulty_helper": {
           "cn": "将直接传给司命 API 的 difficulty 字段，用于应对自定义难度命名",
           "zh_tw": "會直接傳給司命 API 的 difficulty 欄位，用於應對自定義難度命名"
+        },
+        "activity_recognition_required": {
+          "cn": "填写活动难度文本时必须同时填写 OCR 识别关键字",
+          "zh_tw": "輸入活動難度文本時必須同時填寫 OCR 識別關鍵字"
         }
       },
       "DifficultyPicker": {

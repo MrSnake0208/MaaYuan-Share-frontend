@@ -395,20 +395,45 @@ export function parseOperationLoose(raw: unknown): CopilotOperationLoose {
 }
 
 export type CopilotOperation = z.infer<typeof operationSchema>
-export const operationSchema = z.object({
-  version,
-  stage_name: stage_name.unwrap(),
-  difficulty,
-  minimum_required,
-  level_recognition_name,
-  activity_difficulty_override,
-  level_meta,
-  doc: docStrict,
-  // 将 editorv2 中的“密探”(opers)设为必填：至少选择 1 名密探
-  opers: z.array(operator).min(1).default([]),
-  groups: z.array(groupStrict).default([]),
-  actions: z.array(actionStrict).default([]),
-})
+export const operationSchema = z
+  .object({
+    version,
+    stage_name: stage_name.unwrap(),
+    difficulty,
+    minimum_required,
+    level_recognition_name,
+    activity_difficulty_override,
+    level_meta,
+    doc: docStrict,
+    // 将 editorv2 中的“密探”(opers)设为必填：至少选择 1 名密探
+    opers: z.array(operator).min(1).default([]),
+    groups: z.array(groupStrict).default([]),
+    actions: z.array(actionStrict).default([]),
+  })
+  .superRefine((data, ctx) => {
+    const activityCategory = data.level_meta?.cat_one ?? ''
+    const isActivity =
+      typeof activityCategory === 'string' && activityCategory.includes('活动')
+    const activityDiff =
+      typeof data.activity_difficulty_override === 'string'
+        ? data.activity_difficulty_override.trim()
+        : ''
+    if (!isActivity || !activityDiff.length) {
+      return
+    }
+    const recognition =
+      typeof data.level_recognition_name === 'string'
+        ? data.level_recognition_name.trim()
+        : ''
+    if (!recognition.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          i18n.components.editor2.LevelSelect.activity_recognition_required,
+        path: ['level_recognition_name'],
+      })
+    }
+  })
 
 type Labeled<T> = T extends Primitive
   ? string
