@@ -41,6 +41,7 @@ import {
   editorSaveAtom,
 } from './useAutoSave'
 import { getLabeledPath, parseOperationLoose } from './validation/schema'
+import { EditorPreviewTrigger } from './PreviewDrawer'
 
 interface EditorToolbarProps extends SubmitButtonProps {
   subtitle?: string
@@ -83,6 +84,7 @@ export const EditorToolbar: FC<EditorToolbarProps> = ({
         <ErrorButton {...buttonProps} />
         <ImportOperationButton {...buttonProps} />
         <SourceEditorButton {...buttonProps} />
+        <EditorPreviewTrigger buttonProps={buttonProps} />
         <span className="grow max-w-4" />
         <SubmitButton submitAction={submitAction} onSubmit={onSubmit} />
       </div>

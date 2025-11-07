@@ -615,7 +615,7 @@ const OperatorCard: FC<{
   )
 }
 
-function OperationViewerInner({
+export function OperationViewerInner({
   levels,
   operation,
   handleRating,
