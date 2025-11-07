@@ -425,6 +425,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
             </Tag>
           )}
         </div>
+        <FieldError path="opers" />
       </FormGroup>
       {/* 隐藏适用难度选择，保留字段以兼容旧数据 */}
       <input
