@@ -847,6 +847,19 @@ export async function toSimingOperationRemote(
     .map((value) => (typeof value === 'string' ? value.trim() : ''))
     .find((value) => value.length > 0)
     ?? ''
+  const fallbackActivityRecognitionName =
+    normalizedLevelRecognition ||
+    (opts?.level?.catTwo?.trim() ?? '') ||
+    (typeof stageName === 'string' ? stageName.trim() : '') ||
+    '活动关卡'
+  const ensureActivityRecognitionName = () => {
+    const trimmed =
+      typeof payload.level_recognition_name === 'string'
+        ? payload.level_recognition_name.trim()
+        : ''
+    payload.level_recognition_name =
+      trimmed.length > 0 ? trimmed : fallbackActivityRecognitionName
+  }
   const payload: any = {
     // 按新规则：优先使用 catTwo；若无则回退 stageName / 占位
     level_name: (opts?.level?.catTwo ?? stageName) || 'generated_config',
@@ -875,30 +888,15 @@ export async function toSimingOperationRemote(
   } else if (opts?.level?.catOne === '白鹄') {
     payload.level_type = '白鹄'
   } else if (opts?.level?.catOne === '活动') {
-    payload.level_type = '活动有分级'
-    if (normalizedLevelRecognition) {
-      payload.level_recognition_name = normalizedLevelRecognition
-    }
     if (normalizedActivityDifficultyOverride) {
+      payload.level_type = '活动有分级'
       payload.difficulty = normalizedActivityDifficultyOverride
+      ensureActivityRecognitionName()
     } else {
-      // 难度映射：优先“普通”，否则“困难”，未知则留空
-      const diff =
-        (editorOperation as any).difficulty ?? (baseOperation as any).difficulty
-      if (typeof diff === 'number') {
-        const hasRegular =
-          (diff & OpDifficultyBitFlag.REGULAR) === OpDifficultyBitFlag.REGULAR
-        const hasHard =
-          (diff & OpDifficultyBitFlag.HARD) === OpDifficultyBitFlag.HARD
-        if (hasRegular) {
-          payload.difficulty = '普通'
-        } else if (hasHard) {
-          payload.difficulty = '困难'
-        }
-      } else if (diff === OpDifficulty.REGULAR) {
-        payload.difficulty = '普通'
-      } else if (diff === OpDifficulty.HARD) {
-        payload.difficulty = '困难'
+      payload.level_type = '活动'
+      payload.difficulty = ''
+      if (normalizedLevelRecognition) {
+        payload.level_recognition_name = normalizedLevelRecognition
       }
     }
   } else if (
@@ -969,16 +967,15 @@ export async function toSimingOperationRemote(
     } else if (raw.includes('白鹄')) {
       payload.level_type = '白鹄'
     } else if (raw.includes('活动')) {
-      payload.level_type = '活动有分级'
-      if (!payload.level_recognition_name && normalizedLevelRecognition) {
-        payload.level_recognition_name = normalizedLevelRecognition
-      }
       if (normalizedActivityDifficultyOverride) {
+        payload.level_type = '活动有分级'
         payload.difficulty = normalizedActivityDifficultyOverride
-      } else if (!payload.difficulty) {
-        if (raw.includes('普通')) payload.difficulty = '普通'
-        else if (raw.includes('困难') || raw.includes('高难'))
-          payload.difficulty = '困难'
+        ensureActivityRecognitionName()
+      } else {
+        payload.level_type = '活动'
+        if (normalizedLevelRecognition) {
+          payload.level_recognition_name = normalizedLevelRecognition
+        }
       }
     } else {
       // 其他：识别名保持 catTwo 或留空

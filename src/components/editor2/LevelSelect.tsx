@@ -27,7 +27,6 @@ import { Level, OpDifficulty } from '../../models/operation'
 import { formatError } from '../../utils/error'
 import { useDebouncedQuery } from '../../utils/useDebouncedQuery'
 import { Suggest } from '../Suggest'
-import { DifficultyPicker } from './DifficultyPicker'
 
 interface LevelSelectProps {
   className?: string
@@ -57,13 +56,11 @@ interface LevelSelectProps {
 
 export const LevelSelect: FC<LevelSelectProps> = ({
   className,
-  difficulty,
   inputRef,
   disabled,
   value,
   fallbackLevel,
   onChange,
-  onDifficultyChange,
   onFilterChange,
   defaultCategory,
   portalContainer,
@@ -531,24 +528,12 @@ export const LevelSelect: FC<LevelSelectProps> = ({
         const isActivityLevel = selectedLevel?.catOne === '活动'
         const isDungeonLevel = selectedLevel?.catOne === '地宫'
 
+        if (!isActivityLevel && !isDungeonLevel) {
+          return null
+        }
+
         return (
           <>
-            {isActivityLevel && (
-              <div className="flex items-baseline">
-                <span className="mr-2 text-xs font-medium text-slate-500">
-                  {i18n.components.editor.OperationEditor.stage_difficulty}
-                </span>
-                <DifficultyPicker
-                  stageName={value}
-                  value={difficulty}
-                  forceEnable
-                  onChange={(val, programmatically) =>
-                    onDifficultyChange?.(val, programmatically)
-                  }
-                />
-              </div>
-            )}
-
             {isActivityLevel && onActivityDifficultyOverrideChange && (
               <div className="mt-2 flex flex-col gap-1">
                 <span className="text-xs font-medium text-slate-500">
@@ -574,34 +559,33 @@ export const LevelSelect: FC<LevelSelectProps> = ({
               </div>
             )}
 
-            {(isActivityLevel || isDungeonLevel) &&
-              onActivityLevelRecognitionNameChange && (
-                <div className="mt-2 flex flex-col gap-1">
-                  <span className="text-xs font-medium text-slate-500">
-                    {
-                      t.components.editor2.LevelSelect
-                        .activity_level_recognition_label
-                    }
-                  </span>
-                  <InputGroup
-                    large
-                    placeholder={
-                      t.components.editor2.LevelSelect
-                        .activity_level_recognition_placeholder
-                    }
-                    value={activityLevelRecognitionName ?? ''}
-                    onChange={(e) =>
-                      onActivityLevelRecognitionNameChange?.(e.target.value)
-                    }
-                  />
-                  <span className="text-[10px] text-slate-500">
-                    {
-                      t.components.editor2.LevelSelect
-                        .activity_level_recognition_helper
-                    }
-                  </span>
-                </div>
-              )}
+            {onActivityLevelRecognitionNameChange && (
+              <div className="mt-2 flex flex-col gap-1">
+                <span className="text-xs font-medium text-slate-500">
+                  {
+                    t.components.editor2.LevelSelect
+                      .activity_level_recognition_label
+                  }
+                </span>
+                <InputGroup
+                  large
+                  placeholder={
+                    t.components.editor2.LevelSelect
+                      .activity_level_recognition_placeholder
+                  }
+                  value={activityLevelRecognitionName ?? ''}
+                  onChange={(e) =>
+                    onActivityLevelRecognitionNameChange?.(e.target.value)
+                  }
+                />
+                <span className="text-[10px] text-slate-500">
+                  {
+                    t.components.editor2.LevelSelect
+                      .activity_level_recognition_helper
+                  }
+                </span>
+              </div>
+            )}
           </>
         )
       })()}
