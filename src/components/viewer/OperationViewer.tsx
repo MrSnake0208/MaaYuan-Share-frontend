@@ -830,7 +830,7 @@ export function OperationViewerInner({
 function OperationViewerInnerDetails({ operation }: { operation: Operation }) {
   const t = useTranslation()
   const [showOperators, setShowOperators] = useState(true)
-  const [showActions, setShowActions] = useState(true)
+  const [showActions, setShowActions] = useState(false)
   // 眼睛开关：控制是否显示星石/辅星，默认关闭（不显示）
   const [showExtras, setShowExtras] = useState(false)
 
