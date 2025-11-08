@@ -5,13 +5,13 @@ import clsx from 'clsx'
 import Fuse from 'fuse.js'
 import {
   FC,
+  ReactNode,
   Ref,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  ReactNode,
 } from 'react'
 
 import { useLevels } from '../../apis/level'
@@ -39,10 +39,7 @@ interface LevelSelectProps {
   onChange: (stageId: string, level?: Level) => void
   onDifficultyChange?: (value: OpDifficulty, programmatically: boolean) => void
   // 当选择了“游戏”或“分类”时，上抛一个用于筛选的关键字
-  onFilterChange?: (
-    keyword: string,
-    meta?: { catOne?: string },
-  ) => void
+  onFilterChange?: (keyword: string, meta?: { catOne?: string }) => void
   defaultCategory?: string
   // 自定义 Portal 容器，确保下拉菜单渲染在 Overlay 容器内，避免被判定为“外部点击”
   portalContainer?: HTMLElement | undefined | null
@@ -232,9 +229,7 @@ export const LevelSelect: FC<LevelSelectProps> = ({
     const trimmedQuery = debouncedQuery.trim()
 
     if (trimmedQuery) {
-      const searchResults = fuse
-        .search(trimmedQuery)
-        .map((el) => el.item)
+      const searchResults = fuse.search(trimmedQuery).map((el) => el.item)
       const filteredResults = selectedCategory
         ? searchResults.filter(
             (level) => getLevelCategory(level) === selectedCategory,
@@ -550,12 +545,6 @@ export const LevelSelect: FC<LevelSelectProps> = ({
                     onActivityDifficultyOverrideChange?.(e.target.value)
                   }
                 />
-                <span className="text-[10px] text-slate-500">
-                  {
-                    t.components.editor2.LevelSelect
-                      .activity_difficulty_helper
-                  }
-                </span>
               </div>
             )}
 
@@ -578,12 +567,6 @@ export const LevelSelect: FC<LevelSelectProps> = ({
                     onActivityLevelRecognitionNameChange?.(e.target.value)
                   }
                 />
-                <span className="text-[10px] text-slate-500">
-                  {
-                    t.components.editor2.LevelSelect
-                      .activity_level_recognition_helper
-                  }
-                </span>
               </div>
             )}
           </>

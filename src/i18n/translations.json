@@ -604,15 +604,14 @@
           "cn": "原链接",
           "zh_tw": "原連結"
         },
-      "repost_link_placeholder": {
-        "cn": "请粘贴原帖链接",
-        "zh_tw": "請貼上原帖連結"
-      }
-      ,
-      "tags": {
-        "cn": "标签",
-        "zh_tw": "標籤"
-      }
+        "repost_link_placeholder": {
+          "cn": "请粘贴原帖链接",
+          "zh_tw": "請貼上原帖連結"
+        },
+        "tags": {
+          "cn": "标签",
+          "zh_tw": "標籤"
+        }
       },
       "LevelSelect": {
         "related_levels": {
@@ -652,28 +651,28 @@
           "zh_tw": "OCR 識別關鍵字"
         },
         "activity_level_recognition_placeholder": {
-          "cn": "请输入要在活动/地宫界面中搜索的文本",
-          "zh_tw": "請輸入要在活動/地宮介面中搜索的文本"
+          "cn": "请输入Maa在重开（自动赌）时应点击的关卡名称，只填画面上最容易识别到的部分即可，不需填写完整名称",
+          "zh_tw": "請輸入Maa在重開（自動賭）時應點擊的關卡名稱，只填畫面上最容易識別到的部分即可，不需填寫完整名稱"
         },
         "activity_level_recognition_helper": {
           "cn": "用于生成“抄作业找到关卡”节点的 OCR 匹配文本",
           "zh_tw": "用於生成「抄作業找到關卡」節點的 OCR 匹配文本"
         },
         "activity_difficulty_label": {
-          "cn": "活动难度文本",
-          "zh_tw": "活動難度文本"
+          "cn": "关卡难度",
+          "zh_tw": "關卡難度"
         },
         "activity_difficulty_placeholder": {
-          "cn": "请输入司命应点击的难度标签",
-          "zh_tw": "請輸入司命應點擊的難度標籤"
+          "cn": "请输入Maa在重开（自动赌）时应点击的难度标签，活动关卡无难度分级则留空",
+          "zh_tw": "請輸入Maa在重開（自動賭）時應點擊的難度標籤，活動關卡無難度分級則留空"
         },
         "activity_difficulty_helper": {
           "cn": "将直接传给司命 API 的 difficulty 字段，用于应对自定义难度命名",
           "zh_tw": "會直接傳給司命 API 的 difficulty 欄位，用於應對自定義難度命名"
         },
         "activity_recognition_required": {
-          "cn": "填写活动难度文本时必须同时填写 OCR 识别关键字",
-          "zh_tw": "輸入活動難度文本時必須同時填寫 OCR 識別關鍵字"
+          "cn": "填写关卡难度时必须同时填写 OCR 识别关键字",
+          "zh_tw": "輸入關卡難度時必須同時填寫 OCR 識別關鍵字"
         }
       },
       "DifficultyPicker": {
