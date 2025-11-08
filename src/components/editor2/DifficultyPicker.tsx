@@ -13,6 +13,10 @@ interface DifficultyPickerProps {
   selectRef?: Ref<HTMLInputElement>
   value?: OpDifficulty
   onChange: (value: OpDifficulty, programmatically: boolean) => void
+  /**
+   * 当需要手动指定难度（例如活动关卡）但数据中不存在突袭信息时，强制允许选择。
+   */
+  forceEnable?: boolean
 }
 
 const DIFFICULTIES = [
@@ -42,11 +46,15 @@ export const DifficultyPicker: FC<DifficultyPickerProps> = ({
   stageName,
   value,
   onChange,
+  forceEnable = false,
 }) => {
   const t = useTranslation()
   const { data: levels } = useLevels()
 
   const isValidLevel = useMemo(() => {
+    if (forceEnable) {
+      return true
+    }
     if (!stageName) {
       return false
     }
@@ -55,17 +63,18 @@ export const DifficultyPicker: FC<DifficultyPickerProps> = ({
       return true
     }
     return hasHardMode(levels, stageName)
-  }, [levels, stageName])
+  }, [forceEnable, levels, stageName])
 
   useEffect(() => {
     if (
+      !forceEnable &&
       !isValidLevel &&
       value !== undefined &&
       value !== OpDifficulty.UNKNOWN
     ) {
       onChange(OpDifficulty.UNKNOWN, true)
     }
-  }, [isValidLevel, value, onChange])
+  }, [forceEnable, isValidLevel, onChange, value])
 
   return (
     <div className="flex gap-2 items-baseline">
@@ -91,9 +100,13 @@ export const DifficultyPicker: FC<DifficultyPickerProps> = ({
       <span className="text-xs opacity-50">
         {!stageName
           ? t.components.editor2.DifficultyPicker.select_level
-          : !isValidLevel
+          : !forceEnable && !isValidLevel
             ? t.components.editor2.DifficultyPicker.no_hard_mode
-            : null}
+            : forceEnable &&
+                stageName &&
+                !hasHardMode(levels, stageName)
+                ? t.components.editor2.DifficultyPicker.manual_hint
+                : null}
       </span>
     </div>
   )

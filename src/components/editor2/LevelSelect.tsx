@@ -1,17 +1,17 @@
-import { Classes, MenuItem } from '@blueprintjs/core'
+import { Classes, InputGroup, MenuItem } from '@blueprintjs/core'
 import { getCreateNewItem } from '@blueprintjs/select'
 
 import clsx from 'clsx'
 import Fuse from 'fuse.js'
 import {
   FC,
+  ReactNode,
   Ref,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  ReactNode,
 } from 'react'
 
 import { useLevels } from '../../apis/level'
@@ -27,7 +27,6 @@ import { Level, OpDifficulty } from '../../models/operation'
 import { formatError } from '../../utils/error'
 import { useDebouncedQuery } from '../../utils/useDebouncedQuery'
 import { Suggest } from '../Suggest'
-import { DifficultyPicker } from './DifficultyPicker'
 
 interface LevelSelectProps {
   className?: string
@@ -40,30 +39,33 @@ interface LevelSelectProps {
   onChange: (stageId: string, level?: Level) => void
   onDifficultyChange?: (value: OpDifficulty, programmatically: boolean) => void
   // 当选择了“游戏”或“分类”时，上抛一个用于筛选的关键字
-  onFilterChange?: (
-    keyword: string,
-    meta?: { catOne?: string },
-  ) => void
+  onFilterChange?: (keyword: string, meta?: { catOne?: string }) => void
   defaultCategory?: string
   // 自定义 Portal 容器，确保下拉菜单渲染在 Overlay 容器内，避免被判定为“外部点击”
   portalContainer?: HTMLElement | undefined | null
   // 额外的右侧内容（如第三层分类输入），将渲染在同一行的最右侧
   rightExtra?: ReactNode
+  activityLevelRecognitionName?: string
+  onActivityLevelRecognitionNameChange?: (value: string) => void
+  activityDifficultyOverride?: string
+  onActivityDifficultyOverrideChange?: (value: string) => void
 }
 
 export const LevelSelect: FC<LevelSelectProps> = ({
   className,
-  difficulty,
   inputRef,
   disabled,
   value,
   fallbackLevel,
   onChange,
-  onDifficultyChange,
   onFilterChange,
   defaultCategory,
   portalContainer,
   rightExtra,
+  activityLevelRecognitionName,
+  onActivityLevelRecognitionNameChange,
+  activityDifficultyOverride,
+  onActivityDifficultyOverrideChange,
   ...inputProps
 }) => {
   const t = useTranslation()
@@ -227,9 +229,7 @@ export const LevelSelect: FC<LevelSelectProps> = ({
     const trimmedQuery = debouncedQuery.trim()
 
     if (trimmedQuery) {
-      const searchResults = fuse
-        .search(trimmedQuery)
-        .map((el) => el.item)
+      const searchResults = fuse.search(trimmedQuery).map((el) => el.item)
       const filteredResults = selectedCategory
         ? searchResults.filter(
             (level) => getLevelCategory(level) === selectedCategory,
@@ -519,21 +519,59 @@ export const LevelSelect: FC<LevelSelectProps> = ({
           </div>
         )}
       </div>
-      {/* 当 cat_one 为“活动”时，显示难度选择 */}
-      {selectedLevel?.catOne === '活动' && (
-        <div className="flex items-baseline">
-          <span className="mr-2 text-xs font-medium text-slate-500">
-            {i18n.components.editor.OperationEditor.stage_difficulty}
-          </span>
-          <DifficultyPicker
-            stageName={value}
-            value={difficulty}
-            onChange={(val, programmatically) =>
-              onDifficultyChange?.(val, programmatically)
-            }
-          />
-        </div>
-      )}
+      {(() => {
+        const isActivityLevel = selectedLevel?.catOne === '活动'
+        const isDungeonLevel = selectedLevel?.catOne === '地宫'
+
+        if (!isActivityLevel && !isDungeonLevel) {
+          return null
+        }
+
+        return (
+          <>
+            {isActivityLevel && onActivityDifficultyOverrideChange && (
+              <div className="mt-2 flex flex-col gap-1">
+                <span className="text-xs font-medium text-slate-500">
+                  {t.components.editor2.LevelSelect.activity_difficulty_label}
+                </span>
+                <InputGroup
+                  large
+                  placeholder={
+                    t.components.editor2.LevelSelect
+                      .activity_difficulty_placeholder
+                  }
+                  value={activityDifficultyOverride ?? ''}
+                  onChange={(e) =>
+                    onActivityDifficultyOverrideChange?.(e.target.value)
+                  }
+                />
+              </div>
+            )}
+
+            {onActivityLevelRecognitionNameChange && (
+              <div className="mt-2 flex flex-col gap-1">
+                <span className="text-xs font-medium text-slate-500">
+                  {
+                    t.components.editor2.LevelSelect
+                      .activity_level_recognition_label
+                  }
+                </span>
+                <InputGroup
+                  large
+                  placeholder={
+                    t.components.editor2.LevelSelect
+                      .activity_level_recognition_placeholder
+                  }
+                  value={activityLevelRecognitionName ?? ''}
+                  onChange={(e) =>
+                    onActivityLevelRecognitionNameChange?.(e.target.value)
+                  }
+                />
+              </div>
+            )}
+          </>
+        )
+      })()}
       {fetchError && (
         <span className="text-xs opacity-50">
           {t.components.editor2.LevelSelect.load_error({

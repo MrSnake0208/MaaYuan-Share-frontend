@@ -824,12 +824,48 @@ export async function toSimingOperationRemote(
   )
   const stageName =
     (baseOperation as any).stageName ?? (baseOperation as any).stage_name ?? ''
+  const editorLevelRecognition =
+    (editorOperation as any).levelRecognitionName ??
+    (editorOperation as any).level_recognition_name
+  const baseLevelRecognition =
+    (baseOperation as any).level_recognition_name ??
+    (baseOperation as any).levelRecognitionName
+  const normalizedLevelRecognition = [editorLevelRecognition, baseLevelRecognition]
+    .map((value) => (typeof value === 'string' ? value.trim() : ''))
+    .find((value) => value.length > 0)
+    ?? ''
+  const editorActivityDifficultyOverride =
+    (editorOperation as any).activityDifficultyOverride ??
+    (editorOperation as any).activity_difficulty_override
+  const baseActivityDifficultyOverride =
+    (baseOperation as any).activity_difficulty_override ??
+    (baseOperation as any).activityDifficultyOverride
+  const normalizedActivityDifficultyOverride = [
+    editorActivityDifficultyOverride,
+    baseActivityDifficultyOverride,
+  ]
+    .map((value) => (typeof value === 'string' ? value.trim() : ''))
+    .find((value) => value.length > 0)
+    ?? ''
+  const fallbackActivityRecognitionName =
+    normalizedLevelRecognition ||
+    (opts?.level?.catTwo?.trim() ?? '') ||
+    (typeof stageName === 'string' ? stageName.trim() : '') ||
+    '活动关卡'
+  const ensureActivityRecognitionName = () => {
+    const trimmed =
+      typeof payload.level_recognition_name === 'string'
+        ? payload.level_recognition_name.trim()
+        : ''
+    payload.level_recognition_name =
+      trimmed.length > 0 ? trimmed : fallbackActivityRecognitionName
+  }
   const payload: any = {
     // 按新规则：优先使用 catTwo；若无则回退 stageName / 占位
     level_name: (opts?.level?.catTwo ?? stageName) || 'generated_config',
     level_type: '',
     // 按新规则：识别名同样使用 catTwo（若无则保留为空，稍后可能被兜底逻辑覆盖）
-    level_recognition_name: opts?.level?.catTwo ?? '',
+    level_recognition_name: normalizedLevelRecognition || opts?.level?.catTwo || '',
     difficulty: '',
     // 洞窟时由下方逻辑设置为 catThree
     cave_type: '',
@@ -846,19 +882,30 @@ export async function toSimingOperationRemote(
     payload.cave_type = opts.level.catThree ?? ''
   }
 
-  // 映射：level_recognition_name 统一使用 catTwo（若存在）
-  if (opts?.level?.catTwo) {
-    payload.level_recognition_name = opts.level.catTwo
-  }
-
   // 主线、白鹄、活动（有分级）、洞窟、其他类目自动映射 level_type
   if (opts?.level?.catOne === '主线') {
     payload.level_type = '主线'
   } else if (opts?.level?.catOne === '白鹄') {
     payload.level_type = '白鹄'
   } else if (opts?.level?.catOne === '活动') {
-    payload.level_type = '活动有分级'
-    // 难度映射：优先“普通”，否则“困难”，未知则留空
+    if (normalizedActivityDifficultyOverride) {
+      payload.level_type = '活动有分级'
+      payload.difficulty = normalizedActivityDifficultyOverride
+      ensureActivityRecognitionName()
+    } else {
+      payload.level_type = '活动'
+      payload.difficulty = ''
+      if (normalizedLevelRecognition) {
+        payload.level_recognition_name = normalizedLevelRecognition
+      }
+    }
+  } else if (
+    opts?.level?.catOne === '兰台' ||
+    opts?.level?.catOne === '家具' ||
+    opts?.level?.catOne === '其他'
+  ) {
+    // 映射：兰台/家具/其他 -> level_type=其他，且需要难度
+    payload.level_type = '其他'
     const diff =
       (editorOperation as any).difficulty ?? (baseOperation as any).difficulty
     if (typeof diff === 'number') {
@@ -876,14 +923,11 @@ export async function toSimingOperationRemote(
     } else if (diff === OpDifficulty.HARD) {
       payload.difficulty = '困难'
     }
-  } else if (
-    opts?.level?.catOne === '兰台' ||
-    opts?.level?.catOne === '地宫' ||
-    opts?.level?.catOne === '家具' ||
-    opts?.level?.catOne === '其他'
-  ) {
-    // 映射：兰台/地宫/家具/其他 -> level_type=其他，且需要难度
+  } else if (opts?.level?.catOne === '地宫') {
     payload.level_type = '其他'
+    if (normalizedLevelRecognition) {
+      payload.level_recognition_name = normalizedLevelRecognition
+    }
     const diff =
       (editorOperation as any).difficulty ?? (baseOperation as any).difficulty
     if (typeof diff === 'number') {
@@ -923,12 +967,15 @@ export async function toSimingOperationRemote(
     } else if (raw.includes('白鹄')) {
       payload.level_type = '白鹄'
     } else if (raw.includes('活动')) {
-      payload.level_type = '活动有分级'
-      // 识别名优先已由 catTwo 设置，兜底时不再强制从关卡名推断
-      if (!payload.difficulty) {
-        if (raw.includes('普通')) payload.difficulty = '普通'
-        else if (raw.includes('困难') || raw.includes('高难'))
-          payload.difficulty = '困难'
+      if (normalizedActivityDifficultyOverride) {
+        payload.level_type = '活动有分级'
+        payload.difficulty = normalizedActivityDifficultyOverride
+        ensureActivityRecognitionName()
+      } else {
+        payload.level_type = '活动'
+        if (normalizedLevelRecognition) {
+          payload.level_recognition_name = normalizedLevelRecognition
+        }
       }
     } else {
       // 其他：识别名保持 catTwo 或留空

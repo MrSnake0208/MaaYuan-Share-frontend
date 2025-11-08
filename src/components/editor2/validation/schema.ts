@@ -18,6 +18,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 const version = z.number().optional()
 const stage_name = z.string().optional()
 const difficulty = z.enum(OpDifficulty).optional()
+const level_recognition_name = z.string().optional()
+const activity_difficulty_override = z.string().optional()
 const minimum_required = z
   .string()
   .regex(
@@ -255,6 +257,8 @@ export const operationLooseSchema = z.object({
   stage_name,
   difficulty,
   minimum_required,
+  level_recognition_name,
+  activity_difficulty_override,
   level_meta,
   doc: doc.default({}),
   opers: z.array(operator).default([]),
@@ -268,6 +272,10 @@ const KNOWN_OPERATION_KEYS = new Set([
   'stage_name',
   'stageName',
   'difficulty',
+  'level_recognition_name',
+  'levelRecognitionName',
+  'activity_difficulty_override',
+  'activityDifficultyOverride',
   'minimum_required',
   'minimumRequired',
   'level_meta',
@@ -334,6 +342,15 @@ function normalizeOperationLooseInput(raw: unknown): unknown {
     normalized['level_meta'] = camelLevelMeta
     delete normalized['levelMeta']
   }
+  if ('levelRecognitionName' in normalized) {
+    normalized['level_recognition_name'] = normalized['levelRecognitionName']
+    delete normalized['levelRecognitionName']
+  }
+  if ('activityDifficultyOverride' in normalized) {
+    normalized['activity_difficulty_override'] =
+      normalized['activityDifficultyOverride']
+    delete normalized['activityDifficultyOverride']
+  }
   const actions = normalized['actions']
 
   if (Array.isArray(actions)) {
@@ -378,18 +395,45 @@ export function parseOperationLoose(raw: unknown): CopilotOperationLoose {
 }
 
 export type CopilotOperation = z.infer<typeof operationSchema>
-export const operationSchema = z.object({
-  version,
-  stage_name: stage_name.unwrap(),
-  difficulty,
-  minimum_required,
-  level_meta,
-  doc: docStrict,
-  // 将 editorv2 中的“密探”(opers)设为必填：至少选择 1 名密探
-  opers: z.array(operator).min(1).default([]),
-  groups: z.array(groupStrict).default([]),
-  actions: z.array(actionStrict).default([]),
-})
+export const operationSchema = z
+  .object({
+    version,
+    stage_name: stage_name.unwrap(),
+    difficulty,
+    minimum_required,
+    level_recognition_name,
+    activity_difficulty_override,
+    level_meta,
+    doc: docStrict,
+    // 将 editorv2 中的“密探”(opers)设为必填：至少选择 1 名密探
+    opers: z.array(operator).min(1).default([]),
+    groups: z.array(groupStrict).default([]),
+    actions: z.array(actionStrict).default([]),
+  })
+  .superRefine((data, ctx) => {
+    const activityCategory = data.level_meta?.cat_one ?? ''
+    const isActivity =
+      typeof activityCategory === 'string' && activityCategory.includes('活动')
+    const activityDiff =
+      typeof data.activity_difficulty_override === 'string'
+        ? data.activity_difficulty_override.trim()
+        : ''
+    if (!isActivity || !activityDiff.length) {
+      return
+    }
+    const recognition =
+      typeof data.level_recognition_name === 'string'
+        ? data.level_recognition_name.trim()
+        : ''
+    if (!recognition.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          i18n.components.editor2.LevelSelect.activity_recognition_required,
+        path: ['level_recognition_name'],
+      })
+    }
+  })
 
 type Labeled<T> = T extends Primitive
   ? string
@@ -422,6 +466,9 @@ export function getLabel(path: PropertyKey[]) {
   }
   // 额外映射：非 Operation 路径（如元数据）
   const parts = path.filter(isString)
+  if (parts[0] === 'level_recognition_name') {
+    return i18n.components.editor2.LevelSelect.activity_level_recognition_label
+  }
   if (parts[0] === 'metadata') {
     const key = parts[1]
     switch (key) {
