@@ -376,6 +376,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
           </div>
         )}
         <FieldError path="stage_name" />
+        <FieldError path="level_recognition_name" />
       </FormGroup>
 
       {/* catThree 已并入与关卡类别/名称同一行显示，见 LevelSelect.rightExtra */}

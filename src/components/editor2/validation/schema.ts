@@ -466,6 +466,9 @@ export function getLabel(path: PropertyKey[]) {
   }
   // 额外映射：非 Operation 路径（如元数据）
   const parts = path.filter(isString)
+  if (parts[0] === 'level_recognition_name') {
+    return i18n.components.editor2.LevelSelect.activity_level_recognition_label
+  }
   if (parts[0] === 'metadata') {
     const key = parts[1]
     switch (key) {
