@@ -17,7 +17,12 @@ export const defaultAdBanners: AdBannerConfigItem[] = [
     alt: 'MuMu',
   },
   {
-    image: '/辟雍.jpg',
+    image: '/mirror.png',
+    link: 'https://mirrorchyan.com/zh/projects?rid=MaaYuan&source=navtop',
+    alt: 'Mirror',
+  },
+  {
+    image: '/辟雍.png',
     link: '',
     alt: '辟雍',
   },
