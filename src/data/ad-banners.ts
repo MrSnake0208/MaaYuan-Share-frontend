@@ -27,6 +27,11 @@ export const defaultAdBanners: AdBannerConfigItem[] = [
     alt: '辟雍',
   },
   {
+    image: '/wiki.png',
+    link: 'https://wiki.biligame.com/yuan/%E9%A6%96%E9%A1%B5',
+    alt: 'wiki',
+  },
+  {
     image: '/周年庆.png',
     link: 'https://pd.qq.com/s/hismsfiu8',
     alt: 'MaaYuan',
