@@ -401,9 +401,14 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
   )
 
   useEffect(() => {
-    const next = editorActionsToRoundActions(actions)
+    // 从 EditorAction 同步到回合视图时，先清洗与重算，确保回合序号始终为 1..N 连续编号
+    const original = editorActionsToRoundActions(actions)
+    const normalized = normalizeRoundActions(original)
+    const reindexed = reindexRoundActions(normalized)
+
     setRoundActions((prev) => {
-      const merged: RoundActionsInput = { ...next }
+      const merged: RoundActionsInput = { ...reindexed }
+      // 保留此前存在但已被清空的占位回合，避免 UI 抖动
       Object.entries(prev).forEach(([roundKey, entries]) => {
         if (!merged[roundKey] && entries.length === 0) {
           merged[roundKey] = []
@@ -411,7 +416,21 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
       })
       return isEqual(prev, merged) ? prev : merged
     })
-  }, [actions])
+
+    // 若检测到存在跳号/重复号导致的重算，则回写到全局 actions，保证“首次打开/导入”后立即修正
+    if (!isEqual(normalized, reindexed)) {
+      edit((get, set) => {
+        set(
+          editorAtoms.actions,
+          roundActionsToEditorActions(reindexed, { slotAssignments }),
+        )
+        return {
+          action: 'round-actions-reindex',
+          desc: '重算回合序号（导入/打开）',
+        }
+      })
+    }
+  }, [actions, edit, slotAssignments])
 
   useEffect(() => {
     setRoundForms((prev) => {
@@ -451,23 +470,24 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
     (updater: (current: RoundActionsInput) => RoundActionsInput) => {
       setRoundActions((prev) => {
         const cloned = cloneRoundActions(prev)
-        const updated = normalizeRoundActions(updater(cloned))
-        if (isEqual(prev, updated)) {
+        const normalized = normalizeRoundActions(updater(cloned))
+        const reindexed = reindexRoundActions(normalized)
+        if (isEqual(prev, reindexed)) {
           return prev
         }
         edit((get, set) => {
           set(
             editorAtoms.actions,
-            roundActionsToEditorActions(updated, {
+            roundActionsToEditorActions(reindexed, {
               slotAssignments,
             }),
           )
           return {
             action: 'round-actions-update',
-            desc: '更新回合动作',
+            desc: '更新回合动作（含自动重算序号）',
           }
         })
-        return updated
+        return reindexed
       })
     },
     [edit, slotAssignments],
