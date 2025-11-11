@@ -85,6 +85,7 @@ export const handleLazyDownloadJSON = async (id: number, title: string) => {
   }
 
   const sanitizedDoc = stripOperationExportFields(snakeCaseDoc)
+  ;(sanitizedDoc as Record<string, unknown>)['id'] = id
   const json = JSON.stringify(sanitizedDoc, null, 2)
   doTriggerDownloadJSON(json, `MaaYuanCopilot_${title}.json`)
   AppToaster.show({
