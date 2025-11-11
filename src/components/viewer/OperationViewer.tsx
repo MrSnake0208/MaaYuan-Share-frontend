@@ -323,6 +323,9 @@ export const OperationViewer: ComponentType<{
                   handleLazyDownloadJSON(
                     operation.id,
                     operation.parsedContent.doc.title,
+                    Array.isArray(operation.metadata?.tags)
+                      ? (operation.metadata?.tags as string[])
+                      : undefined,
                   )
                 }
               />

@@ -78,7 +78,11 @@ const getSnakeCaseOperationDoc = async (
   }
 }
 
-export const handleLazyDownloadJSON = async (id: number, title: string) => {
+export const handleLazyDownloadJSON = async (
+  id: number,
+  title: string,
+  tags?: string[],
+) => {
   const snakeCaseDoc = await getSnakeCaseOperationDoc(id)
   if (!snakeCaseDoc) {
     return
@@ -86,6 +90,9 @@ export const handleLazyDownloadJSON = async (id: number, title: string) => {
 
   const sanitizedDoc = stripOperationExportFields(snakeCaseDoc)
   ;(sanitizedDoc as Record<string, unknown>)['id'] = id
+  if (Array.isArray(tags) && tags.length > 0) {
+    ;(sanitizedDoc as Record<string, unknown>)['tags'] = tags
+  }
   const json = JSON.stringify(sanitizedDoc, null, 2)
   doTriggerDownloadJSON(json, `MaaYuanCopilot_${title}.json`)
   AppToaster.show({
