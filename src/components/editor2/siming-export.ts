@@ -899,12 +899,15 @@ export async function toSimingOperationRemote(
         payload.level_recognition_name = normalizedLevelRecognition
       }
     }
+  } else if (opts?.level?.catOne === '兰台') {
+    // 映射：兰台 -> level_type=兰台，识别名使用三级分类（catThree）
+    payload.level_type = '兰台'
+    payload.level_recognition_name = opts.level.catThree ?? ''
   } else if (
-    opts?.level?.catOne === '兰台' ||
     opts?.level?.catOne === '家具' ||
     opts?.level?.catOne === '其他'
   ) {
-    // 映射：兰台/家具/其他 -> level_type=其他，且需要难度
+    // 映射：家具/其他 -> level_type=其他，且需要难度
     payload.level_type = '其他'
     const diff =
       (editorOperation as any).difficulty ?? (baseOperation as any).difficulty
