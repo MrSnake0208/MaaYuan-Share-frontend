@@ -1,0 +1,50 @@
+name: Build and Deploy to NAS
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build project
+        run: npx vite build
+
+      - name: Upload new version to tmp folder
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: './dist/*'
+          target: '/tmp/mysharefrontend_index_tmp/'
+          overwrite: true
+          strip_components: 1
+
+      - name: Atomically switch release
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            sudo mkdir -p "/vol1/@appdata/1Panel/1panel/apps/openresty/openresty/www/sites/mysharefrontend"
+            sudo mv "/vol1/@appdata/1Panel/1panel/apps/openresty/openresty/www/sites/mysharefrontend/index" "/vol1/@appdata/1Panel/1panel/apps/openresty/openresty/www/sites/mysharefrontend/index_old" || true
+            sudo mv "/tmp/mysharefrontend_index_tmp" "/vol1/@appdata/1Panel/1panel/apps/openresty/openresty/www/sites/mysharefrontend/index"
+            sudo rm -rf "/vol1/@appdata/1Panel/1panel/apps/openresty/openresty/www/sites/mysharefrontend/index_old"
+            echo "✅ Switched to new version successfully"
