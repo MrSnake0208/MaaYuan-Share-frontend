@@ -8,110 +8,100 @@
  *
  * Only the first two kinds are supported in MAA Copilot.
  */
-import { i18n } from '../i18n/i18n'
-import { Level, OpDifficulty } from './operation'
+import { i18n } from "../i18n/i18n";
+import { Level, OpDifficulty } from "./operation";
 
-const HARD_MODE_SUFFIX = '#f#'
-const BOSSRUSH_NORMAL_INFIX = 'bossrush_'
-const BOSSRUSH_HARD_INFIX = 'bossrush_tm'
+const HARD_MODE_SUFFIX = "#f#";
+const BOSSRUSH_NORMAL_INFIX = "bossrush_";
+const BOSSRUSH_HARD_INFIX = "bossrush_tm";
 
-const customLevelKey = '__customLevel'
+const customLevelKey = "__customLevel";
 
 export function createCustomLevel(name: string): Level {
   return {
     ...{ [customLevelKey]: true },
     name,
     stageId: name,
-    levelId: '',
+    levelId: "",
     catOne: i18n.models.level.custom_level,
     catTwo: name,
-    catThree: '',
+    catThree: "",
     width: 0,
     height: 0,
-  }
+  };
 }
 
 export function isCustomLevel(level: Level): boolean {
-  return customLevelKey in level
+  return customLevelKey in level;
 }
 
 export function isHardMode(stageId: string) {
-  return (
-    stageId.endsWith(HARD_MODE_SUFFIX) || stageId.includes(BOSSRUSH_HARD_INFIX)
-  )
+  return stageId.endsWith(HARD_MODE_SUFFIX) || stageId.includes(BOSSRUSH_HARD_INFIX);
 }
 
 export function toHardMode(stageId: string) {
   if (isHardMode(stageId)) {
-    return stageId
+    return stageId;
   }
 
-  const replacedStageId = stageId.replace(
-    BOSSRUSH_NORMAL_INFIX,
-    BOSSRUSH_HARD_INFIX,
-  )
+  const replacedStageId = stageId.replace(BOSSRUSH_NORMAL_INFIX, BOSSRUSH_HARD_INFIX);
   if (replacedStageId !== stageId) {
-    return replacedStageId
+    return replacedStageId;
   }
 
-  return stageId + HARD_MODE_SUFFIX
+  return stageId + HARD_MODE_SUFFIX;
 }
 
 export function toNormalMode(stageId: string) {
   return isHardMode(stageId)
-    ? stageId
-        .replace(HARD_MODE_SUFFIX, '')
-        .replace(BOSSRUSH_HARD_INFIX, BOSSRUSH_NORMAL_INFIX)
-    : stageId
+    ? stageId.replace(HARD_MODE_SUFFIX, "").replace(BOSSRUSH_HARD_INFIX, BOSSRUSH_NORMAL_INFIX)
+    : stageId;
 }
 
-export function getStageIdWithDifficulty(
-  stageId: string,
-  difficulty: OpDifficulty,
-) {
+export function getStageIdWithDifficulty(stageId: string, difficulty: OpDifficulty) {
   if (difficulty & OpDifficulty.HARD) {
-    return toHardMode(stageId)
+    return toHardMode(stageId);
   }
   if (difficulty & OpDifficulty.REGULAR) {
-    return toNormalMode(stageId)
+    return toNormalMode(stageId);
   }
 
   // if neither hard nor normal is expected, return as is
-  return stageId
+  return stageId;
 }
 
 export function findLevelByStageName(levels: Level[], stageName: string) {
-  return levels.find((level) => matchLevelByStageName(level, stageName))
+  return levels.find((level) => matchLevelByStageName(level, stageName));
 }
 
 export function hasHardMode(levels: Level[], stageName: string) {
   if (isHardMode(stageName)) {
-    return true
+    return true;
   }
 
-  let stageId: string
+  let stageId: string;
 
   // stageId always contains "_" while levelId and name don't
-  if (stageName.includes('_')) {
-    stageId = stageName
+  if (stageName.includes("_")) {
+    stageId = stageName;
   } else {
-    const level = findLevelByStageName(levels, stageName)
+    const level = findLevelByStageName(levels, stageName);
 
     // return false if there's no such level
     if (!level) {
-      return false
+      return false;
     }
 
-    stageId = level.stageId
+    stageId = level.stageId;
   }
 
   if (isHardMode(stageId)) {
-    return true
+    return true;
   }
 
-  const hardStageId = toHardMode(stageId)
+  const hardStageId = toHardMode(stageId);
 
-  return !!levels.find((level) => level.stageId === hardStageId)
+  return !!levels.find((level) => level.stageId === hardStageId);
 }
 
 export function matchLevelByStageName(level: Level, stageName: string) {
@@ -121,7 +111,7 @@ export function matchLevelByStageName(level: Level, stageName: string) {
     level.name === stageName ||
     level.catThree === stageName ||
     level.catTwo === stageName
-  )
+  );
 }
 
 export function matchStageIdIgnoringDifficulty(id1: string, id2: string) {
@@ -131,68 +121,67 @@ export function matchStageIdIgnoringDifficulty(id1: string, id2: string) {
     id1 + HARD_MODE_SUFFIX === id2 ||
     id1.replace(BOSSRUSH_HARD_INFIX, BOSSRUSH_NORMAL_INFIX) === id2 ||
     id1.replace(BOSSRUSH_NORMAL_INFIX, BOSSRUSH_HARD_INFIX) === id2
-  )
+  );
 }
 
 const LEVEL_CATEGORY_ORDER = [
-  '主线',
-  '白鹄',
-  '洞窟',
-  '兰台',
-  '地宫',
-  '家具',
-  '活动',
-  '其他',
-] as const
+  "主线",
+  "白鹄",
+  "洞窟",
+  "兰台",
+  "地宫",
+  "家具",
+  "活动",
+  "其他",
+] as const;
 
 const LEVEL_CATEGORY_ORDER_MAP = new Map<string, number>(
   LEVEL_CATEGORY_ORDER.map((category, index) => [category, index]),
-)
+);
 
 function normalizeLevelCategory(level: Level) {
-  const candidate =
-    level.catOne?.trim() || level.catTwo?.trim() || level.catThree?.trim() || ''
+  const candidate = level.catOne?.trim() || level.catTwo?.trim() || level.catThree?.trim() || "";
 
   if (!candidate) {
-    return '其他'
+    return "其他";
   }
 
   for (const category of LEVEL_CATEGORY_ORDER) {
     if (candidate.includes(category)) {
-      return category
+      return category;
     }
   }
 
-  return candidate
+  return candidate;
 }
 
 function getCategoryPriority(level: Level) {
-  const normalized = normalizeLevelCategory(level)
-  const explicit = LEVEL_CATEGORY_ORDER_MAP.get(normalized)
+  const normalized = normalizeLevelCategory(level);
+  const explicit = LEVEL_CATEGORY_ORDER_MAP.get(normalized);
 
-  if (typeof explicit === 'number') {
-    return explicit
+  if (typeof explicit === "number") {
+    return explicit;
   }
 
   // 不在明确列表中的类别统一归入“其他”之后
-  return LEVEL_CATEGORY_ORDER.length
+  return LEVEL_CATEGORY_ORDER.length;
 }
 
 export function compareLevelsForDisplay(a: Level, b: Level) {
   // 去除 game 优先级，按分类优先级 → levelId → stageId 排序
-  const categoryDiff = getCategoryPriority(a) - getCategoryPriority(b)
+  const categoryDiff = getCategoryPriority(a) - getCategoryPriority(b);
   if (categoryDiff !== 0) {
-    return categoryDiff
+    return categoryDiff;
   }
 
-  const levelIdDiff = a.levelId.localeCompare(b.levelId)
+  const levelIdDiff = a.levelId.localeCompare(b.levelId);
   if (levelIdDiff !== 0) {
-    return levelIdDiff
+    return levelIdDiff;
   }
 
-  return a.stageId.localeCompare(b.stageId)
+  return a.stageId.localeCompare(b.stageId);
 }
 
 export function getPrtsMapUrl(stageId: string) {
-  return `https://map.ark-nights.com/map/${stageId}?coord_override=maa`
+  return `https://map.ark-nights.com/map/${stageId}?coord_override=maa`;
 }

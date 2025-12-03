@@ -1,37 +1,33 @@
-import { Icon, IconSize } from '@blueprintjs/core'
-import { Popover2InteractionKind, Tooltip2 } from '@blueprintjs/popover2'
+import { Icon, IconSize } from "@blueprintjs/core";
+import { Popover2InteractionKind, Tooltip2 } from "@blueprintjs/popover2";
 
-import clsx from 'clsx'
-import { FC } from 'react'
-import Rating from 'react-rating'
+import clsx from "clsx";
+import { FC } from "react";
+import Rating from "react-rating";
 
-import { Operation } from 'models/operation'
-import { ratingLevelToString } from 'models/rating'
+import { Operation } from "models/operation";
+import { ratingLevelToString } from "models/rating";
 
-import { useTranslation } from '../../i18n/i18n'
+import { useTranslation } from "../../i18n/i18n";
 
 type PickedOperation = Pick<
   Operation,
-  'notEnoughRating' | 'ratingRatio' | 'ratingLevel' | 'like' | 'dislike'
->
+  "notEnoughRating" | "ratingRatio" | "ratingLevel" | "like" | "dislike"
+>;
 
 const GetLevelDescription: FC<{
-  operation: PickedOperation
-  layout?: 'horizontal' | 'vertical'
+  operation: PickedOperation;
+  layout?: "horizontal" | "vertical";
 }> = ({ operation, layout }) => {
-  const t = useTranslation()
-  const likePercent = Math.round(
-    (operation.like / (operation.like + operation.dislike)) * 100,
-  )
-  const likeRatio = `${operation.like}/${operation.like + operation.dislike}`
+  const t = useTranslation();
+  const likePercent = Math.round((operation.like / (operation.like + operation.dislike)) * 100);
+  const likeRatio = `${operation.like}/${operation.like + operation.dislike}`;
 
   return operation.notEnoughRating ? (
-    layout === 'vertical' ? (
+    layout === "vertical" ? (
       <span>{t.components.viewer.OperationRating.not_enough_ratings_long}</span>
     ) : (
-      <span>
-        {t.components.viewer.OperationRating.not_enough_ratings_short}
-      </span>
+      <span>{t.components.viewer.OperationRating.not_enough_ratings_short}</span>
     )
   ) : (
     <Tooltip2
@@ -45,20 +41,20 @@ const GetLevelDescription: FC<{
     >
       {ratingLevelToString(operation.ratingLevel)}
     </Tooltip2>
-  )
-}
+  );
+};
 
 export const OperationRating: FC<{
-  operation: PickedOperation
-  layout?: 'horizontal' | 'vertical'
-  className?: string
-}> = ({ operation, layout = 'vertical', className }) => {
+  operation: PickedOperation;
+  layout?: "horizontal" | "vertical";
+  className?: string;
+}> = ({ operation, layout = "vertical", className }) => {
   return (
     <div
       className={clsx(
-        'flex',
-        layout === 'horizontal' && 'flex-row-reverse',
-        layout === 'vertical' && 'flex-col',
+        "flex",
+        layout === "horizontal" && "flex-row-reverse",
+        layout === "vertical" && "flex-col",
         className,
       )}
     >
@@ -67,27 +63,21 @@ export const OperationRating: FC<{
           initialRating={operation.ratingRatio * 5}
           fullSymbol={
             <Icon
-              size={
-                layout === 'horizontal' ? IconSize.STANDARD : IconSize.LARGE
-              }
+              size={layout === "horizontal" ? IconSize.STANDARD : IconSize.LARGE}
               icon="star"
               className="text-yellow-500"
             />
           }
           placeholderSymbol={
             <Icon
-              size={
-                layout === 'horizontal' ? IconSize.STANDARD : IconSize.LARGE
-              }
+              size={layout === "horizontal" ? IconSize.STANDARD : IconSize.LARGE}
               icon="star"
               className="text-yellow-500"
             />
           }
           emptySymbol={
             <Icon
-              size={
-                layout === 'horizontal' ? IconSize.STANDARD : IconSize.LARGE
-              }
+              size={layout === "horizontal" ? IconSize.STANDARD : IconSize.LARGE}
               icon="star-empty"
               className="text-zinc-600 dark:text-slate-100"
             />
@@ -97,12 +87,12 @@ export const OperationRating: FC<{
       )}
       <div
         className={clsx(
-          'text-sm text-zinc-500 dark:text-slate-100',
-          layout === 'horizontal' && !operation.notEnoughRating && 'mr-1.5',
+          "text-sm text-zinc-500 dark:text-slate-100",
+          layout === "horizontal" && !operation.notEnoughRating && "mr-1.5",
         )}
       >
         <GetLevelDescription layout={layout} operation={operation} />
       </div>
     </div>
-  )
-}
+  );
+};

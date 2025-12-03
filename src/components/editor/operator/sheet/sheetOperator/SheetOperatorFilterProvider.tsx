@@ -1,4 +1,4 @@
-import { useAtomValue } from 'jotai'
+import { useAtomValue } from "jotai";
 import {
   Dispatch,
   FC,
@@ -8,83 +8,79 @@ import {
   useContext,
   useMemo,
   useState,
-} from 'react'
+} from "react";
 
-import { OperatorInfo as ModelsOperator, OPERATORS } from 'models/operator'
-import { favOperatorAtom } from 'store/useFavOperators'
+import { OperatorInfo as ModelsOperator, OPERATORS } from "models/operator";
+import { favOperatorAtom } from "store/useFavOperators";
 
-import { useSheet } from '../SheetProvider'
+import { useSheet } from "../SheetProvider";
 
-type OperatorInfo = ModelsOperator
+type OperatorInfo = ModelsOperator;
 
 export enum DEFAULTPROFID {
-  ALL = 'allProf',
-  FAV = 'favProf',
-  OTHERS = 'othersProf',
+  ALL = "allProf",
+  FAV = "favProf",
+  OTHERS = "othersProf",
 }
 
 export enum DEFAULTSUBPROFID {
-  ALL = 'allSubProf',
-  SELECTED = 'selectedProf',
+  ALL = "allSubProf",
+  SELECTED = "selectedProf",
 }
 
 export interface ProfFilter {
-  selectedProf: [string, string]
+  selectedProf: [string, string];
 }
 export const defaultProfFilter: ProfFilter = {
   selectedProf: [DEFAULTPROFID.ALL, DEFAULTSUBPROFID.ALL],
-}
+};
 
 export interface RarityFilter {
-  selectedRarity: number[]
-  reverse: boolean
+  selectedRarity: number[];
+  reverse: boolean;
 }
 export const defaultRarityFilter: RarityFilter = {
   selectedRarity: Array.from(
     new Array(Math.max(...OPERATORS.map(({ rarity }) => rarity)) + 1).keys(),
   ).slice(Math.min(...OPERATORS.map(({ rarity }) => rarity))),
   reverse: false,
-}
+};
 
 export interface PaginationFilter {
-  size: number
-  current: number
+  size: number;
+  current: number;
 }
 export const defaultPagination: PaginationFilter = {
   current: 1,
   size: 60,
-}
+};
 
 interface OperatorFilterProviderProp {
-  children: ReactNode
+  children: ReactNode;
 }
 
-type UseState<T> = [T, Dispatch<SetStateAction<T>>]
+type UseState<T> = [T, Dispatch<SetStateAction<T>>];
 
 type OperatorFilterProviderData = {
-  usePaginationFilterState: UseState<PaginationFilter>
-  useProfFilterState: UseState<ProfFilter>
-  useRarityFilterState: UseState<RarityFilter>
+  usePaginationFilterState: UseState<PaginationFilter>;
+  useProfFilterState: UseState<ProfFilter>;
+  useRarityFilterState: UseState<RarityFilter>;
   operatorFiltered: {
-    data: OperatorInfo[]
+    data: OperatorInfo[];
     meta: {
-      dataTotal: number
-    }
-  }
-}
+      dataTotal: number;
+    };
+  };
+};
 
 const OperatorFilterContext = createContext<OperatorFilterProviderData>(
   {} as OperatorFilterProviderData,
-)
+);
 
-export const OperatorFilterProvider: FC<OperatorFilterProviderProp> = ({
-  children,
-}) => {
-  const [paginationFilter, setPaginationFilter] =
-    useState<PaginationFilter>(defaultPagination)
-  const [profFilter, setProfFilter] = useState<ProfFilter>(defaultProfFilter)
-  const [rarityFilter, setRarityFilter] =
-    useState<RarityFilter>(defaultRarityFilter)
+export const OperatorFilterProvider: FC<OperatorFilterProviderProp> = ({ children }) => {
+  const [paginationFilter, setPaginationFilter] = useState<PaginationFilter>(defaultPagination);
+  const [profFilter, setProfFilter] = useState<ProfFilter>(defaultProfFilter);
+  const [rarityFilter, setRarityFilter] = useState<RarityFilter>(defaultRarityFilter);
 
   return (
     <OperatorFilterContext.Provider
@@ -92,31 +88,27 @@ export const OperatorFilterProvider: FC<OperatorFilterProviderProp> = ({
         usePaginationFilterState: [paginationFilter, setPaginationFilter],
         useProfFilterState: [profFilter, setProfFilter],
         useRarityFilterState: [rarityFilter, setRarityFilter],
-        operatorFiltered: useOperatorFiltered(
-          profFilter,
-          paginationFilter,
-          rarityFilter,
-        ),
+        operatorFiltered: useOperatorFiltered(profFilter, paginationFilter, rarityFilter),
       }}
     >
       {children}
     </OperatorFilterContext.Provider>
-  )
-}
+  );
+};
 
-export const useOperatorFilterProvider = () => useContext(OperatorFilterContext)
+export const useOperatorFilterProvider = () => useContext(OperatorFilterContext);
 
 const generateCustomizedOperInfo = (name: string): OperatorInfo => ({
-  id: 'customized-' + name,
+  id: "customized-" + name,
   name,
-  prof: 'TOKEN',
-  subProf: 'customized',
-  name_en: '',
-  alias: 'customized-operator',
+  prof: "TOKEN",
+  subProf: "customized",
+  name_en: "",
+  alias: "customized-operator",
   rarity: 0,
-  alt_name: 'custormized operator named' + name,
+  alt_name: "custormized operator named" + name,
   discs: [],
-})
+});
 
 const useOperatorFiltered = (
   profFilter: ProfFilter,
@@ -125,15 +117,12 @@ const useOperatorFiltered = (
 ) => {
   // Priority: prof > sub prof > rarity/rarityReverse
   // filterResult init and prof filter about
-  const profFilterResult = useProfFilterHandle(profFilter)
+  const profFilterResult = useProfFilterHandle(profFilter);
   //   rarity about
-  const rarityFilterResult = rarityFilterHandle(rarityFilter, profFilterResult)
+  const rarityFilterResult = rarityFilterHandle(rarityFilter, profFilterResult);
   //   pagination about
   //   filterResult
-  const filterResult = paginationFilterHandle(
-    paginationFilter,
-    rarityFilterResult,
-  )
+  const filterResult = paginationFilterHandle(paginationFilter, rarityFilterResult);
 
   return {
     // return data after being paginated
@@ -141,8 +130,8 @@ const useOperatorFiltered = (
     meta: {
       dataTotal: profFilterResult.length,
     },
-  }
-}
+  };
+};
 
 const useProfFilterHandle = (
   profFilter: ProfFilter = {
@@ -151,10 +140,10 @@ const useProfFilterHandle = (
 ) => {
   const {
     selectedProf: [prof, subProf],
-  } = profFilter
-  const { existedOperators } = useSheet()
+  } = profFilter;
+  const { existedOperators } = useSheet();
 
-  const favOperators = useAtomValue(favOperatorAtom)
+  const favOperators = useAtomValue(favOperatorAtom);
   const customizedOperatorsInfo = useMemo<OperatorInfo[]>(
     () =>
       existedOperators
@@ -165,7 +154,7 @@ const useProfFilterHandle = (
         )
         .filter((item) => !!item) as OperatorInfo[],
     [existedOperators],
-  )
+  );
   const favOperatorsInfo = useMemo<OperatorInfo[]>(
     () =>
       favOperators.map(
@@ -174,58 +163,53 @@ const useProfFilterHandle = (
           generateCustomizedOperInfo(name),
       ),
     [favOperators],
-  )
+  );
 
-  let operatorsFilteredByProf: OperatorInfo[] = []
-  const OPERATORSWITHINCUSTOMIZED = [...OPERATORS, ...customizedOperatorsInfo]
+  let operatorsFilteredByProf: OperatorInfo[] = [];
+  const OPERATORSWITHINCUSTOMIZED = [...OPERATORS, ...customizedOperatorsInfo];
   switch (prof) {
     case DEFAULTPROFID.ALL: {
-      operatorsFilteredByProf = OPERATORSWITHINCUSTOMIZED
-      break
+      operatorsFilteredByProf = OPERATORSWITHINCUSTOMIZED;
+      break;
     }
     case DEFAULTPROFID.FAV: {
-      operatorsFilteredByProf = favOperatorsInfo
-      break
+      operatorsFilteredByProf = favOperatorsInfo;
+      break;
     }
     case DEFAULTPROFID.OTHERS: {
-      operatorsFilteredByProf = OPERATORSWITHINCUSTOMIZED.filter(
-        ({ prof }) => prof === 'TOKEN',
-      )
-      break
+      operatorsFilteredByProf = OPERATORSWITHINCUSTOMIZED.filter(({ prof }) => prof === "TOKEN");
+      break;
     }
 
     default: {
       operatorsFilteredByProf = OPERATORSWITHINCUSTOMIZED.filter(
         ({ prof: OPERProf }) => OPERProf === prof,
-      )
-      break
+      );
+      break;
     }
   }
 
   switch (subProf) {
     case DEFAULTSUBPROFID.ALL: {
-      return operatorsFilteredByProf
+      return operatorsFilteredByProf;
     }
     case DEFAULTSUBPROFID.SELECTED: {
       return operatorsFilteredByProf.filter(
-        ({ name }) =>
-          !!existedOperators.find(
-            ({ name: existedName }) => existedName === name,
-          ),
-      )
+        ({ name }) => !!existedOperators.find(({ name: existedName }) => existedName === name),
+      );
     }
     default: {
       return operatorsFilteredByProf.filter(
         ({ subProf: operatorSubProf }) => operatorSubProf === subProf,
-      )
+      );
     }
   }
-}
+};
 
 const paginationFilterHandle = (
   { current, size }: PaginationFilter,
   originData: OperatorInfo[] = OPERATORS,
-) => originData.slice(0, current * size)
+) => originData.slice(0, current * size);
 
 const rarityFilterHandle = (
   { selectedRarity, reverse }: RarityFilter,
@@ -234,13 +218,13 @@ const rarityFilterHandle = (
   originData
     .filter(({ rarity }) => selectedRarity.includes(rarity))
     .sort((operatorA, operatorB) => {
-      const { rarity: rarityA, id: idA } = operatorA
-      const { rarity: rarityB, id: idB } = operatorB
+      const { rarity: rarityA, id: idA } = operatorA;
+      const { rarity: rarityB, id: idB } = operatorB;
 
-      const rarityDiff = reverse ? rarityA - rarityB : rarityB - rarityA
+      const rarityDiff = reverse ? rarityA - rarityB : rarityB - rarityA;
       if (rarityDiff !== 0) {
-        return rarityDiff
+        return rarityDiff;
       }
 
-      return reverse ? idA.localeCompare(idB) : idB.localeCompare(idA)
-    })
+      return reverse ? idA.localeCompare(idB) : idB.localeCompare(idA);
+    });

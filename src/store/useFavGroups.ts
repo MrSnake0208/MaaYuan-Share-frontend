@@ -1,17 +1,14 @@
-import { atom } from 'jotai'
-import { atomWithStorage } from 'jotai/utils'
-import { omit } from 'lodash-es'
+import { atom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
+import { omit } from "lodash-es";
 
-import { CopilotDocV1 } from '../models/copilot.schema'
+import { CopilotDocV1 } from "../models/copilot.schema";
 
-export const ignoreKeyDic = ['_id', 'id'] as const
-type Group = CopilotDocV1.Group
-export type FavGroup = Omit<Group, (typeof ignoreKeyDic)[number]>
+export const ignoreKeyDic = ["_id", "id"] as const;
+type Group = CopilotDocV1.Group;
+export type FavGroup = Omit<Group, (typeof ignoreKeyDic)[number]>;
 
-const favGroupCoreAtom = atomWithStorage<FavGroup[]>(
-  'maa-copilot-fav-groups',
-  [],
-)
+const favGroupCoreAtom = atomWithStorage<FavGroup[]>("maa-copilot-fav-groups", []);
 
 export const favGroupAtom = atom(
   (get) => get(favGroupCoreAtom),
@@ -19,6 +16,6 @@ export const favGroupAtom = atom(
     set(
       favGroupCoreAtom,
       favGroups.map((item) => omit(item, ...ignoreKeyDic)),
-    )
+    );
   },
-)
+);

@@ -1,31 +1,33 @@
-import { Button, NonIdealState } from '@blueprintjs/core'
-import { Tooltip2 } from '@blueprintjs/popover2'
+import { Button, NonIdealState } from "@blueprintjs/core";
+import { Tooltip2 } from "@blueprintjs/popover2";
 
 import {
   UseOperationSetsParams,
   deleteOperationSet,
   useOperationSetSearch,
   useRefreshOperationSets,
-} from 'apis/operation-set'
-import { ComponentType } from 'react'
+} from "apis/operation-set";
+import { ComponentType } from "react";
 
-import { Confirm } from 'components/Confirm'
-import { OperationSetCard } from 'components/OperationSetCard'
-import { withSuspensable } from 'components/Suspensable'
+import { Confirm } from "components/Confirm";
+import { OperationSetCard } from "components/OperationSetCard";
+import { withSuspensable } from "components/Suspensable";
 
-import { useTranslation } from '../../i18n/i18n'
+import { useTranslation } from "../../i18n/i18n";
 
 interface AdminOperationSetListProps extends UseOperationSetsParams {}
 
-export const AdminOperationSetList: ComponentType<AdminOperationSetListProps> =
-  withSuspensable(({ ...params }) => {
-    const t = useTranslation()
-    const refresh = useRefreshOperationSets()
+export const AdminOperationSetList: ComponentType<AdminOperationSetListProps> = withSuspensable(
+  ({ ...params }) => {
+    const t = useTranslation();
+    const refresh = useRefreshOperationSets();
 
-    const { operationSets, isReachingEnd, isValidating, setSize } =
-      useOperationSetSearch({ ...params, suspense: true })
+    const { operationSets, isReachingEnd, isValidating, setSize } = useOperationSetSearch({
+      ...params,
+      suspense: true,
+    });
 
-    if (!operationSets) throw new Error('unreachable')
+    if (!operationSets) throw new Error("unreachable");
 
     return (
       <>
@@ -40,17 +42,12 @@ export const AdminOperationSetList: ComponentType<AdminOperationSetListProps> =
                 canEscapeKeyCancel
                 trigger={({ handleClick }) => (
                   <Tooltip2 placement="bottom" content={t.common.delete}>
-                    <Button
-                      small
-                      icon="trash"
-                      intent="danger"
-                      onClick={handleClick}
-                    />
+                    <Button small icon="trash" intent="danger" onClick={handleClick} />
                   </Tooltip2>
                 )}
                 onConfirm={async () => {
-                  await deleteOperationSet({ id: opset.id })
-                  refresh()
+                  await deleteOperationSet({ id: opset.id });
+                  refresh();
                 }}
               />
             </div>
@@ -58,10 +55,7 @@ export const AdminOperationSetList: ComponentType<AdminOperationSetListProps> =
         ))}
 
         {isReachingEnd && operationSets.length === 0 && (
-          <NonIdealState
-            icon="slash"
-            title={t.components.OperationSetList.no_job_sets_found}
-          />
+          <NonIdealState icon="slash" title={t.components.OperationSetList.no_job_sets_found} />
         )}
 
         {!isReachingEnd && (
@@ -76,7 +70,8 @@ export const AdminOperationSetList: ComponentType<AdminOperationSetListProps> =
           />
         )}
       </>
-    )
-  })
+    );
+  },
+);
 
-AdminOperationSetList.displayName = 'AdminOperationSetList'
+AdminOperationSetList.displayName = "AdminOperationSetList";

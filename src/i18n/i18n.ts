@@ -1,43 +1,42 @@
-import { atom, getDefaultStore, useAtomValue } from 'jotai'
-import { atomWithStorage } from 'jotai/utils'
-import { get, isObject, isString } from 'lodash-es'
-import mitt from 'mitt'
-import { Fragment, ReactElement, ReactNode, createElement } from 'react'
+import { atom, getDefaultStore, useAtomValue } from "jotai";
+import { atomWithStorage } from "jotai/utils";
+import { get, isObject, isString } from "lodash-es";
+import mitt from "mitt";
+import { Fragment, ReactElement, ReactNode, createElement } from "react";
 
-import ESSENTIALS from './generated/essentials'
+import ESSENTIALS from "./generated/essentials";
 
 // 本地实现：将字符串中的换行转为 <br/>（仅 JSX 模式使用）
 function preserveLineBreaks(text: string): ReactNode[] {
-  const parts = text.split('\n')
-  const result: ReactNode[] = []
+  const parts = text.split("\n");
+  const result: ReactNode[] = [];
   for (let i = 0; i < parts.length; i++) {
-    if (i > 0) result.push(createElement('br', { key: 'br-' + i }))
-    result.push(parts[i])
+    if (i > 0) result.push(createElement("br", { key: "br-" + i }));
+    result.push(parts[i]);
   }
-  return result
+  return result;
 }
 
-export const languages = ['cn', 'zh_tw'] as const
-const browserLanguage = navigator.language.toLowerCase()
+export const languages = ["cn", "zh_tw"] as const;
+const browserLanguage = navigator.language.toLowerCase();
 const defaultLanguage =
-  browserLanguage.includes('zh-hant') ||
-  browserLanguage.includes('zh_tw') ||
-  browserLanguage.includes('zh-tw')
-    ? 'zh_tw'
-    : 'cn'
+  browserLanguage.includes("zh-hant") ||
+  browserLanguage.includes("zh_tw") ||
+  browserLanguage.includes("zh-tw")
+    ? "zh_tw"
+    : "cn";
 
-const updater = mitt()
+const updater = mitt();
 
-export type Language = (typeof languages)[number]
+export type Language = (typeof languages)[number];
 
 export type I18NTranslations = MakeTranslations<
-  | typeof import('./generated/cn').default
-  | typeof import('./generated/zh_tw').default
-> & { essentials: I18NEssentials }
+  typeof import("./generated/cn").default | typeof import("./generated/zh_tw").default
+> & { essentials: I18NEssentials };
 
-type I18NEssentials = MakeTranslations<(typeof ESSENTIALS)[Language]>
+type I18NEssentials = MakeTranslations<(typeof ESSENTIALS)[Language]>;
 
-type MakeTranslations<T> = MakeEndpoints<ParseValue<T>>
+type MakeTranslations<T> = MakeEndpoints<ParseValue<T>>;
 
 // 1. First pass: Convert a tree of messages to a tree of strings and interpolation keys
 //
@@ -62,23 +61,23 @@ type MakeTranslations<T> = MakeEndpoints<ParseValue<T>>
 type ParseValue<T> = T extends string
   ? ParseMessage<T, []>
   : T extends PluralObject
-    ? ParseMessage<T['other'], ['count']>
-    : { [P in keyof T]: ParseValue<T[P]> }
+    ? ParseMessage<T["other"], ["count"]>
+    : { [P in keyof T]: ParseValue<T[P]> };
 
 type ParseMessage<
   T extends string,
   InitialKeys extends string[],
   Keys = InterpolationKeys<T, InitialKeys>,
-> = Keys extends [] ? string : Keys
+> = Keys extends [] ? string : Keys;
 
 type InterpolationKeys<
   Str,
   Keys extends string[],
 > = Str extends `${string}{{${infer Key}}}${infer End}`
   ? InterpolationKeys<End, [...Keys, Key]>
-  : Keys
+  : Keys;
 
-type PluralObject = Record<`${number}` | 'other', string>
+type PluralObject = Record<`${number}` | "other", string>;
 
 // 2. Second pass: Convert a tree of strings and interpolation keys to a tree of strings and functions (endpoints)
 //
@@ -99,24 +98,24 @@ type MakeEndpoints<T, K extends keyof T = keyof T> = string extends T
   ? T
   : [T] extends [string[]]
     ? Interpolation<T> & {}
-    : { [P in K]: MakeEndpoints<T[P]> }
+    : { [P in K]: MakeEndpoints<T[P]> };
 
 type Interpolation<
   Keys extends string[],
   KeyMapping = {
-    [K in Keys[number]]: K extends `${infer Name}(${string})` ? Name : K
+    [K in Keys[number]]: K extends `${infer Name}(${string})` ? Name : K;
   },
 > = ((options: {
-  [K in keyof KeyMapping as K extends KeyMapping[K] ? K : never]: Primitive
+  [K in keyof KeyMapping as K extends KeyMapping[K] ? K : never]: Primitive;
 }) => string) & {
   jsx: (options: {
     [K in keyof KeyMapping as KeyMapping[K] & string]: KeyMapping[K] extends K
       ? ReactNode
-      : (arg?: string) => ReactNode
-  }) => ReactElement
-}
+      : (arg?: string) => ReactNode;
+  }) => ReactElement;
+};
 
-type Primitive = string | number | boolean | null | undefined
+type Primitive = string | number | boolean | null | undefined;
 
 export const allEssentials = Object.fromEntries(
   Object.entries(ESSENTIALS).map(([language, data]) => [
@@ -126,81 +125,74 @@ export const allEssentials = Object.fromEntries(
       data,
     }),
   ]),
-) as Record<Language, I18NEssentials>
+) as Record<Language, I18NEssentials>;
 
-const languageStorageKey = 'maa-copilot-lang'
+const languageStorageKey = "maa-copilot-lang";
 
-let currentLanguage: Language
-let currentTranslations: I18NTranslations | undefined
+let currentLanguage: Language;
+let currentTranslations: I18NTranslations | undefined;
 
-export const i18n = new Proxy(
-  {} as I18NTranslations & { currentLanguage: Language },
-  {
-    get(target, prop) {
-      if (prop === 'currentLanguage') {
-        return currentLanguage
+export const i18n = new Proxy({} as I18NTranslations & { currentLanguage: Language }, {
+  get(target, prop) {
+    if (prop === "currentLanguage") {
+      return currentLanguage;
+    }
+    if (!currentTranslations) {
+      if (prop === "essentials") {
+        return allEssentials[currentLanguage];
       }
-      if (!currentTranslations) {
-        if (prop === 'essentials') {
-          return allEssentials[currentLanguage]
-        }
-        // if this error occurs during dev, it's probably because the code containing i18n.* is executed
-        // before the translations are loaded, in which case you should change it to i18nDefer.*
-        throw new Error(allEssentials[currentLanguage].translations_not_loaded)
-      }
-      return currentTranslations[prop] || prop
-    },
+      // if this error occurs during dev, it's probably because the code containing i18n.* is executed
+      // before the translations are loaded, in which case you should change it to i18nDefer.*
+      throw new Error(allEssentials[currentLanguage].translations_not_loaded);
+    }
+    return currentTranslations[prop] || prop;
   },
-)
+});
 
 type Deferred<T> = T extends string
   ? () => string
   : T extends Function
     ? T
-    : { [K in keyof T]: Deferred<T[K]> }
+    : { [K in keyof T]: Deferred<T[K]> };
 
-export const i18nDefer = createDeferredProxy(
-  '',
-) as unknown as Deferred<I18NTranslations>
+export const i18nDefer = createDeferredProxy("") as unknown as Deferred<I18NTranslations>;
 
 function createDeferredProxy(path: string) {
-  const toString = () => path
+  const toString = () => path;
 
-  let updatedValue: unknown
-  updater.on(path, (value) => (updatedValue = value))
+  let updatedValue: unknown;
+  updater.on(path, (value) => (updatedValue = value));
 
   return new Proxy(toString, {
     get(target, prop) {
-      if (prop === 'toString') {
-        return toString
+      if (prop === "toString") {
+        return toString;
       }
       if (Object.prototype.hasOwnProperty.call(target, prop)) {
-        return target[prop]
+        return target[prop];
       }
-      if (typeof prop === 'symbol') {
-        return undefined
+      if (typeof prop === "symbol") {
+        return undefined;
       }
-      target[prop] = createDeferredProxy(
-        (path ? path + '.' : '') + String(prop),
-      )
-      return target[prop]
+      target[prop] = createDeferredProxy((path ? path + "." : "") + String(prop));
+      return target[prop];
     },
     apply(target, _this, args) {
       if (updatedValue !== undefined) {
-        if (typeof updatedValue === 'function') {
-          return updatedValue(...args)
+        if (typeof updatedValue === "function") {
+          return updatedValue(...args);
         }
-        return updatedValue
+        return updatedValue;
       }
       if (currentTranslations) {
-        const translated = get(currentTranslations, path)
+        const translated = get(currentTranslations, path);
         if (translated) {
-          return translated
+          return translated;
         }
       }
-      return toString()
+      return toString();
     },
-  })
+  });
 }
 
 export const languageAtom = atomWithStorage<Language>(
@@ -208,158 +200,149 @@ export const languageAtom = atomWithStorage<Language>(
   defaultLanguage,
   undefined,
   { getOnInit: true },
-)
+);
 
-currentLanguage = getDefaultStore().get(languageAtom)
+currentLanguage = getDefaultStore().get(languageAtom);
 
 export interface RawTranslations {
-  language: Language
-  data: object
+  language: Language;
+  data: object;
 }
 
-const internalRawTranslationsAtom = atom<RawTranslations | undefined>(undefined)
+const internalRawTranslationsAtom = atom<RawTranslations | undefined>(undefined);
 export const rawTranslationsAtom = atom(
   (get) => get(internalRawTranslationsAtom),
   (get, set, rawTranslations: RawTranslations) => {
-    const translations = setupTranslations(rawTranslations) as I18NTranslations
-    currentLanguage = rawTranslations.language
-    currentTranslations = translations
+    const translations = setupTranslations(rawTranslations) as I18NTranslations;
+    currentLanguage = rawTranslations.language;
+    currentTranslations = translations;
 
-    set(internalRawTranslationsAtom, rawTranslations)
-    set(translationsAtom, translations)
+    set(internalRawTranslationsAtom, rawTranslations);
+    set(translationsAtom, translations);
   },
-)
-const internalTranslationsAtom = atom<I18NTranslations | undefined>(undefined)
+);
+const internalTranslationsAtom = atom<I18NTranslations | undefined>(undefined);
 export const translationsAtom = atom(
   (get) => {
-    const translations = get(internalTranslationsAtom)
+    const translations = get(internalTranslationsAtom);
     if (!translations) {
-      throw new Error(allEssentials[currentLanguage].translations_not_loaded)
+      throw new Error(allEssentials[currentLanguage].translations_not_loaded);
     }
-    return translations
+    return translations;
   },
-  (get, set, translations: I18NTranslations) =>
-    set(internalTranslationsAtom, translations),
-)
+  (get, set, translations: I18NTranslations) => set(internalTranslationsAtom, translations),
+);
 
 function setupTranslations({ language, data }: RawTranslations) {
   data = {
     ...data,
     essentials: ESSENTIALS[language],
-  }
+  };
 
-  const interpolationRegex = /{{([^}]*)}}/
-  const functionalInterpolationKeyRegex = /(.*?)\((.*?)\)/
+  const interpolationRegex = /{{([^}]*)}}/;
+  const functionalInterpolationKeyRegex = /(.*?)\((.*?)\)/;
 
   const convert = (path: string, value: unknown) => {
-    const converted = doConvert(path, value)
-    updater.emit(path, converted)
-    return converted
-  }
+    const converted = doConvert(path, value);
+    updater.emit(path, converted);
+    return converted;
+  };
 
   const doConvert = (path: string, value: unknown) => {
-    let isPlural = false
+    let isPlural = false;
 
     if (isObject(value)) {
-      const keys = Object.keys(value)
-      isPlural = keys.every(
-        (key) => key === 'other' || !Number.isNaN(Number(key)),
-      )
+      const keys = Object.keys(value);
+      isPlural = keys.every((key) => key === "other" || !Number.isNaN(Number(key)));
       if (!isPlural) {
-        return Object.fromEntries(
-          keys.map((key) => [key, convert(`${path}.${key}`, value[key])]),
-        )
+        return Object.fromEntries(keys.map((key) => [key, convert(`${path}.${key}`, value[key])]));
       }
     } else if (!isString(value)) {
-      return value
+      return value;
     } else {
-      const hasInterpolation = interpolationRegex.test(value)
+      const hasInterpolation = interpolationRegex.test(value);
       if (!hasInterpolation) {
-        return value
+        return value;
       }
     }
 
     // as of now, value is either an interpolatable string or a plural object
 
     const interpolate = (
-      options: Record<
-        string,
-        Primitive | ReactNode | ((arg?: string) => ReactNode)
-      >,
+      options: Record<string, Primitive | ReactNode | ((arg?: string) => ReactNode)>,
       jsx: boolean,
     ) => {
       try {
-        let message: string
+        let message: string;
 
         if (isPlural) {
-          const pluralObject = value as PluralObject
-          const count = options.count
-          if (typeof count === 'number') {
-            message = pluralObject[String(count)] ?? pluralObject.other
+          const pluralObject = value as PluralObject;
+          const count = options.count;
+          if (typeof count === "number") {
+            message = pluralObject[String(count)] ?? pluralObject.other;
           } else {
-            message = pluralObject.other
+            message = pluralObject.other;
           }
         } else {
-          message = value as string
+          message = value as string;
         }
 
-        const segments = message.split(interpolationRegex)
+        const segments = message.split(interpolationRegex);
         if (segments.length === 1) {
-          return message
+          return message;
         }
 
         const interpolated = segments.map((segment, index) => {
           if (index % 2 === 0) {
-            if (segment && segment.includes('\n')) {
+            if (segment && segment.includes("\n")) {
               // 仅在 JSX 模式下将换行渲染为 <br/>
-              if (jsx) return preserveLineBreaks(segment)
-              return segment
+              if (jsx) return preserveLineBreaks(segment);
+              return segment;
             }
-            return segment
+            return segment;
           }
 
           if (Object.prototype.hasOwnProperty.call(options, segment)) {
-            return options[segment] as Primitive | ReactNode
+            return options[segment] as Primitive | ReactNode;
           }
 
-          const match = segment.match(functionalInterpolationKeyRegex)
+          const match = segment.match(functionalInterpolationKeyRegex);
           if (match) {
-            const key = match[1]
-            const arg = match[2]
+            const key = match[1];
+            const arg = match[2];
             if (Object.prototype.hasOwnProperty.call(options, key)) {
-              if (typeof options[key] === 'function') {
-                return options[key](arg)
+              if (typeof options[key] === "function") {
+                return options[key](arg);
               }
-              return options[key]
+              return options[key];
             }
           }
 
-          return ''
-        })
+          return "";
+        });
         if (jsx) {
-          return createElement(Fragment, {}, ...interpolated)
+          return createElement(Fragment, {}, ...interpolated);
         }
-        return interpolated.join('')
+        return interpolated.join("");
       } catch (e) {
-        console.error('Error in translation:', path, e)
-        return path
+        console.error("Error in translation:", path, e);
+        return path;
       }
-    }
+    };
 
-    const interpolationEndpoint = (
-      options: Record<string, Primitive>,
-    ): string => interpolate(options, false) as string
+    const interpolationEndpoint = (options: Record<string, Primitive>): string =>
+      interpolate(options, false) as string;
 
     interpolationEndpoint.jsx = (
       options: Record<string, ReactNode | ((arg?: string) => ReactNode)>,
-    ): ReactElement => interpolate(options, true) as ReactElement
+    ): ReactElement => interpolate(options, true) as ReactElement;
 
-    return interpolationEndpoint
-  }
+    return interpolationEndpoint;
+  };
 
-  return convert('', data)
+  return convert("", data);
 }
 
 export function useTranslation() {
-  return useAtomValue(translationsAtom)
+  return useAtomValue(translationsAtom);
 }

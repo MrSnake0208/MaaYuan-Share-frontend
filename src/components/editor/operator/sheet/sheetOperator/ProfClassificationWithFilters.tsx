@@ -1,55 +1,49 @@
-import { Button, Divider, H4, H5 } from '@blueprintjs/core'
-import { Popover2 } from '@blueprintjs/popover2'
+import { Button, Divider, H4, H5 } from "@blueprintjs/core";
+import { Popover2 } from "@blueprintjs/popover2";
 
-import clsx from 'clsx'
-import { useAtomValue } from 'jotai'
-import { FC, ImgHTMLAttributes, useEffect, useMemo } from 'react'
+import clsx from "clsx";
+import { useAtomValue } from "jotai";
+import { FC, ImgHTMLAttributes, useEffect, useMemo } from "react";
 
-import { PROFESSIONS } from 'models/operator'
+import { PROFESSIONS } from "models/operator";
 
-import { languageAtom, useTranslation } from '../../../../../i18n/i18n'
+import { languageAtom, useTranslation } from "../../../../../i18n/i18n";
 import {
   DEFAULTPROFID,
   DEFAULTSUBPROFID,
   defaultPagination,
   useOperatorFilterProvider,
-} from './SheetOperatorFilterProvider'
-import { OperatorBackToTop } from './toolBox/OperatorBackToTop'
-import { OperatorMutipleSelect } from './toolBox/OperatorMutipleSelect'
-import { OperatorRaritySelect } from './toolBox/OperatorRaritySelect'
+} from "./SheetOperatorFilterProvider";
+import { OperatorBackToTop } from "./toolBox/OperatorBackToTop";
+import { OperatorMutipleSelect } from "./toolBox/OperatorMutipleSelect";
+import { OperatorRaritySelect } from "./toolBox/OperatorRaritySelect";
 
 export interface ProfClassificationWithFiltersProp {
-  toTop: () => void
+  toTop: () => void;
 }
 
-export const ProfClassificationWithFilters: FC<
-  ProfClassificationWithFiltersProp
-> = ({ toTop }) => {
-  const t = useTranslation()
-  const language = useAtomValue(languageAtom)
+export const ProfClassificationWithFilters: FC<ProfClassificationWithFiltersProp> = ({ toTop }) => {
+  const t = useTranslation();
+  const language = useAtomValue(languageAtom);
   const {
     useProfFilterState: [{ selectedProf }, setProfFilter],
     usePaginationFilterState: [_, setPaginationFilter],
-  } = useOperatorFilterProvider()
+  } = useOperatorFilterProvider();
 
   const formattedProfessions = useMemo(
     () => [
       {
         id: DEFAULTPROFID.ALL,
-        name: t.components.editor.operator.sheet.sheetOperator
-          .ProfClassificationWithFilters.all,
-        name_en:
-          t.components.editor.operator.sheet.sheetOperator
-            .ProfClassificationWithFilters.all,
+        name: t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.all,
+        name_en: t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.all,
         sub: [],
       },
       {
         id: DEFAULTPROFID.FAV,
-        name: t.components.editor.operator.sheet.sheetOperator
-          .ProfClassificationWithFilters.favorites,
+        name: t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters
+          .favorites,
         name_en:
-          t.components.editor.operator.sheet.sheetOperator
-            .ProfClassificationWithFilters.favorites,
+          t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.favorites,
         sub: [],
       },
       ...PROFESSIONS.map((profession) => ({
@@ -58,43 +52,36 @@ export const ProfClassificationWithFilters: FC<
       })),
       {
         id: DEFAULTPROFID.OTHERS,
-        name: t.components.editor.operator.sheet.sheetOperator
-          .ProfClassificationWithFilters.others,
+        name: t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.others,
         name_en:
-          t.components.editor.operator.sheet.sheetOperator
-            .ProfClassificationWithFilters.others,
+          t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.others,
         sub: [],
       },
     ],
     [t],
-  )
+  );
   const subProfs = useMemo(() => {
     return [
       {
         id: DEFAULTSUBPROFID.ALL,
-        name: t.components.editor.operator.sheet.sheetOperator
-          .ProfClassificationWithFilters.all,
-        name_en:
-          t.components.editor.operator.sheet.sheetOperator
-            .ProfClassificationWithFilters.all,
+        name: t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.all,
+        name_en: t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.all,
       },
       {
         id: DEFAULTSUBPROFID.SELECTED,
-        name: t.components.editor.operator.sheet.sheetOperator
-          .ProfClassificationWithFilters.selected,
+        name: t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters
+          .selected,
         name_en:
-          t.components.editor.operator.sheet.sheetOperator
-            .ProfClassificationWithFilters.selected,
+          t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.selected,
       },
-      ...(formattedProfessions.find(({ id }) => id === selectedProf[0])?.sub ||
-        []),
-    ]
-  }, [selectedProf, formattedProfessions, t])
+      ...(formattedProfessions.find(({ id }) => id === selectedProf[0])?.sub || []),
+    ];
+  }, [selectedProf, formattedProfessions, t]);
 
   useEffect(() => {
-    toTop()
-    setPaginationFilter(defaultPagination)
-  }, [selectedProf, setPaginationFilter, toTop])
+    toTop();
+    setPaginationFilter(defaultPagination);
+  }, [selectedProf, setPaginationFilter, toTop]);
 
   const ToolBox = (
     <div className="flex flex-col absolute bottom-0">
@@ -114,7 +101,7 @@ export const ProfClassificationWithFilters: FC<
       <OperatorMutipleSelect />
       <OperatorBackToTop {...{ toTop }} />
     </div>
-  )
+  );
 
   return (
     <div className="flex flex-row-reverse relative h-full">
@@ -123,9 +110,7 @@ export const ProfClassificationWithFilters: FC<
           <ProfIcon
             key={prof.id}
             profId={prof.id}
-            name={
-              language === 'zh_tw' && prof.name_en ? prof.name_en : prof.name
-            }
+            name={language === "zh_tw" && prof.name_en ? prof.name_en : prof.name}
             selected={selectedProf.includes(prof.id)}
             onProfClick={() =>
               setProfFilter((prev) => ({
@@ -143,12 +128,10 @@ export const ProfClassificationWithFilters: FC<
             <li key={subProf.id}>
               <H4
                 className={clsx(
-                  'truncate cursor-pointer my-3 opacity-50 hover:underline hover:opacity-90',
-                  selectedProf.includes(subProf.id) && '!opacity-100 underline',
-                  (language === 'zh_tw' && subProf.name_en
-                    ? subProf.name_en
-                    : subProf.name
-                  ).length > 3 && '!text-base',
+                  "truncate cursor-pointer my-3 opacity-50 hover:underline hover:opacity-90",
+                  selectedProf.includes(subProf.id) && "!opacity-100 underline",
+                  (language === "zh_tw" && subProf.name_en ? subProf.name_en : subProf.name)
+                    .length > 3 && "!text-base",
                 )}
                 onClick={() =>
                   setProfFilter(({ selectedProf, ...rest }) => ({
@@ -157,9 +140,7 @@ export const ProfClassificationWithFilters: FC<
                   }))
                 }
               >
-                {language === 'zh_tw' && subProf.name_en
-                  ? subProf.name_en
-                  : subProf.name}
+                {language === "zh_tw" && subProf.name_en ? subProf.name_en : subProf.name}
               </H4>
             </li>
           ))}
@@ -167,23 +148,17 @@ export const ProfClassificationWithFilters: FC<
         {ToolBox}
       </div>
     </div>
-  )
-}
+  );
+};
 
 interface ProfIconProp extends ImgHTMLAttributes<HTMLImageElement> {
-  name: string
-  profId: string
-  selected: boolean
-  onProfClick: () => void
+  name: string;
+  profId: string;
+  selected: boolean;
+  onProfClick: () => void;
 }
 
-const ProfIcon: FC<ProfIconProp> = ({
-  name,
-  profId,
-  selected,
-  onProfClick,
-  ...restImgProps
-}) => {
+const ProfIcon: FC<ProfIconProp> = ({ name, profId, selected, onProfClick, ...restImgProps }) => {
   return (
     <li
       className="grow cursor-pointer relative flex justify-center items-center"
@@ -197,7 +172,7 @@ const ProfIcon: FC<ProfIconProp> = ({
         <img
           {...restImgProps}
           className="dark:invert-0"
-          src={'/assets/prof-icons/' + profId + '.png'}
+          src={"/assets/prof-icons/" + profId + ".png"}
           alt=""
           title={name}
         />
@@ -206,5 +181,5 @@ const ProfIcon: FC<ProfIconProp> = ({
         <div className="h-full w-1 bg-black dark:bg-white absolute top-0 right-full rounded" />
       )}
     </li>
-  )
-}
+  );
+};

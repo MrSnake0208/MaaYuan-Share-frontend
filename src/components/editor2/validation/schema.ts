@@ -1,31 +1,31 @@
-import { locales } from '@zod/core'
+import { locales } from "@zod/core";
 
-import { get, isNumber, isString } from 'lodash-es'
-import { Primitive } from 'type-fest'
-import * as z from 'zod'
+import { get, isNumber, isString } from "lodash-es";
+import { Primitive } from "type-fest";
+import * as z from "zod";
 
-import { i18n } from '../../../i18n/i18n'
-import { CopilotDocV1 } from '../../../models/copilot.schema'
-import { OpDifficulty } from '../../../models/operation'
-import cn from './error-map-cn'
+import { i18n } from "../../../i18n/i18n";
+import { CopilotDocV1 } from "../../../models/copilot.schema";
+import { OpDifficulty } from "../../../models/operation";
+import cn from "./error-map-cn";
 
-export type ZodIssue = z.core.$ZodIssue
+export type ZodIssue = z.core.$ZodIssue;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-const version = z.number().optional()
-const stage_name = z.string().optional()
-const difficulty = z.enum(OpDifficulty).optional()
-const level_recognition_name = z.string().optional()
-const activity_difficulty_override = z.string().optional()
+const version = z.number().optional();
+const stage_name = z.string().optional();
+const difficulty = z.enum(OpDifficulty).optional();
+const level_recognition_name = z.string().optional();
+const activity_difficulty_override = z.string().optional();
 const minimum_required = z
   .string()
   .regex(
     /^v((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$/,
   )
-  .default('v4.0.0')
+  .default("v4.0.0");
 
 const level_meta = z
   .looseObject({
@@ -38,14 +38,14 @@ const level_meta = z
     width: z.number().int().optional(),
     height: z.number().int().optional(),
   })
-  .optional()
+  .optional();
 
 const doc = z.looseObject({
   title: z.string().optional(),
   details: z.string().optional(),
   title_color: z.string().optional(),
   details_color: z.string().optional(),
-})
+});
 
 const docStrict = doc
   .extend({
@@ -56,7 +56,7 @@ const docStrict = doc
     // the backend requires details to be non-empty, but we don't want to
     // force the user to fill it in, so we use title as a fallback
     details: doc.details || doc.title,
-  }))
+  }));
 
 const operator_requirements = z.looseObject({
   elite: z.number().int().min(0).max(2).optional(),
@@ -64,7 +64,7 @@ const operator_requirements = z.looseObject({
   skill_level: z.number().int().min(0).max(10).optional(),
   module: z.number().int().optional(),
   potentiality: z.number().int().min(0).max(6).optional(),
-})
+});
 
 const operator = z.looseObject({
   name: z.string().min(1),
@@ -72,24 +72,21 @@ const operator = z.looseObject({
   skill_usage: z.number().int().min(0).max(3).optional(),
   skill_times: z.number().int().min(0).optional(),
   requirements: operator_requirements.optional(),
-})
+});
 
 const group = z.looseObject({
   name: z.string(),
   opers: z.array(operator).default([]),
-})
+});
 
 const groupStrict = group.extend({
   name: group.shape.name.min(1),
-})
+});
 
 const actionShape = {
   name: z.string().min(1).optional(),
   location: z
-    .tuple([
-      z.number().int().or(z.undefined()),
-      z.number().int().or(z.undefined()),
-    ])
+    .tuple([z.number().int().or(z.undefined()), z.number().int().or(z.undefined())])
     .optional(),
 
   // We have to use `distance: z.string()` here and later validate it in `.check()`,
@@ -100,9 +97,7 @@ const actionShape = {
     typeof actionWithDirection.shape.direction
   >,
 
-  distance: z
-    .tuple([z.number().or(z.undefined()), z.number().or(z.undefined())])
-    .optional(),
+  distance: z.tuple([z.number().or(z.undefined()), z.number().or(z.undefined())]).optional(),
   skill_usage: operator.shape.skill_usage,
   skill_times: operator.shape.skill_times,
 
@@ -116,12 +111,12 @@ const actionShape = {
   post_delay: z.number().int().min(0).optional(),
   doc: z.string().optional(),
   doc_color: z.string().optional(),
-}
+};
 const actionWithDirection = z.object({
   direction: z.enum(CopilotDocV1.Direction),
-})
+});
 const action = z
-  .discriminatedUnion('type', [
+  .discriminatedUnion("type", [
     z.looseObject({
       type: z.literal(CopilotDocV1.Type.Deploy),
       ...actionShape,
@@ -160,21 +155,21 @@ const action = z
     }),
   ])
   .check(({ value, issues }) => {
-    if ('direction' in value && value.direction !== undefined) {
-      const result = actionWithDirection.safeParse(value)
+    if ("direction" in value && value.direction !== undefined) {
+      const result = actionWithDirection.safeParse(value);
       if (result.error) {
-        issues.push(...(result.error.issues as unknown as typeof issues))
+        issues.push(...(result.error.issues as unknown as typeof issues));
       }
     }
-  })
+  });
 
 const actionShapeStrict = {
   ...actionShape,
   location: z.tuple([z.number().int(), z.number().int()]).optional(),
   distance: z.tuple([z.number(), z.number()]).optional(),
-}
+};
 const actionStrict = z
-  .discriminatedUnion('type', [
+  .discriminatedUnion("type", [
     z.looseObject({
       ...actionShapeStrict,
       type: z.literal(CopilotDocV1.Type.Deploy),
@@ -225,10 +220,10 @@ const actionStrict = z
     }),
   ])
   .check(({ value, issues }) => {
-    if ('direction' in value && value.direction !== undefined) {
-      const result = actionWithDirection.safeParse(value)
+    if ("direction" in value && value.direction !== undefined) {
+      const result = actionWithDirection.safeParse(value);
       if (result.error) {
-        issues.push(...(result.error.issues as unknown as typeof issues))
+        issues.push(...(result.error.issues as unknown as typeof issues));
       }
     }
     if (
@@ -239,19 +234,17 @@ const actionStrict = z
       value.location === undefined
     ) {
       issues.push({
-        code: 'custom',
+        code: "custom",
         input: value,
-        message: '目标或位置至少需要填写一项',
+        message: "目标或位置至少需要填写一项",
         continue: true,
-      })
+      });
     }
-  })
+  });
 
-const siming_actions = z
-  .record(z.string(), z.record(z.string(), z.unknown()))
-  .optional()
+const siming_actions = z.record(z.string(), z.record(z.string(), z.unknown())).optional();
 
-export type CopilotOperationLoose = z.infer<typeof operationLooseSchema>
+export type CopilotOperationLoose = z.infer<typeof operationLooseSchema>;
 export const operationLooseSchema = z.object({
   version,
   stage_name,
@@ -265,136 +258,132 @@ export const operationLooseSchema = z.object({
   groups: z.array(group).default([]),
   actions: z.array(action).default([]),
   siming_actions,
-})
+});
 
 const KNOWN_OPERATION_KEYS = new Set([
-  'version',
-  'stage_name',
-  'stageName',
-  'difficulty',
-  'level_recognition_name',
-  'levelRecognitionName',
-  'activity_difficulty_override',
-  'activityDifficultyOverride',
-  'minimum_required',
-  'minimumRequired',
-  'level_meta',
-  'levelMeta',
-  'doc',
-  'opers',
-  'groups',
-  'actions',
-  'siming_actions',
-  'simingActions',
-])
+  "version",
+  "stage_name",
+  "stageName",
+  "difficulty",
+  "level_recognition_name",
+  "levelRecognitionName",
+  "activity_difficulty_override",
+  "activityDifficultyOverride",
+  "minimum_required",
+  "minimumRequired",
+  "level_meta",
+  "levelMeta",
+  "doc",
+  "opers",
+  "groups",
+  "actions",
+  "siming_actions",
+  "simingActions",
+]);
 
-function isLikelySimingActionEntry(
-  value: unknown,
-): value is Record<string, unknown> {
+function isLikelySimingActionEntry(value: unknown): value is Record<string, unknown> {
   if (!isRecord(value)) {
-    return false
+    return false;
   }
   return (
-    'next' in value ||
-    'action' in value ||
-    'recognition' in value ||
-    'expected' in value ||
-    'text_doc' in value ||
-    'textDoc' in value
-  )
+    "next" in value ||
+    "action" in value ||
+    "recognition" in value ||
+    "expected" in value ||
+    "text_doc" in value ||
+    "textDoc" in value
+  );
 }
 
 function normalizeOperationLooseInput(raw: unknown): unknown {
   if (!isRecord(raw)) {
-    return raw
+    return raw;
   }
 
-  const keys = Object.keys(raw)
-  const hasKnownKey = keys.some((key) => KNOWN_OPERATION_KEYS.has(key))
+  const keys = Object.keys(raw);
+  const hasKnownKey = keys.some((key) => KNOWN_OPERATION_KEYS.has(key));
   if (!hasKnownKey && keys.length > 0) {
-    const entries = Object.values(raw)
-    const isAllLikely =
-      entries.length > 0 && entries.every(isLikelySimingActionEntry)
+    const entries = Object.values(raw);
+    const isAllLikely = entries.length > 0 && entries.every(isLikelySimingActionEntry);
     // 兼容：当 JSON 顶层包含少量“非动作”键（如“作业信息”“抄作业自定义延时”）时，
     // 依然应识别为 Siming 动作表。只要包含至少一个“回合N行动M”或“检测回合N”键即判定为 Siming 结构。
     const hasRoundLikeKeys = keys.some(
       (k) => /^回合\d+行动\d+$/.test(k) || /^检测回合\d+$/.test(k),
-    )
+    );
     if (isAllLikely || hasRoundLikeKeys) {
       return {
         siming_actions: Object.fromEntries(Object.entries(raw)),
         actions: [],
-      }
+      };
     }
   }
 
-  const normalized: Record<string, unknown> = { ...raw }
-  if (!('level_meta' in normalized) && !('levelMeta' in normalized)) {
-    normalized['level_meta'] = {}
+  const normalized: Record<string, unknown> = { ...raw };
+  if (!("level_meta" in normalized) && !("levelMeta" in normalized)) {
+    normalized["level_meta"] = {};
   }
-  const camelSimingActions = normalized['simingActions']
+  const camelSimingActions = normalized["simingActions"];
   if (isRecord(camelSimingActions)) {
-    normalized['siming_actions'] = camelSimingActions
-    delete normalized['simingActions']
+    normalized["siming_actions"] = camelSimingActions;
+    delete normalized["simingActions"];
   }
-  const camelLevelMeta = normalized['levelMeta']
+  const camelLevelMeta = normalized["levelMeta"];
   if (isRecord(camelLevelMeta)) {
-    normalized['level_meta'] = camelLevelMeta
-    delete normalized['levelMeta']
+    normalized["level_meta"] = camelLevelMeta;
+    delete normalized["levelMeta"];
   }
-  if ('levelRecognitionName' in normalized) {
-    normalized['level_recognition_name'] = normalized['levelRecognitionName']
-    delete normalized['levelRecognitionName']
+  if ("levelRecognitionName" in normalized) {
+    normalized["level_recognition_name"] = normalized["levelRecognitionName"];
+    delete normalized["levelRecognitionName"];
   }
-  if ('activityDifficultyOverride' in normalized) {
-    normalized['activity_difficulty_override'] =
-      normalized['activityDifficultyOverride']
-    delete normalized['activityDifficultyOverride']
+  if ("activityDifficultyOverride" in normalized) {
+    normalized["activity_difficulty_override"] = normalized["activityDifficultyOverride"];
+    delete normalized["activityDifficultyOverride"];
   }
-  const actions = normalized['actions']
+  const actions = normalized["actions"];
 
   if (Array.isArray(actions)) {
-    return normalized
+    return normalized;
   }
 
   if (isRecord(actions)) {
     const existingSimingActions = (() => {
-      const snakeCase = normalized['siming_actions']
+      const snakeCase = normalized["siming_actions"];
       if (isRecord(snakeCase)) {
-        return snakeCase
+        return snakeCase;
       }
-      const camelCase = normalized['simingActions']
+      const camelCase = normalized["simingActions"];
       if (isRecord(camelCase)) {
-        return camelCase
+        return camelCase;
       }
-      return {}
-    })()
+      return {};
+    })();
 
-    normalized['siming_actions'] = {
+    normalized["siming_actions"] = {
       ...existingSimingActions,
       ...actions,
+    };
+    normalized["actions"] = [];
+    if ("simingActions" in normalized) {
+      delete normalized["simingActions"];
     }
-    normalized['actions'] = []
-    if ('simingActions' in normalized) {
-      delete normalized['simingActions']
-    }
-    return normalized
+    return normalized;
   }
 
   if (actions === undefined || actions === null) {
-    normalized['actions'] = []
-    return normalized
+    normalized["actions"] = [];
+    return normalized;
   }
 
-  normalized['actions'] = []
-  return normalized
+  normalized["actions"] = [];
+  return normalized;
 }
 
 export function parseOperationLoose(raw: unknown): CopilotOperationLoose {
-  return operationLooseSchema.parse(normalizeOperationLooseInput(raw))
+  return operationLooseSchema.parse(normalizeOperationLooseInput(raw));
 }
 
-export type CopilotOperation = z.infer<typeof operationSchema>
+export type CopilotOperation = z.infer<typeof operationSchema>;
 export const operationSchema = z
   .object({
     version,
@@ -411,29 +400,25 @@ export const operationSchema = z
     actions: z.array(actionStrict).default([]),
   })
   .superRefine((data, ctx) => {
-    const activityCategory = data.level_meta?.cat_one ?? ''
-    const isActivity =
-      typeof activityCategory === 'string' && activityCategory.includes('活动')
+    const activityCategory = data.level_meta?.cat_one ?? "";
+    const isActivity = typeof activityCategory === "string" && activityCategory.includes("活动");
     const activityDiff =
-      typeof data.activity_difficulty_override === 'string'
+      typeof data.activity_difficulty_override === "string"
         ? data.activity_difficulty_override.trim()
-        : ''
+        : "";
     if (!isActivity || !activityDiff.length) {
-      return
+      return;
     }
     const recognition =
-      typeof data.level_recognition_name === 'string'
-        ? data.level_recognition_name.trim()
-        : ''
+      typeof data.level_recognition_name === "string" ? data.level_recognition_name.trim() : "";
     if (!recognition.length) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message:
-          i18n.components.editor2.LevelSelect.activity_recognition_required,
-        path: ['level_recognition_name'],
-      })
+        message: i18n.components.editor2.LevelSelect.activity_recognition_required,
+        path: ["level_recognition_name"],
+      });
     }
-  })
+  });
 
 type Labeled<T> = T extends Primitive
   ? string
@@ -441,7 +426,7 @@ type Labeled<T> = T extends Primitive
     ? U[] extends T // test for array (non-tuple)
       ? { _item: string } & Labeled<U>
       : string
-    : { [K in keyof T as string extends K ? never : K]-?: Labeled<T[K]> }
+    : { [K in keyof T as string extends K ? never : K]-?: Labeled<T[K]> };
 
 export function getLabel(path: PropertyKey[]) {
   const labels: Labeled<CopilotOperation> = {
@@ -452,87 +437,81 @@ export function getLabel(path: PropertyKey[]) {
       ...i18n.components.editor2.label.operation.groups,
       opers: i18n.components.editor2.label.opers,
     },
-  }
-  const labelOrObject = get(labels, path.filter(isString))
+  };
+  const labelOrObject = get(labels, path.filter(isString));
   if (isString(labelOrObject)) {
-    return labelOrObject
+    return labelOrObject;
   }
   // 兼容：当路径不在 CopilotOperation 标签映射中时，labelOrObject 可能为 undefined
-  if (labelOrObject && typeof labelOrObject === 'object') {
+  if (labelOrObject && typeof labelOrObject === "object") {
     // eslint-disable-next-line no-prototype-builtins
-    if ((labelOrObject as any).hasOwnProperty('_item')) {
-      return (labelOrObject as any)._item as string
+    if ((labelOrObject as any).hasOwnProperty("_item")) {
+      return (labelOrObject as any)._item as string;
     }
   }
   // 额外映射：非 Operation 路径（如元数据）
-  const parts = path.filter(isString)
-  if (parts[0] === 'level_recognition_name') {
-    return i18n.components.editor2.LevelSelect.activity_level_recognition_label
+  const parts = path.filter(isString);
+  if (parts[0] === "level_recognition_name") {
+    return i18n.components.editor2.LevelSelect.activity_level_recognition_label;
   }
-  if (parts[0] === 'metadata') {
-    const key = parts[1]
+  if (parts[0] === "metadata") {
+    const key = parts[1];
     switch (key) {
-      case 'tags':
-        return i18n.components.editor2.InfoEditor.tags
-      case 'repostAuthor':
-        return i18n.components.editor2.InfoEditor.repost_author
-      case 'repostPlatform':
-        return i18n.components.editor2.InfoEditor.repost_platform
-      case 'repostUrl':
-        return i18n.components.editor2.InfoEditor.repost_link
-      case 'sourceType':
-        return i18n.components.editor2.InfoEditor.source
-      case 'visibility':
-        return i18n.components.editor2.InfoEditor.visibility
+      case "tags":
+        return i18n.components.editor2.InfoEditor.tags;
+      case "repostAuthor":
+        return i18n.components.editor2.InfoEditor.repost_author;
+      case "repostPlatform":
+        return i18n.components.editor2.InfoEditor.repost_platform;
+      case "repostUrl":
+        return i18n.components.editor2.InfoEditor.repost_link;
+      case "sourceType":
+        return i18n.components.editor2.InfoEditor.source;
+      case "visibility":
+        return i18n.components.editor2.InfoEditor.visibility;
     }
   }
-  return undefined
+  return undefined;
 }
 
 export function getLabeledPath(path: PropertyKey[]): string {
   if (path.length === 0) {
-    return ''
+    return "";
   }
 
-  let label: string | undefined
-  const maybeIndex = path[path.length - 1]
+  let label: string | undefined;
+  const maybeIndex = path[path.length - 1];
 
   if (isNumber(maybeIndex)) {
-    label = maybeIndex + 1 + ''
+    label = maybeIndex + 1 + "";
   } else {
-    label = getLabel(path)
+    label = getLabel(path);
   }
 
-  return [getLabeledPath(path.slice(0, -1)), label].filter(Boolean).join('/')
+  return [getLabeledPath(path.slice(0, -1)), label].filter(Boolean).join("/");
 }
 
-const enError = locales.en()
-const cnError = cn()
+const enError = locales.en();
+const cnError = cn();
 
 z.config({
   localeError: (issue) => {
     // the default error message for missing fields is not very user-friendly
     // so we override it with our own one
     if (
-      (issue.code === 'invalid_type' && issue.input === undefined) ||
-      (issue.code === 'too_small' &&
-        issue.origin === 'string' &&
-        issue.minimum === 1)
+      (issue.code === "invalid_type" && issue.input === undefined) ||
+      (issue.code === "too_small" && issue.origin === "string" && issue.minimum === 1)
     ) {
-      return i18n.components.editor2.validation.required
+      return i18n.components.editor2.validation.required;
     }
 
     // 当数组最小长度为 1 时（例如 opers 至少 1 人），也视为“必填”提示
-    if (
-      issue.code === 'too_small' &&
-      issue.origin === 'array' &&
-      issue.minimum === 1
-    ) {
-      return i18n.components.editor2.validation.required
+    if (issue.code === "too_small" && issue.origin === "array" && issue.minimum === 1) {
+      return i18n.components.editor2.validation.required;
     }
 
-    return i18n.currentLanguage === 'cn'
+    return i18n.currentLanguage === "cn"
       ? (cnError.localeError as (issue: unknown) => any)(issue)
-      : (enError.localeError as (issue: unknown) => any)(issue)
+      : (enError.localeError as (issue: unknown) => any)(issue);
   },
-})
+});

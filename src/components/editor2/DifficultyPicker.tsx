@@ -1,46 +1,46 @@
-import { Button } from '@blueprintjs/core'
+import { Button } from "@blueprintjs/core";
 
-import { FC, Ref, useEffect, useMemo } from 'react'
+import { FC, Ref, useEffect, useMemo } from "react";
 
-import { useLevels } from '../../apis/level'
-import { i18nDefer, useTranslation } from '../../i18n/i18n'
-import { findLevelByStageName, hasHardMode } from '../../models/level'
-import { OpDifficulty } from '../../models/operation'
-import { DetailedSelect, DetailedSelectChoice } from '../editor/DetailedSelect'
+import { useLevels } from "../../apis/level";
+import { i18nDefer, useTranslation } from "../../i18n/i18n";
+import { findLevelByStageName, hasHardMode } from "../../models/level";
+import { OpDifficulty } from "../../models/operation";
+import { DetailedSelect, DetailedSelectChoice } from "../editor/DetailedSelect";
 
 interface DifficultyPickerProps {
-  stageName?: string
-  selectRef?: Ref<HTMLInputElement>
-  value?: OpDifficulty
-  onChange: (value: OpDifficulty, programmatically: boolean) => void
+  stageName?: string;
+  selectRef?: Ref<HTMLInputElement>;
+  value?: OpDifficulty;
+  onChange: (value: OpDifficulty, programmatically: boolean) => void;
   /**
    * 当需要手动指定难度（例如活动关卡）但数据中不存在突袭信息时，强制允许选择。
    */
-  forceEnable?: boolean
+  forceEnable?: boolean;
 }
 
 const DIFFICULTIES = [
   {
-    type: 'choice',
+    type: "choice",
     title: i18nDefer.components.editor2.DifficultyPicker.default,
     value: OpDifficulty.UNKNOWN,
   },
   {
-    type: 'choice',
+    type: "choice",
     title: i18nDefer.components.editor2.DifficultyPicker.regular,
     value: OpDifficulty.REGULAR,
   },
   {
-    type: 'choice',
+    type: "choice",
     title: i18nDefer.components.editor2.DifficultyPicker.hard,
     value: OpDifficulty.HARD,
   },
   {
-    type: 'choice',
+    type: "choice",
     title: i18nDefer.components.editor2.DifficultyPicker.regular_and_hard,
     value: OpDifficulty.REGULAR_HARD,
   },
-] satisfies DetailedSelectChoice[]
+] satisfies DetailedSelectChoice[];
 
 export const DifficultyPicker: FC<DifficultyPickerProps> = ({
   stageName,
@@ -48,33 +48,28 @@ export const DifficultyPicker: FC<DifficultyPickerProps> = ({
   onChange,
   forceEnable = false,
 }) => {
-  const t = useTranslation()
-  const { data: levels } = useLevels()
+  const t = useTranslation();
+  const { data: levels } = useLevels();
 
   const isValidLevel = useMemo(() => {
     if (forceEnable) {
-      return true
+      return true;
     }
     if (!stageName) {
-      return false
+      return false;
     }
     // if the stageName is a custom level, we always allow setting difficulty
     if (!findLevelByStageName(levels, stageName)) {
-      return true
+      return true;
     }
-    return hasHardMode(levels, stageName)
-  }, [forceEnable, levels, stageName])
+    return hasHardMode(levels, stageName);
+  }, [forceEnable, levels, stageName]);
 
   useEffect(() => {
-    if (
-      !forceEnable &&
-      !isValidLevel &&
-      value !== undefined &&
-      value !== OpDifficulty.UNKNOWN
-    ) {
-      onChange(OpDifficulty.UNKNOWN, true)
+    if (!forceEnable && !isValidLevel && value !== undefined && value !== OpDifficulty.UNKNOWN) {
+      onChange(OpDifficulty.UNKNOWN, true);
     }
-  }, [forceEnable, isValidLevel, onChange, value])
+  }, [forceEnable, isValidLevel, onChange, value]);
 
   return (
     <div className="flex gap-2 items-baseline">
@@ -90,10 +85,7 @@ export const DifficultyPicker: FC<DifficultyPickerProps> = ({
             rightIcon="double-caret-vertical"
             disabled={!isValidLevel}
           >
-            {(
-              DIFFICULTIES.find((item) => item.value === value) ??
-              DIFFICULTIES[0]
-            ).title()}
+            {(DIFFICULTIES.find((item) => item.value === value) ?? DIFFICULTIES[0]).title()}
           </Button>
         }
       </DetailedSelect>
@@ -102,12 +94,10 @@ export const DifficultyPicker: FC<DifficultyPickerProps> = ({
           ? t.components.editor2.DifficultyPicker.select_level
           : !forceEnable && !isValidLevel
             ? t.components.editor2.DifficultyPicker.no_hard_mode
-            : forceEnable &&
-                stageName &&
-                !hasHardMode(levels, stageName)
-                ? t.components.editor2.DifficultyPicker.manual_hint
-                : null}
+            : forceEnable && stageName && !hasHardMode(levels, stageName)
+              ? t.components.editor2.DifficultyPicker.manual_hint
+              : null}
       </span>
     </div>
-  )
-}
+  );
+};

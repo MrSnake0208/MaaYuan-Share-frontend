@@ -2,7 +2,7 @@
 // so that { foo: { bar: string }[] } will be converted to { foo?: { bar?: string }[] }
 // instead of { foo?: ({ bar?: string } | undefined)[] } when recurseIntoArrays is true.
 // Also, the recurseIntoArrays option now defaults to true.
-import type { BuiltIns } from 'type-fest/source/internal'
+import type { BuiltIns } from "type-fest/source/internal";
 
 /**
 @see PartialDeep
@@ -13,8 +13,8 @@ type PartialDeepOptions = {
 
   @default true
   */
-  readonly recurseIntoArrays?: boolean
-}
+  readonly recurseIntoArrays?: boolean;
+};
 
 /**
 Create a type from another type with all keys and nested keys set to optional.
@@ -78,7 +78,7 @@ export type PartialDeep<T, Options extends PartialDeepOptions = {}> = T extends
           ? PartialReadonlySetDeep<ItemType, Options>
           : T extends object
             ? T extends ReadonlyArray<infer ItemType> // Test for arrays/tuples, per https://github.com/microsoft/TypeScript/issues/35156
-              ? Options['recurseIntoArrays'] extends false
+              ? Options["recurseIntoArrays"] extends false
                 ? T // If they don't opt into array testing, just use the original type
                 : ItemType[] extends T // Test for arrays (non-tuples) specifically
                   ? readonly ItemType[] extends T // Differentiate readonly and mutable arrays
@@ -86,23 +86,20 @@ export type PartialDeep<T, Options extends PartialDeepOptions = {}> = T extends
                     : Array<PartialDeep<ItemType, Options>>
                   : { [KeyType in keyof T]: PartialDeep<T[KeyType], Options> } // Tuples behave properly
               : PartialObjectDeep<T, Options>
-            : unknown
+            : unknown;
 
 /**
 Same as `PartialDeep`, but accepts only `Map`s and as inputs. Internal helper for `PartialDeep`.
 */
-type PartialMapDeep<
-  KeyType,
-  ValueType,
-  Options extends PartialDeepOptions,
-> = {} & Map<PartialDeep<KeyType, Options>, PartialDeep<ValueType, Options>>
+type PartialMapDeep<KeyType, ValueType, Options extends PartialDeepOptions> = {} & Map<
+  PartialDeep<KeyType, Options>,
+  PartialDeep<ValueType, Options>
+>;
 
 /**
 Same as `PartialDeep`, but accepts only `Set`s as inputs. Internal helper for `PartialDeep`.
 */
-type PartialSetDeep<T, Options extends PartialDeepOptions> = {} & Set<
-  PartialDeep<T, Options>
->
+type PartialSetDeep<T, Options extends PartialDeepOptions> = {} & Set<PartialDeep<T, Options>>;
 
 /**
 Same as `PartialDeep`, but accepts only `ReadonlyMap`s as inputs. Internal helper for `PartialDeep`.
@@ -111,25 +108,18 @@ type PartialReadonlyMapDeep<
   KeyType,
   ValueType,
   Options extends PartialDeepOptions,
-> = {} & ReadonlyMap<
-  PartialDeep<KeyType, Options>,
-  PartialDeep<ValueType, Options>
->
+> = {} & ReadonlyMap<PartialDeep<KeyType, Options>, PartialDeep<ValueType, Options>>;
 
 /**
 Same as `PartialDeep`, but accepts only `ReadonlySet`s as inputs. Internal helper for `PartialDeep`.
 */
-type PartialReadonlySetDeep<
-  T,
-  Options extends PartialDeepOptions,
-> = {} & ReadonlySet<PartialDeep<T, Options>>
+type PartialReadonlySetDeep<T, Options extends PartialDeepOptions> = {} & ReadonlySet<
+  PartialDeep<T, Options>
+>;
 
 /**
 Same as `PartialDeep`, but accepts only `object`s as inputs. Internal helper for `PartialDeep`.
 */
-type PartialObjectDeep<
-  ObjectType extends object,
-  Options extends PartialDeepOptions,
-> = {
-  [KeyType in keyof ObjectType]?: PartialDeep<ObjectType[KeyType], Options>
-}
+type PartialObjectDeep<ObjectType extends object, Options extends PartialDeepOptions> = {
+  [KeyType in keyof ObjectType]?: PartialDeep<ObjectType[KeyType], Options>;
+};

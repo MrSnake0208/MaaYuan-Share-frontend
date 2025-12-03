@@ -1,5 +1,5 @@
-import type { IconName } from '@blueprintjs/core'
-import { Button, Card, HTMLSelect, Icon, InputGroup } from '@blueprintjs/core'
+import type { IconName } from "@blueprintjs/core";
+import { Button, Card, HTMLSelect, Icon, InputGroup } from "@blueprintjs/core";
 import {
   DndContext,
   DragEndEvent,
@@ -7,118 +7,117 @@ import {
   TouchSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core'
-import type { DraggableAttributes } from '@dnd-kit/core'
-import { SortableContext, arrayMove } from '@dnd-kit/sortable'
+} from "@dnd-kit/core";
+import type { DraggableAttributes } from "@dnd-kit/core";
+import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 
-import clsx from 'clsx'
-import { useAtomValue } from 'jotai'
-import isEqual from 'lodash-es/isEqual'
-import { FC, useCallback, useEffect, useMemo, useState } from 'react'
+import clsx from "clsx";
+import { useAtomValue } from "jotai";
+import isEqual from "lodash-es/isEqual";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 
-import { AppToaster } from '../../Toaster'
-import { Droppable, Sortable } from '../../dnd'
-import { NumericInput2 } from '../../editor/NumericInput2'
-import { editorAtoms, useEdit } from '../editor-state'
+import { AppToaster } from "../../Toaster";
+import { Droppable, Sortable } from "../../dnd";
+import { NumericInput2 } from "../../editor/NumericInput2";
+import { editorAtoms, useEdit } from "../editor-state";
 import {
   MappingOptions,
   RoundActionsInput,
   editorActionsToRoundActions,
   roundActionsToEditorActions,
-} from './roundMapping'
-import type { BasicActionSymbol, ChipVariant } from './tokenUtils'
+} from "./roundMapping";
+import type { BasicActionSymbol, ChipVariant } from "./tokenUtils";
 import {
   CHIP_VARIANT_DOT_CLASS,
   SLOT_KEYS,
   groupTokensBySlotWithExtraAttribution,
   resolveChipVariant,
-} from './tokenUtils'
+} from "./tokenUtils";
 
 interface ActionEditorProps {
-  className?: string
+  className?: string;
 }
 
 interface RoundFormState {
-  slot: string
-  basicAction: BasicActionSymbol
-  extraType: 'wait' | 'left' | 'right' | 'lvbu' | 'auto' | 'sp'
-  extraSlot: string
-  extraAction: BasicActionSymbol
-  waitMs: string
-  restartType: 'full' | 'manual' | 'orange' | 'down'
-  restartSlot: string
+  slot: string;
+  basicAction: BasicActionSymbol;
+  extraType: "wait" | "left" | "right" | "lvbu" | "auto" | "sp";
+  extraSlot: string;
+  extraAction: BasicActionSymbol;
+  waitMs: string;
+  restartType: "full" | "manual" | "orange" | "down";
+  restartSlot: string;
 }
 
-const SLOT_OPTIONS = [...SLOT_KEYS]
+const SLOT_OPTIONS = [...SLOT_KEYS];
 const BASIC_ACTION_OPTIONS = [
-  { value: '普', label: 'A' },
-  { value: '大', label: '↑' },
-  { value: '下', label: '↓' },
-] as const
-const BASIC_ACTION_LABEL_MAP: Record<RoundFormState['basicAction'], string> = {
-  普: 'A',
-  大: '↑',
-  下: '↓',
-}
+  { value: "普", label: "A" },
+  { value: "大", label: "↑" },
+  { value: "下", label: "↓" },
+] as const;
+const BASIC_ACTION_LABEL_MAP: Record<RoundFormState["basicAction"], string> = {
+  普: "A",
+  大: "↑",
+  下: "↓",
+};
 
-const getActionSortableId = (roundKey: string, index: number) =>
-  `${roundKey}-action-${index}`
+const getActionSortableId = (roundKey: string, index: number) => `${roundKey}-action-${index}`;
 const EXTRA_TYPES = [
-  { value: 'wait', label: '等待' },
-  { value: 'left', label: '切换至左侧目标' },
-  { value: 'right', label: '切换至右侧目标' },
-  { value: 'lvbu', label: '吕布·切换形态' },
-  { value: 'auto', label: '开启自动战斗' },
-  { value: 'sp', label: '史子眇sp' },
-] as const
+  { value: "wait", label: "等待" },
+  { value: "left", label: "切换至左侧目标" },
+  { value: "right", label: "切换至右侧目标" },
+  { value: "lvbu", label: "吕布·切换形态" },
+  { value: "auto", label: "开启自动战斗" },
+  { value: "sp", label: "史子眇sp" },
+] as const;
 const RESTART_TYPES = [
-  { value: 'full', label: '全灭重开' },
-  { value: 'manual', label: '左上角重开' },
-  { value: 'orange', label: '无橙星重开' },
-  { value: 'down', label: '阵亡检测重开' },
-] as const
-const DEFAULT_WAIT_MS = 1000
+  { value: "full", label: "全灭重开" },
+  { value: "manual", label: "左上角重开" },
+  { value: "orange", label: "无橙星重开" },
+  { value: "down", label: "阵亡检测重开" },
+] as const;
+const DEFAULT_WAIT_MS = 1000;
 
-const ROUND_LIMIT = 50
+const ROUND_LIMIT = 50;
 
 const clampNumber = (value: number, min: number, max: number) => {
   if (Number.isNaN(value)) {
-    return min
+    return min;
   }
-  return Math.min(Math.max(value, min), max)
-}
+  return Math.min(Math.max(value, min), max);
+};
 
-type ActionViewMode = 'round' | 'round2'
+type ActionViewMode = "round" | "round2";
 
-type SyntheticListenerMap = Record<string, Function>
+type SyntheticListenerMap = Record<string, Function>;
 
 const VIEW_MODE_META: Record<
   ActionViewMode,
   { label: string; icon: IconName; description: string }
 > = {
   round: {
-    label: '动作链视图',
-    icon: 'timeline-events',
-    description: '',
+    label: "动作链视图",
+    icon: "timeline-events",
+    description: "",
   },
   round2: {
-    label: '类表格视图',
-    icon: 'layout-grid',
-    description: '按密探分组展示动作，调整布局不影响导出的 JSON 内容。',
+    label: "类表格视图",
+    icon: "layout-grid",
+    description: "按密探分组展示动作，调整布局不影响导出的 JSON 内容。",
   },
-}
+};
 
 interface ActionEditorHeaderProps {
-  viewMode: ActionViewMode
-  onViewModeChange: (mode: ActionViewMode) => void
-  loopStart: number
-  loopEnd: number
-  minRound: number
-  maxRound: number
-  hasRounds: boolean
-  onLoopRangeChange: (field: 'start' | 'end', value: number) => void
-  onAddRound: () => void
-  onGenerateLoop: () => void
+  viewMode: ActionViewMode;
+  onViewModeChange: (mode: ActionViewMode) => void;
+  loopStart: number;
+  loopEnd: number;
+  minRound: number;
+  maxRound: number;
+  hasRounds: boolean;
+  onLoopRangeChange: (field: "start" | "end", value: number) => void;
+  onAddRound: () => void;
+  onGenerateLoop: () => void;
 }
 
 const ActionEditorHeader: FC<ActionEditorHeaderProps> = ({
@@ -133,31 +132,29 @@ const ActionEditorHeader: FC<ActionEditorHeaderProps> = ({
   onAddRound,
   onGenerateLoop,
 }) => {
-  const viewMeta = VIEW_MODE_META[viewMode]
-  const viewLabel = viewMeta.label
-  const viewDescription = viewMeta.description
+  const viewMeta = VIEW_MODE_META[viewMode];
+  const viewLabel = viewMeta.label;
+  const viewDescription = viewMeta.description;
 
   return (
     <div className="sticky top-0 z-20 -mx-4 px-4 pt-4 pb-3 bg-white/95 dark:bg-[#383e47] shadow-sm border-b border-slate-200/70 dark:border-slate-700/70">
       <div className="flex flex-wrap gap-4 items-center justify-between">
         <div>
           <h3 className="text-lg font-bold">动作序列（{viewLabel}）</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {viewDescription}
-          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{viewDescription}</p>
         </div>
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-3 flex-wrap justify-end">
             <div className="flex items-center gap-2 flex-wrap">
               {Object.entries(VIEW_MODE_META).map(([key, meta]) => {
-                const mode = key as ActionViewMode
-                const active = viewMode === mode
+                const mode = key as ActionViewMode;
+                const active = viewMode === mode;
                 return (
                   <button
                     key={mode}
                     type="button"
                     className="editor-round-pill text-sm"
-                    data-state={active ? 'active' : undefined}
+                    data-state={active ? "active" : undefined}
                     data-variant="neutral"
                     aria-pressed={active}
                     onClick={() => onViewModeChange(mode)}
@@ -165,7 +162,7 @@ const ActionEditorHeader: FC<ActionEditorHeaderProps> = ({
                     <Icon icon={meta.icon} />
                     <span>{meta.label}</span>
                   </button>
-                )
+                );
               })}
             </div>
             <button
@@ -183,38 +180,34 @@ const ActionEditorHeader: FC<ActionEditorHeaderProps> = ({
               生成循环
             </span>
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 basis-full sm:basis-auto sm:flex-nowrap">
-              <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
-                起始
-              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">起始</span>
               <NumericInput2
-                containerClassName={`editor-loop-range-input w-20 flex-none sm:w-24${hasRounds ? '' : ' is-disabled'}`}
+                containerClassName={`editor-loop-range-input w-20 flex-none sm:w-24${hasRounds ? "" : " is-disabled"}`}
                 inputClassName="!text-center"
                 intOnly
                 min={minRound}
                 max={maxRound}
                 value={loopStart}
                 disabled={!hasRounds}
-                onValueChange={(value) => onLoopRangeChange('start', value)}
+                onValueChange={(value) => onLoopRangeChange("start", value)}
               />
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 basis-full sm:basis-auto sm:flex-nowrap">
-              <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
-                结束
-              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">结束</span>
               <NumericInput2
-                containerClassName={`editor-loop-range-input w-20 flex-none sm:w-24${hasRounds ? '' : ' is-disabled'}`}
+                containerClassName={`editor-loop-range-input w-20 flex-none sm:w-24${hasRounds ? "" : " is-disabled"}`}
                 inputClassName="!text-center"
                 intOnly
                 min={minRound}
                 max={maxRound}
                 value={loopEnd}
                 disabled={!hasRounds}
-                onValueChange={(value) => onLoopRangeChange('end', value)}
+                onValueChange={(value) => onLoopRangeChange("end", value)}
               />
             </div>
             <button
               type="button"
-              className={`editor-round-pill text-sm flex-shrink-0 basis-full sm:basis-auto w-full sm:w-auto justify-center whitespace-nowrap${hasRounds ? '' : ' is-disabled'}`}
+              className={`editor-round-pill text-sm flex-shrink-0 basis-full sm:basis-auto w-full sm:w-auto justify-center whitespace-nowrap${hasRounds ? "" : " is-disabled"}`}
               data-variant="teal"
               onClick={onGenerateLoop}
               disabled={!hasRounds}
@@ -226,17 +219,17 @@ const ActionEditorHeader: FC<ActionEditorHeaderProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 interface RoundChipProps {
-  label: string
-  variant: ChipVariant
-  onRemove?: () => void
-  draggableAttributes?: DraggableAttributes
-  draggableListeners?: SyntheticListenerMap
-  className?: string
-  isDraggable?: boolean
+  label: string;
+  variant: ChipVariant;
+  onRemove?: () => void;
+  draggableAttributes?: DraggableAttributes;
+  draggableListeners?: SyntheticListenerMap;
+  className?: string;
+  isDraggable?: boolean;
 }
 
 const RoundChip: FC<RoundChipProps> = ({
@@ -249,17 +242,17 @@ const RoundChip: FC<RoundChipProps> = ({
   isDraggable,
 }) => {
   const cursorClass = isDraggable
-    ? 'cursor-grab active:cursor-grabbing'
+    ? "cursor-grab active:cursor-grabbing"
     : onRemove
-      ? 'cursor-pointer'
-      : 'cursor-default'
+      ? "cursor-pointer"
+      : "cursor-default";
 
   return (
     <div
       className={clsx(
-        'editor-round-chip text-xs sm:text-sm font-medium select-none whitespace-nowrap',
+        "editor-round-chip text-xs sm:text-sm font-medium select-none whitespace-nowrap",
         cursorClass,
-        onRemove && 'pr-1.5',
+        onRemove && "pr-1.5",
         className,
       )}
       data-variant={variant}
@@ -268,7 +261,7 @@ const RoundChip: FC<RoundChipProps> = ({
     >
       <span
         className={clsx(
-          'inline-flex h-2.5 w-2.5 flex-none rounded-full',
+          "inline-flex h-2.5 w-2.5 flex-none rounded-full",
           CHIP_VARIANT_DOT_CLASS[variant],
         )}
         aria-hidden="true"
@@ -279,9 +272,9 @@ const RoundChip: FC<RoundChipProps> = ({
           type="button"
           className="ml-2 inline-flex h-5 w-5 flex-none items-center justify-center rounded-full bg-white/60 text-slate-500 transition hover:bg-white hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 dark:bg-slate-700/70 dark:hover:bg-slate-600/80 dark:text-slate-200"
           onClick={(event) => {
-            event.preventDefault()
-            event.stopPropagation()
-            onRemove()
+            event.preventDefault();
+            event.stopPropagation();
+            onRemove();
           }}
           aria-label="移除此动作"
         >
@@ -289,33 +282,33 @@ const RoundChip: FC<RoundChipProps> = ({
         </button>
       ) : null}
     </div>
-  )
-}
+  );
+};
 
 function defaultFormState(): RoundFormState {
   return {
-    slot: '1',
-    basicAction: '普',
-    extraType: 'wait',
-    extraSlot: '1',
-    extraAction: '普',
+    slot: "1",
+    basicAction: "普",
+    extraType: "wait",
+    extraSlot: "1",
+    extraAction: "普",
     waitMs: String(DEFAULT_WAIT_MS),
-    restartType: 'full',
-    restartSlot: '1',
-  }
+    restartType: "full",
+    restartSlot: "1",
+  };
 }
 
 function cloneRoundActions(source: RoundActionsInput): RoundActionsInput {
-  const result: RoundActionsInput = {}
+  const result: RoundActionsInput = {};
   for (const [round, actions] of Object.entries(source)) {
-    result[round] = actions.map((entry) => [...entry])
+    result[round] = actions.map((entry) => [...entry]);
   }
-  return result
+  return result;
 }
 
 function ensureRoundKey(roundKey: string, input: RoundActionsInput) {
   if (!input[roundKey]) {
-    input[roundKey] = []
+    input[roundKey] = [];
   }
 }
 
@@ -323,73 +316,71 @@ function ensureRoundKey(roundKey: string, input: RoundActionsInput) {
 function reindexRoundActions(input: RoundActionsInput): RoundActionsInput {
   const sorted = Object.entries(input)
     .sort(([a], [b]) => Number(a) - Number(b))
-    .map(([, actions]) => actions)
+    .map(([, actions]) => actions);
 
-  const result: RoundActionsInput = {}
+  const result: RoundActionsInput = {};
   for (let i = 0; i < sorted.length; i += 1) {
     // 保持不可变：复制每个 entry
-    result[String(i + 1)] = (sorted[i] ?? []).map((entry) => [...entry])
+    result[String(i + 1)] = (sorted[i] ?? []).map((entry) => [...entry]);
   }
-  return result
+  return result;
 }
 
 function normalizeRoundActions(input: RoundActionsInput): RoundActionsInput {
-  const cleaned: RoundActionsInput = {}
+  const cleaned: RoundActionsInput = {};
   Object.entries(input)
     .sort(([a], [b]) => Number(a) - Number(b))
     .forEach(([round, actions]) => {
       const filtered = actions
         .map((entry) => entry.filter((token) => token.trim()) as string[])
-        .filter((entry) => entry.length > 0)
-      cleaned[round] = filtered.length > 0 ? filtered : []
-    })
-  return cleaned
+        .filter((entry) => entry.length > 0);
+      cleaned[round] = filtered.length > 0 ? filtered : [];
+    });
+  return cleaned;
 }
 
 export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
-  const actions = useAtomValue(editorAtoms.actions)
-  const operation = useAtomValue(editorAtoms.operation)
-  const edit = useEdit()
+  const actions = useAtomValue(editorAtoms.actions);
+  const operation = useAtomValue(editorAtoms.operation);
+  const edit = useEdit();
 
-  const slotAssignments: MappingOptions['slotAssignments'] = useMemo(() => {
-    const result: MappingOptions['slotAssignments'] = {}
-    const candidates = operation.opers ?? []
+  const slotAssignments: MappingOptions["slotAssignments"] = useMemo(() => {
+    const result: MappingOptions["slotAssignments"] = {};
+    const candidates = operation.opers ?? [];
     for (let i = 0; i < Math.min(5, candidates.length); i += 1) {
-      const oper = candidates[i]
+      const oper = candidates[i];
       if (oper?.name) {
-        result[i + 1] = { name: oper.name }
+        result[i + 1] = { name: oper.name };
       }
     }
-    return result
-  }, [operation.opers])
+    return result;
+  }, [operation.opers]);
 
   const [roundActions, setRoundActions] = useState<RoundActionsInput>(() =>
     editorActionsToRoundActions(actions),
-  )
+  );
   const roundKeys = useMemo(
     () => Object.keys(roundActions).sort((a, b) => Number(a) - Number(b)),
     [roundActions],
-  )
+  );
   const numericRoundKeys = useMemo(
     () => roundKeys.map((key) => Number(key)).sort((a, b) => a - b),
     [roundKeys],
-  )
-  const [loopRange, setLoopRange] = useState(() => ({ start: 1, end: 1 }))
-  const hasRounds = numericRoundKeys.length > 0
-  const minRound = hasRounds ? numericRoundKeys[0] : 1
-  const maxRound = hasRounds ? numericRoundKeys[numericRoundKeys.length - 1] : 1
-  const loopStart = loopRange.start
-  const loopEnd = loopRange.end
-  const [roundForms, setRoundForms] = useState<Record<string, RoundFormState>>(
-    () => {
-      const initial: Record<string, RoundFormState> = {}
-      roundKeys.forEach((key) => {
-        initial[key] = defaultFormState()
-      })
-      return initial
-    },
-  )
-  const [viewMode, setViewMode] = useState<ActionViewMode>('round')
+  );
+  const [loopRange, setLoopRange] = useState(() => ({ start: 1, end: 1 }));
+  const hasRounds = numericRoundKeys.length > 0;
+  const minRound = hasRounds ? numericRoundKeys[0] : 1;
+  const maxRound = hasRounds ? numericRoundKeys[numericRoundKeys.length - 1] : 1;
+  const loopStart = loopRange.start;
+  const loopEnd = loopRange.end;
+  const [roundForms, setRoundForms] = useState<Record<string, RoundFormState>>(() => {
+    const initial: Record<string, RoundFormState> = {};
+    roundKeys.forEach((key) => {
+      initial[key] = defaultFormState();
+    });
+    return initial;
+  });
+  const [viewMode, setViewMode] = useState<ActionViewMode>("round");
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -398,82 +389,75 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
     useSensor(TouchSensor, {
       activationConstraint: { delay: 200, tolerance: 5 },
     }),
-  )
+  );
 
   useEffect(() => {
     // 从 EditorAction 同步到回合视图时，先清洗与重算，确保回合序号始终为 1..N 连续编号
-    const original = editorActionsToRoundActions(actions)
-    const normalized = normalizeRoundActions(original)
-    const reindexed = reindexRoundActions(normalized)
+    const original = editorActionsToRoundActions(actions);
+    const normalized = normalizeRoundActions(original);
+    const reindexed = reindexRoundActions(normalized);
 
     setRoundActions((prev) => {
-      const merged: RoundActionsInput = { ...reindexed }
+      const merged: RoundActionsInput = { ...reindexed };
       // 保留此前存在但已被清空的占位回合，避免 UI 抖动
       Object.entries(prev).forEach(([roundKey, entries]) => {
         if (!merged[roundKey] && entries.length === 0) {
-          merged[roundKey] = []
+          merged[roundKey] = [];
         }
-      })
-      return isEqual(prev, merged) ? prev : merged
-    })
+      });
+      return isEqual(prev, merged) ? prev : merged;
+    });
 
     // 若检测到存在跳号/重复号导致的重算，则回写到全局 actions，保证“首次打开/导入”后立即修正
     if (!isEqual(normalized, reindexed)) {
       edit((get, set) => {
-        set(
-          editorAtoms.actions,
-          roundActionsToEditorActions(reindexed, { slotAssignments }),
-        )
+        set(editorAtoms.actions, roundActionsToEditorActions(reindexed, { slotAssignments }));
         return {
-          action: 'round-actions-reindex',
-          desc: '重算回合序号（导入/打开）',
-        }
-      })
+          action: "round-actions-reindex",
+          desc: "重算回合序号（导入/打开）",
+        };
+      });
     }
-  }, [actions, edit, slotAssignments])
+  }, [actions, edit, slotAssignments]);
 
   useEffect(() => {
     setRoundForms((prev) => {
-      const next: Record<string, RoundFormState> = {}
+      const next: Record<string, RoundFormState> = {};
       roundKeys.forEach((key) => {
-        next[key] = { ...defaultFormState(), ...(prev[key] ?? {}) }
-      })
-      return next
-    })
-  }, [roundKeys])
+        next[key] = { ...defaultFormState(), ...(prev[key] ?? {}) };
+      });
+      return next;
+    });
+  }, [roundKeys]);
 
   useEffect(() => {
     if (!hasRounds) {
       setLoopRange((prev) => {
         if (prev.start === 1 && prev.end === 1) {
-          return prev
+          return prev;
         }
-        return { start: 1, end: 1 }
-      })
-      return
+        return { start: 1, end: 1 };
+      });
+      return;
     }
     setLoopRange((prev) => {
-      const nextStart = clampNumber(prev.start, minRound, maxRound)
-      const nextEnd = clampNumber(
-        Math.max(nextStart, prev.end),
-        minRound,
-        maxRound,
-      )
+      const nextStart = clampNumber(prev.start, minRound, maxRound);
+      const nextEnd = clampNumber(Math.max(nextStart, prev.end), minRound, maxRound);
       if (nextStart === prev.start && nextEnd === prev.end) {
-        return prev
+        return prev;
       }
-      return { start: nextStart, end: nextEnd }
-    })
-  }, [hasRounds, maxRound, minRound])
+      return { start: nextStart, end: nextEnd };
+    });
+  }, [hasRounds, maxRound, minRound]);
 
   const applyRoundActions = useCallback(
     (updater: (current: RoundActionsInput) => RoundActionsInput) => {
       setRoundActions((prev) => {
-        const cloned = cloneRoundActions(prev)
-        const normalized = normalizeRoundActions(updater(cloned))
-        const reindexed = reindexRoundActions(normalized)
+        const cloned = cloneRoundActions(prev);
+        const normalized = normalizeRoundActions(updater(cloned));
+        const reindexed = reindexRoundActions(normalized);
         if (isEqual(prev, reindexed)) {
-          return prev
+          return prev;
         }
         edit((get, set) => {
           set(
@@ -481,466 +465,451 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
             roundActionsToEditorActions(reindexed, {
               slotAssignments,
             }),
-          )
+          );
           return {
-            action: 'round-actions-update',
-            desc: '更新回合动作（含自动重算序号）',
-          }
-        })
-        return reindexed
-      })
+            action: "round-actions-update",
+            desc: "更新回合动作（含自动重算序号）",
+          };
+        });
+        return reindexed;
+      });
     },
     [edit, slotAssignments],
-  )
+  );
 
-  const updateForm = useCallback(
-    (roundKey: string, patch: Partial<RoundFormState>) => {
-      setRoundForms((prev) => ({
-        ...prev,
-        [roundKey]: {
-          ...prev[roundKey],
-          ...patch,
-        },
-      }))
-    },
-    [],
-  )
+  const updateForm = useCallback((roundKey: string, patch: Partial<RoundFormState>) => {
+    setRoundForms((prev) => ({
+      ...prev,
+      [roundKey]: {
+        ...prev[roundKey],
+        ...patch,
+      },
+    }));
+  }, []);
 
   const handleLoopRangeChange = useCallback(
-    (field: 'start' | 'end', nextValue: number) => {
+    (field: "start" | "end", nextValue: number) => {
       if (!hasRounds) {
-        return
+        return;
       }
       if (!Number.isFinite(nextValue)) {
-        return
+        return;
       }
       setLoopRange((prev) => {
-        if (field === 'start') {
-          const nextStart = clampNumber(nextValue, minRound, maxRound)
-          const nextEnd = clampNumber(
-            Math.max(nextStart, prev.end),
-            nextStart,
-            maxRound,
-          )
+        if (field === "start") {
+          const nextStart = clampNumber(nextValue, minRound, maxRound);
+          const nextEnd = clampNumber(Math.max(nextStart, prev.end), nextStart, maxRound);
           if (nextStart === prev.start && nextEnd === prev.end) {
-            return prev
+            return prev;
           }
-          return { start: nextStart, end: nextEnd }
+          return { start: nextStart, end: nextEnd };
         }
-        const nextEnd = clampNumber(nextValue, minRound, maxRound)
-        const baseStart = clampNumber(prev.start, minRound, maxRound)
-        const nextStart = clampNumber(baseStart, minRound, nextEnd)
+        const nextEnd = clampNumber(nextValue, minRound, maxRound);
+        const baseStart = clampNumber(prev.start, minRound, maxRound);
+        const nextStart = clampNumber(baseStart, minRound, nextEnd);
         if (nextStart === prev.start && nextEnd === prev.end) {
-          return prev
+          return prev;
         }
-        return { start: nextStart, end: nextEnd }
-      })
+        return { start: nextStart, end: nextEnd };
+      });
     },
     [hasRounds, maxRound, minRound],
-  )
+  );
 
   const handleGenerateLoop = useCallback(() => {
     if (!hasRounds) {
-      AppToaster.show({ message: '请先添加至少一个回合', intent: 'danger' })
-      return
+      AppToaster.show({ message: "请先添加至少一个回合", intent: "danger" });
+      return;
     }
-    const start = loopStart
-    const end = loopEnd
+    const start = loopStart;
+    const end = loopEnd;
     if (start > end) {
-      AppToaster.show({ message: '起始回合不能大于结束回合', intent: 'danger' })
-      return
+      AppToaster.show({ message: "起始回合不能大于结束回合", intent: "danger" });
+      return;
     }
-    const missingRounds: number[] = []
+    const missingRounds: number[] = [];
     for (let round = start; round <= end; round += 1) {
       if (!Object.prototype.hasOwnProperty.call(roundActions, String(round))) {
-        missingRounds.push(round)
+        missingRounds.push(round);
       }
     }
     if (missingRounds.length > 0) {
       AppToaster.show({
-        message: `回合 ${missingRounds.join(', ')} 未设置，无法生成循环`,
-        intent: 'danger',
-      })
-      return
+        message: `回合 ${missingRounds.join(", ")} 未设置，无法生成循环`,
+        intent: "danger",
+      });
+      return;
     }
-    const templateLength = end - start + 1
-    const currentMax = maxRound
-    const targetEnd = currentMax + templateLength
+    const templateLength = end - start + 1;
+    const currentMax = maxRound;
+    const targetEnd = currentMax + templateLength;
     if (targetEnd > ROUND_LIMIT) {
       AppToaster.show({
         message: `复制后将超过 ${ROUND_LIMIT} 回合限制`,
-        intent: 'danger',
-      })
-      return
+        intent: "danger",
+      });
+      return;
     }
     applyRoundActions((current) => {
-      const next = cloneRoundActions(current)
+      const next = cloneRoundActions(current);
       for (let offset = 0; offset < templateLength; offset += 1) {
-        const sourceKey = String(start + offset)
-        const targetKey = String(currentMax + offset + 1)
-        const sourceEntries = next[sourceKey] ?? []
-        next[targetKey] = sourceEntries.map((entry) => [...entry])
+        const sourceKey = String(start + offset);
+        const targetKey = String(currentMax + offset + 1);
+        const sourceEntries = next[sourceKey] ?? [];
+        next[targetKey] = sourceEntries.map((entry) => [...entry]);
       }
-      return next
-    })
+      return next;
+    });
     AppToaster.show({
       message: `已复制第${start}~${end}回合至第${currentMax + 1}~${targetEnd}回合`,
-      intent: 'success',
-    })
-  }, [applyRoundActions, hasRounds, loopEnd, loopStart, maxRound, roundActions])
+      intent: "success",
+    });
+  }, [applyRoundActions, hasRounds, loopEnd, loopStart, maxRound, roundActions]);
 
   const handleAddRound = useCallback(() => {
     applyRoundActions((current) => {
-      const next = cloneRoundActions(current)
-      const numbers = Object.keys(next).map((key) => Number(key))
-      const nextRound = numbers.length ? Math.max(...numbers) + 1 : 1
-      next[String(nextRound)] = []
-      return next
-    })
-  }, [applyRoundActions])
+      const next = cloneRoundActions(current);
+      const numbers = Object.keys(next).map((key) => Number(key));
+      const nextRound = numbers.length ? Math.max(...numbers) + 1 : 1;
+      next[String(nextRound)] = [];
+      return next;
+    });
+  }, [applyRoundActions]);
 
   const handleRemoveRound = useCallback(
     (roundKey: string) => {
       applyRoundActions((current) => {
-        const next = cloneRoundActions(current)
-        delete next[roundKey]
+        const next = cloneRoundActions(current);
+        delete next[roundKey];
         // 删除后重新编号，确保后续回合序号依次递减 1
-        return reindexRoundActions(next)
-      })
+        return reindexRoundActions(next);
+      });
     },
     [applyRoundActions],
-  )
+  );
 
   const handleAddToken = useCallback(
     (roundKey: string, token: string) => {
       applyRoundActions((current) => {
-        const next = cloneRoundActions(current)
-        ensureRoundKey(roundKey, next)
-        next[roundKey].push([token])
-        return next
-      })
+        const next = cloneRoundActions(current);
+        ensureRoundKey(roundKey, next);
+        next[roundKey].push([token]);
+        return next;
+      });
     },
     [applyRoundActions],
-  )
+  );
 
   const handleRemoveToken = useCallback(
     (roundKey: string, index: number) => {
       applyRoundActions((current) => {
-        const next = cloneRoundActions(current)
-        const list = next[roundKey] ?? []
-        next[roundKey] = list.filter((_, i) => i !== index)
+        const next = cloneRoundActions(current);
+        const list = next[roundKey] ?? [];
+        next[roundKey] = list.filter((_, i) => i !== index);
         if (next[roundKey].length === 0) {
-          delete next[roundKey]
+          delete next[roundKey];
         }
-        return next
-      })
+        return next;
+      });
     },
     [applyRoundActions],
-  )
+  );
 
   const handleAddBasicAction = useCallback(
-    (roundKey: string, action?: RoundFormState['basicAction']) => {
-      const form = roundForms[roundKey] ?? defaultFormState()
-      const actionSymbol = action ?? form.basicAction
+    (roundKey: string, action?: RoundFormState["basicAction"]) => {
+      const form = roundForms[roundKey] ?? defaultFormState();
+      const actionSymbol = action ?? form.basicAction;
       if (actionSymbol !== form.basicAction) {
-        updateForm(roundKey, { basicAction: actionSymbol })
+        updateForm(roundKey, { basicAction: actionSymbol });
       }
-      const token = `${form.slot}${actionSymbol}`
-      handleAddToken(roundKey, token)
+      const token = `${form.slot}${actionSymbol}`;
+      handleAddToken(roundKey, token);
     },
     [handleAddToken, roundForms, updateForm],
-  )
+  );
 
   const handleAddExtraAction = useCallback(
     (roundKey: string) => {
-      const form = roundForms[roundKey] ?? defaultFormState()
+      const form = roundForms[roundKey] ?? defaultFormState();
       switch (form.extraType) {
-        case 'wait': {
-          const waitMs = Math.max(
-            0,
-            Number.parseInt(form.waitMs, 10) || DEFAULT_WAIT_MS,
-          )
-          handleAddToken(roundKey, '额外:等待:' + waitMs)
-          break
+        case "wait": {
+          const waitMs = Math.max(0, Number.parseInt(form.waitMs, 10) || DEFAULT_WAIT_MS);
+          handleAddToken(roundKey, "额外:等待:" + waitMs);
+          break;
         }
-        case 'left':
-          handleAddToken(roundKey, '额外:左侧目标')
-          break
-        case 'right':
-          handleAddToken(roundKey, '额外:右侧目标')
-          break
-        case 'lvbu':
-          handleAddToken(roundKey, '额外:吕布')
-          break
-        case 'auto':
-          handleAddToken(roundKey, '额外:开自动')
-          break
-        case 'sp':
-          handleAddToken(roundKey, '额外:史子眇sp')
-          break
+        case "left":
+          handleAddToken(roundKey, "额外:左侧目标");
+          break;
+        case "right":
+          handleAddToken(roundKey, "额外:右侧目标");
+          break;
+        case "lvbu":
+          handleAddToken(roundKey, "额外:吕布");
+          break;
+        case "auto":
+          handleAddToken(roundKey, "额外:开自动");
+          break;
+        case "sp":
+          handleAddToken(roundKey, "额外:史子眇sp");
+          break;
         default:
-          break
+          break;
       }
     },
     [handleAddToken, roundForms],
-  )
+  );
 
   const handleAddRestartAction = useCallback(
     (roundKey: string) => {
-      const form = roundForms[roundKey] ?? defaultFormState()
-      let token: string
+      const form = roundForms[roundKey] ?? defaultFormState();
+      let token: string;
       switch (form.restartType) {
-        case 'manual':
-          token = '重开:左上角'
-          break
-        case 'orange':
-          token = '重开:无橙星'
-          break
-        case 'down': {
-          const slot = form.restartSlot || '1'
-          token = '重开:检测' + slot + '号位阵亡'
-          break
+        case "manual":
+          token = "重开:左上角";
+          break;
+        case "orange":
+          token = "重开:无橙星";
+          break;
+        case "down": {
+          const slot = form.restartSlot || "1";
+          token = "重开:检测" + slot + "号位阵亡";
+          break;
         }
         default:
-          token = '重开:全灭'
-          break
+          token = "重开:全灭";
+          break;
       }
-      handleAddToken(roundKey, token)
+      handleAddToken(roundKey, token);
     },
     [handleAddToken, roundForms],
-  )
+  );
 
   const handleSelectSpy = useCallback(
     (roundKey: string, slot: string) => {
-      updateForm(roundKey, { slot, extraSlot: slot, restartSlot: slot })
+      updateForm(roundKey, { slot, extraSlot: slot, restartSlot: slot });
     },
     [updateForm],
-  )
+  );
 
   const formatTokenLabel = useCallback(
     (rawToken: string) => {
-      const token = rawToken.trim()
+      const token = rawToken.trim();
       if (!token) {
-        return '未设定动作'
+        return "未设定动作";
       }
 
       const buildSlotLabel = (slot: number, actionLabel?: string) => {
-        const name = slotAssignments?.[slot]?.name?.trim()
-        const prefix = name ? `${slot}号位·${name}` : `${slot}号位`
-        return actionLabel ? `${prefix}（${actionLabel}）` : prefix
-      }
+        const name = slotAssignments?.[slot]?.name?.trim();
+        const prefix = name ? `${slot}号位·${name}` : `${slot}号位`;
+        return actionLabel ? `${prefix}（${actionLabel}）` : prefix;
+      };
 
-      const baseMatch = token.match(/^(\d)([普大下])$/)
+      const baseMatch = token.match(/^(\d)([普大下])$/);
       if (baseMatch) {
-        const slot = Number(baseMatch[1])
-        const actionSymbol = baseMatch[2] as RoundFormState['basicAction']
-        const actionLabel = BASIC_ACTION_LABEL_MAP[actionSymbol]
-        return buildSlotLabel(slot, actionLabel)
+        const slot = Number(baseMatch[1]);
+        const actionSymbol = baseMatch[2] as RoundFormState["basicAction"];
+        const actionLabel = BASIC_ACTION_LABEL_MAP[actionSymbol];
+        return buildSlotLabel(slot, actionLabel);
       }
 
-      if (token.startsWith('额外:')) {
-        const extraPayload = token.slice('额外:'.length)
-        const againMatch = extraPayload.match(/^([1-5])([普大下])$/)
+      if (token.startsWith("额外:")) {
+        const extraPayload = token.slice("额外:".length);
+        const againMatch = extraPayload.match(/^([1-5])([普大下])$/);
         if (againMatch) {
-          const actionSymbol = againMatch[2] as RoundFormState['basicAction']
-          return '再动·' + BASIC_ACTION_LABEL_MAP[actionSymbol]
+          const actionSymbol = againMatch[2] as RoundFormState["basicAction"];
+          return "再动·" + BASIC_ACTION_LABEL_MAP[actionSymbol];
         }
 
-        if (extraPayload.startsWith('等待:')) {
-          const wait = extraPayload.split(':')[1] ?? ''
-          return '等待 ' + wait + 'ms'
+        if (extraPayload.startsWith("等待:")) {
+          const wait = extraPayload.split(":")[1] ?? "";
+          return "等待 " + wait + "ms";
         }
 
-        if (extraPayload === '左侧目标') {
-          return '切换左侧目标'
+        if (extraPayload === "左侧目标") {
+          return "切换左侧目标";
         }
-        if (extraPayload === '右侧目标') {
-          return '切换右侧目标'
+        if (extraPayload === "右侧目标") {
+          return "切换右侧目标";
         }
-        if (extraPayload === '吕布') {
-          return '吕布切换'
+        if (extraPayload === "吕布") {
+          return "吕布切换";
         }
-        if (extraPayload === '开自动') {
-          return '开启自动'
+        if (extraPayload === "开自动") {
+          return "开启自动";
         }
-        if (extraPayload === '史子眇sp') {
-          return '史子眇sp'
+        if (extraPayload === "史子眇sp") {
+          return "史子眇sp";
         }
 
-        return extraPayload
+        return extraPayload;
       }
 
-      if (token.startsWith('重开:')) {
-        if (token === '重开:无橙星') {
-          return '无橙星重开'
+      if (token.startsWith("重开:")) {
+        if (token === "重开:无橙星") {
+          return "无橙星重开";
         }
-        if (token.startsWith('重开:检测')) {
-          return token.replace('重开:', '')
+        if (token.startsWith("重开:检测")) {
+          return token.replace("重开:", "");
         }
-        const type = token.split(':')[1]
-        return type === '左上角' ? '左上角重开' : '全灭重开'
+        const type = token.split(":")[1];
+        return type === "左上角" ? "左上角重开" : "全灭重开";
       }
 
-      return token
+      return token;
     },
     [slotAssignments],
-  )
+  );
 
   const formatTokenSummary = useCallback((rawToken: string) => {
-    const token = rawToken.trim()
+    const token = rawToken.trim();
     if (!token) {
-      return '未设定'
+      return "未设定";
     }
 
-    const baseMatch = token.match(/^(\d)([普大下])$/)
+    const baseMatch = token.match(/^(\d)([普大下])$/);
     if (baseMatch) {
-      const actionSymbol = baseMatch[2] as RoundFormState['basicAction']
-      return BASIC_ACTION_LABEL_MAP[actionSymbol]
+      const actionSymbol = baseMatch[2] as RoundFormState["basicAction"];
+      return BASIC_ACTION_LABEL_MAP[actionSymbol];
     }
 
-    if (token.startsWith('额外:')) {
-      const extraPayload = token.slice('额外:'.length)
-      const againMatch = extraPayload.match(/^(\d)([普大下])$/)
+    if (token.startsWith("额外:")) {
+      const extraPayload = token.slice("额外:".length);
+      const againMatch = extraPayload.match(/^(\d)([普大下])$/);
       if (againMatch) {
-        const actionSymbol = againMatch[2] as RoundFormState['basicAction']
-        return `额外·${BASIC_ACTION_LABEL_MAP[actionSymbol]}`
+        const actionSymbol = againMatch[2] as RoundFormState["basicAction"];
+        return `额外·${BASIC_ACTION_LABEL_MAP[actionSymbol]}`;
       }
 
-      if (extraPayload.startsWith('等待:')) {
-        const wait = extraPayload.split(':')[1] ?? ''
-        return `等待 ${wait}ms`
+      if (extraPayload.startsWith("等待:")) {
+        const wait = extraPayload.split(":")[1] ?? "";
+        return `等待 ${wait}ms`;
       }
 
-      if (extraPayload === '左侧目标') {
-        return '切换左侧目标'
+      if (extraPayload === "左侧目标") {
+        return "切换左侧目标";
       }
-      if (extraPayload === '右侧目标') {
-        return '切换右侧目标'
+      if (extraPayload === "右侧目标") {
+        return "切换右侧目标";
       }
-      if (extraPayload === '吕布') {
-        return '吕布切换'
+      if (extraPayload === "吕布") {
+        return "吕布切换";
       }
-      if (extraPayload === '开自动') {
-        return '开启自动'
+      if (extraPayload === "开自动") {
+        return "开启自动";
       }
-      if (extraPayload === '史子眇sp') {
-        return '史子眇sp'
+      if (extraPayload === "史子眇sp") {
+        return "史子眇sp";
       }
 
-      return extraPayload
+      return extraPayload;
     }
 
-    if (token === '重开:无橙星') {
-      return '无橙星'
+    if (token === "重开:无橙星") {
+      return "无橙星";
     }
-    if (token === '重开:左上角') {
-      return '左上角重开'
+    if (token === "重开:左上角") {
+      return "左上角重开";
     }
-    if (token === '重开:全灭') {
-      return '全灭重开'
+    if (token === "重开:全灭") {
+      return "全灭重开";
     }
-    if (token.startsWith('重开:检测')) {
-      return token.replace('重开:', '')
+    if (token.startsWith("重开:检测")) {
+      return token.replace("重开:", "");
     }
 
-    return token
-  }, [])
+    return token;
+  }, []);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
-      const { active, over } = event
+      const { active, over } = event;
       if (!over || active.id === over.id) {
-        return
+        return;
       }
-      const activeType = active.data.current?.type as string | undefined
+      const activeType = active.data.current?.type as string | undefined;
 
-      if (activeType === 'round') {
-        const activeKey = active.data.current?.roundKey as string | undefined
+      if (activeType === "round") {
+        const activeKey = active.data.current?.roundKey as string | undefined;
         const overKey =
           (over.data.current?.roundKey as string | undefined) ||
-          (typeof over.id === 'string' ? over.id : undefined)
+          (typeof over.id === "string" ? over.id : undefined);
         if (!activeKey || !overKey) {
-          return
+          return;
         }
-        const fromIndex = roundKeys.indexOf(activeKey)
-        const toIndex = roundKeys.indexOf(overKey)
+        const fromIndex = roundKeys.indexOf(activeKey);
+        const toIndex = roundKeys.indexOf(overKey);
         if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) {
-          return
+          return;
         }
-        const reorderedKeys = arrayMove(roundKeys, fromIndex, toIndex)
+        const reorderedKeys = arrayMove(roundKeys, fromIndex, toIndex);
         const mappings = reorderedKeys.map((oldKey, idx) => ({
           oldKey,
           newKey: String(idx + 1),
-        }))
+        }));
 
         setRoundForms((prev) => {
-          const next: Record<string, RoundFormState> = {}
+          const next: Record<string, RoundFormState> = {};
           mappings.forEach(({ oldKey, newKey }) => {
-            next[newKey] = prev[oldKey] ?? defaultFormState()
-          })
-          return next
-        })
+            next[newKey] = prev[oldKey] ?? defaultFormState();
+          });
+          return next;
+        });
 
         applyRoundActions((current) => {
-          const next: RoundActionsInput = {}
+          const next: RoundActionsInput = {};
           mappings.forEach(({ oldKey, newKey }) => {
-            next[newKey] = current[oldKey] ?? []
-          })
-          return next
-        })
-        return
+            next[newKey] = current[oldKey] ?? [];
+          });
+          return next;
+        });
+        return;
       }
 
-      if (activeType === 'action') {
-        const activeRound = active.data.current?.roundKey as string | undefined
-        const activeIndex = active.data.current?.index as number | undefined
+      if (activeType === "action") {
+        const activeRound = active.data.current?.roundKey as string | undefined;
+        const activeIndex = active.data.current?.index as number | undefined;
         const overData = over.data.current as
           | { type?: string; roundKey?: string; index?: number }
-          | undefined
-        const overRound = overData?.roundKey
-        if (
-          !activeRound ||
-          activeIndex === undefined ||
-          !overRound ||
-          activeRound !== overRound
-        ) {
-          return
+          | undefined;
+        const overRound = overData?.roundKey;
+        if (!activeRound || activeIndex === undefined || !overRound || activeRound !== overRound) {
+          return;
         }
-        const list = roundActions[activeRound] ?? []
+        const list = roundActions[activeRound] ?? [];
         if (list.length <= 1) {
-          return
+          return;
         }
-        let overIndex = overData?.index
-        if (overData?.type === 'round-action-container') {
-          overIndex = list.length - 1
+        let overIndex = overData?.index;
+        if (overData?.type === "round-action-container") {
+          overIndex = list.length - 1;
         }
         if (overIndex === undefined) {
-          return
+          return;
         }
-        const targetIndex = Math.max(0, Math.min(overIndex, list.length - 1))
+        const targetIndex = Math.max(0, Math.min(overIndex, list.length - 1));
         if (targetIndex === activeIndex) {
-          return
+          return;
         }
         applyRoundActions((current) => {
-          const source = current[activeRound] ?? []
+          const source = current[activeRound] ?? [];
           if (
             activeIndex < 0 ||
             activeIndex >= source.length ||
             targetIndex < 0 ||
             targetIndex >= source.length
           ) {
-            return current
+            return current;
           }
-          const reordered = arrayMove(source, activeIndex, targetIndex)
+          const reordered = arrayMove(source, activeIndex, targetIndex);
           return {
             ...current,
             [activeRound]: reordered,
-          }
-        })
+          };
+        });
       }
     },
     [applyRoundActions, roundActions, roundKeys, setRoundForms],
-  )
+  );
 
   const renderActionControls = (roundKey: string, form: RoundFormState) => (
     <div className="flex flex-wrap gap-4">
@@ -949,9 +918,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
         <div className="flex flex-wrap gap-2 items-center">
           <HTMLSelect
             value={form.slot}
-            onChange={(e) =>
-              updateForm(roundKey, { slot: e.currentTarget.value })
-            }
+            onChange={(e) => updateForm(roundKey, { slot: e.currentTarget.value })}
           >
             {SLOT_OPTIONS.map((value) => (
               <option key={value} value={value}>
@@ -961,18 +928,18 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
           </HTMLSelect>
           <div className="flex flex-wrap gap-2">
             {BASIC_ACTION_OPTIONS.map((option) => {
-              const isActive = form.basicAction === option.value
+              const isActive = form.basicAction === option.value;
               return (
                 <Button
                   key={option.value}
                   small
                   outlined={!isActive}
-                  intent={isActive ? 'primary' : undefined}
+                  intent={isActive ? "primary" : undefined}
                   onClick={() => handleAddBasicAction(roundKey, option.value)}
                 >
                   {option.label}
                 </Button>
-              )
+              );
             })}
           </div>
         </div>
@@ -985,7 +952,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
             value={form.extraType}
             onChange={(e) =>
               updateForm(roundKey, {
-                extraType: e.currentTarget.value as RoundFormState['extraType'],
+                extraType: e.currentTarget.value as RoundFormState["extraType"],
               })
             }
           >
@@ -996,12 +963,10 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
             ))}
           </HTMLSelect>
           {/* 移除“再次行动”额外操作选项 */}
-          {form.extraType === 'wait' && (
+          {form.extraType === "wait" && (
             <InputGroup
               value={form.waitMs}
-              onChange={(e) =>
-                updateForm(roundKey, { waitMs: e.currentTarget.value })
-              }
+              onChange={(e) => updateForm(roundKey, { waitMs: e.currentTarget.value })}
               type="number"
               min={0}
               placeholder="毫秒"
@@ -1019,8 +984,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
             value={form.restartType}
             onChange={(e) =>
               updateForm(roundKey, {
-                restartType: e.currentTarget
-                  .value as RoundFormState['restartType'],
+                restartType: e.currentTarget.value as RoundFormState["restartType"],
               })
             }
           >
@@ -1030,7 +994,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
               </option>
             ))}
           </HTMLSelect>
-          {form.restartType === 'down' && (
+          {form.restartType === "down" && (
             <HTMLSelect
               value={form.restartSlot}
               onChange={(e) =>
@@ -1046,16 +1010,14 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
               ))}
             </HTMLSelect>
           )}
-          <Button onClick={() => handleAddRestartAction(roundKey)}>
-            ＋重开
-          </Button>
+          <Button onClick={() => handleAddRestartAction(roundKey)}>＋重开</Button>
         </div>
       </div>
     </div>
-  )
+  );
 
   return (
-    <div className={clsx('px-4 pb-24 space-y-6 relative', className)}>
+    <div className={clsx("px-4 pb-24 space-y-6 relative", className)}>
       <ActionEditorHeader
         viewMode={viewMode}
         onViewModeChange={(mode) => setViewMode(mode)}
@@ -1078,18 +1040,16 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
           <SortableContext items={roundKeys}>
             <ul className="space-y-4">
               {roundKeys.map((roundKey, roundIndex) => {
-                const actions = roundActions[roundKey] ?? []
-                const form = roundForms[roundKey] ?? defaultFormState()
-                const actionItems = actions.map((_, index) =>
-                  getActionSortableId(roundKey, index),
-                )
+                const actions = roundActions[roundKey] ?? [];
+                const form = roundForms[roundKey] ?? defaultFormState();
+                const actionItems = actions.map((_, index) => getActionSortableId(roundKey, index));
 
-                if (viewMode === 'round') {
+                if (viewMode === "round") {
                   return (
                     <Sortable
                       key={roundKey}
                       id={roundKey}
-                      data={{ type: 'round', roundKey, index: roundIndex }}
+                      data={{ type: "round", roundKey, index: roundIndex }}
                       className="list-none"
                     >
                       {({ attributes, listeners }) => (
@@ -1122,7 +1082,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
 
                           <Droppable
                             id={`${roundKey}-actions`}
-                            data={{ type: 'round-action-container', roundKey }}
+                            data={{ type: "round-action-container", roundKey }}
                             className="block"
                           >
                             <SortableContext items={actionItems}>
@@ -1131,7 +1091,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
                                   <Sortable
                                     key={getActionSortableId(roundKey, index)}
                                     id={getActionSortableId(roundKey, index)}
-                                    data={{ type: 'action', roundKey, index }}
+                                    data={{ type: "action", roundKey, index }}
                                     className="list-none"
                                   >
                                     {({
@@ -1139,13 +1099,9 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
                                       listeners: actionListeners,
                                     }) => (
                                       <RoundChip
-                                        label={formatTokenLabel(entry[0] ?? '')}
-                                        variant={resolveChipVariant(
-                                          entry[0] ?? '',
-                                        )}
-                                        onRemove={() =>
-                                          handleRemoveToken(roundKey, index)
-                                        }
+                                        label={formatTokenLabel(entry[0] ?? "")}
+                                        variant={resolveChipVariant(entry[0] ?? "")}
+                                        onRemove={() => handleRemoveToken(roundKey, index)}
                                         draggableAttributes={actionAttributes}
                                         draggableListeners={actionListeners}
                                         isDraggable
@@ -1166,35 +1122,32 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
                         </Card>
                       )}
                     </Sortable>
-                  )
+                  );
                 }
 
-                const { slotMap, others, errors } = groupTokensBySlotWithExtraAttribution(
-                  actions,
-                  { slotAssignments: slotAssignments as any },
-                )
+                const { slotMap, others, errors } = groupTokensBySlotWithExtraAttribution(actions, {
+                  slotAssignments: slotAssignments as any,
+                });
                 const assignedSlots = SLOT_OPTIONS.filter((slot) =>
                   Boolean(slotAssignments?.[Number(slot)]?.name),
-                )
+                );
                 const slotsWithTokens = SLOT_OPTIONS.filter(
                   (slot) => (slotMap[slot]?.length ?? 0) > 0,
-                )
+                );
                 const slotsToRender =
                   assignedSlots.length > 0
                     ? SLOT_OPTIONS.filter(
-                        (slot) =>
-                          assignedSlots.includes(slot) ||
-                          slotsWithTokens.includes(slot),
+                        (slot) => assignedSlots.includes(slot) || slotsWithTokens.includes(slot),
                       )
                     : slotsWithTokens.length > 0
                       ? slotsWithTokens
-                      : SLOT_OPTIONS
+                      : SLOT_OPTIONS;
 
                 return (
                   <Sortable
                     key={roundKey}
                     id={roundKey}
-                    data={{ type: 'round', roundKey, index: roundIndex }}
+                    data={{ type: "round", roundKey, index: roundIndex }}
                     className="list-none"
                   >
                     {({ attributes, listeners }) => (
@@ -1229,29 +1182,27 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
                           <div className="overflow-x-auto">
                             <div className="flex gap-4 min-w-max">
                               {slotsToRender.map((slot) => {
-                                const slotNumber = Number(slot)
-                                const spy = slotAssignments?.[slotNumber]
-                                const tokensForSlot = slotMap[slot] ?? []
-                                const isActive = form.slot === slot
+                                const slotNumber = Number(slot);
+                                const spy = slotAssignments?.[slotNumber];
+                                const tokensForSlot = slotMap[slot] ?? [];
+                                const isActive = form.slot === slot;
                                 return (
                                   <div
                                     key={slot}
                                     role="button"
                                     tabIndex={0}
-                                    onClick={() =>
-                                      handleSelectSpy(roundKey, slot)
-                                    }
+                                    onClick={() => handleSelectSpy(roundKey, slot)}
                                     onKeyDown={(e) => {
-                                      if (e.key === 'Enter' || e.key === ' ') {
-                                        e.preventDefault()
-                                        handleSelectSpy(roundKey, slot)
+                                      if (e.key === "Enter" || e.key === " ") {
+                                        e.preventDefault();
+                                        handleSelectSpy(roundKey, slot);
                                       }
                                     }}
                                     className={clsx(
-                                      'min-w-[180px] rounded-md border p-3 cursor-pointer select-none transition-colors',
+                                      "min-w-[180px] rounded-md border p-3 cursor-pointer select-none transition-colors",
                                       isActive
-                                        ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-500/10'
-                                        : 'border-gray-200 dark:border-gray-600 hover:border-blue-400 hover:bg-blue-50/40 dark:hover:border-blue-400/30',
+                                        ? "border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-500/10"
+                                        : "border-gray-200 dark:border-gray-600 hover:border-blue-400 hover:bg-blue-50/40 dark:hover:border-blue-400/30",
                                     )}
                                   >
                                     <div className="text-sm font-semibold">
@@ -1263,23 +1214,18 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
                                     <div className="mt-2 flex flex-wrap gap-2">
                                       {tokensForSlot.length > 0 ? (
                                         tokensForSlot.map((entry) => {
-                                          const summaryLabel = `${entry.index + 1}${formatTokenSummary(entry.token)}`
+                                          const summaryLabel = `${entry.index + 1}${formatTokenSummary(entry.token)}`;
                                           return (
                                             <RoundChip
                                               key={`${roundKey}-${slot}-${entry.index}-${entry.token}`}
                                               label={summaryLabel}
-                                              variant={resolveChipVariant(
-                                                entry.token,
-                                              )}
+                                              variant={resolveChipVariant(entry.token)}
                                               onRemove={() =>
-                                                handleRemoveToken(
-                                                  roundKey,
-                                                  entry.index,
-                                                )
+                                                handleRemoveToken(roundKey, entry.index)
                                               }
                                               className="text-xs sm:text-sm"
                                             />
-                                          )
+                                          );
                                         })
                                       ) : (
                                         <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -1288,7 +1234,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
                                       )}
                                     </div>
                                   </div>
-                                )
+                                );
                               })}
                             </div>
                           </div>
@@ -1304,7 +1250,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
                                         ? `第 ${e.index + 1} 条（${e.reason}）`
                                         : e.reason,
                                     )
-                                    .join('，')}
+                                    .join("，")}
                                 </div>
                               )}
                               <div className="text-xs font-medium text-gray-600 dark:text-gray-300">
@@ -1312,18 +1258,16 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
                               </div>
                               <div className="mt-2 flex flex-wrap gap-2">
                                 {others.map((entry) => {
-                                  const summaryLabel = `${entry.index + 1}${formatTokenSummary(entry.token)}`
+                                  const summaryLabel = `${entry.index + 1}${formatTokenSummary(entry.token)}`;
                                   return (
                                     <RoundChip
                                       key={`${roundKey}-other-${entry.index}-${entry.token}`}
                                       label={summaryLabel}
                                       variant={resolveChipVariant(entry.token)}
-                                      onRemove={() =>
-                                        handleRemoveToken(roundKey, entry.index)
-                                      }
+                                      onRemove={() => handleRemoveToken(roundKey, entry.index)}
                                       className="text-xs sm:text-sm"
                                     />
-                                  )
+                                  );
                                 })}
                               </div>
                             </div>
@@ -1334,14 +1278,14 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
                       </Card>
                     )}
                   </Sortable>
-                )
+                );
               })}
             </ul>
           </SortableContext>
         </DndContext>
       )}
     </div>
-  )
-}
+  );
+};
 
-ActionEditor.displayName = 'ActionEditor'
+ActionEditor.displayName = "ActionEditor";

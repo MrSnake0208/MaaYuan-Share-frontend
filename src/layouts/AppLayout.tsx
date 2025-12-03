@@ -1,26 +1,24 @@
-import { Button, Navbar, Tag } from '@blueprintjs/core'
+import { Button, Navbar, Tag } from "@blueprintjs/core";
 
-import { useLinks } from 'hooks/useLinks'
-import { Link, NavLink } from 'react-router-dom'
-import { FCC } from 'types'
+import { useLinks } from "hooks/useLinks";
+import { Link, NavLink } from "react-router-dom";
+import { FCC } from "types";
 
-import { AccountManager } from 'components/AccountManager'
-import { BackToTop } from 'components/BackToTop'
-import { LanguageSwitcher } from 'components/LanguageSwitcher'
-import { NavExpandButton } from 'components/NavExpandButton'
-import { ThemeSwitchButton } from 'components/ThemeSwitchButton'
-import { NavAside } from 'components/drawer/NavAside'
+import { AccountManager } from "components/AccountManager";
+import { BackToTop } from "components/BackToTop";
+import { LanguageSwitcher } from "components/LanguageSwitcher";
+import { NavExpandButton } from "components/NavExpandButton";
+import { ThemeSwitchButton } from "components/ThemeSwitchButton";
+import { NavAside } from "components/drawer/NavAside";
 
 export const AppLayout: FCC = ({ children }) => {
-  const { NAV_LINKS } = useLinks()
+  const { NAV_LINKS } = useLinks();
 
   return (
     <div className="flex flex-col h-full w-full bg-zinc-50 ">
       <Navbar className="flex w-full px-8 py-2 items-center bg-zinc-100 shadow fixed h-14 z-20 whitespace-nowrap overflow-x-none overflow-y-hidden">
         <Link to="/" className="flex items-center hover:no-underline ">
-          <div className="select-none text-lg font-bold leading-none">
-            MaaYuan Share
-          </div>
+          <div className="select-none text-lg font-bold leading-none">MaaYuan Share</div>
 
           <Tag minimal className="ml-1" intent="warning">
             Beta
@@ -60,5 +58,5 @@ export const AppLayout: FCC = ({ children }) => {
 
       <BackToTop />
     </div>
-  )
-}
+  );
+};

@@ -1,36 +1,30 @@
-import { Button, Card, MenuItem } from '@blueprintjs/core'
-import { Select2 } from '@blueprintjs/select'
+import { Button, Card, MenuItem } from "@blueprintjs/core";
+import { Select2 } from "@blueprintjs/select";
 
-import { FC, useMemo } from 'react'
+import { FC, useMemo } from "react";
 
-import type { CopilotDocV1 } from 'models/copilot.schema'
+import type { CopilotDocV1 } from "models/copilot.schema";
 
-import { useTranslation } from '../../../i18n/i18n'
-import {
-  EditorPerformerGroup,
-  EditorPerformerGroupProps,
-} from './EditorPerformerGroup'
-import {
-  EditorPerformerOperator,
-  EditorPerformerOperatorProps,
-} from './EditorPerformerOperator'
+import { useTranslation } from "../../../i18n/i18n";
+import { EditorPerformerGroup, EditorPerformerGroupProps } from "./EditorPerformerGroup";
+import { EditorPerformerOperator, EditorPerformerOperatorProps } from "./EditorPerformerOperator";
 
-export type PerformerType = 'operator' | 'group'
+export type PerformerType = "operator" | "group";
 
 export interface EditorPerformerAddProps {
-  mode: PerformerType
-  operator?: CopilotDocV1.Operator
-  group?: CopilotDocV1.Group
-  groups: CopilotDocV1.Group[]
-  onModeChange: (mode: PerformerType) => void
-  onCancel: () => void
-  submitOperator: EditorPerformerOperatorProps['submit']
-  submitGroup: EditorPerformerGroupProps['submit']
+  mode: PerformerType;
+  operator?: CopilotDocV1.Operator;
+  group?: CopilotDocV1.Group;
+  groups: CopilotDocV1.Group[];
+  onModeChange: (mode: PerformerType) => void;
+  onCancel: () => void;
+  submitOperator: EditorPerformerOperatorProps["submit"];
+  submitGroup: EditorPerformerGroupProps["submit"];
 }
 
 interface PerformerSelectItem {
-  label: string
-  value: PerformerType
+  label: string;
+  value: PerformerType;
 }
 
 export const EditorPerformerAdd: FC<EditorPerformerAddProps> = ({
@@ -43,25 +37,24 @@ export const EditorPerformerAdd: FC<EditorPerformerAddProps> = ({
   submitOperator,
   submitGroup,
 }) => {
-  const t = useTranslation()
+  const t = useTranslation();
 
   const performerSelectItems: PerformerSelectItem[] = useMemo(
     () => [
       {
         label: t.components.editor.operator.EditorPerformerAdd.operator,
-        value: 'operator',
+        value: "operator",
       },
       {
         label: t.components.editor.operator.EditorPerformerAdd.operator_group,
-        value: 'group',
+        value: "group",
       },
     ],
     [t],
-  )
+  );
 
   const selectedItem =
-    performerSelectItems.find((item) => item.value === mode) ||
-    performerSelectItems[0]
+    performerSelectItems.find((item) => item.value === mode) || performerSelectItems[0];
 
   const selector = useMemo(
     () => (
@@ -82,19 +75,15 @@ export const EditorPerformerAdd: FC<EditorPerformerAddProps> = ({
             />
           )}
         >
-          <Button
-            large
-            text={selectedItem.label}
-            rightIcon="double-caret-vertical"
-          />
+          <Button large text={selectedItem.label} rightIcon="double-caret-vertical" />
         </Select2>
       </>
     ),
     [mode, onModeChange, selectedItem, performerSelectItems, t],
-  )
+  );
 
   const child = useMemo(() => {
-    return mode === 'operator' ? (
+    return mode === "operator" ? (
       <EditorPerformerOperator
         operator={operator}
         submit={submitOperator}
@@ -109,17 +98,8 @@ export const EditorPerformerAdd: FC<EditorPerformerAddProps> = ({
         onCancel={onCancel}
         categorySelector={selector}
       />
-    )
-  }, [
-    mode,
-    submitOperator,
-    submitGroup,
-    group,
-    groups,
-    onCancel,
-    operator,
-    selector,
-  ])
+    );
+  }, [mode, submitOperator, submitGroup, group, groups, onCancel, operator, selector]);
 
-  return <Card className="mb-8 pt-4">{child}</Card>
-}
+  return <Card className="mb-8 pt-4">{child}</Card>;
+};

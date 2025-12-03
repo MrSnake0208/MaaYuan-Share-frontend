@@ -1,22 +1,20 @@
-import { CommentsInfo, SubCommentsInfo } from 'maa-copilot-client'
+import { CommentsInfo, SubCommentsInfo } from "maa-copilot-client";
 
-export type CommentInfo = MainCommentInfo | SubCommentInfo
-export type MainCommentInfo = CommentsInfo
-export type SubCommentInfo = SubCommentsInfo
+export type CommentInfo = MainCommentInfo | SubCommentInfo;
+export type MainCommentInfo = CommentsInfo;
+export type SubCommentInfo = SubCommentsInfo;
 
 export const enum CommentRating {
-  None = 'None',
-  Like = 'Like',
-  Dislike = 'Dislike',
+  None = "None",
+  Like = "Like",
+  Dislike = "Dislike",
 }
 
-export const MAX_COMMENT_LENGTH = 150
-export const AUTHOR_MAX_COMMENT_LENGTH = 500
+export const MAX_COMMENT_LENGTH = 150;
+export const AUTHOR_MAX_COMMENT_LENGTH = 500;
 
-export function isMainComment(
-  comment: CommentInfo,
-): comment is MainCommentInfo {
-  return 'subCommentsInfos' in comment
+export function isMainComment(comment: CommentInfo): comment is MainCommentInfo {
+  return "subCommentsInfos" in comment;
 }
 
 /**
@@ -29,13 +27,13 @@ export function traverseComments(
 ): CommentInfo | undefined {
   return comments.find((comment) => {
     if (callback(comment)) {
-      return true
+      return true;
     }
 
-    if ('subCommentsInfos' in comment) {
-      return traverseComments(comment.subCommentsInfos, callback)
+    if ("subCommentsInfos" in comment) {
+      return traverseComments(comment.subCommentsInfos, callback);
     }
 
-    return false
-  })
+    return false;
+  });
 }

@@ -1,21 +1,16 @@
-import { Suggest2, Suggest2Props } from '@blueprintjs/select'
+import { Suggest2, Suggest2Props } from "@blueprintjs/select";
 
-import { noop } from 'lodash-es'
-import { useEffect, useRef } from 'react'
-import { ControllerFieldState } from 'react-hook-form'
+import { noop } from "lodash-es";
+import { useEffect, useRef } from "react";
+import { ControllerFieldState } from "react-hook-form";
 
-import {
-  UseDebouncedQueryParams,
-  useDebouncedQuery,
-} from '../utils/useDebouncedQuery'
-import { FieldResetButton } from './FieldResetButton'
+import { UseDebouncedQueryParams, useDebouncedQuery } from "../utils/useDebouncedQuery";
+import { FieldResetButton } from "./FieldResetButton";
 
-interface SuggestProps<T>
-  extends Omit<Suggest2Props<T>, 'onQueryChange'>,
-    UseDebouncedQueryParams {
-  query?: string // controlled query, optional
-  fieldState?: ControllerFieldState
-  onReset?: () => void
+interface SuggestProps<T> extends Omit<Suggest2Props<T>, "onQueryChange">, UseDebouncedQueryParams {
+  query?: string; // controlled query, optional
+  fieldState?: ControllerFieldState;
+  onReset?: () => void;
 }
 
 export const Suggest = <T,>({
@@ -33,9 +28,9 @@ export const Suggest = <T,>({
 }: SuggestProps<T>) => {
   // 禁用掉 focus 自动选中输入框文字的功能
   // https://github.com/palantir/blueprint/blob/b41f668461e63e2c20caf54a3248181fe01161c4/packages/select/src/components/suggest/suggest2.tsx#L229
-  const ref = useRef<Suggest2<T>>(null)
-  if (ref.current && ref.current['selectText'] !== noop) {
-    ref.current['selectText'] = noop
+  const ref = useRef<Suggest2<T>>(null);
+  if (ref.current && ref.current["selectText"] !== noop) {
+    ref.current["selectText"] = noop;
   }
 
   const { query, debouncedQuery, updateQuery } = useDebouncedQuery({
@@ -43,23 +38,21 @@ export const Suggest = <T,>({
     debounceTime,
     onQueryChange,
     onDebouncedQueryChange,
-  })
+  });
 
   useEffect(() => {
     if (fieldState && !fieldState.isTouched) {
-      updateQuery('', true)
+      updateQuery("", true);
     }
-  }, [fieldState, updateQuery])
+  }, [fieldState, updateQuery]);
 
   // 合并 Popover2 属性：强制 Portal 并提升层级，避免在 Dialog 内被遮挡
-  const basePopover = (suggest2Props as any)?.popoverProps || {}
+  const basePopover = (suggest2Props as any)?.popoverProps || {};
   const mergedPopover = {
     ...basePopover,
     usePortal: true,
-    portalClassName: [basePopover.portalClassName, 'z-[3100]']
-      .filter(Boolean)
-      .join(' '),
-  }
+    portalClassName: [basePopover.portalClassName, "z-[3100]"].filter(Boolean).join(" "),
+  };
 
   return (
     <Suggest2<T>
@@ -68,15 +61,13 @@ export const Suggest = <T,>({
       onQueryChange={(query) => updateQuery(query, false)}
       selectedItem={selectedItem}
       itemListPredicate={
-        itemListPredicate
-          ? (query, items) => itemListPredicate(debouncedQuery, items)
-          : undefined
+        itemListPredicate ? (query, items) => itemListPredicate(debouncedQuery, items) : undefined
       }
       inputProps={{
         onKeyDown: (event) => {
           // prevent form submission
-          if (event.key === 'Enter') {
-            event.preventDefault()
+          if (event.key === "Enter") {
+            event.preventDefault();
           }
         },
         rightElement: (
@@ -84,16 +75,12 @@ export const Suggest = <T,>({
             disabled={
               !(
                 // enabled =
-                (fieldState
-                  ? fieldState.isDirty
-                  : onReset
-                    ? query || selectedItem !== null
-                    : false)
+                (fieldState ? fieldState.isDirty : onReset ? query || selectedItem !== null : false)
               )
             }
             onReset={() => {
-              updateQuery('', true)
-              onReset?.()
+              updateQuery("", true);
+              onReset?.();
             }}
           />
         ),
@@ -101,10 +88,10 @@ export const Suggest = <T,>({
       }}
       {...suggest2Props}
       popoverProps={{
-        placement: 'bottom-start',
+        placement: "bottom-start",
         captureDismiss: true,
         ...mergedPopover,
       }}
     />
-  )
-}
+  );
+};

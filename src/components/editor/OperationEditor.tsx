@@ -7,27 +7,21 @@ import {
   InputGroup,
   MenuItem,
   TextArea,
-} from '@blueprintjs/core'
-import { Tooltip2 } from '@blueprintjs/popover2'
+} from "@blueprintjs/core";
+import { Tooltip2 } from "@blueprintjs/popover2";
 
-import { useLevels } from 'apis/level'
-import clsx from 'clsx'
-import Fuse from 'fuse.js'
-import { FC, ReactNode, useEffect, useMemo, useState } from 'react'
-import {
-  Control,
-  FieldErrors,
-  UseFormReturn,
-  useController,
-  useWatch,
-} from 'react-hook-form'
+import { useLevels } from "apis/level";
+import clsx from "clsx";
+import Fuse from "fuse.js";
+import { FC, ReactNode, useEffect, useMemo, useState } from "react";
+import { Control, FieldErrors, UseFormReturn, useController, useWatch } from "react-hook-form";
 
-import { FormField, FormField2 } from 'components/FormField'
-import { HelperText } from 'components/HelperText'
-import type { CopilotDocV1 } from 'models/copilot.schema'
-import { Level, OpDifficulty } from 'models/operation'
+import { FormField, FormField2 } from "components/FormField";
+import { HelperText } from "components/HelperText";
+import type { CopilotDocV1 } from "models/copilot.schema";
+import { Level, OpDifficulty } from "models/operation";
 
-import { useTranslation } from '../../i18n/i18n'
+import { useTranslation } from "../../i18n/i18n";
 import {
   compareLevelsForDisplay,
   createCustomLevel,
@@ -37,37 +31,31 @@ import {
   isCustomLevel,
   isHardMode,
   toNormalMode,
-} from '../../models/level'
-import { useBreakpoint } from '../../utils/device'
-import { formatError } from '../../utils/error'
-import { Suggest } from '../Suggest'
-import { EditorActions } from './action/EditorActions'
-import { FloatingMap } from './floatingMap/FloatingMap'
-import {
-  FloatingMapContext,
-  useFloatingMap,
-} from './floatingMap/FloatingMapContext'
-import {
-  EditorPerformer,
-  EditorPerformerProps,
-} from './operator/EditorPerformer'
+} from "../../models/level";
+import { useBreakpoint } from "../../utils/device";
+import { formatError } from "../../utils/error";
+import { Suggest } from "../Suggest";
+import { EditorActions } from "./action/EditorActions";
+import { FloatingMap } from "./floatingMap/FloatingMap";
+import { FloatingMapContext, useFloatingMap } from "./floatingMap/FloatingMapContext";
+import { EditorPerformer, EditorPerformerProps } from "./operator/EditorPerformer";
 
 export const StageNameInput: FC<{
-  control: Control<CopilotDocV1.Operation, object>
+  control: Control<CopilotDocV1.Operation, object>;
 }> = ({ control }) => {
-  const t = useTranslation()
+  const t = useTranslation();
   const {
     field: { value, onChange, onBlur },
     fieldState,
   } = useController({
-    name: 'stageName',
+    name: "stageName",
     control,
     rules: { required: t.components.editor.OperationEditor.stage_required },
-  })
+  });
 
   // we are going to manually handle loading state so we could show the skeleton state easily,
   // without swapping the actual element.
-  const { data, error: levelError, isLoading } = useLevels()
+  const { data, error: levelError, isLoading } = useLevels();
 
   const levels = useMemo(
     () =>
@@ -76,16 +64,16 @@ export const StageNameInput: FC<{
         .filter((level) => !isHardMode(level.stageId))
         .sort(compareLevelsForDisplay) || [],
     [data],
-  )
+  );
 
   const fuse = useMemo(
     () =>
       new Fuse(levels, {
-        keys: ['name', 'catOne', 'catTwo', 'catThree'],
+        keys: ["name", "catOne", "catTwo", "catThree"],
         threshold: 0.3,
       }),
     [levels],
-  )
+  );
 
   const selectedLevel = useMemo(
     () =>
@@ -94,26 +82,23 @@ export const StageNameInput: FC<{
         : // return null to ensure the component is controlled
           null,
     [levels, value],
-  )
+  );
 
-  const difficulty = useWatch({ control, name: 'difficulty' })
+  const difficulty = useWatch({ control, name: "difficulty" });
   const prtsMapUrl = selectedLevel
     ? getPrtsMapUrl(
-        getStageIdWithDifficulty(
-          selectedLevel.stageId,
-          difficulty ?? OpDifficulty.UNKNOWN,
-        ),
+        getStageIdWithDifficulty(selectedLevel.stageId, difficulty ?? OpDifficulty.UNKNOWN),
       )
-    : undefined
+    : undefined;
 
   // stageName should always be in normal mode
-  const selectLevel = (level: Level) => onChange(toNormalMode(level.stageId))
+  const selectLevel = (level: Level) => onChange(toNormalMode(level.stageId));
 
-  const { setLevel } = useFloatingMap()
+  const { setLevel } = useFloatingMap();
 
   useEffect(() => {
-    setLevel(selectedLevel || undefined)
-  }, [selectedLevel, setLevel])
+    setLevel(selectedLevel || undefined);
+  }, [selectedLevel, setLevel]);
 
   return (
     <FormField2
@@ -134,12 +119,10 @@ export const StageNameInput: FC<{
       <div className="flex">
         <Suggest<Level>
           items={levels}
-          itemListPredicate={(query) =>
-            query ? fuse.search(query).map((el) => el.item) : levels
-          }
+          itemListPredicate={(query) => (query ? fuse.search(query).map((el) => el.item) : levels)}
           fieldState={fieldState}
-          onReset={() => onChange('')}
-          className={clsx('flex-grow mr-2', isLoading && 'bp4-skeleton')}
+          onReset={() => onChange("")}
+          className={clsx("flex-grow mr-2", isLoading && "bp4-skeleton")}
           disabled={isLoading}
           itemRenderer={(item, { handleClick, handleFocus, modifiers }) => (
             <MenuItem
@@ -159,10 +142,7 @@ export const StageNameInput: FC<{
               : `${item.catThree} ${item.name}`
           }
           noResults={
-            <MenuItem
-              disabled
-              text={t.components.editor.OperationEditor.no_matching_stages}
-            />
+            <MenuItem disabled text={t.components.editor.OperationEditor.no_matching_stages} />
           }
           createNewItemFromQuery={(query) => createCustomLevel(query)}
           createNewItemRenderer={(query, active, handleClick) => (
@@ -182,10 +162,7 @@ export const StageNameInput: FC<{
             onBlur,
           }}
         />
-        <Tooltip2
-          placement="top"
-          content={t.components.editor.OperationEditor.view_in_prts_map}
-        >
+        <Tooltip2 placement="top" content={t.components.editor.OperationEditor.view_in_prts_map}>
           <AnchorButton
             large
             icon="share"
@@ -196,31 +173,31 @@ export const StageNameInput: FC<{
         </Tooltip2>
       </div>
     </FormField2>
-  )
-}
+  );
+};
 
 const DifficultyPicker: FC<{
-  control: Control<CopilotDocV1.Operation>
+  control: Control<CopilotDocV1.Operation>;
 }> = ({ control }) => {
   const {
     field: { value, onChange },
   } = useController({
-    name: 'difficulty',
+    name: "difficulty",
     control,
-  })
+  });
 
   useEffect(() => {
     if (value === undefined) {
-      onChange(OpDifficulty.UNKNOWN)
+      onChange(OpDifficulty.UNKNOWN);
     }
-  }, [value, onChange])
+  }, [value, onChange]);
 
-  return null
-}
+  return null;
+};
 
 export interface OperationEditorProps {
-  form: UseFormReturn<CopilotDocV1.Operation>
-  toolbar: ReactNode
+  form: UseFormReturn<CopilotDocV1.Operation>;
+  toolbar: ReactNode;
 }
 
 export const OperationEditor: FC<OperationEditorProps> = ({
@@ -233,38 +210,33 @@ export const OperationEditor: FC<OperationEditorProps> = ({
   },
   toolbar,
 }) => {
-  const t = useTranslation()
-  const { data: levels } = useLevels()
+  const t = useTranslation();
+  const { data: levels } = useLevels();
 
-  const stageName = watch('stageName')
+  const stageName = watch("stageName");
 
-  const breakpoint = useBreakpoint()
+  const breakpoint = useBreakpoint();
 
   // set default title if not set
   useEffect(() => {
-    if (!getValues('doc.title')) {
-      const level = findLevelByStageName(levels, stageName)
+    if (!getValues("doc.title")) {
+      const level = findLevelByStageName(levels, stageName);
 
       if (level) {
-        const normalizedName = level.name?.trim()
-        setValue(
-          'doc.title',
-          normalizedName?.length ? normalizedName : level.stageId,
-        )
+        const normalizedName = level.name?.trim();
+        setValue("doc.title", normalizedName?.length ? normalizedName : level.stageId);
       }
     }
-  }, [stageName, levels, getValues, setValue])
+  }, [stageName, levels, getValues, setValue]);
 
-  const globalError = (errors as FieldErrors<{ global: void }>).global?.message
+  const globalError = (errors as FieldErrors<{ global: void }>).global?.message;
 
   return (
     <FloatingMapContext>
       <section className="flex flex-col relative h-full pt-4 pb-16">
         <div className="px-8 text-lg font-medium flex items-center flex-wrap w-full">
           <Icon icon="document" />
-          <span className="ml-2 mr-4">
-            {t.components.editor.OperationEditor.job_editor}
-          </span>
+          <span className="ml-2 mr-4">{t.components.editor.OperationEditor.job_editor}</span>
           <div className="flex-1" />
 
           {toolbar}
@@ -277,7 +249,7 @@ export const OperationEditor: FC<OperationEditorProps> = ({
             icon="error"
             title={t.components.editor.OperationEditor.error}
           >
-            {globalError.split('\n').map((line) => (
+            {globalError.split("\n").map((line) => (
               <p key={line}>{line}</p>
             ))}
           </Callout>
@@ -297,18 +269,15 @@ export const OperationEditor: FC<OperationEditorProps> = ({
                 error={errors.doc?.title}
                 ControllerProps={{
                   rules: {
-                    required:
-                      t.components.editor.OperationEditor.title_required,
+                    required: t.components.editor.OperationEditor.title_required,
                   },
                   render: ({ field }) => (
                     <InputGroup
                       large
                       id="doc.title"
-                      placeholder={
-                        t.components.editor.OperationEditor.title_placeholder
-                      }
+                      placeholder={t.components.editor.OperationEditor.title_placeholder}
                       {...field}
-                      value={field.value || ''}
+                      value={field.value || ""}
                     />
                   ),
                 }}
@@ -334,12 +303,9 @@ export const OperationEditor: FC<OperationEditorProps> = ({
                       growVertically
                       large
                       id="doc.details"
-                      placeholder={
-                        t.components.editor.OperationEditor
-                          .description_placeholder
-                      }
+                      placeholder={t.components.editor.OperationEditor.description_placeholder}
                       {...field}
-                      value={field.value || ''}
+                      value={field.value || ""}
                     />
                   ),
                 }}
@@ -356,38 +322,34 @@ export const OperationEditor: FC<OperationEditorProps> = ({
             <div className="w-full pb-8">
               <H4>{t.components.editor.OperationEditor.action_sequence}</H4>
               <HelperText className="mb-4">
-                <span>
-                  {t.components.editor.OperationEditor.drag_to_reorder}
-                </span>
+                <span>{t.components.editor.OperationEditor.drag_to_reorder}</span>
               </HelperText>
               <EditorActions control={control} />
             </div>
           </div>
         </div>
 
-        {breakpoint !== 'tablet' && <FloatingMap />}
+        {breakpoint !== "tablet" && <FloatingMap />}
       </section>
     </FloatingMapContext>
-  )
-}
+  );
+};
 
 const EditorPerformerPanel: FC<EditorPerformerProps> = (props) => {
-  const t = useTranslation()
-  const [reload, setReload] = useState(false)
+  const t = useTranslation();
+  const [reload, setReload] = useState(false);
 
   // temporary workaround for https://github.com/clauderic/dnd-kit/issues/799
   if (reload) {
-    setTimeout(() => setReload(false), 100)
-    return null
+    setTimeout(() => setReload(false), 100);
+    return null;
   }
 
   return (
     <>
       <H4>{t.components.editor.OperationEditor.operators_and_groups}</H4>
       <HelperText className="mb-4">
-        <span>
-          {t.components.editor.OperationEditor.drag_to_reorder_operators}
-        </span>
+        <span>{t.components.editor.OperationEditor.drag_to_reorder_operators}</span>
         <span>
           {t.components.editor.OperationEditor.drag_too_fast_issue}
           <Button
@@ -402,5 +364,5 @@ const EditorPerformerPanel: FC<EditorPerformerProps> = (props) => {
       </HelperText>
       <EditorPerformer {...props} />
     </>
-  )
-}
+  );
+};

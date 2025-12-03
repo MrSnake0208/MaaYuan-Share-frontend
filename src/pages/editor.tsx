@@ -1,48 +1,33 @@
-import { useAtomValue, useSetAtom } from 'jotai'
-import { useAtomDevtools } from 'jotai-devtools'
-import { useAtomCallback } from 'jotai/utils'
-import { CopilotInfoStatusEnum } from 'maa-copilot-client'
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomDevtools } from "jotai-devtools";
+import { useAtomCallback } from "jotai/utils";
+import { CopilotInfoStatusEnum } from "maa-copilot-client";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
-import { OperationEditor } from 'components/editor2/Editor'
+import { OperationEditor } from "components/editor2/Editor";
 
-import { useLevels } from '../apis/level'
-import {
-  createOperation,
-  getOperation,
-  updateOperation,
-  useOperation,
-} from '../apis/operation'
-import type { OperationMetadataPayload } from '../apis/operation'
-import { withSuspensable } from '../components/Suspensable'
-import { AppToaster } from '../components/Toaster'
-import {
-  defaultEditorState,
-  editorAtoms,
-  historyAtom,
-} from '../components/editor2/editor-state'
-import type { EditorMetadata } from '../components/editor2/types'
-import { toEditorOperation } from '../components/editor2/reconciliation'
-import { toSimingOperationRemote } from '../components/editor2/siming-export'
-import { parseOperationLoose } from '../components/editor2/validation/schema'
-import { editorValidationAtom } from '../components/editor2/validation/validation'
-import { i18n, useTranslation } from '../i18n/i18n'
-import { CopilotDocV1 } from '../models/copilot.schema'
-import { findLevelByStageName } from '../models/level'
-import { Level } from '../models/operation'
-import { parseShortCode } from '../models/shortCode'
-import { stripOperationExportFields } from '../services/operation'
-import { formatError } from '../utils/error'
-import { wrapErrorMessage } from '../utils/wrapErrorMessage'
+import { useLevels } from "../apis/level";
+import { createOperation, getOperation, updateOperation, useOperation } from "../apis/operation";
+import type { OperationMetadataPayload } from "../apis/operation";
+import { withSuspensable } from "../components/Suspensable";
+import { AppToaster } from "../components/Toaster";
+import { defaultEditorState, editorAtoms, historyAtom } from "../components/editor2/editor-state";
+import type { EditorMetadata } from "../components/editor2/types";
+import { toEditorOperation } from "../components/editor2/reconciliation";
+import { toSimingOperationRemote } from "../components/editor2/siming-export";
+import { parseOperationLoose } from "../components/editor2/validation/schema";
+import { editorValidationAtom } from "../components/editor2/validation/validation";
+import { i18n, useTranslation } from "../i18n/i18n";
+import { CopilotDocV1 } from "../models/copilot.schema";
+import { findLevelByStageName } from "../models/level";
+import { Level } from "../models/operation";
+import { parseShortCode } from "../models/shortCode";
+import { stripOperationExportFields } from "../services/operation";
+import { formatError } from "../utils/error";
+import { wrapErrorMessage } from "../utils/wrapErrorMessage";
 
-type CamelLevelMeta = CopilotDocV1.LevelMeta | undefined
+type CamelLevelMeta = CopilotDocV1.LevelMeta | undefined;
 
 const buildCamelLevelMeta = (
   level: Level | undefined,
@@ -60,24 +45,24 @@ const buildCamelLevelMeta = (
       catThree: existing?.catThree ?? level.catThree,
       width: level.width,
       height: level.height,
-    }
+    };
   }
   if (existing) {
     if (!existing.stageId && stageName) {
       return {
         ...existing,
         stageId: stageName,
-      }
+      };
     }
-    return existing
+    return existing;
   }
   if (!stageName) {
-    return undefined
+    return undefined;
   }
   return {
     stageId: stageName,
-  }
-}
+  };
+};
 
 const toSnakeLevelMeta = (meta: CamelLevelMeta) =>
   meta
@@ -91,21 +76,21 @@ const toSnakeLevelMeta = (meta: CamelLevelMeta) =>
         width: meta.width,
         height: meta.height,
       }
-    : undefined
+    : undefined;
 
 export const EditorPage = withSuspensable(() => {
-  const params = useParams()
-  const navigate = useNavigate()
-  const id = params.id ? +params.id : undefined
-  const isNew = !id
+  const params = useParams();
+  const navigate = useNavigate();
+  const id = params.id ? +params.id : undefined;
+  const isNew = !id;
 
-  const [preLevel, setPreLevel] = useState<Level | undefined>(undefined)
+  const [preLevel, setPreLevel] = useState<Level | undefined>(undefined);
   const setEditorPreLevel = useCallback(
     (level?: Level) => {
-      setPreLevel(level)
+      setPreLevel(level);
     },
     [setPreLevel],
-  )
+  );
 
   const apiOperation = useOperation({
     id,
@@ -113,45 +98,41 @@ export const EditorPage = withSuspensable(() => {
     revalidateOnFocus: false,
     revalidateIfStale: false,
     revalidateOnReconnect: false,
-  }).data
-  const t = useTranslation()
-  const resetEditor = useSetAtom(editorAtoms.reset)
-  const setMetadataLocked = useSetAtom(editorAtoms.metadataLocked)
-  const operatorsLocked = useAtomValue(editorAtoms.operatorsLocked)
-  const currentOperation = useAtomValue(editorAtoms.operation)
-  const { data: levels } = useLevels({ suspense: false })
-  const [searchParams, setSearchParams] = useSearchParams()
-  const importShortcode = searchParams.get('shortcode')
-  const importedShortcodeRef = useRef<string | null>(null)
+  }).data;
+  const t = useTranslation();
+  const resetEditor = useSetAtom(editorAtoms.reset);
+  const setMetadataLocked = useSetAtom(editorAtoms.metadataLocked);
+  const operatorsLocked = useAtomValue(editorAtoms.operatorsLocked);
+  const currentOperation = useAtomValue(editorAtoms.operation);
+  const { data: levels } = useLevels({ suspense: false });
+  const [searchParams, setSearchParams] = useSearchParams();
+  const importShortcode = searchParams.get("shortcode");
+  const importedShortcodeRef = useRef<string | null>(null);
 
   const validateMetadata = useCallback(
     (metadata: EditorMetadata) => {
-      const missingFields: string[] = []
+      const missingFields: string[] = [];
 
       // 标签必填：清洗后需至少 1 项
       const cleanedTags = Array.isArray(metadata.tags)
         ? Array.from(
-            new Set(
-              metadata.tags
-                .map((s) => (s ?? '').trim())
-                .filter((s) => s.length > 0),
-            ),
+            new Set(metadata.tags.map((s) => (s ?? "").trim()).filter((s) => s.length > 0)),
           )
-        : []
+        : [];
       if (cleanedTags.length === 0) {
-        missingFields.push(t.components.editor2.InfoEditor.tags)
+        missingFields.push(t.components.editor2.InfoEditor.tags);
       }
 
       // 搬运稿额外必填字段校验
-      if (metadata.sourceType === 'repost') {
+      if (metadata.sourceType === "repost") {
         if (!metadata.repostAuthor?.trim()) {
-          missingFields.push(t.components.editor2.InfoEditor.repost_author)
+          missingFields.push(t.components.editor2.InfoEditor.repost_author);
         }
         if (!metadata.repostPlatform?.trim()) {
-          missingFields.push(t.components.editor2.InfoEditor.repost_platform)
+          missingFields.push(t.components.editor2.InfoEditor.repost_platform);
         }
         if (!metadata.repostUrl?.trim()) {
-          missingFields.push(t.components.editor2.InfoEditor.repost_link)
+          missingFields.push(t.components.editor2.InfoEditor.repost_link);
         }
       }
 
@@ -159,251 +140,221 @@ export const EditorPage = withSuspensable(() => {
         return {
           ok: false as const,
           message: t.pages.editor.validation.metadata_missing({
-            fields: missingFields.join('、'),
+            fields: missingFields.join("、"),
           }),
-        }
+        };
       }
 
       // 当为搬运稿时校验链接格式
-      if (metadata.sourceType === 'repost' && metadata.repostUrl?.trim()) {
+      if (metadata.sourceType === "repost" && metadata.repostUrl?.trim()) {
         try {
           // eslint-disable-next-line no-new
-          new URL(metadata.repostUrl!.trim())
+          new URL(metadata.repostUrl!.trim());
         } catch {
           return {
             ok: false as const,
             message: t.pages.editor.validation.metadata_invalid_url,
-          }
+          };
         }
       }
-      return { ok: true as const }
+      return { ok: true as const };
     },
     [t],
-  )
+  );
 
-  const buildMetadataPayload = useCallback(
-    (metadata: EditorMetadata): OperationMetadataPayload => {
-      const tidy = (value?: string) => {
-        const normalized = value?.trim()
-        return normalized && normalized.length > 0 ? normalized : undefined
-      }
-      const sourceType = metadata.sourceType ?? 'original'
-      const normalizedSourceType: 'original' | 'repost' =
-        sourceType === 'repost' ? 'repost' : 'original'
-      const base = {
-        sourceType: normalizedSourceType,
-        // 去重并清洗标签
-        tags: Array.isArray(metadata.tags)
-          ? Array.from(
-              new Set(
-                metadata.tags
-                  .map((s) => (s ?? '').trim())
-                  .filter((s) => s.length > 0),
-              ),
-            )
-          : undefined,
-      }
-      if (sourceType !== 'repost') {
-        return base
-      }
-      return {
-        ...base,
-        repostAuthor: tidy(metadata.repostAuthor),
-        repostPlatform: tidy(metadata.repostPlatform),
-        repostUrl: tidy(metadata.repostUrl),
-      }
-    },
-    [],
-  )
+  const buildMetadataPayload = useCallback((metadata: EditorMetadata): OperationMetadataPayload => {
+    const tidy = (value?: string) => {
+      const normalized = value?.trim();
+      return normalized && normalized.length > 0 ? normalized : undefined;
+    };
+    const sourceType = metadata.sourceType ?? "original";
+    const normalizedSourceType: "original" | "repost" =
+      sourceType === "repost" ? "repost" : "original";
+    const base = {
+      sourceType: normalizedSourceType,
+      // 去重并清洗标签
+      tags: Array.isArray(metadata.tags)
+        ? Array.from(
+            new Set(metadata.tags.map((s) => (s ?? "").trim()).filter((s) => s.length > 0)),
+          )
+        : undefined,
+    };
+    if (sourceType !== "repost") {
+      return base;
+    }
+    return {
+      ...base,
+      repostAuthor: tidy(metadata.repostAuthor),
+      repostPlatform: tidy(metadata.repostPlatform),
+      repostUrl: tidy(metadata.repostUrl),
+    };
+  }, []);
 
   // 统一遵循 Hooks 规则：避免条件调用，保证调用顺序一致
   // devtools 在非开发环境通常不会生效，但保持调用安全无副作用
-  useAtomDevtools(historyAtom, { name: 'editorStateAtom' })
+  useAtomDevtools(historyAtom, { name: "editorStateAtom" });
 
   useLayoutEffect(() => {
     // 将后端返回的预计算关卡信息注入全局，供 InfoEditor 使用
-    setEditorPreLevel(apiOperation?.preLevel)
+    setEditorPreLevel(apiOperation?.preLevel);
     if (apiOperation) {
-      const serverMetadata = apiOperation?.metadata
+      const serverMetadata = apiOperation?.metadata;
       resetEditor({
-        operation: toEditorOperation(
-          parseOperationLoose(JSON.parse(apiOperation.content)),
-        ),
+        operation: toEditorOperation(parseOperationLoose(JSON.parse(apiOperation.content))),
         metadata: {
-          visibility:
-            apiOperation.status === CopilotInfoStatusEnum.Public
-              ? 'public'
-              : 'private',
-          sourceType:
-            serverMetadata?.sourceType === 'repost' ? 'repost' : 'original',
-          repostAuthor: serverMetadata?.repostAuthor ?? '',
-          repostPlatform: serverMetadata?.repostPlatform ?? '',
-          repostUrl: serverMetadata?.repostUrl ?? '',
+          visibility: apiOperation.status === CopilotInfoStatusEnum.Public ? "public" : "private",
+          sourceType: serverMetadata?.sourceType === "repost" ? "repost" : "original",
+          repostAuthor: serverMetadata?.repostAuthor ?? "",
+          repostPlatform: serverMetadata?.repostPlatform ?? "",
+          repostUrl: serverMetadata?.repostUrl ?? "",
           tags: serverMetadata?.tags ?? [],
         },
-      })
+      });
     } else {
-      resetEditor(defaultEditorState)
+      resetEditor(defaultEditorState);
     }
-  }, [apiOperation, resetEditor, setEditorPreLevel])
+  }, [apiOperation, resetEditor, setEditorPreLevel]);
 
   useEffect(() => {
     if (!importShortcode) {
-      importedShortcodeRef.current = null
-      return
+      importedShortcodeRef.current = null;
+      return;
     }
 
     if (importedShortcodeRef.current === importShortcode) {
-      return
+      return;
     }
 
-    let cancelled = false
+    let cancelled = false;
 
     const run = async () => {
       try {
-        const shortCodeContent = parseShortCode(importShortcode)
+        const shortCodeContent = parseShortCode(importShortcode);
 
         if (!shortCodeContent) {
-          throw new Error(
-            t.components.editor.source.ShortCodeImporter.invalid_shortcode,
-          )
+          throw new Error(t.components.editor.source.ShortCodeImporter.invalid_shortcode);
         }
 
-        const operationData = await getOperation({ id: shortCodeContent.id })
-        setEditorPreLevel(operationData.preLevel)
-        const operationContent = operationData.parsedContent
+        const operationData = await getOperation({ id: shortCodeContent.id });
+        setEditorPreLevel(operationData.preLevel);
+        const operationContent = operationData.parsedContent;
 
-        if (
-          operationContent.doc.title ===
-          t.models.converter.invalid_operation_content
-        ) {
-          throw new Error(
-            t.components.editor.source.ShortCodeImporter.cannot_parse_content,
-          )
+        if (operationContent.doc.title === t.models.converter.invalid_operation_content) {
+          throw new Error(t.components.editor.source.ShortCodeImporter.cannot_parse_content);
         }
 
         const sanitizedContent = stripOperationExportFields(
           operationContent as unknown as Record<string, unknown>,
-        )
-        const parsedOperation = parseOperationLoose(sanitizedContent)
-        const importedOp = toEditorOperation(parsedOperation)
+        );
+        const parsedOperation = parseOperationLoose(sanitizedContent);
+        const importedOp = toEditorOperation(parsedOperation);
         // 拦截：若开启密探锁定，则跳过对 opers/groups 的变更
-        let spyChangeAttempted = false
+        let spyChangeAttempted = false;
         try {
-          const nextOpersJson = JSON.stringify(importedOp.opers ?? [])
-          const currOpersJson = JSON.stringify(currentOperation.opers ?? [])
-          const nextGroupsJson = JSON.stringify(importedOp.groups ?? [])
-          const currGroupsJson = JSON.stringify(currentOperation.groups ?? [])
-          spyChangeAttempted =
-            nextOpersJson !== currOpersJson || nextGroupsJson !== currGroupsJson
+          const nextOpersJson = JSON.stringify(importedOp.opers ?? []);
+          const currOpersJson = JSON.stringify(currentOperation.opers ?? []);
+          const nextGroupsJson = JSON.stringify(importedOp.groups ?? []);
+          const currGroupsJson = JSON.stringify(currentOperation.groups ?? []);
+          spyChangeAttempted = nextOpersJson !== currOpersJson || nextGroupsJson !== currGroupsJson;
         } catch {}
         if (operatorsLocked) {
-          importedOp.opers = currentOperation.opers
-          importedOp.groups = currentOperation.groups
+          importedOp.opers = currentOperation.opers;
+          importedOp.groups = currentOperation.groups;
         }
 
         resetEditor({
           operation: importedOp,
           metadata: {
             // 神秘代码导入：默认仅自己可见
-            visibility: 'private',
+            visibility: "private",
             // 修正：导入后本次编辑视为“搬运”；
             // 若原作业为搬运则沿用原作业元数据；否则填充上传者/平台/链接。
-            sourceType: 'repost',
+            sourceType: "repost",
             repostAuthor:
-              (operationData.metadata?.sourceType === 'repost'
+              (operationData.metadata?.sourceType === "repost"
                 ? operationData.metadata?.repostAuthor
-                : operationData.uploader) ?? '',
+                : operationData.uploader) ?? "",
             repostPlatform:
-              (operationData.metadata?.sourceType === 'repost'
+              (operationData.metadata?.sourceType === "repost"
                 ? operationData.metadata?.repostPlatform
-                : '作业站') ?? '',
+                : "作业站") ?? "",
             repostUrl:
-              (operationData.metadata?.sourceType === 'repost'
+              (operationData.metadata?.sourceType === "repost"
                 ? operationData.metadata?.repostUrl
-                : `https://share.maayuan.top/?op=${operationData.id}`) ?? '',
+                : `https://share.maayuan.top/?op=${operationData.id}`) ?? "",
             // 补齐：导入标签（多选 AND），从后端返回/映射到的 metadata.tags 读取
             tags: Array.isArray(operationData.metadata?.tags)
               ? Array.from(
                   new Set(
                     (operationData.metadata?.tags ?? [])
-                      .map((s) => (s ?? '').trim())
+                      .map((s) => (s ?? "").trim())
                       .filter((s) => s.length > 0),
                   ),
                 )
               : [],
           },
-        })
+        });
         // 神秘代码导入：锁定作业来源编辑，保护原作者
-        setMetadataLocked(true)
+        setMetadataLocked(true);
         if (operatorsLocked && spyChangeAttempted) {
           AppToaster.show({
-            intent: 'warning',
-            message: '已开启密探锁定，密探变更已跳过（详见报告）',
-          })
+            intent: "warning",
+            message: "已开启密探锁定，密探变更已跳过（详见报告）",
+          });
         }
-        importedShortcodeRef.current = importShortcode
+        importedShortcodeRef.current = importShortcode;
       } catch (error) {
-        console.warn(error)
+        console.warn(error);
         AppToaster.show({
-          intent: 'danger',
-          message:
-            t.components.editor.source.ShortCodeImporter.load_failed +
-            formatError(error),
-        })
-        importedShortcodeRef.current = importShortcode
+          intent: "danger",
+          message: t.components.editor.source.ShortCodeImporter.load_failed + formatError(error),
+        });
+        importedShortcodeRef.current = importShortcode;
       } finally {
         if (!cancelled) {
           setSearchParams(
             (prev) => {
-              const next = new URLSearchParams(prev)
-              next.delete('shortcode')
-              return next
+              const next = new URLSearchParams(prev);
+              next.delete("shortcode");
+              return next;
             },
             { replace: true },
-          )
+          );
         }
       }
-    }
+    };
 
-    run()
+    run();
 
     return () => {
-      cancelled = true
-    }
-  }, [
-    importShortcode,
-    resetEditor,
-    setSearchParams,
-    setEditorPreLevel,
-    setMetadataLocked,
-    t,
-  ])
+      cancelled = true;
+    };
+  }, [importShortcode, resetEditor, setSearchParams, setEditorPreLevel, setMetadataLocked, t]);
 
   const handleSubmit = useAtomCallback(
     useCallback(
       async (get, set) => {
-        const result = set(editorValidationAtom)
+        const result = set(editorValidationAtom);
         if (!result.success) {
-          set(editorAtoms.errorsVisible, true)
+          set(editorAtoms.errorsVisible, true);
           AppToaster.show({
             message: i18n.pages.editor.validation_error,
-            intent: 'danger',
-          })
-          return false
+            intent: "danger",
+          });
+          return false;
         }
-        const baseOperation = result.data
-        const editorOperation = get(editorAtoms.operation)
-        const editorMetadata = get(editorAtoms.metadata)
-        const metadataValidation = validateMetadata(editorMetadata)
+        const baseOperation = result.data;
+        const editorOperation = get(editorAtoms.operation);
+        const editorMetadata = get(editorAtoms.metadata);
+        const metadataValidation = validateMetadata(editorMetadata);
         if (!metadataValidation.ok) {
           AppToaster.show({
             message: metadataValidation.message,
-            intent: 'danger',
-          })
-          return false
+            intent: "danger",
+          });
+          return false;
         }
-        const metadataPayload = buildMetadataPayload(editorMetadata)
+        const metadataPayload = buildMetadataPayload(editorMetadata);
         // 解析所选关卡，便于洞窟时设置 cave_type
         const selectedLevel = levels
           ? findLevelByStageName(
@@ -411,24 +362,24 @@ export const EditorPage = withSuspensable(() => {
               (baseOperation as any).stageName ??
                 (baseOperation as any).stage_name ??
                 editorOperation.stageName ??
-                editorOperation['stage_name'] ??
-                '',
+                editorOperation["stage_name"] ??
+                "",
             )
-          : undefined
+          : undefined;
 
         // 调试输出：创建作业时打印当前选择的关卡分类信息
         if (selectedLevel) {
           // eslint-disable-next-line no-console
-          console.log('[CreateOperation] level meta:', {
+          console.log("[CreateOperation] level meta:", {
             catOne: selectedLevel.catOne,
             catTwo: selectedLevel.catTwo,
             catThree: selectedLevel.catThree,
             stageId: selectedLevel.stageId,
             name: selectedLevel.name,
-          })
+          });
         } else {
           // eslint-disable-next-line no-console
-          console.log('[CreateOperation] level meta: <none>')
+          console.log("[CreateOperation] level meta: <none>");
         }
 
         const stageNameCandidate =
@@ -436,53 +387,51 @@ export const EditorPage = withSuspensable(() => {
           (baseOperation as any).stageName ??
           editorOperation.stageName ??
           (editorOperation as any).stage_name ??
-          ''
+          "";
 
         const camelLevelMeta = buildCamelLevelMeta(
           selectedLevel,
           stageNameCandidate,
           editorOperation.levelMeta,
-        )
+        );
 
-        const editorOperationWithMeta = { ...editorOperation }
+        const editorOperationWithMeta = { ...editorOperation };
         if (camelLevelMeta) {
-          editorOperationWithMeta.levelMeta = camelLevelMeta
+          editorOperationWithMeta.levelMeta = camelLevelMeta;
         } else {
-          delete (editorOperationWithMeta as any).levelMeta
+          delete (editorOperationWithMeta as any).levelMeta;
         }
-        set(editorAtoms.operation, editorOperationWithMeta)
+        set(editorAtoms.operation, editorOperationWithMeta);
 
-        const snakeLevelMeta = toSnakeLevelMeta(camelLevelMeta)
+        const snakeLevelMeta = toSnakeLevelMeta(camelLevelMeta);
         if (snakeLevelMeta) {
-          ;(baseOperation as any).level_meta = snakeLevelMeta
+          (baseOperation as any).level_meta = snakeLevelMeta;
         } else {
-          delete (baseOperation as any).level_meta
+          delete (baseOperation as any).level_meta;
         }
 
         const levelForExport: Level | undefined =
           selectedLevel ??
           (camelLevelMeta
             ? {
-                stageId: camelLevelMeta.stageId ?? '',
-                levelId: camelLevelMeta.levelId ?? '',
-                name: camelLevelMeta.name ?? '',
-                catOne: camelLevelMeta.catOne ?? '',
-                catTwo: camelLevelMeta.catTwo ?? '',
-                catThree: camelLevelMeta.catThree ?? '',
+                stageId: camelLevelMeta.stageId ?? "",
+                levelId: camelLevelMeta.levelId ?? "",
+                name: camelLevelMeta.name ?? "",
+                catOne: camelLevelMeta.catOne ?? "",
+                catTwo: camelLevelMeta.catTwo ?? "",
+                catThree: camelLevelMeta.catThree ?? "",
                 width: camelLevelMeta.width ?? 0,
                 height: camelLevelMeta.height ?? 0,
               }
-            : undefined)
+            : undefined);
 
-        const operation = await toSimingOperationRemote(
-          baseOperation,
-          editorOperationWithMeta,
-          { level: levelForExport },
-        )
+        const operation = await toSimingOperationRemote(baseOperation, editorOperationWithMeta, {
+          level: levelForExport,
+        });
         const status =
-          editorMetadata.visibility === 'public'
+          editorMetadata.visibility === "public"
             ? CopilotInfoStatusEnum.Public
-            : CopilotInfoStatusEnum.Private
+            : CopilotInfoStatusEnum.Private;
 
         const upload = async () => {
           if (id) {
@@ -491,50 +440,46 @@ export const EditorPage = withSuspensable(() => {
               content: JSON.stringify(operation),
               status,
               metadata: metadataPayload,
-            })
+            });
             AppToaster.show({
               message: i18n.pages.editor.edit.success,
-              intent: 'success',
-            })
-            navigate(`/?op=${id}`)
+              intent: "success",
+            });
+            navigate(`/?op=${id}`);
           } else {
             const newId = await createOperation({
               content: JSON.stringify(operation),
               status,
               metadata: metadataPayload,
-            })
+            });
             AppToaster.show({
               message: i18n.pages.editor.create.success,
-              intent: 'success',
-            })
+              intent: "success",
+            });
             if (newId) {
-              navigate(`/?op=${newId}`)
+              navigate(`/?op=${newId}`);
             } else {
-              navigate('/')
+              navigate("/");
             }
           }
-        }
+        };
 
         await wrapErrorMessage(
           (e) => i18n.pages.editor.upload_failed({ error: formatError(e) }),
           upload(),
-        )
-        return true
+        );
+        return true;
       },
       [buildMetadataPayload, id, levels, navigate, validateMetadata],
     ),
-  )
+  );
 
   return (
     <OperationEditor
       preLevel={preLevel}
-      subtitle={
-        isNew ? t.pages.editor.create.subtitle : t.pages.editor.edit.subtitle
-      }
-      submitAction={
-        isNew ? t.pages.editor.create.submit : t.pages.editor.edit.submit
-      }
+      subtitle={isNew ? t.pages.editor.create.subtitle : t.pages.editor.edit.subtitle}
+      submitAction={isNew ? t.pages.editor.create.submit : t.pages.editor.edit.submit}
       onSubmit={handleSubmit}
     />
-  )
-})
+  );
+});

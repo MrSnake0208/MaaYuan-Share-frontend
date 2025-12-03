@@ -1,14 +1,14 @@
-import { Button, NonIdealState } from '@blueprintjs/core'
+import { Button, NonIdealState } from "@blueprintjs/core";
 
-import { ComponentType } from 'react'
-import { Link } from 'react-router-dom'
+import { ComponentType } from "react";
+import { Link } from "react-router-dom";
 
-import { withGlobalErrorBoundary } from 'components/GlobalErrorBoundary'
+import { withGlobalErrorBoundary } from "components/GlobalErrorBoundary";
 
-import { useTranslation } from '../i18n/i18n'
+import { useTranslation } from "../i18n/i18n";
 
 export const NotFoundPage: ComponentType = withGlobalErrorBoundary(() => {
-  const t = useTranslation()
+  const t = useTranslation();
 
   return (
     <NonIdealState
@@ -22,5 +22,5 @@ export const NotFoundPage: ComponentType = withGlobalErrorBoundary(() => {
         </Link>
       }
     />
-  )
-})
+  );
+});

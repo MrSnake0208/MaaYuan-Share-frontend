@@ -1,16 +1,16 @@
-import { Card } from '@blueprintjs/core'
+import { Card } from "@blueprintjs/core";
 
-import { FC } from 'react'
+import { FC } from "react";
 
-import { useLocalizedOperatorName } from 'models/operator'
+import { useLocalizedOperatorName } from "models/operator";
 
-import { OperatorAvatar } from '../../../../OperatorAvatar'
-import { Operator } from '../../EditorSheet'
-import { SkillAboutTrigger } from '../SheetOperatorSkillAbout'
+import { OperatorAvatar } from "../../../../OperatorAvatar";
+import { Operator } from "../../EditorSheet";
+import { SkillAboutTrigger } from "../SheetOperatorSkillAbout";
 
 export interface OperatorInGroupItemProp {
-  operatorInfo: Operator
-  onOperatorSkillChange?: (operatorInfo: Operator) => void
+  operatorInfo: Operator;
+  onOperatorSkillChange?: (operatorInfo: Operator) => void;
 }
 
 export const OperatorInGroupItem: FC<OperatorInGroupItemProp> = ({
@@ -33,4 +33,4 @@ export const OperatorInGroupItem: FC<OperatorInGroupItemProp> = ({
       )}
     </>
   </Card>
-)
+);

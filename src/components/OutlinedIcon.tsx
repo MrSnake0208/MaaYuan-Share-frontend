@@ -1,6 +1,6 @@
-import { Icon, IconProps } from '@blueprintjs/core'
+import { Icon, IconProps } from "@blueprintjs/core";
 
-import clsx from 'clsx'
+import clsx from "clsx";
 
 export const OutlinedIcon = ({
   className,
@@ -8,13 +8,13 @@ export const OutlinedIcon = ({
   ...iconProps
 }: IconProps & {
   // default is true, set to false to disable the outline effect
-  outlined?: boolean
+  outlined?: boolean;
 }) => (
   <Icon
     {...iconProps}
     className={clsx(
       className,
-      (outlined ?? true) && '[&_path]:fill-transparent [&_path]:stroke-current',
+      (outlined ?? true) && "[&_path]:fill-transparent [&_path]:stroke-current",
     )}
   />
-)
+);

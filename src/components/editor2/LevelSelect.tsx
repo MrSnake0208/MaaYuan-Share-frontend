@@ -1,54 +1,45 @@
-import { Classes, InputGroup, MenuItem } from '@blueprintjs/core'
-import { getCreateNewItem } from '@blueprintjs/select'
+import { Classes, InputGroup, MenuItem } from "@blueprintjs/core";
+import { getCreateNewItem } from "@blueprintjs/select";
 
-import clsx from 'clsx'
-import Fuse from 'fuse.js'
-import {
-  FC,
-  ReactNode,
-  Ref,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import clsx from "clsx";
+import Fuse from "fuse.js";
+import { FC, ReactNode, Ref, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { useLevels } from '../../apis/level'
-import { i18n, useTranslation } from '../../i18n/i18n'
+import { useLevels } from "../../apis/level";
+import { i18n, useTranslation } from "../../i18n/i18n";
 import {
   compareLevelsForDisplay,
   createCustomLevel,
   findLevelByStageName,
   isCustomLevel,
   isHardMode,
-} from '../../models/level'
-import { Level, OpDifficulty } from '../../models/operation'
-import { formatError } from '../../utils/error'
-import { useDebouncedQuery } from '../../utils/useDebouncedQuery'
-import { Suggest } from '../Suggest'
+} from "../../models/level";
+import { Level, OpDifficulty } from "../../models/operation";
+import { formatError } from "../../utils/error";
+import { useDebouncedQuery } from "../../utils/useDebouncedQuery";
+import { Suggest } from "../Suggest";
 
 interface LevelSelectProps {
-  className?: string
-  difficulty?: OpDifficulty
-  name?: string
-  inputRef?: Ref<HTMLInputElement>
-  disabled?: boolean
-  value?: string
-  fallbackLevel?: Level
-  onChange: (stageId: string, level?: Level) => void
-  onDifficultyChange?: (value: OpDifficulty, programmatically: boolean) => void
+  className?: string;
+  difficulty?: OpDifficulty;
+  name?: string;
+  inputRef?: Ref<HTMLInputElement>;
+  disabled?: boolean;
+  value?: string;
+  fallbackLevel?: Level;
+  onChange: (stageId: string, level?: Level) => void;
+  onDifficultyChange?: (value: OpDifficulty, programmatically: boolean) => void;
   // 当选择了“游戏”或“分类”时，上抛一个用于筛选的关键字
-  onFilterChange?: (keyword: string, meta?: { catOne?: string }) => void
-  defaultCategory?: string
+  onFilterChange?: (keyword: string, meta?: { catOne?: string }) => void;
+  defaultCategory?: string;
   // 自定义 Portal 容器，确保下拉菜单渲染在 Overlay 容器内，避免被判定为“外部点击”
-  portalContainer?: HTMLElement | undefined | null
+  portalContainer?: HTMLElement | undefined | null;
   // 额外的右侧内容（如第三层分类输入），将渲染在同一行的最右侧
-  rightExtra?: ReactNode
-  activityLevelRecognitionName?: string
-  onActivityLevelRecognitionNameChange?: (value: string) => void
-  activityDifficultyOverride?: string
-  onActivityDifficultyOverrideChange?: (value: string) => void
+  rightExtra?: ReactNode;
+  activityLevelRecognitionName?: string;
+  onActivityLevelRecognitionNameChange?: (value: string) => void;
+  activityDifficultyOverride?: string;
+  onActivityDifficultyOverrideChange?: (value: string) => void;
 }
 
 export const LevelSelect: FC<LevelSelectProps> = ({
@@ -68,11 +59,11 @@ export const LevelSelect: FC<LevelSelectProps> = ({
   onActivityDifficultyOverrideChange,
   ...inputProps
 }) => {
-  const t = useTranslation()
-  const relatedLevelsLabel = i18n.components.editor2.LevelSelect.related_levels
+  const t = useTranslation();
+  const relatedLevelsLabel = i18n.components.editor2.LevelSelect.related_levels;
   // we are going to manually handle loading state so we could show the skeleton state easily,
   // without swapping the actual element.
-  const { data, error: fetchError, isLoading } = useLevels()
+  const { data, error: fetchError, isLoading } = useLevels();
   const levels = useMemo(
     () =>
       data
@@ -80,221 +71,193 @@ export const LevelSelect: FC<LevelSelectProps> = ({
         .filter((level) => !isHardMode(level.stageId))
         .sort(compareLevelsForDisplay),
     [data],
-  )
+  );
   const fuse = useMemo(
     () =>
       new Fuse(levels, {
-        keys: ['name', 'catOne', 'catTwo', 'catThree', 'stageId'],
+        keys: ["name", "catOne", "catTwo", "catThree", "stageId"],
         threshold: 0.3,
       }),
     [levels],
-  )
+  );
 
-  const { query, debouncedQuery, updateQuery, onOptionMouseDown } =
-    useDebouncedQuery({
-      onDebouncedQueryChange: (value) => {
-        if (value !== debouncedQuery) {
-          // 清空 activeItem，之后会自动设置为第一项
-          setActiveItem(null)
-        }
-      },
-    })
-  const [activeItem, setActiveItem] = useState<Level | 'createNewItem' | null>(
-    null,
-  )
+  const { query, debouncedQuery, updateQuery, onOptionMouseDown } = useDebouncedQuery({
+    onDebouncedQueryChange: (value) => {
+      if (value !== debouncedQuery) {
+        // 清空 activeItem，之后会自动设置为第一项
+        setActiveItem(null);
+      }
+    },
+  });
+  const [activeItem, setActiveItem] = useState<Level | "createNewItem" | null>(null);
 
   const selectedLevel = useMemo(() => {
-    if (!value) return null
-    const fromStageName = findLevelByStageName(levels, value)
-    if (fromStageName) return fromStageName
+    if (!value) return null;
+    const fromStageName = findLevelByStageName(levels, value);
+    if (fromStageName) return fromStageName;
     if (
       fallbackLevel &&
       (fallbackLevel.stageId === value ||
         fallbackLevel.catThree === value ||
         fallbackLevel.name === value)
     ) {
-      return fallbackLevel
+      return fallbackLevel;
     }
-    return createCustomLevel(value)
-  }, [levels, value, fallbackLevel])
+    return createCustomLevel(value);
+  }, [levels, value, fallbackLevel]);
 
   const getLevelCategory = useCallback(
     (level: Level) =>
-      level.catOne?.trim() ||
-      level.catTwo?.trim() ||
-      level.catThree?.trim() ||
-      relatedLevelsLabel,
+      level.catOne?.trim() || level.catTwo?.trim() || level.catThree?.trim() || relatedLevelsLabel,
     [relatedLevelsLabel],
-  )
+  );
 
   // 已移除游戏层，不再构建游戏维度选项
 
   const categories = useMemo(() => {
-    const seen = new Set<string>()
-    const result: string[] = []
+    const seen = new Set<string>();
+    const result: string[] = [];
     for (const level of levels) {
-      const category = getLevelCategory(level)
+      const category = getLevelCategory(level);
       if (!seen.has(category)) {
-        seen.add(category)
-        result.push(category)
+        seen.add(category);
+        result.push(category);
       }
     }
     if (selectedLevel && !isCustomLevel(selectedLevel)) {
-      const category = getLevelCategory(selectedLevel)
+      const category = getLevelCategory(selectedLevel);
       if (!seen.has(category)) {
-        seen.add(category)
-        result.push(category)
+        seen.add(category);
+        result.push(category);
       }
     }
-    return result
-  }, [getLevelCategory, levels, selectedLevel])
+    return result;
+  }, [getLevelCategory, levels, selectedLevel]);
 
-  const normalizedDefaultCategory = (defaultCategory ?? '').trim()
+  const normalizedDefaultCategory = (defaultCategory ?? "").trim();
   const [selectedCategory, setSelectedCategory] = useState<string>(() => {
     if (selectedLevel) {
-      return getLevelCategory(selectedLevel)
+      return getLevelCategory(selectedLevel);
     }
     // 没有关卡时，尝试使用父组件传入的默认分类以便回显
-    return normalizedDefaultCategory
-  })
+    return normalizedDefaultCategory;
+  });
 
   // 标记：用户是否手动选择过分类，避免后续默认值/下级选择回写覆盖
-  const categoryEditedRef = useRef(false)
+  const categoryEditedRef = useRef(false);
   // 标记：仅在初次挂载/首次有选中关卡时，从关卡类别回显一次到分类
-  const hydratedCategoryRef = useRef(false)
+  const hydratedCategoryRef = useRef(false);
 
   useEffect(() => {
-    if (selectedLevel) return
-    if (!normalizedDefaultCategory) return
+    if (selectedLevel) return;
+    if (!normalizedDefaultCategory) return;
     // 若用户已手动选择过分类，则不再用默认分类覆盖
-    if (categoryEditedRef.current) return
-    setSelectedCategory(normalizedDefaultCategory)
-  }, [normalizedDefaultCategory, selectedLevel])
+    if (categoryEditedRef.current) return;
+    setSelectedCategory(normalizedDefaultCategory);
+  }, [normalizedDefaultCategory, selectedLevel]);
 
   // 取消自动选择首个分类，避免“强制重置”
 
   const categoryOptions = useMemo(() => {
     if (!selectedCategory) {
-      return categories
+      return categories;
     }
     if (categories.includes(selectedCategory)) {
-      return categories
+      return categories;
     }
-    return [...categories, selectedCategory]
-  }, [categories, selectedCategory])
+    return [...categories, selectedCategory];
+  }, [categories, selectedCategory]);
 
-  const previousValueRef = useRef<string | undefined>(undefined)
+  const previousValueRef = useRef<string | undefined>(undefined);
   useEffect(() => {
     if (value !== previousValueRef.current) {
-      previousValueRef.current = value
+      previousValueRef.current = value;
 
       if (selectedLevel && !isCustomLevel(selectedLevel)) {
-        const category = getLevelCategory(selectedLevel)
+        const category = getLevelCategory(selectedLevel);
         if (category && category !== selectedCategory) {
           // 仅在尚未被用户手动选择且尚未水合过时，从关卡回显一次分类
           if (!categoryEditedRef.current && !hydratedCategoryRef.current) {
-            setSelectedCategory(category)
-            hydratedCategoryRef.current = true
+            setSelectedCategory(category);
+            hydratedCategoryRef.current = true;
           }
           // 将输入框填充为已选关卡的显示文案，便于直观看到当前选择
-          updateQuery(formatLevelInputValue(selectedLevel), true)
+          updateQuery(formatLevelInputValue(selectedLevel), true);
         }
-        return
+        return;
       }
       // 不再在无选中关卡时强制设定首个分类
     }
-  }, [
-    categories,
-    getLevelCategory,
-    selectedCategory,
-    selectedLevel,
-    updateQuery,
-    value,
-  ])
+  }, [categories, getLevelCategory, selectedCategory, selectedLevel, updateQuery, value]);
 
   const ensureIncludesSelected = useCallback(
     (list: Level[]) => {
-      if (
-        selectedLevel &&
-        !list.some((level) => level.stageId === selectedLevel.stageId)
-      ) {
-        return [selectedLevel, ...list]
+      if (selectedLevel && !list.some((level) => level.stageId === selectedLevel.stageId)) {
+        return [selectedLevel, ...list];
       }
-      return list
+      return list;
     },
     [selectedLevel],
-  )
+  );
 
   const filteredLevels = useMemo(() => {
-    const trimmedQuery = debouncedQuery.trim()
+    const trimmedQuery = debouncedQuery.trim();
 
     if (trimmedQuery) {
-      const searchResults = fuse.search(trimmedQuery).map((el) => el.item)
+      const searchResults = fuse.search(trimmedQuery).map((el) => el.item);
       const filteredResults = selectedCategory
-        ? searchResults.filter(
-            (level) => getLevelCategory(level) === selectedCategory,
-          )
-        : searchResults
-      return ensureIncludesSelected(
-        filteredResults.length ? filteredResults : searchResults,
-      )
+        ? searchResults.filter((level) => getLevelCategory(level) === selectedCategory)
+        : searchResults;
+      return ensureIncludesSelected(filteredResults.length ? filteredResults : searchResults);
     }
 
     if (selectedLevel) {
-      let similarLevels: Level[] = []
-      let headerName = relatedLevelsLabel
+      let similarLevels: Level[] = [];
+      let headerName = relatedLevelsLabel;
 
-      if (selectedLevel.catOne === '剿灭作战') {
-        headerName = selectedLevel.catOne
-        similarLevels = levels.filter(
-          (level) => level.catOne === selectedLevel.catOne,
-        )
+      if (selectedLevel.catOne === "剿灭作战") {
+        headerName = selectedLevel.catOne;
+        similarLevels = levels.filter((level) => level.catOne === selectedLevel.catOne);
       } else if (
-        selectedLevel.stageId.includes('rune') ||
-        selectedLevel.stageId.includes('crisis')
+        selectedLevel.stageId.includes("rune") ||
+        selectedLevel.stageId.includes("crisis")
       ) {
-        headerName = '危机合约'
+        headerName = "危机合约";
         similarLevels = levels.filter(
-          (level) =>
-            level.stageId.includes('rune') || level.stageId.includes('crisis'),
-        )
+          (level) => level.stageId.includes("rune") || level.stageId.includes("crisis"),
+        );
       } else if (selectedLevel.catTwo) {
-        headerName = selectedLevel.catTwo
-        similarLevels = levels.filter(
-          (level) => level.catTwo === selectedLevel.catTwo,
-        )
+        headerName = selectedLevel.catTwo;
+        similarLevels = levels.filter((level) => level.catTwo === selectedLevel.catTwo);
       } else {
-        const levelIdPrefix = selectedLevel.levelId
-          .split('/')
-          .slice(0, -1)
-          .join('/')
+        const levelIdPrefix = selectedLevel.levelId.split("/").slice(0, -1).join("/");
         similarLevels = levelIdPrefix
           ? levels.filter((level) => level.levelId.startsWith(levelIdPrefix))
-          : []
+          : [];
       }
 
       if (selectedCategory) {
         similarLevels = similarLevels.filter(
           (level) => getLevelCategory(level) === selectedCategory,
-        )
+        );
       }
 
       if (similarLevels.length > 1) {
-        const header = createCustomLevel('header')
-        header.name = headerName
-        return ensureIncludesSelected([header, ...similarLevels])
+        const header = createCustomLevel("header");
+        header.name = headerName;
+        return ensureIncludesSelected([header, ...similarLevels]);
       }
 
       if (similarLevels.length === 1) {
-        return ensureIncludesSelected(similarLevels)
+        return ensureIncludesSelected(similarLevels);
       }
     }
 
     const levelsInCategory = selectedCategory
       ? levels.filter((level) => getLevelCategory(level) === selectedCategory)
-      : levels
+      : levels;
 
-    return ensureIncludesSelected(levelsInCategory)
+    return ensureIncludesSelected(levelsInCategory);
   }, [
     debouncedQuery,
     ensureIncludesSelected,
@@ -304,75 +267,75 @@ export const LevelSelect: FC<LevelSelectProps> = ({
     relatedLevelsLabel,
     selectedCategory,
     selectedLevel,
-  ])
+  ]);
 
   useEffect(() => {
     if (!selectedLevel) {
-      setActiveItem(null)
+      setActiveItem(null);
     } else if (isCustomLevel(selectedLevel)) {
-      setActiveItem('createNewItem')
+      setActiveItem("createNewItem");
     } else {
-      setActiveItem(selectedLevel)
+      setActiveItem(selectedLevel);
     }
-  }, [selectedLevel])
+  }, [selectedLevel]);
 
   // 同步输入框显示为当前选中关卡，避免初次加载为空白
   useEffect(() => {
     if (selectedLevel) {
-      const formatted = formatLevelInputValue(selectedLevel)
+      const formatted = formatLevelInputValue(selectedLevel);
       if (formatted) {
-        updateQuery(formatted, true)
+        updateQuery(formatted, true);
       }
     }
-  }, [selectedLevel, updateQuery])
+  }, [selectedLevel, updateQuery]);
 
   useEffect(() => {
     if (selectedLevel) {
-      return
+      return;
     }
     if (!fallbackLevel) {
-      return
+      return;
     }
-    const formatted = formatLevelInputValue(fallbackLevel)
+    const formatted = formatLevelInputValue(fallbackLevel);
     if (!formatted) {
-      return
+      return;
     }
-    updateQuery(formatted, true)
-  }, [fallbackLevel, selectedLevel, updateQuery])
+    updateQuery(formatted, true);
+  }, [fallbackLevel, selectedLevel, updateQuery]);
 
   const formatLevelInputValue = (level: Level) => {
-    const trimmedName = level.name?.trim()
+    const trimmedName = level.name?.trim();
     if (trimmedName) {
-      return trimmedName
+      return trimmedName;
     }
-    return level.stageId
-  }
+    return level.stageId;
+  };
 
   const formatLevelLabel = (level: Level) => {
     // 下拉项与选择后展示仅显示关卡名，若无则回退至 stageId
-    if (level.stageId === 'header') return level.name
-    const trimmedName = level.name?.trim()
-    return trimmedName || level.stageId
-  }
+    if (level.stageId === "header") return level.name;
+    const trimmedName = level.name?.trim();
+    return trimmedName || level.stageId;
+  };
 
   const enhanceCustomLevel = useCallback(
     (level: Level): Level => {
       if (!isCustomLevel(level)) {
-        return level
+        return level;
       }
-      const trimmedName = level.name?.trim() || level.stageId
+      const trimmedName = level.name?.trim() || level.stageId;
       return {
         ...level,
-        catOne: selectedCategory?.trim() || level.catOne || '',
+        catOne: selectedCategory?.trim() || level.catOne || "",
         catTwo: trimmedName,
-        catThree: '',
-      }
+        catThree: "",
+      };
     },
     [selectedCategory],
-  )
+  );
 
   return (
-    <div className={clsx('flex flex-col gap-2', className)}>
+    <div className={clsx("flex flex-col gap-2", className)}>
       <div className="flex w-full flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1 flex-1 min-w-[200px] max-w-[260px]">
           <Suggest<string>
@@ -382,17 +345,15 @@ export const LevelSelect: FC<LevelSelectProps> = ({
             disabled={disabled || isLoading || categoryOptions.length === 0}
             className="w-full"
             itemListPredicate={(search, items) => {
-              const normalized = (search ?? '').trim().toLowerCase()
+              const normalized = (search ?? "").trim().toLowerCase();
               if (!normalized) {
-                return items
+                return items;
               }
-              return items.filter((item) =>
-                item.toLowerCase().includes(normalized),
-              )
+              return items.filter((item) => item.toLowerCase().includes(normalized));
             }}
             itemRenderer={(item, { handleClick, handleFocus, modifiers }) => {
               if (modifiers.matchesPredicate === false) {
-                return null
+                return null;
               }
               return (
                 <MenuItem
@@ -406,30 +367,29 @@ export const LevelSelect: FC<LevelSelectProps> = ({
                   selected={item === selectedCategory}
                   disabled={modifiers.disabled}
                 />
-              )
+              );
             }}
-            inputValueRenderer={(item) => item ?? ''}
+            inputValueRenderer={(item) => item ?? ""}
             onItemSelect={(category) => {
               if (!category || category === selectedCategory) {
-                return
+                return;
               }
               // 用户主动选择分类
-              categoryEditedRef.current = true
-              setSelectedCategory(category)
-              setActiveItem(null)
-              updateQuery('', true)
+              categoryEditedRef.current = true;
+              setSelectedCategory(category);
+              setActiveItem(null);
+              updateQuery("", true);
               // 分类变化时无条件清空关卡，避免跨分类残留
               if (!disabled) {
-                onChange('')
+                onChange("");
               }
               // 选择“分类”时触发一次筛选查询（仅分类关键字）
-              const kw = category
-              onFilterChange?.(kw, { catOne: category })
+              const kw = category;
+              onFilterChange?.(kw, { catOne: category });
             }}
             inputProps={{
               large: true,
-              placeholder:
-                t.components.editor2.LevelSelect.category_placeholder,
+              placeholder: t.components.editor2.LevelSelect.category_placeholder,
             }}
             popoverProps={{
               minimal: true,
@@ -442,25 +402,23 @@ export const LevelSelect: FC<LevelSelectProps> = ({
           <Suggest<Level>
             items={levels}
             itemListPredicate={() => filteredLevels}
-            activeItem={
-              activeItem === 'createNewItem' ? getCreateNewItem() : activeItem
-            }
+            activeItem={activeItem === "createNewItem" ? getCreateNewItem() : activeItem}
             onActiveItemChange={(item, isCreateNewItem) => {
-              setActiveItem(isCreateNewItem ? 'createNewItem' : item)
+              setActiveItem(isCreateNewItem ? "createNewItem" : item);
             }}
             resetOnQuery={false}
             query={query}
             onQueryChange={(query) => updateQuery(query, false)}
             onReset={() => {
-              setActiveItem(null)
+              setActiveItem(null);
               if (!disabled) {
-                onChange('')
+                onChange("");
               }
             }}
             disabled={disabled || isLoading}
-            className={clsx('w-full', isLoading && 'bp4-skeleton')}
+            className={clsx("w-full", isLoading && "bp4-skeleton")}
             itemsEqual={(a, b) => a.stageId === b.stageId}
-            itemDisabled={(item) => item.stageId === 'header'}
+            itemDisabled={(item) => item.stageId === "header"}
             itemRenderer={(item, { handleClick, handleFocus, modifiers }) => (
               <MenuItem
                 roleStructure="listoption"
@@ -477,12 +435,12 @@ export const LevelSelect: FC<LevelSelectProps> = ({
             inputValueRenderer={formatLevelInputValue}
             selectedItem={selectedLevel}
             onItemSelect={(level) => {
-              const nextLevel = enhanceCustomLevel(level)
+              const nextLevel = enhanceCustomLevel(level);
               if (!isCustomLevel(level)) {
-                updateQuery('', true)
+                updateQuery("", true);
               }
               if (!disabled) {
-                onChange(nextLevel.stageId, nextLevel)
+                onChange(nextLevel.stageId, nextLevel);
               }
             }}
             createNewItemFromQuery={(query) => createCustomLevel(query)}
@@ -508,23 +466,21 @@ export const LevelSelect: FC<LevelSelectProps> = ({
               captureDismiss: true,
               portalContainer: portalContainer ?? undefined,
               onClosed() {
-                updateQuery('', false)
+                updateQuery("", false);
               },
             }}
           />
         </div>
         {rightExtra && (
-          <div className="flex flex-col gap-1 flex-1 min-w-[200px] max-w-[260px]">
-            {rightExtra}
-          </div>
+          <div className="flex flex-col gap-1 flex-1 min-w-[200px] max-w-[260px]">{rightExtra}</div>
         )}
       </div>
       {(() => {
-        const isActivityLevel = selectedLevel?.catOne === '活动'
-        const isDungeonLevel = selectedLevel?.catOne === '地宫'
+        const isActivityLevel = selectedLevel?.catOne === "活动";
+        const isDungeonLevel = selectedLevel?.catOne === "地宫";
 
         if (!isActivityLevel && !isDungeonLevel) {
-          return null
+          return null;
         }
 
         return (
@@ -536,14 +492,9 @@ export const LevelSelect: FC<LevelSelectProps> = ({
                 </span>
                 <InputGroup
                   large
-                  placeholder={
-                    t.components.editor2.LevelSelect
-                      .activity_difficulty_placeholder
-                  }
-                  value={activityDifficultyOverride ?? ''}
-                  onChange={(e) =>
-                    onActivityDifficultyOverrideChange?.(e.target.value)
-                  }
+                  placeholder={t.components.editor2.LevelSelect.activity_difficulty_placeholder}
+                  value={activityDifficultyOverride ?? ""}
+                  onChange={(e) => onActivityDifficultyOverrideChange?.(e.target.value)}
                 />
               </div>
             )}
@@ -551,26 +502,20 @@ export const LevelSelect: FC<LevelSelectProps> = ({
             {onActivityLevelRecognitionNameChange && (
               <div className="mt-2 flex flex-col gap-1">
                 <span className="text-xs font-medium text-slate-500">
-                  {
-                    t.components.editor2.LevelSelect
-                      .activity_level_recognition_label
-                  }
+                  {t.components.editor2.LevelSelect.activity_level_recognition_label}
                 </span>
                 <InputGroup
                   large
                   placeholder={
-                    t.components.editor2.LevelSelect
-                      .activity_level_recognition_placeholder
+                    t.components.editor2.LevelSelect.activity_level_recognition_placeholder
                   }
-                  value={activityLevelRecognitionName ?? ''}
-                  onChange={(e) =>
-                    onActivityLevelRecognitionNameChange?.(e.target.value)
-                  }
+                  value={activityLevelRecognitionName ?? ""}
+                  onChange={(e) => onActivityLevelRecognitionNameChange?.(e.target.value)}
                 />
               </div>
             )}
           </>
-        )
+        );
       })()}
       {fetchError && (
         <span className="text-xs opacity-50">
@@ -580,5 +525,5 @@ export const LevelSelect: FC<LevelSelectProps> = ({
         </span>
       )}
     </div>
-  )
-}
+  );
+};

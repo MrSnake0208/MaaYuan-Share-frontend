@@ -1,29 +1,29 @@
-import { Card, Elevation, Icon, NonIdealState } from '@blueprintjs/core'
-import { UniqueIdentifier } from '@dnd-kit/core'
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { Card, Elevation, Icon, NonIdealState } from "@blueprintjs/core";
+import { UniqueIdentifier } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 
-import { clsx } from 'clsx'
+import { clsx } from "clsx";
 
-import type { CopilotDocV1 } from 'models/copilot.schema'
+import type { CopilotDocV1 } from "models/copilot.schema";
 
-import { useTranslation } from '../../../i18n/i18n'
-import { Sortable, SortableItemProps } from '../../dnd'
-import { CardDeleteOption, CardEditOption } from '../CardOptions'
-import { EditorOperatorItem } from './EditorOperatorItem'
+import { useTranslation } from "../../../i18n/i18n";
+import { Sortable, SortableItemProps } from "../../dnd";
+import { CardDeleteOption, CardEditOption } from "../CardOptions";
+import { EditorOperatorItem } from "./EditorOperatorItem";
 
-export type GroupWithIdentifiedOperators = Omit<CopilotDocV1.Group, 'opers'> & {
-  opers: (CopilotDocV1.Operator & { id: UniqueIdentifier })[]
-}
+export type GroupWithIdentifiedOperators = Omit<CopilotDocV1.Group, "opers"> & {
+  opers: (CopilotDocV1.Operator & { id: UniqueIdentifier })[];
+};
 
 interface EditorGroupItemProps extends Partial<SortableItemProps> {
-  group: CopilotDocV1.Group
-  editing?: boolean
-  onEdit?: () => void
-  onRemove?: () => void
-  getOperatorId: (operator: CopilotDocV1.Operator) => UniqueIdentifier
-  isOperatorEditing?: (operator: CopilotDocV1.Operator) => boolean
-  onOperatorEdit?: (operator: CopilotDocV1.Operator) => void
-  onOperatorRemove?: (index: number) => void
+  group: CopilotDocV1.Group;
+  editing?: boolean;
+  onEdit?: () => void;
+  onRemove?: () => void;
+  getOperatorId: (operator: CopilotDocV1.Operator) => UniqueIdentifier;
+  isOperatorEditing?: (operator: CopilotDocV1.Operator) => boolean;
+  onOperatorEdit?: (operator: CopilotDocV1.Operator) => void;
+  onOperatorRemove?: (index: number) => void;
 }
 
 export const EditorGroupItem = ({
@@ -39,13 +39,13 @@ export const EditorGroupItem = ({
   attributes,
   listeners,
 }: EditorGroupItemProps) => {
-  const t = useTranslation()
+  const t = useTranslation();
 
   return (
     <Card
       elevation={Elevation.TWO}
-      className={clsx(editing && 'bg-gray-100', isDragging && 'invisible')}
-      style={{ width: 'fit-content' }}
+      className={clsx(editing && "bg-gray-100", isDragging && "invisible")}
+      style={{ width: "fit-content" }}
     >
       <SortableContext
         items={group.opers?.map(getOperatorId) || []}
@@ -71,7 +71,7 @@ export const EditorGroupItem = ({
               className="mb-2"
               key={getOperatorId(operator)}
               id={getOperatorId(operator)}
-              data={{ type: 'operator' }}
+              data={{ type: "operator" }}
             >
               {(attrs) => (
                 <EditorOperatorItem
@@ -93,5 +93,5 @@ export const EditorGroupItem = ({
         )}
       </SortableContext>
     </Card>
-  )
-}
+  );
+};

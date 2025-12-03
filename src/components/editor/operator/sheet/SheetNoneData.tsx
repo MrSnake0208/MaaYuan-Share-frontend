@@ -1,21 +1,13 @@
-import { NonIdealState } from '@blueprintjs/core'
+import { NonIdealState } from "@blueprintjs/core";
 
-import { useTranslation } from '../../../../i18n/i18n'
+import { useTranslation } from "../../../../i18n/i18n";
 
 export const OperatorNoData = () => {
-  const t = useTranslation()
-  return (
-    <NonIdealState
-      title={t.components.editor.operator.sheet.SheetNoneData.no_operators}
-    />
-  )
-}
+  const t = useTranslation();
+  return <NonIdealState title={t.components.editor.operator.sheet.SheetNoneData.no_operators} />;
+};
 
 export const GroupNoData = () => {
-  const t = useTranslation()
-  return (
-    <NonIdealState
-      title={t.components.editor.operator.sheet.SheetNoneData.no_groups}
-    />
-  )
-}
+  const t = useTranslation();
+  return <NonIdealState title={t.components.editor.operator.sheet.SheetNoneData.no_groups} />;
+};

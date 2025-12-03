@@ -1,34 +1,31 @@
-import { Button, Callout, Dialog, InputGroup } from '@blueprintjs/core'
+import { Button, Callout, Dialog, InputGroup } from "@blueprintjs/core";
 
-import { resetPassword, sendResetPasswordEmail } from 'apis/auth'
-import { FC, useState } from 'react'
-import { FieldErrors, useForm } from 'react-hook-form'
+import { resetPassword, sendResetPasswordEmail } from "apis/auth";
+import { FC, useState } from "react";
+import { FieldErrors, useForm } from "react-hook-form";
 
-import { useTranslation } from '../../i18n/i18n'
-import { formatError } from '../../utils/error'
-import { useNetworkState } from '../../utils/useNetworkState'
-import { wrapErrorMessage } from '../../utils/wrapErrorMessage'
-import { FormField } from '../FormField'
-import { GlobalErrorBoundary } from '../GlobalErrorBoundary'
-import { AppToaster } from '../Toaster'
-import { AuthFormEmailField, AuthFormPasswordField } from './AuthFormShared'
+import { useTranslation } from "../../i18n/i18n";
+import { formatError } from "../../utils/error";
+import { useNetworkState } from "../../utils/useNetworkState";
+import { wrapErrorMessage } from "../../utils/wrapErrorMessage";
+import { FormField } from "../FormField";
+import { GlobalErrorBoundary } from "../GlobalErrorBoundary";
+import { AppToaster } from "../Toaster";
+import { AuthFormEmailField, AuthFormPasswordField } from "./AuthFormShared";
 
 interface ResetPasswordDialogProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 interface FormValues {
-  email: string
-  token: string
-  password: string
+  email: string;
+  token: string;
+  password: string;
 }
 
-export const ResetPasswordDialog: FC<ResetPasswordDialogProps> = ({
-  isOpen,
-  onClose,
-}) => {
-  const t = useTranslation()
+export const ResetPasswordDialog: FC<ResetPasswordDialogProps> = ({ isOpen, onClose }) => {
+  const t = useTranslation();
 
   const {
     control,
@@ -36,9 +33,9 @@ export const ResetPasswordDialog: FC<ResetPasswordDialogProps> = ({
     setError,
     clearErrors,
     formState: { errors, isDirty, isSubmitting },
-  } = useForm<FormValues>()
+  } = useForm<FormValues>();
 
-  const globalError = (errors as FieldErrors<{ global: void }>).global?.message
+  const globalError = (errors as FieldErrors<{ global: void }>).global?.message;
 
   const onSubmit = handleSubmit(async (values) => {
     try {
@@ -46,18 +43,18 @@ export const ResetPasswordDialog: FC<ResetPasswordDialogProps> = ({
         email: values.email,
         activeCode: values.token,
         password: values.password,
-      })
+      });
 
       AppToaster.show({
-        intent: 'success',
+        intent: "success",
         message: t.components.account.ResetPasswordDialog.reset_success,
-      })
-      onClose()
+      });
+      onClose();
     } catch (e) {
-      console.warn(e)
-      setError('global' as any, { message: formatError(e) })
+      console.warn(e);
+      setError("global" as any, { message: formatError(e) });
     }
-  })
+  });
 
   return (
     <Dialog
@@ -86,10 +83,7 @@ export const ResetPasswordDialog: FC<ResetPasswordDialogProps> = ({
               error={errors.email}
               inputGroupProps={({ field, fieldState }) => ({
                 rightElement: (
-                  <RequestTokenButton
-                    email={field.value}
-                    disabled={!!fieldState.error}
-                  />
+                  <RequestTokenButton email={field.value} disabled={!!fieldState.error} />
                 ),
               })}
             />
@@ -101,27 +95,20 @@ export const ResetPasswordDialog: FC<ResetPasswordDialogProps> = ({
               error={errors.token}
               ControllerProps={{
                 rules: {
-                  required:
-                    t.components.account.ResetPasswordDialog.code_required,
+                  required: t.components.account.ResetPasswordDialog.code_required,
                 },
                 render: ({ field: { value, ...binding } }) => (
                   <InputGroup
                     id="token"
-                    value={value || ''}
-                    placeholder={
-                      t.components.account.ResetPasswordDialog.enter_email_code
-                    }
+                    value={value || ""}
+                    placeholder={t.components.account.ResetPasswordDialog.enter_email_code}
                     {...binding}
                   />
                 ),
               }}
             />
 
-            <AuthFormPasswordField
-              field="password"
-              control={control}
-              error={errors.password}
-            />
+            <AuthFormPasswordField field="password" control={control} error={errors.password} />
 
             <div className="mt-6 flex justify-end">
               <Button
@@ -132,8 +119,8 @@ export const ResetPasswordDialog: FC<ResetPasswordDialogProps> = ({
                 icon="floppy-disk"
                 onClick={(e) => {
                   // manually clear the `global` error or else the submission will be blocked
-                  clearErrors()
-                  onSubmit(e)
+                  clearErrors();
+                  onSubmit(e);
                 }}
               >
                 {t.components.account.ResetPasswordDialog.save}
@@ -143,22 +130,16 @@ export const ResetPasswordDialog: FC<ResetPasswordDialogProps> = ({
         </GlobalErrorBoundary>
       </div>
     </Dialog>
-  )
-}
+  );
+};
 
-const RequestTokenButton = ({
-  email,
-  disabled,
-}: {
-  email: string
-  disabled: boolean
-}) => {
-  const t = useTranslation()
-  const { networkState, start, finish } = useNetworkState()
-  const [sent, setSent] = useState(false)
+const RequestTokenButton = ({ email, disabled }: { email: string; disabled: boolean }) => {
+  const t = useTranslation();
+  const { networkState, start, finish } = useNetworkState();
+  const [sent, setSent] = useState(false);
 
   const handleClick = () => {
-    start()
+    start();
     wrapErrorMessage(
       (e) =>
         t.components.account.ResetPasswordDialog.get_code_failed({
@@ -167,21 +148,21 @@ const RequestTokenButton = ({
       sendResetPasswordEmail({ email }),
     )
       .then(() => {
-        finish(null)
-        setSent(true)
+        finish(null);
+        setSent(true);
         AppToaster.show({
           message: t.components.account.ResetPasswordDialog.code_sent,
-          intent: 'success',
-        })
+          intent: "success",
+        });
       })
-      .catch((e) => finish(e))
-  }
+      .catch((e) => finish(e));
+  };
 
   return (
     <Button
       small
       minimal
-      icon={sent ? 'refresh' : 'envelope'}
+      icon={sent ? "refresh" : "envelope"}
       disabled={disabled || !email}
       onClick={handleClick}
       loading={networkState.loading}
@@ -190,5 +171,5 @@ const RequestTokenButton = ({
         ? t.components.account.ResetPasswordDialog.resend
         : t.components.account.ResetPasswordDialog.get_code}
     </Button>
-  )
-}
+  );
+};

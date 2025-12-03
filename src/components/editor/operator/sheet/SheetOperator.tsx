@@ -1,29 +1,29 @@
-import { FC, useCallback, useRef } from 'react'
+import { FC, useCallback, useRef } from "react";
 
-import { useTranslation } from '../../../../i18n/i18n'
-import { SheetContainerSkeleton } from './SheetContainerSkeleton'
-import { OperatorNoData } from './SheetNoneData'
-import { ProfClassificationWithFilters } from './sheetOperator/ProfClassificationWithFilters'
+import { useTranslation } from "../../../../i18n/i18n";
+import { SheetContainerSkeleton } from "./SheetContainerSkeleton";
+import { OperatorNoData } from "./SheetNoneData";
+import { ProfClassificationWithFilters } from "./sheetOperator/ProfClassificationWithFilters";
 import {
   OperatorFilterProvider,
   useOperatorFilterProvider,
-} from './sheetOperator/SheetOperatorFilterProvider'
-import { SheetOperatorItem } from './sheetOperator/SheetOperatorItem'
-import { ShowMore } from './sheetOperator/ShowMore'
+} from "./sheetOperator/SheetOperatorFilterProvider";
+import { SheetOperatorItem } from "./sheetOperator/SheetOperatorItem";
+import { ShowMore } from "./sheetOperator/ShowMore";
 
 export interface SheetOperatorProps {}
 
 const SheetOperator: FC<SheetOperatorProps> = () => {
-  const operatorScrollRef = useRef<HTMLDivElement>(null)
+  const operatorScrollRef = useRef<HTMLDivElement>(null);
 
   const toTop = useCallback(
     () => operatorScrollRef?.current?.scrollIntoView(),
     [operatorScrollRef],
-  )
+  );
 
   const {
     operatorFiltered: { data: operatorFilteredData },
-  } = useOperatorFilterProvider()
+  } = useOperatorFilterProvider();
 
   return (
     <div className="flex h-full">
@@ -50,13 +50,11 @@ const SheetOperator: FC<SheetOperatorProps> = () => {
         <ProfClassificationWithFilters {...{ toTop }} />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export const SheetOperatorContainer = (
-  sheetOperatorProp: SheetOperatorProps,
-) => {
-  const t = useTranslation()
+export const SheetOperatorContainer = (sheetOperatorProp: SheetOperatorProps) => {
+  const t = useTranslation();
   return (
     <SheetContainerSkeleton
       title={t.components.editor.operator.sheet.SheetOperator.select_operator}
@@ -66,5 +64,5 @@ export const SheetOperatorContainer = (
         <SheetOperator {...sheetOperatorProp} />
       </OperatorFilterProvider>
     </SheetContainerSkeleton>
-  )
-}
+  );
+};

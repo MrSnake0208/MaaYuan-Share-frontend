@@ -1,10 +1,10 @@
-import { atomWithStorage } from 'jotai/utils'
+import { atomWithStorage } from "jotai/utils";
 
 export interface OperatorFilterData {
-  included: string[]
-  excluded: string[]
-  enabled: boolean
-  save: boolean
+  included: string[];
+  excluded: string[];
+  enabled: boolean;
+  save: boolean;
 }
 
 export const DEFAULT_OPERATOR_FILTER: OperatorFilterData = {
@@ -12,17 +12,17 @@ export const DEFAULT_OPERATOR_FILTER: OperatorFilterData = {
   excluded: [],
   enabled: true,
   save: true,
-}
+};
 
 export const operatorFilterAtom = atomWithStorage<OperatorFilterData>(
-  'maa-copilot-operatorFilter',
+  "maa-copilot-operatorFilter",
   DEFAULT_OPERATOR_FILTER,
   undefined,
   { getOnInit: true },
-)
+);
 
 // 删除旧版数据
-if (localStorage.getItem('maa-copilot-selectedOperators')) {
-  localStorage.removeItem('maa-copilot-selectedOperators')
-  localStorage.removeItem('maa-copilot-saveSelectedOperators')
+if (localStorage.getItem("maa-copilot-selectedOperators")) {
+  localStorage.removeItem("maa-copilot-selectedOperators");
+  localStorage.removeItem("maa-copilot-saveSelectedOperators");
 }

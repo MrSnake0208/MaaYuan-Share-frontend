@@ -1,18 +1,12 @@
-import {
-  PrimitiveAtom,
-  SetStateAction,
-  atom,
-  getDefaultStore,
-  useAtom,
-} from 'jotai'
-import { atomWithStorage, splitAtom } from 'jotai/utils'
-import { noop } from 'lodash-es'
-import { useMemo } from 'react'
-import { Simplify } from 'type-fest'
+import { PrimitiveAtom, SetStateAction, atom, getDefaultStore, useAtom } from "jotai";
+import { atomWithStorage, splitAtom } from "jotai/utils";
+import { noop } from "lodash-es";
+import { useMemo } from "react";
+import { Simplify } from "type-fest";
 
-import { CopilotDocV1 } from '../../models/copilot.schema'
-import { createHistoryAtom, useHistoryEdit } from './history'
-import { toEditorOperation, toMaaOperation } from './reconciliation'
+import { CopilotDocV1 } from "../../models/copilot.schema";
+import { createHistoryAtom, useHistoryEdit } from "./history";
+import { toEditorOperation, toMaaOperation } from "./reconciliation";
 import {
   EditorAction,
   EditorGroup,
@@ -22,9 +16,9 @@ import {
   EditorOperator,
   EditorState,
   WithId,
-} from './types'
-import { ZodIssue, parseOperationLoose } from './validation/schema'
-import { EntityIssue } from './validation/validation'
+} from "./types";
+import { ZodIssue, parseOperationLoose } from "./validation/schema";
+import { EntityIssue } from "./validation/validation";
 
 export type {
   EditorAction,
@@ -35,104 +29,94 @@ export type {
   EditorOperator,
   EditorState,
   WithId,
-} from './types'
+} from "./types";
 
 const defaultOperation = parseOperationLoose({
   version: CopilotDocV1.VERSION,
-})
+});
 
 export const DEFAULT_EDITOR_METADATA: EditorMetadata = {
-  visibility: 'public',
-  sourceType: 'original',
-  repostAuthor: '',
-  repostPlatform: '',
-  repostUrl: '',
+  visibility: "public",
+  sourceType: "original",
+  repostAuthor: "",
+  repostPlatform: "",
+  repostUrl: "",
   tags: [],
-}
+};
 
-const normalizeMetadata = (
-  metadata?: Partial<EditorMetadata> | null,
-): EditorMetadata => ({
+const normalizeMetadata = (metadata?: Partial<EditorMetadata> | null): EditorMetadata => ({
   ...DEFAULT_EDITOR_METADATA,
   ...(metadata ?? {}),
-})
+});
 
 export const defaultEditorState: EditorState = {
   operation: toEditorOperation(defaultOperation),
   metadata: normalizeMetadata(),
-}
+};
 
 const sourceEditorTextAtom = atom(
   JSON.stringify(toMaaOperation(defaultEditorState.operation), null, 2),
-)
+);
 
 // splitAtom() 有重载，无法用正常方法来构造类型
-const __operAtomsAtom = (noop as typeof splitAtom)(
-  1 as unknown as PrimitiveAtom<EditorOperator[]>,
-)
+const __operAtomsAtom = (noop as typeof splitAtom)(1 as unknown as PrimitiveAtom<EditorOperator[]>);
 export type BaseEditorGroup = Simplify<
-  Omit<EditorGroup, 'opers'> & {
-    opersAtom: PrimitiveAtom<EditorOperator[]>
-    operAtomsAtom: typeof __operAtomsAtom
+  Omit<EditorGroup, "opers"> & {
+    opersAtom: PrimitiveAtom<EditorOperator[]>;
+    operAtomsAtom: typeof __operAtomsAtom;
   }
->
+>;
 
 const baseAtom = atom<EditorOperationBase>({
   version: defaultOperation.version,
   minimumRequired: defaultOperation.minimum_required,
   doc: defaultOperation.doc,
-})
-const operatorsAtom = atom<EditorOperator[]>([])
-const baseGroupsAtom = atom<BaseEditorGroup[]>([])
-const groupCache = new WeakMap<
-  BaseEditorGroup,
-  [EditorGroup, EditorOperator[]]
->()
+});
+const operatorsAtom = atom<EditorOperator[]>([]);
+const baseGroupsAtom = atom<BaseEditorGroup[]>([]);
+const groupCache = new WeakMap<BaseEditorGroup, [EditorGroup, EditorOperator[]]>();
 const groupsAtom: PrimitiveAtom<EditorGroup[]> = atom(
   (get) =>
     get(baseGroupsAtom).map((baseGroup) => {
-      const opers = get(baseGroup.opersAtom)
-      const cached = groupCache.get(baseGroup)
+      const opers = get(baseGroup.opersAtom);
+      const cached = groupCache.get(baseGroup);
       if (cached?.[1] === opers) {
         // base 和 opers 都没有变化，返回缓存的值，避免 rerender
-        return cached[0]
+        return cached[0];
       }
-      const { opersAtom, operAtomsAtom, ...newGroup } = { ...baseGroup, opers }
-      groupCache.set(baseGroup, [newGroup, opers])
-      return newGroup
+      const { opersAtom, operAtomsAtom, ...newGroup } = { ...baseGroup, opers };
+      groupCache.set(baseGroup, [newGroup, opers]);
+      return newGroup;
     }),
   (get, set, update) => {
-    const originalGroups = get(groupsAtom)
-    const originalBaseGroups = get(baseGroupsAtom)
-    if (typeof update === 'function') {
-      update = update(originalGroups)
+    const originalGroups = get(groupsAtom);
+    const originalBaseGroups = get(baseGroupsAtom);
+    if (typeof update === "function") {
+      update = update(originalGroups);
     }
     const baseGroups = update.map((group, index) => {
       // 无变化，保留原来的值
       if (group === originalGroups[index]) {
-        return originalBaseGroups[index]
+        return originalBaseGroups[index];
       }
-      const { opers, ...rest } = group
-      const originalBaseGroup = originalBaseGroups.find(
-        (original) => original.id === group.id,
-      )
+      const { opers, ...rest } = group;
+      const originalBaseGroup = originalBaseGroups.find((original) => original.id === group.id);
 
       // 读取之前的 opersAtom 和 operAtomsAtom，如果没有就创建新的
-      const opersAtom = originalBaseGroup?.opersAtom ?? atom(opers)
-      set(opersAtom, opers)
-      const operAtomsAtom =
-        originalBaseGroup?.operAtomsAtom ?? splitAtom(opersAtom, getId)
+      const opersAtom = originalBaseGroup?.opersAtom ?? atom(opers);
+      set(opersAtom, opers);
+      const operAtomsAtom = originalBaseGroup?.operAtomsAtom ?? splitAtom(opersAtom, getId);
 
       return {
         ...rest,
         opersAtom,
         operAtomsAtom,
-      }
-    })
-    set(baseGroupsAtom, baseGroups)
+      };
+    });
+    set(baseGroupsAtom, baseGroups);
   },
-)
-const actionsAtom = atom<EditorAction[]>([])
+);
+const actionsAtom = atom<EditorAction[]>([]);
 const operationAtom = atom(
   (get): EditorOperation => ({
     ...get(baseAtom),
@@ -141,85 +125,85 @@ const operationAtom = atom(
     actions: get(actionsAtom),
   }),
   (get, set, update: SetStateAction<EditorOperation>) => {
-    if (typeof update === 'function') {
-      update = update(get(operationAtom))
+    if (typeof update === "function") {
+      update = update(get(operationAtom));
     }
-    const { opers, groups, actions, ...base } = update
-    set(baseAtom, base)
-    set(operatorsAtom, opers)
-    set(groupsAtom, groups)
-    set(actionsAtom, actions)
+    const { opers, groups, actions, ...base } = update;
+    set(baseAtom, base);
+    set(operatorsAtom, opers);
+    set(groupsAtom, groups);
+    set(actionsAtom, actions);
   },
-)
-const metadataAtom = atom<EditorMetadata>(normalizeMetadata())
+);
+const metadataAtom = atom<EditorMetadata>(normalizeMetadata());
 const editorAtom = atom(
   (get): EditorState => ({
     operation: get(operationAtom),
     metadata: get(metadataAtom),
   }),
   (get, set, update: SetStateAction<EditorState>) => {
-    if (typeof update === 'function') {
-      update = update(get(editorAtom))
+    if (typeof update === "function") {
+      update = update(get(editorAtom));
     }
-    set(operationAtom, update.operation)
-    set(metadataAtom, normalizeMetadata(update.metadata))
+    set(operationAtom, update.operation);
+    set(metadataAtom, normalizeMetadata(update.metadata));
   },
-)
+);
 
 interface EditorConfig {
-  showLinkerButtons: boolean
-  toggleSelectorPanel: boolean
-  historyLimit: number
-  showErrorsByDefault: boolean
+  showLinkerButtons: boolean;
+  toggleSelectorPanel: boolean;
+  historyLimit: number;
+  showErrorsByDefault: boolean;
 }
 const defaultConfig: EditorConfig = {
   showLinkerButtons: false,
   toggleSelectorPanel: true,
   historyLimit: 20,
   showErrorsByDefault: false,
-}
+};
 const localConfigAtom = atomWithStorage<Partial<EditorConfig>>(
-  'prts-editor-config',
+  "prts-editor-config",
   {},
   undefined,
   { getOnInit: true },
-)
+);
 const initialConfig = {
   ...defaultConfig,
   ...getDefaultStore().get(localConfigAtom),
-}
+};
 const configAtom = atom(
   (get) => ({
     ...defaultConfig,
     ...get(localConfigAtom),
   }),
   (get, set, update: SetStateAction<Partial<EditorConfig>>) => {
-    if (typeof update === 'function') {
-      update = update(get(configAtom))
+    if (typeof update === "function") {
+      update = update(get(configAtom));
     }
-    set(localConfigAtom, (prev) => ({ ...prev, ...update }))
+    set(localConfigAtom, (prev) => ({ ...prev, ...update }));
 
     if (update.showErrorsByDefault) {
-      set(editorErrorsVisibleAtom, true)
+      set(editorErrorsVisibleAtom, true);
     }
     if (update.historyLimit !== undefined) {
       set(historyAtom, (prev) => ({
         ...prev,
         limit: update.historyLimit!,
-      }))
+      }));
     }
   },
-)
+);
 
-const editorGlobalErrorsAtom = atom<ZodIssue[]>([])
-const editorEntityErrorsAtom = atom<Record<string, EntityIssue[]>>({})
-const editorErrorsVisibleAtom = atom(initialConfig.showErrorsByDefault)
+const editorGlobalErrorsAtom = atom<ZodIssue[]>([]);
+const editorEntityErrorsAtom = atom<Record<string, EntityIssue[]>>({});
+const editorErrorsVisibleAtom = atom(initialConfig.showErrorsByDefault);
 const editorVisibleGlobalErrorsAtom = atom((get) =>
   get(editorErrorsVisibleAtom) ? get(editorGlobalErrorsAtom) : undefined,
-)
+);
 const editorVisibleEntityErrorsAtom = atom((get) =>
   get(editorErrorsVisibleAtom) ? get(editorEntityErrorsAtom) : undefined,
-)
+);
 
 // this atom will cause some memory leak but generally not a big deal
 export const editorAtoms = {
@@ -259,46 +243,34 @@ export const editorAtoms = {
   visibleGlobalErrors: editorVisibleGlobalErrorsAtom,
   visibleEntityErrors: editorVisibleEntityErrorsAtom,
 
-  reset: atom(
-    null,
-    (get, set, editorState: EditorState = defaultEditorState) => {
-      set(historyAtom, 'RESET')
-      set(editorAtom, editorState)
-      set(
-        sourceEditorTextAtom,
-        JSON.stringify(toMaaOperation(editorState.operation), null, 2),
-      )
-      set(editorGlobalErrorsAtom, [])
-      set(editorEntityErrorsAtom, {})
-      // 复位来源锁定状态
-      set(editorAtoms.metadataLocked, false)
-      // 复位密探锁定状态
-      set(editorAtoms.operatorsLocked, false)
-    },
-  ),
-}
+  reset: atom(null, (get, set, editorState: EditorState = defaultEditorState) => {
+    set(historyAtom, "RESET");
+    set(editorAtom, editorState);
+    set(sourceEditorTextAtom, JSON.stringify(toMaaOperation(editorState.operation), null, 2));
+    set(editorGlobalErrorsAtom, []);
+    set(editorEntityErrorsAtom, {});
+    // 复位来源锁定状态
+    set(editorAtoms.metadataLocked, false);
+    // 复位密探锁定状态
+    set(editorAtoms.operatorsLocked, false);
+  }),
+};
 
-export const historyAtom = createHistoryAtom(
-  editorAtom,
-  initialConfig.historyLimit,
-)
+export const historyAtom = createHistoryAtom(editorAtom, initialConfig.historyLimit);
 
 export function useEdit() {
-  return useHistoryEdit(historyAtom)
+  return useHistoryEdit(historyAtom);
 }
 
-export function useActiveState(
-  targetAtom: PrimitiveAtom<string | undefined>,
-  id: string,
-) {
+export function useActiveState(targetAtom: PrimitiveAtom<string | undefined>, id: string) {
   return useAtom(
     useMemo(() => {
       return atom(
         (get) => get(targetAtom) === id,
         (get, set, value: boolean) => set(targetAtom, value ? id : undefined),
-      )
+      );
     }, [id, targetAtom]),
-  )
+  );
 }
 
 export function traverseOperators<T>(
@@ -306,18 +278,18 @@ export function traverseOperators<T>(
   fn: (oper: EditorOperator) => T,
 ): NonNullable<T> | undefined {
   for (const oper of opers) {
-    const result = fn(oper)
-    if (result) return result
+    const result = fn(oper);
+    if (result) return result;
   }
   for (const group of groups) {
     for (const oper of group.opers) {
-      const result = fn(oper)
-      if (result) return result
+      const result = fn(oper);
+      if (result) return result;
     }
   }
-  return undefined
+  return undefined;
 }
 
 function getId(entity: WithId) {
-  return entity.id
+  return entity.id;
 }

@@ -1,24 +1,24 @@
 export interface Version {
-  level: string
+  level: string;
   version: {
-    chineseSimplified: string
-    chineseTraditional: string
-    english: string
-    japanese: string
-    korean: string
-  }
+    chineseSimplified: string;
+    chineseTraditional: string;
+    english: string;
+    japanese: string;
+    korean: string;
+  };
   status: {
-    chineseSimplified: string
-    chineseTraditional: string
-    english: string
-    japanese: string
-    korean: string
-  }
+    chineseSimplified: string;
+    chineseTraditional: string;
+    english: string;
+    japanese: string;
+    korean: string;
+  };
 }
 
 export interface Operator {
-  name: string
-  id: string
-  profession: string
-  star: number
+  name: string;
+  id: string;
+  profession: string;
+  star: number;
 }

@@ -1,17 +1,17 @@
-import { Button, Card, NonIdealState, Spinner } from '@blueprintjs/core'
+import { Button, Card, NonIdealState, Spinner } from "@blueprintjs/core";
 
-import clsx from 'clsx'
-import { clamp, isNil } from 'lodash-es'
-import { useCallback, useEffect, useState } from 'react'
-import { createPortal } from 'react-dom'
-import { Rnd, RndResizeCallback } from 'react-rnd'
-import { useWindowSize } from 'react-use'
+import clsx from "clsx";
+import { clamp, isNil } from "lodash-es";
+import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { Rnd, RndResizeCallback } from "react-rnd";
+import { useWindowSize } from "react-use";
 
-import { useTranslation } from '../../../i18n/i18n'
-import { Level } from '../../../models/operation'
-import { sendMessage, useMessage } from '../../../utils/messenger'
-import { useLazyStorage } from '../../../utils/useLazyStorage'
-import { useFloatingMap } from './FloatingMapContext'
+import { useTranslation } from "../../../i18n/i18n";
+import { Level } from "../../../models/operation";
+import { sendMessage, useMessage } from "../../../utils/messenger";
+import { useLazyStorage } from "../../../utils/useLazyStorage";
+import { useFloatingMap } from "./FloatingMapContext";
 import {
   CheckMapMessage,
   ErrorMessage,
@@ -19,28 +19,28 @@ import {
   MapReadyMessage,
   SetMapStateMessage,
   getMapUrl,
-} from './connection'
+} from "./connection";
 
 interface FloatingMapConfig {
-  show: boolean
-  x: number
-  y: number
-  width: number
-  height: number
-  level?: Level
+  show: boolean;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  level?: Level;
 }
 
-const UID = 'floating-map'
-const STORAGE_KEY = `copilot-${UID}`
+const UID = "floating-map";
+const STORAGE_KEY = `copilot-${UID}`;
 
-const HEADER_CLASS = 'floating-map-header'
+const HEADER_CLASS = "floating-map-header";
 
-const HEADER_HEIGHT = 36
-const ASPECT_RATIO = 16 / 9
-const MIN_HEIGHT = 150 + HEADER_HEIGHT
-const MIN_WIDTH = 150 * ASPECT_RATIO
-const DEFAULT_HEIGHT = 300 + HEADER_HEIGHT
-const DEFAULT_WIDTH = 300 * ASPECT_RATIO
+const HEADER_HEIGHT = 36;
+const ASPECT_RATIO = 16 / 9;
+const MIN_HEIGHT = 150 + HEADER_HEIGHT;
+const MIN_WIDTH = 150 * ASPECT_RATIO;
+const DEFAULT_HEIGHT = 300 + HEADER_HEIGHT;
+const DEFAULT_WIDTH = 300 * ASPECT_RATIO;
 
 const enum MapStatus {
   Loading,
@@ -49,7 +49,7 @@ const enum MapStatus {
 }
 
 export function FloatingMap() {
-  const t = useTranslation()
+  const t = useTranslation();
 
   const [config, setConfig] = useLazyStorage<FloatingMapConfig>(
     STORAGE_KEY,
@@ -63,101 +63,101 @@ export function FloatingMap() {
     },
     // merge two values in case the saved value is missing some properties
     (savedValue, defaultValue) => ({ ...defaultValue, ...savedValue }),
-  )
+  );
 
-  const { width: windowWidth, height: windowHeight } = useWindowSize()
+  const { width: windowWidth, height: windowHeight } = useWindowSize();
 
   useEffect(() => {
     setConfig((cfg) => ({
       ...cfg,
       x: clamp(cfg.x, 0, windowWidth - cfg.width),
       y: clamp(cfg.y, 0, windowHeight - cfg.height),
-    }))
-  }, [setConfig, windowWidth, windowHeight])
+    }));
+  }, [setConfig, windowWidth, windowHeight]);
 
-  const [iframeWindow, setIframeWindow] = useState<Window | null | undefined>()
-  const [mapStatus, setMapStatus] = useState(MapStatus.Loading)
+  const [iframeWindow, setIframeWindow] = useState<Window | null | undefined>();
+  const [mapStatus, setMapStatus] = useState(MapStatus.Loading);
 
-  const { level, activeTiles } = useFloatingMap()
+  const { level, activeTiles } = useFloatingMap();
 
   useEffect(() => {
     // when level changes, the iframe should reload
-    setMapStatus(MapStatus.Loading)
-    setConfig((cfg) => ({ ...cfg, level }))
-  }, [setConfig, level])
+    setMapStatus(MapStatus.Loading);
+    setConfig((cfg) => ({ ...cfg, level }));
+  }, [setConfig, level]);
 
   const setMapState = useCallback(() => {
     if (iframeWindow) {
       sendMessage<SetMapStateMessage>(iframeWindow, MAP_ORIGIN, {
-        type: 'setMapState',
+        type: "setMapState",
         data: { activeTiles },
-      })
+      });
     }
-  }, [iframeWindow, activeTiles])
+  }, [iframeWindow, activeTiles]);
 
-  useEffect(setMapState, [setMapState])
+  useEffect(setMapState, [setMapState]);
 
-  useMessage<MapReadyMessage>(MAP_ORIGIN, 'mapReady', () => {
-    setMapStatus(MapStatus.Ready)
+  useMessage<MapReadyMessage>(MAP_ORIGIN, "mapReady", () => {
+    setMapStatus(MapStatus.Ready);
 
     // sync state when the map is ready
-    setMapState()
-  })
+    setMapState();
+  });
 
-  useMessage<ErrorMessage>(MAP_ORIGIN, 'error', ({ message }) => {
-    setMapStatus(MapStatus.Error)
+  useMessage<ErrorMessage>(MAP_ORIGIN, "error", ({ message }) => {
+    setMapStatus(MapStatus.Error);
 
     // no need to display the error, the map site will show it reasonably
-    console.warn(`Map error: ${message}`)
-  })
+    console.warn(`Map error: ${message}`);
+  });
 
   // check the connection when the component is re-mounted, useful during development
   useEffect(() => {
     if (iframeWindow) {
       sendMessage<CheckMapMessage>(iframeWindow, MAP_ORIGIN, {
-        type: 'checkMap',
-      })
+        type: "checkMap",
+      });
     }
-  }, [iframeWindow])
+  }, [iframeWindow]);
 
   // this function and the following resize/drag handlers are used to
   // disable pointer events on every iframe while resizing/dragging,
   // see: https://github.com/bokuweb/react-rnd/issues/609
   const toggleIframePointerEvents = useCallback((disable = false) => {
-    Array.from(document.getElementsByTagName('iframe')).forEach((iframe) => {
+    Array.from(document.getElementsByTagName("iframe")).forEach((iframe) => {
       // eslint-disable-next-line no-param-reassign
-      iframe.style.pointerEvents = disable ? 'none' : 'auto'
-    })
-  }, [])
+      iframe.style.pointerEvents = disable ? "none" : "auto";
+    });
+  }, []);
 
   const onDragStartHandler = useCallback(() => {
-    toggleIframePointerEvents(true)
-  }, [toggleIframePointerEvents])
+    toggleIframePointerEvents(true);
+  }, [toggleIframePointerEvents]);
 
   const onDragStopHandler = useCallback(
     (e, { x, y }) => {
-      toggleIframePointerEvents(false)
-      setConfig((cfg) => ({ ...cfg, x, y }))
+      toggleIframePointerEvents(false);
+      setConfig((cfg) => ({ ...cfg, x, y }));
     },
     [setConfig, toggleIframePointerEvents],
-  )
+  );
 
   const onResizeStartHandler = useCallback(() => {
-    toggleIframePointerEvents(true)
-  }, [toggleIframePointerEvents])
+    toggleIframePointerEvents(true);
+  }, [toggleIframePointerEvents]);
 
   const onResizeStopHandler: RndResizeCallback = useCallback(
     (e, direction, ref, delta, pos) => {
-      toggleIframePointerEvents(false)
+      toggleIframePointerEvents(false);
       setConfig((cfg) => ({
         ...cfg,
         ...pos,
         width: parseFloat(ref.style.width),
         height: parseFloat(ref.style.height),
-      }))
+      }));
     },
     [setConfig, toggleIframePointerEvents],
-  )
+  );
 
   return createPortal(
     <div className="fixed z-30 inset-0 pointer-events-none">
@@ -177,10 +177,7 @@ export function FloatingMap() {
           onResizeStart={onResizeStartHandler}
           onResizeStop={onResizeStopHandler}
         >
-          <Card
-            className="h-full !p-0 flex flex-col overflow-hidden"
-            elevation={3}
-          >
+          <Card className="h-full !p-0 flex flex-col overflow-hidden" elevation={3}>
             <FloatingMapHeader config={config} setConfig={setConfig} />
             {level ? (
               <div className="relative flex-grow">
@@ -189,22 +186,17 @@ export function FloatingMap() {
                   className="w-full h-full"
                   src={getMapUrl(level)}
                   onLoad={(e) => {
-                    setIframeWindow(
-                      (e.target as HTMLIFrameElement).contentWindow,
-                    )
+                    setIframeWindow((e.target as HTMLIFrameElement).contentWindow);
                   }}
                 />
                 {mapStatus === MapStatus.Loading && (
                   <NonIdealState
                     className="absolute inset-0 bg-gray-900/50 [&_*]:!text-white"
-                    icon={
-                      <Spinner className="[&_.bp4-spinner-head]:stroke-current" />
-                    }
+                    icon={<Spinner className="[&_.bp4-spinner-head]:stroke-current" />}
                     description={
                       iframeWindow
                         ? undefined
-                        : t.components.editor.floatingMap.FloatingMap
-                            .waiting_connection
+                        : t.components.editor.floatingMap.FloatingMap.waiting_connection
                     }
                   />
                 )}
@@ -212,9 +204,7 @@ export function FloatingMap() {
             ) : (
               <NonIdealState
                 icon="area-of-interest"
-                title={
-                  t.components.editor.floatingMap.FloatingMap.no_stage_selected
-                }
+                title={t.components.editor.floatingMap.FloatingMap.no_stage_selected}
               />
             )}
           </Card>
@@ -230,7 +220,7 @@ export function FloatingMap() {
     </div>,
 
     document.body,
-  )
+  );
 }
 
 function FloatingMapHeader({
@@ -238,17 +228,17 @@ function FloatingMapHeader({
   config,
   setConfig,
 }: {
-  className?: string
-  config: FloatingMapConfig
-  setConfig: (config: FloatingMapConfig) => void
+  className?: string;
+  config: FloatingMapConfig;
+  setConfig: (config: FloatingMapConfig) => void;
 }) {
-  const t = useTranslation()
-  let levelName = config.level?.name
+  const t = useTranslation();
+  let levelName = config.level?.name;
 
   if (isNil(levelName)) {
-    levelName = t.components.editor.floatingMap.FloatingMap.no_stage_selected
+    levelName = t.components.editor.floatingMap.FloatingMap.no_stage_selected;
   } else if (!levelName.trim()) {
-    levelName = t.components.editor.floatingMap.FloatingMap.unnamed_stage
+    levelName = t.components.editor.floatingMap.FloatingMap.unnamed_stage;
   }
 
   return (
@@ -256,8 +246,8 @@ function FloatingMapHeader({
       className={clsx(
         className,
         HEADER_CLASS,
-        'flex items-center text-xs bg-gray-200 dark:bg-slate-500',
-        config.show ? 'cursor-move' : 'cursor-default',
+        "flex items-center text-xs bg-gray-200 dark:bg-slate-500",
+        config.show ? "cursor-move" : "cursor-default",
       )}
       style={{ height: HEADER_HEIGHT }}
     >
@@ -270,12 +260,12 @@ function FloatingMapHeader({
             ? t.components.editor.floatingMap.FloatingMap.hide_map
             : t.components.editor.floatingMap.FloatingMap.show_map
         }
-        icon={config.show ? 'caret-down' : 'caret-up'}
+        icon={config.show ? "caret-down" : "caret-up"}
         onClick={() => setConfig({ ...config, show: !config.show })}
       >
         {t.components.editor.floatingMap.FloatingMap.map}
         {config.show && ` - ${levelName}`}
       </Button>
     </div>
-  )
+  );
 }

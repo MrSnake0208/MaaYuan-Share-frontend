@@ -1,58 +1,53 @@
-import { Button, Divider, H6, InputGroup, Intent } from '@blueprintjs/core'
+import { Button, Divider, H6, InputGroup, Intent } from "@blueprintjs/core";
 
-import { useAtomValue } from 'jotai'
-import { FC, useMemo, useState } from 'react'
+import { useAtomValue } from "jotai";
+import { FC, useMemo, useState } from "react";
 
-import { AppToaster } from 'components/Toaster'
-import { OPERATORS, PROFESSIONS } from 'models/operator'
-import { favGroupAtom } from 'store/useFavGroups'
+import { AppToaster } from "components/Toaster";
+import { OPERATORS, PROFESSIONS } from "models/operator";
+import { favGroupAtom } from "store/useFavGroups";
 
-import { useTranslation } from '../../../../i18n/i18n'
-import { Group, Operator } from '../EditorSheet'
-import {
-  SheetContainerSkeleton,
-  SheetContainerSkeletonProps,
-} from './SheetContainerSkeleton'
-import { GroupNoData } from './SheetNoneData'
-import { useSheet } from './SheetProvider'
-import { SheetGroupItem, SheetGroupItemProp } from './sheetGroup/SheetGroupItem'
+import { useTranslation } from "../../../../i18n/i18n";
+import { Group, Operator } from "../EditorSheet";
+import { SheetContainerSkeleton, SheetContainerSkeletonProps } from "./SheetContainerSkeleton";
+import { GroupNoData } from "./SheetNoneData";
+import { useSheet } from "./SheetProvider";
+import { SheetGroupItem, SheetGroupItemProp } from "./sheetGroup/SheetGroupItem";
 
 export interface SheetGroupProps {}
 
 export interface GroupListModifyProp {
-  groupAddHandle?: (value: Group) => void
-  groupRemoveHandle?: (_id: string) => void
-  groupPinHandle?: (value: Group) => void
-  groupUpdateHandle?: (value: Group) => void
+  groupAddHandle?: (value: Group) => void;
+  groupRemoveHandle?: (_id: string) => void;
+  groupPinHandle?: (value: Group) => void;
+  groupUpdateHandle?: (value: Group) => void;
 }
 
 const EditorGroupName: FC = () => {
-  const t = useTranslation()
-  const [groupName, setGroupName] = useState('')
+  const t = useTranslation();
+  const [groupName, setGroupName] = useState("");
 
-  const { submitGroupInSheet } = useSheet()
+  const { submitGroupInSheet } = useSheet();
 
   const addGroupHandle = () => {
-    const name = groupName.trim()
+    const name = groupName.trim();
     if (!name) {
       AppToaster.show({
         message: t.components.editor.operator.sheet.SheetGroup.group_name_empty,
         intent: Intent.DANGER,
-      })
+      });
     } else {
-      submitGroupInSheet({ name })
-      setGroupName('')
+      submitGroupInSheet({ name });
+      setGroupName("");
     }
-  }
+  };
 
   return (
     <div className="flex px-3 items-center">
       <InputGroup
         type="text"
         value={groupName}
-        placeholder={
-          t.components.editor.operator.sheet.SheetGroup.enter_group_name
-        }
+        placeholder={t.components.editor.operator.sheet.SheetGroup.enter_group_name}
         onChange={(e) => setGroupName(e.target.value)}
         fill
       />
@@ -67,35 +62,31 @@ const EditorGroupName: FC = () => {
           minimal
           icon="reset"
           title={t.components.editor.operator.sheet.SheetGroup.reset}
-          onClick={() => setGroupName('')}
+          onClick={() => setGroupName("")}
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
 const SheetGroup: FC<SheetGroupProps> = () => {
-  const t = useTranslation()
-  const { existedGroups, existedOperators } = useSheet()
+  const t = useTranslation();
+  const { existedGroups, existedOperators } = useSheet();
 
   const defaultGroup = useMemo<Group[]>(
     () =>
       Object.entries(
         existedOperators.reduce(
           (acc, { name, ...rest }) => {
-            const { prof = '', subProf = '' } =
-              OPERATORS.find(({ name: OPERName }) => OPERName === name) || {}
-            const profInfo = PROFESSIONS.find(({ id }) => id === prof)
-            const subProfName = profInfo?.sub?.find(
-              ({ id }) => id === subProf,
-            )?.name
+            const { prof = "", subProf = "" } =
+              OPERATORS.find(({ name: OPERName }) => OPERName === name) || {};
+            const profInfo = PROFESSIONS.find(({ id }) => id === prof);
+            const subProfName = profInfo?.sub?.find(({ id }) => id === subProf)?.name;
             const key =
-              (profInfo?.name || '其它') +
-              (profInfo?.name ? '-' : '') +
-              (subProfName || '')
-            if (!acc[key]) acc[key] = []
-            acc[key].push({ name, ...rest })
-            return acc
+              (profInfo?.name || "其它") + (profInfo?.name ? "-" : "") + (subProfName || "");
+            if (!acc[key]) acc[key] = [];
+            acc[key].push({ name, ...rest });
+            return acc;
           },
           {} as Record<string, Operator[]>,
         ),
@@ -104,9 +95,9 @@ const SheetGroup: FC<SheetGroupProps> = () => {
         opers: value,
       })),
     [existedOperators],
-  )
+  );
 
-  const favGroups = useAtomValue(favGroupAtom)
+  const favGroups = useAtomValue(favGroupAtom);
 
   return (
     <>
@@ -114,9 +105,7 @@ const SheetGroup: FC<SheetGroupProps> = () => {
         <div className="flex-1 sticky top-0 h-screen flex flex-col">
           <div className="grow overflow-y-auto">
             <SheetContainerSkeleton
-              title={
-                t.components.editor.operator.sheet.SheetGroup.add_operator_group
-              }
+              title={t.components.editor.operator.sheet.SheetGroup.add_operator_group}
               icon="add"
               mini
               className="sticky top-0 z-10 backdrop-blur-lg py-1"
@@ -124,9 +113,7 @@ const SheetGroup: FC<SheetGroupProps> = () => {
               <EditorGroupName />
             </SheetContainerSkeleton>
             <SheetGroupItemsWithSkeleton
-              title={
-                t.components.editor.operator.sheet.SheetGroup.configured_groups
-              }
+              title={t.components.editor.operator.sheet.SheetGroup.configured_groups}
               icon="cog"
               mini
               groups={existedGroups}
@@ -144,18 +131,14 @@ const SheetGroup: FC<SheetGroupProps> = () => {
         <Divider />
         <div className="flex-1">
           <SheetGroupItemsWithSkeleton
-            title={
-              t.components.editor.operator.sheet.SheetGroup.recommended_groups
-            }
+            title={t.components.editor.operator.sheet.SheetGroup.recommended_groups}
             icon="thumbs-up"
             mini
             groups={defaultGroup}
             itemType="recommend"
           />
           <SheetGroupItemsWithSkeleton
-            title={
-              t.components.editor.operator.sheet.SheetGroup.favorite_groups
-            }
+            title={t.components.editor.operator.sheet.SheetGroup.favorite_groups}
             icon="star"
             mini
             groups={favGroups}
@@ -164,11 +147,11 @@ const SheetGroup: FC<SheetGroupProps> = () => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
 export const SheetGroupContainer: FC<SheetGroupProps> = () => {
-  const t = useTranslation()
+  const t = useTranslation();
   return (
     <SheetContainerSkeleton
       title={t.components.editor.operator.sheet.SheetGroup.set_operator_groups}
@@ -176,28 +159,24 @@ export const SheetGroupContainer: FC<SheetGroupProps> = () => {
     >
       <SheetGroup />
     </SheetContainerSkeleton>
-  )
-}
+  );
+};
 
 const SheetGroupItemsWithSkeleton: FC<
   SheetContainerSkeletonProps & {
-    groups: SheetGroupItemProp['groupInfo'][]
-    itemType: SheetGroupItemProp['itemType']
+    groups: SheetGroupItemProp["groupInfo"][];
+    itemType: SheetGroupItemProp["itemType"];
   }
 > = ({ groups, itemType, ...sheetContainerSkeletonProps }) => (
   <SheetContainerSkeleton {...sheetContainerSkeletonProps}>
     <div>
       {groups.length ? (
         groups.map((item) => (
-          <SheetGroupItem
-            key={item.name}
-            groupInfo={item}
-            itemType={itemType}
-          />
+          <SheetGroupItem key={item.name} groupInfo={item} itemType={itemType} />
         ))
       ) : (
         <GroupNoData />
       )}
     </div>
   </SheetContainerSkeleton>
-)
+);

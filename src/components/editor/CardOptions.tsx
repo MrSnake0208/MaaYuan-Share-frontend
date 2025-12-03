@@ -1,48 +1,41 @@
-import { Button, ButtonProps, Menu, MenuItem } from '@blueprintjs/core'
-import { Popover2 } from '@blueprintjs/popover2'
+import { Button, ButtonProps, Menu, MenuItem } from "@blueprintjs/core";
+import { Popover2 } from "@blueprintjs/popover2";
 
-import clsx from 'clsx'
-import { FC } from 'react'
+import clsx from "clsx";
+import { FC } from "react";
 
-import { useTranslation } from '../../i18n/i18n'
+import { useTranslation } from "../../i18n/i18n";
 
-export const CardDuplicateOption: FC<ButtonProps> = ({
-  className,
-  ...props
-}) => {
-  const t = useTranslation()
+export const CardDuplicateOption: FC<ButtonProps> = ({ className, ...props }) => {
+  const t = useTranslation();
 
   return (
     <Button
       minimal
       icon="duplicate"
       title={t.components.editor.CardOptions.duplicate}
-      className={clsx('-my-2', className)}
+      className={clsx("-my-2", className)}
       {...props}
     />
-  )
-}
+  );
+};
 
 export const CardEditOption: FC<ButtonProps> = ({ className, ...props }) => {
-  const t = useTranslation()
+  const t = useTranslation();
 
   return (
     <Button
       minimal
       icon="edit"
       title={t.components.editor.CardOptions.edit}
-      className={clsx('-my-2', className)}
+      className={clsx("-my-2", className)}
       {...props}
     />
-  )
-}
+  );
+};
 
-export const CardDeleteOption: FC<ButtonProps> = ({
-  className,
-  onClick,
-  ...props
-}) => {
-  const t = useTranslation()
+export const CardDeleteOption: FC<ButtonProps> = ({ className, onClick, ...props }) => {
+  const t = useTranslation();
 
   return (
     <Popover2
@@ -62,9 +55,9 @@ export const CardDeleteOption: FC<ButtonProps> = ({
         minimal
         icon="trash"
         title={t.components.editor.CardOptions.delete}
-        className={clsx('-my-2', className)}
+        className={clsx("-my-2", className)}
         {...props}
       />
     </Popover2>
-  )
-}
+  );
+};

@@ -1,91 +1,84 @@
-import clsx from 'clsx'
-import { useAtomCallback } from 'jotai/utils'
-import { throttle } from 'lodash-es'
-import { FC, memo, useCallback, useEffect } from 'react'
+import clsx from "clsx";
+import { useAtomCallback } from "jotai/utils";
+import { throttle } from "lodash-es";
+import { FC, memo, useCallback, useEffect } from "react";
 
-import { Operation } from '../../models/operation'
-import { useCurrentSize } from '../../utils/useCurrenSize'
-import { EditorToolbar } from './EditorToolbar'
-import { InfoEditor } from './InfoEditor'
-import { ActionEditor } from './action/ActionEditor'
-import { editorAtoms, historyAtom } from './editor-state'
-import { useHistoryControls } from './history'
-import { OperatorEditor } from './operator/OperatorEditor'
-import { useAutosave } from './useAutoSave'
-import { Validator } from './validation/Validator'
+import { Operation } from "../../models/operation";
+import { useCurrentSize } from "../../utils/useCurrenSize";
+import { EditorToolbar } from "./EditorToolbar";
+import { InfoEditor } from "./InfoEditor";
+import { ActionEditor } from "./action/ActionEditor";
+import { editorAtoms, historyAtom } from "./editor-state";
+import { useHistoryControls } from "./history";
+import { OperatorEditor } from "./operator/OperatorEditor";
+import { useAutosave } from "./useAutoSave";
+import { Validator } from "./validation/Validator";
 
 interface OperationEditorProps {
-  subtitle?: string
-  submitAction: string
-  onSubmit: () => void
-  preLevel?: Operation['preLevel']
+  subtitle?: string;
+  submitAction: string;
+  onSubmit: () => void;
+  preLevel?: Operation["preLevel"];
 }
 
 export const OperationEditor: FC<OperationEditorProps> = memo(
   ({ subtitle, submitAction, onSubmit, preLevel }) => {
-    useAutosave()
-    const { isMD } = useCurrentSize()
-    const { undo, redo } = useHistoryControls(historyAtom)
+    useAutosave();
+    const { isMD } = useCurrentSize();
+    const { undo, redo } = useHistoryControls(historyAtom);
 
     const handleUndoRedo = useAtomCallback(
       useCallback(
         (get, set) => {
           const shouldUseNativeUndo = () => {
-            return get(editorAtoms.sourceEditorIsOpen)
-          }
-          const throttledUndo = throttle(undo, 100)
-          const throttledRedo = throttle(redo, 100)
+            return get(editorAtoms.sourceEditorIsOpen);
+          };
+          const throttledUndo = throttle(undo, 100);
+          const throttledRedo = throttle(redo, 100);
           const onKeyDown = (e: KeyboardEvent) => {
-            if (e.code === 'KeyZ' && (e.ctrlKey || e.metaKey)) {
+            if (e.code === "KeyZ" && (e.ctrlKey || e.metaKey)) {
               if (shouldUseNativeUndo()) {
-                return
+                return;
               }
               if (e.shiftKey) {
-                throttledRedo()
+                throttledRedo();
               } else {
-                throttledUndo()
+                throttledUndo();
               }
-              e.preventDefault()
+              e.preventDefault();
             }
-          }
+          };
           const onBeforeInput = (e: InputEvent) => {
-            if (
-              e.inputType === 'historyUndo' ||
-              e.inputType === 'historyRedo'
-            ) {
+            if (e.inputType === "historyUndo" || e.inputType === "historyRedo") {
               if (!shouldUseNativeUndo()) {
-                e.preventDefault()
+                e.preventDefault();
               }
             }
-          }
-          document.addEventListener('keydown', onKeyDown)
-          document.addEventListener('beforeinput', onBeforeInput, {
+          };
+          document.addEventListener("keydown", onKeyDown);
+          document.addEventListener("beforeinput", onBeforeInput, {
             capture: true,
-          })
+          });
           return () => {
-            document.removeEventListener('keydown', onKeyDown)
-            document.removeEventListener('beforeinput', onBeforeInput, {
+            document.removeEventListener("keydown", onKeyDown);
+            document.removeEventListener("beforeinput", onBeforeInput, {
               capture: true,
-            })
-          }
+            });
+          };
         },
         [undo, redo],
       ),
-    )
+    );
 
     useEffect(() => {
-      return handleUndoRedo()
-    }, [handleUndoRedo])
+      return handleUndoRedo();
+    }, [handleUndoRedo]);
 
     return (
       <div className="-mt-14 pt-14 md:h-screen flex flex-col">
         <Validator />
-        <EditorToolbar
-          subtitle={subtitle}
-          submitAction={submitAction}
-          onSubmit={onSubmit}
-        />
-        <div className={clsx('grow min-h-0 relative')}>
+        <EditorToolbar subtitle={subtitle} submitAction={submitAction} onSubmit={onSubmit} />
+        <div className={clsx("grow min-h-0 relative")}>
           {isMD ? (
             <div className="panel-shadow">
               <InfoEditor preLevel={preLevel} />
@@ -100,7 +93,7 @@ export const OperationEditor: FC<OperationEditorProps> = memo(
           )}
         </div>
       </div>
-    )
+    );
   },
-)
-OperationEditor.displayName = 'OperationEditor'
+);
+OperationEditor.displayName = "OperationEditor";

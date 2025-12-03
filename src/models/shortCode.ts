@@ -4,26 +4,26 @@
  * and currently there is no way to distinguish them.
  */
 
-const shortCodeScheme = 'maay://'
+const shortCodeScheme = "maay://";
 
 export interface ShortCodeContent {
-  id: number
+  id: number;
 }
 
 export function toShortCode({ id }: ShortCodeContent) {
-  return shortCodeScheme + id
+  return shortCodeScheme + id;
 }
 
 export function parseShortCode(code: string): ShortCodeContent | null {
   if (code.startsWith(shortCodeScheme)) {
-    const idStr = code.slice(shortCodeScheme.length)
+    const idStr = code.slice(shortCodeScheme.length);
     const content: ShortCodeContent = {
       id: +idStr,
-    }
+    };
 
     if (!isNaN(content.id)) {
-      return content
+      return content;
     }
   }
-  return null
+  return null;
 }

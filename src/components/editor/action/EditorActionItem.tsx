@@ -1,26 +1,22 @@
-import { Icon } from '@blueprintjs/core'
+import { Icon } from "@blueprintjs/core";
 
-import clsx from 'clsx'
-import { FC } from 'react'
+import clsx from "clsx";
+import { FC } from "react";
 
-import { CardTitle } from 'components/CardTitle'
-import type { CopilotDocV1 } from 'models/copilot.schema'
-import { findActionType } from 'models/types'
+import { CardTitle } from "components/CardTitle";
+import type { CopilotDocV1 } from "models/copilot.schema";
+import { findActionType } from "models/types";
 
-import { ActionCard } from '../../ActionCard'
-import { SortableItemProps } from '../../dnd'
-import {
-  CardDeleteOption,
-  CardDuplicateOption,
-  CardEditOption,
-} from '../CardOptions'
+import { ActionCard } from "../../ActionCard";
+import { SortableItemProps } from "../../dnd";
+import { CardDeleteOption, CardDuplicateOption, CardEditOption } from "../CardOptions";
 
 interface EditorActionItemProps extends Partial<SortableItemProps> {
-  editing?: boolean
-  action: CopilotDocV1.Action
-  onEdit?: () => void
-  onDuplicate?: () => void
-  onRemove?: () => void
+  editing?: boolean;
+  action: CopilotDocV1.Action;
+  onEdit?: () => void;
+  onDuplicate?: () => void;
+  onRemove?: () => void;
 }
 
 export const EditorActionItem: FC<EditorActionItemProps> = ({
@@ -33,11 +29,11 @@ export const EditorActionItem: FC<EditorActionItemProps> = ({
   attributes,
   listeners,
 }) => {
-  const type = findActionType(action.type)
+  const type = findActionType(action.type);
 
   return (
     <ActionCard
-      className={clsx(editing && 'bg-gray-100', isDragging && 'invisible')}
+      className={clsx(editing && "bg-gray-100", isDragging && "invisible")}
       action={action}
       title={
         <div className="flex items-center">
@@ -56,5 +52,5 @@ export const EditorActionItem: FC<EditorActionItemProps> = ({
         </div>
       }
     />
-  )
-}
+  );
+};

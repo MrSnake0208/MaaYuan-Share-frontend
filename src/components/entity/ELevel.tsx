@@ -1,23 +1,23 @@
-import { H4, Tag } from '@blueprintjs/core'
+import { H4, Tag } from "@blueprintjs/core";
 
-import { FC } from 'react'
+import { FC } from "react";
 
-import { EDifficulty } from 'components/entity/EDifficulty'
-import { Level, OpDifficulty } from 'models/operation'
+import { EDifficulty } from "components/entity/EDifficulty";
+import { Level, OpDifficulty } from "models/operation";
 
-import { useTranslation } from '../../i18n/i18n'
-import { isCustomLevel } from '../../models/level'
+import { useTranslation } from "../../i18n/i18n";
+import { isCustomLevel } from "../../models/level";
 
 export const NeoELevel: FC<{
-  className?: string
-  level: Level
+  className?: string;
+  level: Level;
 }> = ({ level }) => {
-  const t = useTranslation()
-  let { catOne, catTwo } = level
+  const t = useTranslation();
+  let { catOne, catTwo } = level;
 
   if (isCustomLevel(level)) {
-    catOne = t.components.entity.ELevel.custom_level
-    catTwo = ''
+    catOne = t.components.entity.ELevel.custom_level;
+    catTwo = "";
   }
 
   return (
@@ -28,27 +28,27 @@ export const NeoELevel: FC<{
           <span className="text-xs">{catOne}</span>
           {catTwo && (
             <>
-              {' | '}
+              {" | "}
               <span className="text-xs">{catTwo}</span>
             </>
           )}
         </div>
       </div>
     </Tag>
-  )
-}
+  );
+};
 
 export const ELevel: FC<{
-  className?: string
-  level: Level
+  className?: string;
+  level: Level;
 }> = ({ level }) => {
-  const t = useTranslation()
-  let { catOne, catTwo, catThree } = level
+  const t = useTranslation();
+  let { catOne, catTwo, catThree } = level;
 
   if (isCustomLevel(level)) {
-    catOne = t.components.entity.ELevel.custom_level
-    catTwo = ''
-    catThree = level.name
+    catOne = t.components.entity.ELevel.custom_level;
+    catTwo = "";
+    catThree = level.name;
   }
 
   return (
@@ -63,17 +63,17 @@ export const ELevel: FC<{
         </div>
       </div>
     </Tag>
-  )
-}
+  );
+};
 
 export const EDifficultyLevel: FC<{
-  level: Level
-  difficulty?: OpDifficulty
+  level: Level;
+  difficulty?: OpDifficulty;
 }> = ({ level, difficulty = OpDifficulty.UNKNOWN }) => {
   return (
     <div className="flex flex-wrap">
       <ELevel level={level} />
       <EDifficulty difficulty={difficulty} />
     </div>
-  )
-}
+  );
+};

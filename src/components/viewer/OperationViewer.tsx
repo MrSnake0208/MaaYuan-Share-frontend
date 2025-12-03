@@ -14,9 +14,9 @@ import {
   MenuItem,
   NonIdealState,
   Tag,
-} from '@blueprintjs/core'
-import { Popover2, Tooltip2 } from '@blueprintjs/popover2'
-import { ErrorBoundary } from '@sentry/react'
+} from "@blueprintjs/core";
+import { Popover2, Tooltip2 } from "@blueprintjs/popover2";
+import { ErrorBoundary } from "@sentry/react";
 
 import {
   banComments,
@@ -24,13 +24,10 @@ import {
   rateOperation,
   useOperation,
   useRefreshOperations,
-} from 'apis/operation'
-import clsx from 'clsx'
-import { useAtom } from 'jotai'
-import {
-  BanCommentsStatusEnum,
-  CopilotInfoStatusEnum,
-} from 'maa-copilot-client'
+} from "apis/operation";
+import clsx from "clsx";
+import { useAtom } from "jotai";
+import { BanCommentsStatusEnum, CopilotInfoStatusEnum } from "maa-copilot-client";
 import {
   ComponentType,
   FC,
@@ -38,49 +35,49 @@ import {
   MouseEventHandler,
   useEffect,
   useState,
-} from 'react'
-import { useNavigate } from 'react-router-dom'
-import { copyShortCode, handleLazyDownloadJSON } from 'services/operation'
+} from "react";
+import { useNavigate } from "react-router-dom";
+import { copyShortCode, handleLazyDownloadJSON } from "services/operation";
 
-import { FactItem } from 'components/FactItem'
-import { Paragraphs } from 'components/Paragraphs'
-import { RelativeTime } from 'components/RelativeTime'
-import { withSuspensable } from 'components/Suspensable'
-import { AppToaster } from 'components/Toaster'
-import { DrawerLayout } from 'components/drawer/DrawerLayout'
-import { EDifficultyLevel } from 'components/entity/ELevel'
-import { OpRatingType, Operation } from 'models/operation'
-import { toShortCode } from 'models/shortCode'
-import { authAtom, isAdmin } from 'store/auth'
-import { wrapErrorMessage } from 'utils/wrapErrorMessage'
+import { FactItem } from "components/FactItem";
+import { Paragraphs } from "components/Paragraphs";
+import { RelativeTime } from "components/RelativeTime";
+import { withSuspensable } from "components/Suspensable";
+import { AppToaster } from "components/Toaster";
+import { DrawerLayout } from "components/drawer/DrawerLayout";
+import { EDifficultyLevel } from "components/entity/ELevel";
+import { OpRatingType, Operation } from "models/operation";
+import { toShortCode } from "models/shortCode";
+import { authAtom, isAdmin } from "store/auth";
+import { wrapErrorMessage } from "utils/wrapErrorMessage";
 
-import { useLevels } from '../../apis/level'
-import { i18nDefer, useTranslation } from '../../i18n/i18n'
-import { CopilotDocV1 } from '../../models/copilot.schema'
-import { createCustomLevel, findLevelByStageName } from '../../models/level'
-import { Level } from '../../models/operation'
+import { useLevels } from "../../apis/level";
+import { i18nDefer, useTranslation } from "../../i18n/i18n";
+import { CopilotDocV1 } from "../../models/copilot.schema";
+import { createCustomLevel, findLevelByStageName } from "../../models/level";
+import { Level } from "../../models/operation";
 import {
   OPERATORS,
   getModuleName,
   useLocalizedOperatorName,
   withDefaultRequirements,
-} from '../../models/operator'
-import { formatError } from '../../utils/error'
-import { readOperatorStats } from '../../utils/operatorStats'
-import { Confirm } from '../Confirm'
-import { OperatorAvatar } from '../OperatorAvatar'
-import { ReLinkRenderer } from '../ReLink'
-import { UserName } from '../UserName'
-import { ActionSequenceViewer } from './ActionSequenceViewer'
-import { CommentArea } from './comment/CommentArea'
+} from "../../models/operator";
+import { formatError } from "../../utils/error";
+import { readOperatorStats } from "../../utils/operatorStats";
+import { Confirm } from "../Confirm";
+import { OperatorAvatar } from "../OperatorAvatar";
+import { ReLinkRenderer } from "../ReLink";
+import { UserName } from "../UserName";
+import { ActionSequenceViewer } from "./ActionSequenceViewer";
+import { CommentArea } from "./comment/CommentArea";
 
 const ManageMenu: FC<{
-  operation: Operation
-  onRevalidateOperation: () => void
-  onDelete: () => void
+  operation: Operation;
+  onRevalidateOperation: () => void;
+  onDelete: () => void;
 }> = ({ operation, onRevalidateOperation, onDelete }) => {
-  const t = useTranslation()
-  const refreshOperations = useRefreshOperations()
+  const t = useTranslation();
+  const refreshOperations = useRefreshOperations();
 
   const handleBanComments = async (status: BanCommentsStatusEnum) => {
     await wrapErrorMessage(
@@ -89,10 +86,10 @@ const ManageMenu: FC<{
           error: formatError(e),
         }),
       banComments({ operationId: operation.id, status }),
-    ).catch(console.warn)
+    ).catch(console.warn);
 
-    onRevalidateOperation()
-  }
+    onRevalidateOperation();
+  };
 
   const handleDelete = async () => {
     try {
@@ -102,19 +99,19 @@ const ManageMenu: FC<{
             error: formatError(e),
           }),
         deleteOperation({ id: operation.id }),
-      )
+      );
 
-      refreshOperations()
+      refreshOperations();
 
       AppToaster.show({
-        intent: 'success',
+        intent: "success",
         message: t.components.viewer.OperationViewer.delete_success,
-      })
-      onDelete()
+      });
+      onDelete();
     } catch (e) {
-      console.warn(e)
+      console.warn(e);
     }
-  }
+  };
 
   return (
     <>
@@ -162,9 +159,7 @@ const ManageMenu: FC<{
           >
             <H6>{t.components.viewer.OperationViewer.close_comments}</H6>
             <p>{t.components.viewer.OperationViewer.confirm_close_comments}</p>
-            <p>
-              {t.components.viewer.OperationViewer.existing_comments_preserved}
-            </p>
+            <p>{t.components.viewer.OperationViewer.existing_comments_preserved}</p>
           </Confirm>
         )}
         {operation.commentStatus === BanCommentsStatusEnum.Disabled && (
@@ -205,16 +200,16 @@ const ManageMenu: FC<{
         </Confirm>
       </Menu>
     </>
-  )
-}
+  );
+};
 
 export const OperationViewer: ComponentType<{
-  operationId: Operation['id']
-  onCloseDrawer: () => void
+  operationId: Operation["id"];
+  onCloseDrawer: () => void;
 }> = withSuspensable(
   function OperationViewer({ operationId, onCloseDrawer }) {
-    const t = useTranslation()
-    const navigate = useNavigate()
+    const t = useTranslation();
+    const navigate = useNavigate();
     const {
       data: operation,
       error,
@@ -222,43 +217,43 @@ export const OperationViewer: ComponentType<{
     } = useOperation({
       id: operationId,
       suspense: true,
-    })
+    });
 
     useEffect(() => {
       // on finished loading, scroll to #fragment if any
       if (operation) {
-        const fragment = window.location.hash
+        const fragment = window.location.hash;
         if (fragment) {
-          const el = document.querySelector(fragment)
+          const el = document.querySelector(fragment);
           if (el) {
-            el.scrollIntoView({ behavior: 'smooth' })
+            el.scrollIntoView({ behavior: "smooth" });
           }
         }
       }
-    }, [operation])
+    }, [operation]);
 
-    const { data: levels } = useLevels()
+    const { data: levels } = useLevels();
 
-    const [auth] = useAtom(authAtom)
+    const [auth] = useAtom(authAtom);
 
     // make eslint happy: we got Suspense out there
-    if (!operation) throw new Error('unreachable')
+    if (!operation) throw new Error("unreachable");
 
     useEffect(() => {
       if (error) {
         AppToaster.show({
-          intent: 'danger',
+          intent: "danger",
           message: t.components.viewer.OperationViewer.refresh_failed({
             error: formatError(error),
           }),
-        })
+        });
       }
-    }, [error, t])
+    }, [error, t]);
 
     const handleRating = async (decision: OpRatingType) => {
       // cancel rating if already rated by the same type
       if (decision === operation.ratingType) {
-        decision = OpRatingType.None
+        decision = OpRatingType.None;
       }
 
       wrapErrorMessage(
@@ -270,26 +265,24 @@ export const OperationViewer: ComponentType<{
           await rateOperation({
             id: operationId,
             rating: decision,
-          })
-          return val
+          });
+          return val;
         }),
-      ).catch(console.warn)
-    }
+      ).catch(console.warn);
+    };
 
     const handleCopyToEditor = () => {
-      const shortCode = toShortCode({ id: operation.id })
-      onCloseDrawer()
-      navigate(`/editor?shortcode=${encodeURIComponent(shortCode)}`)
-    }
+      const shortCode = toShortCode({ id: operation.id });
+      onCloseDrawer();
+      navigate(`/editor?shortcode=${encodeURIComponent(shortCode)}`);
+    };
 
     return (
       <DrawerLayout
         title={
           <>
             <Icon icon="document" />
-            <span className="ml-2">
-              {t.components.viewer.OperationViewer.maa_copilot_task}
-            </span>
+            <span className="ml-2">{t.components.viewer.OperationViewer.maa_copilot_task}</span>
 
             <div className="flex-1" />
 
@@ -356,124 +349,113 @@ export const OperationViewer: ComponentType<{
             />
           }
         >
-          <OperationViewerInner
-            levels={levels}
-            operation={operation}
-            handleRating={handleRating}
-          />
+          <OperationViewerInner levels={levels} operation={operation} handleRating={handleRating} />
         </ErrorBoundary>
       </DrawerLayout>
-    )
+    );
   },
   {
     pendingTitle: i18nDefer.components.viewer.OperationViewer.loading_task,
   },
-)
+);
 
 const OperatorCard: FC<{
-  operator: CopilotDocV1.Operator
-  showExtras?: boolean
+  operator: CopilotDocV1.Operator;
+  showExtras?: boolean;
 }> = ({ operator, showExtras }) => {
-  const t = useTranslation()
-  const displayName = useLocalizedOperatorName(operator.name)
-  const info = OPERATORS.find((o) => o.name === operator.name)
-  const { module } = withDefaultRequirements(
-    operator.requirements,
-    info?.rarity,
-  )
+  const t = useTranslation();
+  const displayName = useLocalizedOperatorName(operator.name);
+  const info = OPERATORS.find((o) => o.name === operator.name);
+  const { module } = withDefaultRequirements(operator.requirements, info?.rarity);
 
   // —— 属性拓展读取（extensions）+ 兼容旧字段 ——
   type DiscSlot = {
-    index: number
-    disc: number
-    starStone?: string
-    assistStar?: string
-  }
+    index: number;
+    disc: number;
+    starStone?: string;
+    assistStar?: string;
+  };
   const getDiscSlots = (op: CopilotDocV1.Operator): DiscSlot[] => {
     // 原方案优先：并行数组（camelCase）；viewer 接口层已 camel 化
-    const ds = (op as any).discsSelected ?? []
-    const ss = (op as any).discStarStones ?? []
-    const as = (op as any).discAssistStars ?? []
-    const hasLegacy = ds.length > 0 || ss.length > 0 || as.length > 0
+    const ds = (op as any).discsSelected ?? [];
+    const ss = (op as any).discStarStones ?? [];
+    const as = (op as any).discAssistStars ?? [];
+    const hasLegacy = ds.length > 0 || ss.length > 0 || as.length > 0;
     if (hasLegacy) {
       return [0, 1, 2].map((i) => ({
         index: i,
         disc: ds[i] ?? 0,
-        starStone: ss[i] ?? '',
-        assistStar: as[i] ?? '',
-      }))
+        starStone: ss[i] ?? "",
+        assistStar: as[i] ?? "",
+      }));
     }
     // 回退：extensions.slots
     const ext = (op as any).extensions as
       | {
-          discs?: { slots?: DiscSlot[] }
-          stats?: { starLevel?: number; attack?: number; hp?: number }
+          discs?: { slots?: DiscSlot[] };
+          stats?: { starLevel?: number; attack?: number; hp?: number };
         }
-      | undefined
-    const slots = ext?.discs?.slots
+      | undefined;
+    const slots = ext?.discs?.slots;
     if (slots && slots.length > 0) {
       const norm = [...slots]
-        .filter((s) => s && typeof s.index === 'number')
+        .filter((s) => s && typeof s.index === "number")
         .map((s, i) => ({
           index: s.index ?? i,
           disc: s.disc ?? 0,
-          starStone: s.starStone ?? '',
-          assistStar: s.assistStar ?? '',
+          starStone: s.starStone ?? "",
+          assistStar: s.assistStar ?? "",
         }))
-        .sort((a, b) => a.index - b.index)
+        .sort((a, b) => a.index - b.index);
       while (norm.length < 3)
         norm.push({
           index: norm.length,
           disc: 0,
-          starStone: '',
-          assistStar: '',
-        })
-      return norm.slice(0, 3)
+          starStone: "",
+          assistStar: "",
+        });
+      return norm.slice(0, 3);
     }
     return [0, 1, 2].map((i) => ({
       index: i,
       disc: 0,
-      starStone: '',
-      assistStar: '',
-    }))
-  }
+      starStone: "",
+      assistStar: "",
+    }));
+  };
   // 读取命盘集合与选中结果（优先 extensions.slots；回退 discsSelected）
-  const discList = (info as any)?.discs ?? []
-  const slots = getDiscSlots(operator)
-  const selectedDiscs = slots.filter((s) => s.disc !== 0).map((s) => s)
+  const discList = (info as any)?.discs ?? [];
+  const slots = getDiscSlots(operator);
+  const selectedDiscs = slots.filter((s) => s.disc !== 0).map((s) => s);
   const selectedDiscsDisplay = selectedDiscs
     .map((s) => {
       if (s.disc === -1) {
         return {
           _slot: s.index,
-          item: { name: '任意', abbreviation: '任意', desp: '任意' } as any,
-        }
+          item: { name: "任意", abbreviation: "任意", desp: "任意" } as any,
+        };
       }
-      if (
-        typeof s.disc === 'number' &&
-        s.disc > 0 &&
-        s.disc <= discList.length
-      ) {
-        return { _slot: s.index, item: discList[s.disc - 1] }
+      if (typeof s.disc === "number" && s.disc > 0 && s.disc <= discList.length) {
+        return { _slot: s.index, item: discList[s.disc - 1] };
       }
-      return null
+      return null;
     })
-    .filter(Boolean) as { _slot: number; item: any }[]
+    .filter(Boolean) as { _slot: number; item: any }[];
 
   const discColorClasses = (color?: string) => {
     switch (color) {
-      case '金':
-        return '!bg-yellow-100 dark:!bg-yellow-900 dark:!text-yellow-200 !text-yellow-800'
-      case '紫':
-        return '!bg-purple-100 dark:!bg-purple-900 dark:!text-purple-200 !text-purple-800'
-      case '蓝':
-        return '!bg-blue-100 dark:!bg-blue-900 dark:!text-blue-200 !text-blue-800'
-      case '橙':
-        return '!bg-orange-100 dark:!bg-orange-900 dark:!text-orange-200 !text-orange-800'
+      case "金":
+        return "!bg-yellow-100 dark:!bg-yellow-900 dark:!text-yellow-200 !text-yellow-800";
+      case "紫":
+        return "!bg-purple-100 dark:!bg-purple-900 dark:!text-purple-200 !text-purple-800";
+      case "蓝":
+        return "!bg-blue-100 dark:!bg-blue-900 dark:!text-blue-200 !text-blue-800";
+      case "橙":
+        return "!bg-orange-100 dark:!bg-orange-900 dark:!text-orange-200 !text-orange-800";
       default:
-        return '!bg-gray-300 dark:!bg-gray-600 opacity-15 dark:opacity-25 hover:opacity-30 dark:hover:opacity-50'
+        return "!bg-gray-300 dark:!bg-gray-600 opacity-15 dark:opacity-25 hover:opacity-30 dark:hover:opacity-50";
     }
-  }
+  };
 
   return (
     <div className="relative flex items-start">
@@ -486,10 +468,10 @@ const OperatorCard: FC<{
             fallback={displayName}
             sourceSize={96}
           />
-          {info && info.prof !== 'TOKEN' && (
+          {info && info.prof !== "TOKEN" && (
             <img
               className="absolute top-0 right-0 w-5 h-5 p-px bg-gray-600 rounded-tr-md"
-              src={'/assets/prof-icons/' + info.prof + '.png'}
+              src={"/assets/prof-icons/" + info.prof + ".png"}
               alt={info.prof}
             />
           )}
@@ -514,10 +496,10 @@ const OperatorCard: FC<{
         </h4>
         {/* 星级（展示 1..5）与基础数值（仅当作业有设置时显示） */}
         {(() => {
-          const stats = readOperatorStats(operator)
-          const show = stats.hasStar || stats.hasAttack || stats.hasHp
-          if (!show) return null
-          const current = Math.min(5, Math.max(0, stats.starLevel))
+          const stats = readOperatorStats(operator);
+          const show = stats.hasStar || stats.hasAttack || stats.hasHp;
+          if (!show) return null;
+          const current = Math.min(5, Math.max(0, stats.starLevel));
           return (
             <div className="mt-1 flex flex-col items-center gap-1 select-none">
               {stats.hasStar && (
@@ -527,10 +509,8 @@ const OperatorCard: FC<{
                       key={n}
                       icon="star"
                       className={clsx(
-                        'w-4 h-4',
-                        n <= current
-                          ? 'text-yellow-500 opacity-100'
-                          : 'text-gray-500 opacity-40',
+                        "w-4 h-4",
+                        n <= current ? "text-yellow-500 opacity-100" : "text-gray-500 opacity-40",
                       )}
                     />
                   ))}
@@ -538,29 +518,19 @@ const OperatorCard: FC<{
               )}
               {(stats.hasAttack || stats.hasHp) && (
                 <div className="flex items-center gap-2 text-xs opacity-80">
-                  {stats.hasAttack && (
-                    <span title="攻击">攻: {Math.max(0, stats.attack)}</span>
-                  )}
-                  {stats.hasHp && (
-                    <span title="生命">血: {Math.max(0, stats.hp)}</span>
-                  )}
+                  {stats.hasAttack && <span title="攻击">攻: {Math.max(0, stats.attack)}</span>}
+                  {stats.hasHp && <span title="生命">血: {Math.max(0, stats.hp)}</span>}
                 </div>
               )}
             </div>
-          )
+          );
         })()}
         {selectedDiscs?.length > 0 && (
           <div className="mt-1 mx-[-4px] grid gap-1">
             {selectedDiscsDisplay.map(({ item: d, _slot }, i: number) => {
-              const star = slots.find((s) => s.index === _slot)?.starStone
+              const star = slots.find((s) => s.index === _slot)?.starStone;
               return (
-                <div
-                  key={i}
-                  className={clsx(
-                    'flex gap-1',
-                    !showExtras && 'justify-center',
-                  )}
-                >
+                <div key={i} className={clsx("flex gap-1", !showExtras && "justify-center")}>
                   {/* 提升命盘描述 Tooltip 的层级，避免被 Drawer 内容遮挡 */}
                   <Tooltip2
                     content={d.desp}
@@ -569,64 +539,56 @@ const OperatorCard: FC<{
                   >
                     <div
                       className={clsx(
-                        'bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current',
+                        "bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current",
                         discColorClasses(d.color),
                       )}
                     >
-                      <span className="bp4-button-text">
-                        {d.abbreviation as string}
-                      </span>
+                      <span className="bp4-button-text">{d.abbreviation as string}</span>
                     </div>
                   </Tooltip2>
                   {showExtras && (
                     <>
                       <div
                         className={clsx(
-                          'bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600',
+                          "bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600",
                         )}
-                        title={star || '主星'}
+                        title={star || "主星"}
                       >
-                        <span className="bp4-button-text">
-                          {star || '主星'}
-                        </span>
+                        <span className="bp4-button-text">{star || "主星"}</span>
                       </div>
                       <div
                         className={clsx(
-                          'bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600',
+                          "bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600",
                         )}
-                        title={
-                          slots.find((s) => s.index === _slot)?.assistStar ||
-                          '辅星'
-                        }
+                        title={slots.find((s) => s.index === _slot)?.assistStar || "辅星"}
                       >
                         <span className="bp4-button-text">
-                          {slots.find((s) => s.index === _slot)?.assistStar ||
-                            '辅星'}
+                          {slots.find((s) => s.index === _slot)?.assistStar || "辅星"}
                         </span>
                       </div>
                     </>
                   )}
                 </div>
-              )
+              );
             })}
           </div>
         )}
         {/* prof icon moved into avatar container to stick to avatar corner */}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export function OperationViewerInner({
   levels,
   operation,
   handleRating,
 }: {
-  levels: Level[]
-  operation: Operation
-  handleRating: (decision: OpRatingType) => Promise<void>
+  levels: Level[];
+  operation: Operation;
+  handleRating: (decision: OpRatingType) => Promise<void>;
 }) {
-  const t = useTranslation()
+  const t = useTranslation();
   return (
     <div className="h-full overflow-auto p-4 md:p-8">
       <H3>
@@ -650,28 +612,21 @@ export function OperationViewerInner({
                 // 优先使用后端直出字段；回退到本地映射
                 const levelFromBackend =
                   operation.preLevel ||
-                  findLevelByStageName(
-                    levels,
-                    operation.parsedContent.stageName,
-                  ) ||
-                  createCustomLevel(operation.parsedContent.stageName)
+                  findLevelByStageName(levels, operation.parsedContent.stageName) ||
+                  createCustomLevel(operation.parsedContent.stageName);
                 // 标签显示规则：{catOne} | {name}
                 const displayLevel = {
                   ...levelFromBackend,
                   // 与 OperationCard 保持一致：使用 name 渲染第二部分
                   catTwo: levelFromBackend.name,
-                }
-                return displayLevel
+                };
+                return displayLevel;
               })()}
               difficulty={operation.parsedContent.difficulty}
             />
           </FactItem>
 
-          <FactItem
-            relaxed
-            className="items-start"
-            title={'作业点赞数'}
-          >
+          <FactItem relaxed className="items-start" title={"作业点赞数"}>
             <div className="flex items-center mr-2">
               <Icon icon="thumbs-up" className="mr-1.5" />
               <span className="tabular-nums text-gray-800 dark:text-slate-100 font-bold">
@@ -683,11 +638,7 @@ export function OperationViewerInner({
               <Tooltip2 content="o(*≧▽≦)ツ" placement="bottom">
                 <Button
                   icon="thumbs-up"
-                  intent={
-                    operation.ratingType === OpRatingType.Like
-                      ? 'success'
-                      : 'none'
-                  }
+                  intent={operation.ratingType === OpRatingType.Like ? "success" : "none"}
                   className="mr-2"
                   active={operation.ratingType === OpRatingType.Like}
                   onClick={() => handleRating(OpRatingType.Like)}
@@ -696,11 +647,7 @@ export function OperationViewerInner({
               <Tooltip2 content=" ヽ(。>д<)ｐ" placement="bottom">
                 <Button
                   icon="thumbs-down"
-                  intent={
-                    operation.ratingType === OpRatingType.Dislike
-                      ? 'danger'
-                      : 'none'
-                  }
+                  intent={operation.ratingType === OpRatingType.Dislike ? "danger" : "none"}
                   active={operation.ratingType === OpRatingType.Dislike}
                   onClick={() => handleRating(OpRatingType.Dislike)}
                 />
@@ -710,31 +657,17 @@ export function OperationViewerInner({
         </div>
 
         <div className="flex flex-wrap md:flex-col items-start select-none tabular-nums gap-4">
-          <FactItem
-            dense
-            title={t.components.viewer.OperationViewer.views}
-            icon="eye-open"
-          >
-            <span className="text-gray-800 dark:text-slate-100 font-bold">
-              {operation.views}
-            </span>
+          <FactItem dense title={t.components.viewer.OperationViewer.views} icon="eye-open">
+            <span className="text-gray-800 dark:text-slate-100 font-bold">{operation.views}</span>
           </FactItem>
 
-          <FactItem
-            dense
-            title={t.components.viewer.OperationViewer.published_at}
-            icon="time"
-          >
+          <FactItem dense title={t.components.viewer.OperationViewer.published_at} icon="time">
             <span className="text-gray-800 dark:text-slate-100 font-bold">
               <RelativeTime moment={operation.uploadTime} />
             </span>
           </FactItem>
 
-          <FactItem
-            dense
-            title={t.components.viewer.OperationViewer.author}
-            icon="user"
-          >
+          <FactItem dense title={t.components.viewer.OperationViewer.author} icon="user">
             <UserName
               className="text-gray-800 dark:text-slate-100 font-bold"
               userId={operation.uploaderId}
@@ -744,7 +677,7 @@ export function OperationViewerInner({
           </FactItem>
 
           {/* 作业来源（仅当为“搬运”时显示） */}
-          {operation.metadata?.sourceType === 'repost' && (
+          {operation.metadata?.sourceType === "repost" && (
             <FactItem
               relaxed
               className="items-start"
@@ -759,13 +692,13 @@ export function OperationViewerInner({
                 </div>
                 {operation.metadata?.repostAuthor && (
                   <div className="text-sm">
-                    {t.components.editor2.InfoEditor.repost_author}:{' '}
+                    {t.components.editor2.InfoEditor.repost_author}:{" "}
                     {operation.metadata.repostAuthor}
                   </div>
                 )}
                 {operation.metadata?.repostPlatform && (
                   <div className="text-sm">
-                    {t.components.editor2.InfoEditor.repost_platform}:{' '}
+                    {t.components.editor2.InfoEditor.repost_platform}:{" "}
                     {operation.metadata.repostPlatform}
                   </div>
                 )}
@@ -795,9 +728,7 @@ export function OperationViewerInner({
           <NonIdealState
             icon="issue"
             title={t.components.viewer.OperationViewer.render_error}
-            description={
-              t.components.viewer.OperationViewer.render_preview_problem
-            }
+            description={t.components.viewer.OperationViewer.render_preview_problem}
             className="h-96 bg-stripe rounded"
           />
         }
@@ -819,23 +750,21 @@ export function OperationViewerInner({
           <NonIdealState
             icon="tree"
             title={t.components.viewer.OperationViewer.comments_closed}
-            description={
-              t.components.viewer.OperationViewer.comments_closed_note
-            }
+            description={t.components.viewer.OperationViewer.comments_closed_note}
           />
         ) : (
           <CommentArea operationId={operation.id} />
         )}
       </div>
     </div>
-  )
+  );
 }
 function OperationViewerInnerDetails({ operation }: { operation: Operation }) {
-  const t = useTranslation()
-  const [showOperators, setShowOperators] = useState(true)
-  const [showActions, setShowActions] = useState(false)
+  const t = useTranslation();
+  const [showOperators, setShowOperators] = useState(true);
+  const [showActions, setShowActions] = useState(false);
   // 眼睛开关：控制是否显示星石/辅星，默认关闭（不显示）
-  const [showExtras, setShowExtras] = useState(false)
+  const [showExtras, setShowExtras] = useState(false);
 
   return (
     <div>
@@ -847,10 +776,7 @@ function OperationViewerInnerDetails({ operation }: { operation: Operation }) {
           {t.components.viewer.OperationViewer.operators_and_groups}
           <Icon
             icon="chevron-down"
-            className={clsx(
-              'ml-1 transition-transform',
-              showOperators && 'rotate-180',
-            )}
+            className={clsx("ml-1 transition-transform", showOperators && "rotate-180")}
           />
         </H4>
         <details className="inline ml-2">
@@ -859,44 +785,35 @@ function OperationViewerInnerDetails({ operation }: { operation: Operation }) {
           </summary>
           <Callout intent="primary" icon={null} className="mb-4">
             <p>
-              {t.components.viewer.OperationViewer.operators_and_groups_note.jsx(
-                {
-                  operators: (s) => <b>{s}</b>,
-                  groups: (s) => <b>{s}</b>,
-                },
-              )}
+              {t.components.viewer.OperationViewer.operators_and_groups_note.jsx({
+                operators: (s) => <b>{s}</b>,
+                groups: (s) => <b>{s}</b>,
+              })}
             </p>
           </Callout>
         </details>
         {/* 星石/辅星显示开关：默认闭眼（隐藏），点击切换 */}
         <Icon
-          icon={showExtras ? 'eye-open' : 'eye-off'}
+          icon={showExtras ? "eye-open" : "eye-off"}
           size={14}
           className="ml-2 mb-1 opacity-60 cursor-pointer hover:opacity-90 align-middle"
           onClick={() => setShowExtras((v) => !v)}
-          title={showExtras ? '隐藏星石/辅星' : '显示星石/辅星'}
+          title={showExtras ? "隐藏星石/辅星" : "显示星石/辅星"}
         />
       </div>
       <Collapse isOpen={showOperators}>
         <div className="mt-2 flex flex-wrap gap-8">
-          {!operation.parsedContent.opers?.length &&
-            !operation.parsedContent.groups?.length && (
-              <NonIdealState
-                className="my-2"
-                title={t.components.viewer.OperationViewer.no_operators}
-                description={
-                  t.components.viewer.OperationViewer.no_operators_added
-                }
-                icon="slash"
-                layout="horizontal"
-              />
-            )}
-          {operation.parsedContent.opers?.map((operator) => (
-            <OperatorCard
-              key={operator.name}
-              operator={operator}
-              showExtras={showExtras}
+          {!operation.parsedContent.opers?.length && !operation.parsedContent.groups?.length && (
+            <NonIdealState
+              className="my-2"
+              title={t.components.viewer.OperationViewer.no_operators}
+              description={t.components.viewer.OperationViewer.no_operators_added}
+              icon="slash"
+              layout="horizontal"
             />
+          )}
+          {operation.parsedContent.opers?.map((operator) => (
+            <OperatorCard key={operator.name} operator={operator} showExtras={showExtras} />
           ))}
         </div>
         <div className="flex flex-wrap gap-4 mt-4">
@@ -909,11 +826,7 @@ function OperationViewerInnerDetails({ operation }: { operation: Operation }) {
               <H6 className="mb-3 text-gray-800">{group.name}</H6>
               <div className="flex flex-wrap px-2 gap-8">
                 {group.opers?.filter(Boolean).map((operator) => (
-                  <OperatorCard
-                    key={operator.name}
-                    operator={operator}
-                    showExtras={showExtras}
-                  />
+                  <OperatorCard key={operator.name} operator={operator} showExtras={showExtras} />
                 ))}
 
                 {group.opers?.filter(Boolean).length === 0 && (
@@ -934,15 +847,12 @@ function OperationViewerInnerDetails({ operation }: { operation: Operation }) {
         {t.components.viewer.OperationViewer.action_sequence}
         <Icon
           icon="chevron-down"
-          className={clsx(
-            'ml-1 transition-transform',
-            showActions && 'rotate-180',
-          )}
+          className={clsx("ml-1 transition-transform", showActions && "rotate-180")}
         />
       </H4>
       <Collapse isOpen={showActions}>
         <ActionSequenceViewer operation={operation} />
       </Collapse>
     </div>
-  )
+  );
 }

@@ -11,39 +11,36 @@ import {
   Tab,
   TabId,
   Tabs,
-} from '@blueprintjs/core'
-import { Popover2 } from '@blueprintjs/popover2'
+} from "@blueprintjs/core";
+import { Popover2 } from "@blueprintjs/popover2";
 
-import { useAtom } from 'jotai'
-import { ComponentType, FC, useState } from 'react'
+import { useAtom } from "jotai";
+import { ComponentType, FC, useState } from "react";
 
-import { LoginPanel } from 'components/account/LoginPanel'
-import { authAtom } from 'store/auth'
-import { useCurrentSize } from 'utils/useCurrenSize'
+import { LoginPanel } from "components/account/LoginPanel";
+import { authAtom } from "store/auth";
+import { useCurrentSize } from "utils/useCurrenSize";
 
-import { useTranslation } from '../i18n/i18n'
-import {
-  GlobalErrorBoundary,
-  withGlobalErrorBoundary,
-} from './GlobalErrorBoundary'
-import { AppToaster } from './Toaster'
-import { EditDialog } from './account/EditDialog'
-import { RegisterPanel } from './account/RegisterPanel'
+import { useTranslation } from "../i18n/i18n";
+import { GlobalErrorBoundary, withGlobalErrorBoundary } from "./GlobalErrorBoundary";
+import { AppToaster } from "./Toaster";
+import { EditDialog } from "./account/EditDialog";
+import { RegisterPanel } from "./account/RegisterPanel";
 
 const AccountMenu: FC = () => {
-  const t = useTranslation()
-  const [authState, setAuthState] = useAtom(authAtom)
-  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const { isSM } = useCurrentSize()
+  const t = useTranslation();
+  const [authState, setAuthState] = useAtom(authAtom);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const { isSM } = useCurrentSize();
 
   const handleLogout = () => {
-    setAuthState({})
+    setAuthState({});
     AppToaster.show({
-      intent: 'success',
+      intent: "success",
       message: t.components.AccountManager.logout_success,
-    })
-  }
+    });
+  };
 
   return (
     <>
@@ -61,10 +58,7 @@ const AccountMenu: FC = () => {
         <p>{t.components.AccountManager.logout_confirm}</p>
       </Alert>
 
-      <EditDialog
-        isOpen={editDialogOpen}
-        onClose={() => setEditDialogOpen(false)}
-      />
+      <EditDialog isOpen={editDialogOpen} onClose={() => setEditDialogOpen(false)} />
 
       <Menu>
         {!authState.activated && (
@@ -77,10 +71,7 @@ const AccountMenu: FC = () => {
 
         <MenuItem
           icon="person"
-          text={
-            (isSM ? authState.username + ' - ' : '') +
-            t.components.AccountManager.profile
-          }
+          text={(isSM ? authState.username + " - " : "") + t.components.AccountManager.profile}
           href={`/profile/${authState.userId}`}
         />
         <MenuItem
@@ -100,15 +91,15 @@ const AccountMenu: FC = () => {
         />
       </Menu>
     </>
-  )
-}
+  );
+};
 
 export const AccountAuthDialog: ComponentType<{
-  open?: boolean
-  onClose?: () => void
+  open?: boolean;
+  onClose?: () => void;
 }> = withGlobalErrorBoundary(({ open, onClose }) => {
-  const t = useTranslation()
-  const [activeTab, setActiveTab] = useState<TabId>('login')
+  const t = useTranslation();
+  const [activeTab, setActiveTab] = useState<TabId>("login");
 
   return (
     <Dialog
@@ -124,7 +115,7 @@ export const AccountAuthDialog: ComponentType<{
             renderActiveTabPanelOnly={true}
             id="account-auto-tabs"
             onChange={(tab) => {
-              setActiveTab(tab)
+              setActiveTab(tab);
             }}
             selectedTabId={activeTab}
           >
@@ -133,14 +124,12 @@ export const AccountAuthDialog: ComponentType<{
               title={
                 <div>
                   <Icon icon="person" />
-                  <span className="ml-1">
-                    {t.components.AccountManager.login}
-                  </span>
+                  <span className="ml-1">{t.components.AccountManager.login}</span>
                 </div>
               }
               panel={
                 <LoginPanel
-                  onNavigateRegisterPanel={() => setActiveTab('register')}
+                  onNavigateRegisterPanel={() => setActiveTab("register")}
                   onComplete={() => onClose?.()}
                 />
               }
@@ -150,25 +139,23 @@ export const AccountAuthDialog: ComponentType<{
               title={
                 <div>
                   <Icon icon="new-person" />
-                  <span className="ml-1">
-                    {t.components.AccountManager.register}
-                  </span>
+                  <span className="ml-1">{t.components.AccountManager.register}</span>
                 </div>
               }
-              panel={<RegisterPanel onComplete={() => setActiveTab('login')} />}
+              panel={<RegisterPanel onComplete={() => setActiveTab("login")} />}
             />
           </Tabs>
         </GlobalErrorBoundary>
       </div>
     </Dialog>
-  )
-})
+  );
+});
 
 export const AccountManager: ComponentType = withGlobalErrorBoundary(() => {
-  const t = useTranslation()
-  const [open, setOpen] = useState(false)
-  const [authState] = useAtom(authAtom)
-  const { isSM } = useCurrentSize()
+  const t = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [authState] = useAtom(authAtom);
+  const { isSM } = useCurrentSize();
 
   return (
     <>
@@ -176,11 +163,7 @@ export const AccountManager: ComponentType = withGlobalErrorBoundary(() => {
       {authState.token ? (
         // BUTTOM_RIGHT设置防止弹出框撑大body超过100vw
         <Popover2 content={<AccountMenu />} position={Position.BOTTOM_RIGHT}>
-          <Button
-            icon="user"
-            text={!isSM && authState.username}
-            rightIcon="caret-down"
-          />
+          <Button icon="user" text={!isSM && authState.username} rightIcon="caret-down" />
         </Popover2>
       ) : (
         <Button className="ml-auto" icon="user" onClick={() => setOpen(true)}>
@@ -188,5 +171,5 @@ export const AccountManager: ComponentType = withGlobalErrorBoundary(() => {
         </Button>
       )}
     </>
-  )
-})
+  );
+});

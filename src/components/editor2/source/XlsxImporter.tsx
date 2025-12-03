@@ -1,139 +1,131 @@
-import { Button, Dialog, DialogBody, MenuItem } from '@blueprintjs/core'
+import { Button, Dialog, DialogBody, MenuItem } from "@blueprintjs/core";
 
 import {
   type DetectedColor,
   convertXlsxToAutoFightJson,
   detectXlsxPalette,
-} from 'features/auto-fight-gen/convert'
-import { ChangeEventHandler, FC, useRef, useState } from 'react'
+} from "features/auto-fight-gen/convert";
+import { ChangeEventHandler, FC, useRef, useState } from "react";
 
-import { useTranslation } from '../../../i18n/i18n'
-import { AppToaster } from '../../Toaster'
-import { updateOperationDocTitle } from './updateDocTitle'
+import { useTranslation } from "../../../i18n/i18n";
+import { AppToaster } from "../../Toaster";
+import { updateOperationDocTitle } from "./updateDocTitle";
 
-export const XlsxImporter: FC<{ onImport: (content: string) => void }> = ({
-  onImport,
-}) => {
-  const t = useTranslation()
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [isMappingOpen, setIsMappingOpen] = useState(false)
-  const [pendingBuffer, setPendingBuffer] = useState<ArrayBuffer | null>(null)
-  const [pendingFileName, setPendingFileName] = useState<string>('')
-  const [palette, setPalette] = useState<DetectedColor[]>([])
-  const [colorOrder, setColorOrder] = useState<string[]>([])
+export const XlsxImporter: FC<{ onImport: (content: string) => void }> = ({ onImport }) => {
+  const t = useTranslation();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isMappingOpen, setIsMappingOpen] = useState(false);
+  const [pendingBuffer, setPendingBuffer] = useState<ArrayBuffer | null>(null);
+  const [pendingFileName, setPendingFileName] = useState<string>("");
+  const [palette, setPalette] = useState<DetectedColor[]>([]);
+  const [colorOrder, setColorOrder] = useState<string[]>([]);
 
   const handleUpload: ChangeEventHandler<HTMLInputElement> = async (event) => {
-    const file = event.target.files?.[0]
+    const file = event.target.files?.[0];
     if (!file) {
-      return
+      return;
     }
 
     try {
-      const buffer = await file.arrayBuffer()
+      const buffer = await file.arrayBuffer();
       // 先检测 Excel 中的颜色（包含色块），若发现则进入颜色映射流程
       // 读取默认颜色（import.defaultColor）作为无色/白色的等价映射
       const defaultColorHex = ((): string => {
         try {
-          const v = localStorage.getItem('import.defaultColor')
-          return (v && /^#?[0-9A-Fa-f]{6}$/.test(v))
-            ? (v.startsWith('#') ? v : `#${v}`)
-            : '#FFFFFF'
+          const v = localStorage.getItem("import.defaultColor");
+          return v && /^#?[0-9A-Fa-f]{6}$/.test(v) ? (v.startsWith("#") ? v : `#${v}`) : "#FFFFFF";
         } catch {
-          return '#FFFFFF'
+          return "#FFFFFF";
         }
-      })()
+      })();
 
       const pal = detectXlsxPalette(buffer, {
-        colorType: 'fill',
+        colorType: "fill",
         defaultColorHex,
-      })
+      });
       if (pal.length > 0) {
-        setPendingBuffer(buffer)
-        setPendingFileName(file.name)
-        setPalette(pal)
-        setColorOrder(pal.map((p) => p.rgb))
-        setIsMappingOpen(true)
-        return
+        setPendingBuffer(buffer);
+        setPendingFileName(file.name);
+        setPalette(pal);
+        setColorOrder(pal.map((p) => p.rgb));
+        setIsMappingOpen(true);
+        return;
       }
 
       // 未发现颜色时，按旧流程直接转换
-      const json = convertXlsxToAutoFightJson(buffer, { defaultColorHex })
-      const jsonWithTitle = updateOperationDocTitle(json, file.name)
-      onImport(jsonWithTitle)
+      const json = convertXlsxToAutoFightJson(buffer, { defaultColorHex });
+      const jsonWithTitle = updateOperationDocTitle(json, file.name);
+      onImport(jsonWithTitle);
       AppToaster.show({
         message: t.components.editor.source.XlsxImporter.import_success,
-        intent: 'success',
-      })
+        intent: "success",
+      });
     } catch (error) {
-      console.warn('Failed to convert xlsx into JSON', error)
+      console.warn("Failed to convert xlsx into JSON", error);
       AppToaster.show({
         message: t.components.editor.source.XlsxImporter.import_failed,
-        intent: 'danger',
-      })
+        intent: "danger",
+      });
     } finally {
       if (inputRef.current) {
-        inputRef.current.value = ''
+        inputRef.current.value = "";
       }
     }
-  }
+  };
 
   const confirmMapping = async () => {
     if (!pendingBuffer) {
-      setIsMappingOpen(false)
-      return
+      setIsMappingOpen(false);
+      return;
     }
     try {
-      const tokens = colorOrder.map((_, idx) =>
-        String.fromCharCode('A'.charCodeAt(0) + idx),
-      )
+      const tokens = colorOrder.map((_, idx) => String.fromCharCode("A".charCodeAt(0) + idx));
       // 读取默认颜色（import.defaultColor）
       const defaultColorHex = ((): string => {
         try {
-          const v = localStorage.getItem('import.defaultColor')
-          return (v && /^#?[0-9A-Fa-f]{6}$/.test(v))
-            ? (v.startsWith('#') ? v : `#${v}`)
-            : '#FFFFFF'
+          const v = localStorage.getItem("import.defaultColor");
+          return v && /^#?[0-9A-Fa-f]{6}$/.test(v) ? (v.startsWith("#") ? v : `#${v}`) : "#FFFFFF";
         } catch {
-          return '#FFFFFF'
+          return "#FFFFFF";
         }
-      })()
+      })();
 
       const json = convertXlsxToAutoFightJson(pendingBuffer, {
         useColor: true,
-        colorType: 'fill',
+        colorType: "fill",
         colorList: tokens,
         paletteHexList: colorOrder,
         colorTokenList: tokens,
         defaultColorHex,
-      })
-      const jsonWithTitle = updateOperationDocTitle(json, pendingFileName)
-      onImport(jsonWithTitle)
+      });
+      const jsonWithTitle = updateOperationDocTitle(json, pendingFileName);
+      onImport(jsonWithTitle);
       AppToaster.show({
         message: t.components.editor.source.XlsxImporter.import_success,
-        intent: 'success',
-      })
+        intent: "success",
+      });
     } catch (error) {
-      console.warn('Failed to convert with color mapping', error)
+      console.warn("Failed to convert with color mapping", error);
       AppToaster.show({
         message: t.components.editor.source.XlsxImporter.import_failed,
-        intent: 'danger',
-      })
+        intent: "danger",
+      });
     } finally {
-      setIsMappingOpen(false)
-      setPendingBuffer(null)
-      setPendingFileName('')
-      setPalette([])
-      setColorOrder([])
+      setIsMappingOpen(false);
+      setPendingBuffer(null);
+      setPendingFileName("");
+      setPalette([]);
+      setColorOrder([]);
     }
-  }
+  };
 
   const cancelMapping = () => {
-    setIsMappingOpen(false)
-    setPendingBuffer(null)
-    setPendingFileName('')
-    setPalette([])
-    setColorOrder([])
-  }
+    setIsMappingOpen(false);
+    setPendingBuffer(null);
+    setPendingFileName("");
+    setPalette([]);
+    setColorOrder([]);
+  };
 
   return (
     <>
@@ -155,19 +147,15 @@ export const XlsxImporter: FC<{ onImport: (content: string) => void }> = ({
         }
       />
 
-      <Dialog
-        isOpen={isMappingOpen}
-        onClose={cancelMapping}
-        title="敌人颜色顺序"
-      >
+      <Dialog isOpen={isMappingOpen} onClose={cancelMapping} title="敌人颜色顺序">
         <DialogBody>
           <div className="mb-2">已检测到以下敌人颜色，请设置敌方目标顺序：</div>
           {palette.length > 0 && (
             <div
               style={{
-                display: 'flex',
+                display: "flex",
                 gap: 8,
-                flexWrap: 'wrap',
+                flexWrap: "wrap",
                 marginBottom: 8,
               }}
             >
@@ -176,11 +164,11 @@ export const XlsxImporter: FC<{ onImport: (content: string) => void }> = ({
                   key={`${p.rgb}-${i}`}
                   title={p.rgb}
                   style={{
-                    display: 'inline-block',
+                    display: "inline-block",
                     width: 16,
                     height: 16,
                     backgroundColor: p.rgb,
-                    border: '1px solid #ccc',
+                    border: "1px solid #ccc",
                   }}
                 />
               ))}
@@ -189,47 +177,44 @@ export const XlsxImporter: FC<{ onImport: (content: string) => void }> = ({
           {palette.length === 0 ? (
             <div>未检测到颜色</div>
           ) : (
-            <div style={{ display: 'grid', gap: 8 }}>
+            <div style={{ display: "grid", gap: 8 }}>
               {colorOrder.map((selected, idx) => (
                 <div
                   key={idx}
                   style={{
-                    display: 'flex',
+                    display: "flex",
                     gap: 8,
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
+                    alignItems: "center",
+                    flexWrap: "wrap",
                   }}
                 >
                   <span style={{ width: 64 }}>第{idx + 1}个敌人</span>
                   <span
                     title={selected}
                     style={{
-                      display: 'inline-block',
+                      display: "inline-block",
                       width: 16,
                       height: 16,
                       backgroundColor: selected,
-                      border: '1px solid #ccc',
+                      border: "1px solid #ccc",
                     }}
                   />
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {palette.map((p, i) => (
                       <button
                         key={`${idx}-${p.rgb}-${i}`}
                         type="button"
                         onClick={() => {
-                          const next = [...colorOrder]
-                          next[idx] = p.rgb
-                          setColorOrder(next)
+                          const next = [...colorOrder];
+                          next[idx] = p.rgb;
+                          setColorOrder(next);
                         }}
                         style={{
                           width: 22,
                           height: 22,
                           backgroundColor: p.rgb,
-                          border:
-                            selected === p.rgb
-                              ? '2px solid #106BA3'
-                              : '1px solid #ccc',
-                          cursor: 'pointer',
+                          border: selected === p.rgb ? "2px solid #106BA3" : "1px solid #ccc",
+                          cursor: "pointer",
                         }}
                         aria-label={`选择颜色 ${p.rgb}`}
                         title={p.rgb}
@@ -242,10 +227,10 @@ export const XlsxImporter: FC<{ onImport: (content: string) => void }> = ({
           )}
           <div
             style={{
-              display: 'flex',
+              display: "flex",
               gap: 8,
               marginTop: 12,
-              justifyContent: 'flex-end',
+              justifyContent: "flex-end",
             }}
           >
             <Button onClick={cancelMapping}>取消</Button>
@@ -256,5 +241,5 @@ export const XlsxImporter: FC<{ onImport: (content: string) => void }> = ({
         </DialogBody>
       </Dialog>
     </>
-  )
-}
+  );
+};

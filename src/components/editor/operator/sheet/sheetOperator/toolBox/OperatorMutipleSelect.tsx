@@ -1,60 +1,57 @@
-import { Button } from '@blueprintjs/core'
+import { Button } from "@blueprintjs/core";
 
-import { FC, useMemo } from 'react'
+import { FC, useMemo } from "react";
 
-import { MAX_ACTIVE_OPERATORS } from 'components/editor2/operator/constants'
+import { MAX_ACTIVE_OPERATORS } from "components/editor2/operator/constants";
 
-import { useTranslation } from '../../../../../../i18n/i18n'
-import { useSheet } from '../../SheetProvider'
-import { useOperatorFilterProvider } from '../SheetOperatorFilterProvider'
+import { useTranslation } from "../../../../../../i18n/i18n";
+import { useSheet } from "../../SheetProvider";
+import { useOperatorFilterProvider } from "../SheetOperatorFilterProvider";
 
 export interface OperatorMutipleSelectProp {}
 
 export const OperatorMutipleSelect: FC<OperatorMutipleSelectProp> = () => {
-  const t = useTranslation()
+  const t = useTranslation();
   const {
     operatorFiltered: { data: operatorFilteredData },
-  } = useOperatorFilterProvider()
-  const { existedOperators, submitOperatorInSheet, removeOperator } = useSheet()
+  } = useOperatorFilterProvider();
+  const { existedOperators, submitOperatorInSheet, removeOperator } = useSheet();
 
-  const { cancelAllDisabled, selectAllDisabled, existedOperatorsNames } =
-    useMemo(() => {
-      const existedOperatorsNames = existedOperators.map(({ name }) => name)
-      return {
-        cancelAllDisabled: !operatorFilteredData.some(({ name }) =>
-          existedOperatorsNames.includes(name),
-        ),
-        selectAllDisabled:
-          MAX_ACTIVE_OPERATORS - existedOperators.length <= 0 ||
-          operatorFilteredData.every(({ name }) =>
-            existedOperatorsNames.includes(name),
-          ),
-        existedOperatorsNames,
-      }
-    }, [existedOperators, operatorFilteredData])
+  const { cancelAllDisabled, selectAllDisabled, existedOperatorsNames } = useMemo(() => {
+    const existedOperatorsNames = existedOperators.map(({ name }) => name);
+    return {
+      cancelAllDisabled: !operatorFilteredData.some(({ name }) =>
+        existedOperatorsNames.includes(name),
+      ),
+      selectAllDisabled:
+        MAX_ACTIVE_OPERATORS - existedOperators.length <= 0 ||
+        operatorFilteredData.every(({ name }) => existedOperatorsNames.includes(name)),
+      existedOperatorsNames,
+    };
+  }, [existedOperators, operatorFilteredData]);
 
   const selectAll = () => {
-    let remainingSlots = MAX_ACTIVE_OPERATORS - existedOperators.length
+    let remainingSlots = MAX_ACTIVE_OPERATORS - existedOperators.length;
     operatorFilteredData.forEach((item) => {
-      const isExisting = existedOperatorsNames.includes(item.name)
+      const isExisting = existedOperatorsNames.includes(item.name);
       if (!isExisting && remainingSlots <= 0) {
-        return
+        return;
       }
-      const success = submitOperatorInSheet(item)
+      const success = submitOperatorInSheet(item);
       if (!isExisting && success) {
-        remainingSlots -= 1
+        remainingSlots -= 1;
       }
-    })
-  }
+    });
+  };
 
   const cancelAll = () => {
-    const deleteIndexList: number[] = []
+    const deleteIndexList: number[] = [];
     operatorFilteredData.forEach(({ name }) => {
-      const index = existedOperators.findIndex((item) => item.name === name)
-      if (index !== -1) deleteIndexList.push(index)
-    })
-    removeOperator(deleteIndexList)
-  }
+      const index = existedOperators.findIndex((item) => item.name === name);
+      if (index !== -1) deleteIndexList.push(index);
+    });
+    removeOperator(deleteIndexList);
+  };
 
   return (
     <>
@@ -77,5 +74,5 @@ export const OperatorMutipleSelect: FC<OperatorMutipleSelectProp> = () => {
         onClick={selectAll}
       />
     </>
-  )
-}
+  );
+};

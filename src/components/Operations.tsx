@@ -1,59 +1,45 @@
-import {
-  Button,
-  ButtonGroup,
-  Card,
-  Divider,
-  H6,
-  InputGroup,
-  Tab,
-  Tabs,
-} from '@blueprintjs/core'
-import { IconNames } from '@blueprintjs/icons'
+import { Button, ButtonGroup, Card, Divider, H6, InputGroup, Tab, Tabs } from "@blueprintjs/core";
+import { IconNames } from "@blueprintjs/icons";
 
-import { UseOperationsParams, useRefreshOperations } from 'apis/operation'
-import clsx from 'clsx'
-import { useAtom } from 'jotai'
-import { debounce } from 'lodash-es'
-import { MaaUserInfo } from 'maa-copilot-client'
-import { ComponentType, useMemo, useState } from 'react'
+import { UseOperationsParams, useRefreshOperations } from "apis/operation";
+import clsx from "clsx";
+import { useAtom } from "jotai";
+import { debounce } from "lodash-es";
+import { MaaUserInfo } from "maa-copilot-client";
+import { ComponentType, useMemo, useState } from "react";
 
-import { CardTitle } from 'components/CardTitle'
-import { OperationList } from 'components/OperationList'
-import { OperationSetList } from 'components/OperationSetList'
-import { neoLayoutAtom } from 'store/pref'
+import { CardTitle } from "components/CardTitle";
+import { OperationList } from "components/OperationList";
+import { OperationSetList } from "components/OperationSetList";
+import { neoLayoutAtom } from "store/pref";
 
-import { useTranslation } from '../i18n/i18n'
+import { useTranslation } from "../i18n/i18n";
 // 使用悬浮式按钮选择器
-import { LevelSelectButton } from './LevelSelectButton'
-import { OperatorFilter, useOperatorFilter } from './OperatorFilter'
-import { withSuspensable } from './Suspensable'
-import { UserFilter } from './UserFilter'
-import { TagsFilter } from './TagsFilter'
-import { mapQuickPresetToTags } from '../constants/tags'
+import { LevelSelectButton } from "./LevelSelectButton";
+import { OperatorFilter, useOperatorFilter } from "./OperatorFilter";
+import { withSuspensable } from "./Suspensable";
+import { UserFilter } from "./UserFilter";
+import { TagsFilter } from "./TagsFilter";
+import { mapQuickPresetToTags } from "../constants/tags";
 
 export const Operations: ComponentType = withSuspensable(() => {
-  const t = useTranslation()
-  const refreshOperations = useRefreshOperations()
-  const [queryParams, setQueryParams] = useState<
-    Omit<UseOperationsParams, 'operator'>
-  >({
+  const t = useTranslation();
+  const refreshOperations = useRefreshOperations();
+  const [queryParams, setQueryParams] = useState<Omit<UseOperationsParams, "operator">>({
     limit: 10,
-    orderBy: 'hot',
-  })
-  const debouncedSetQueryParams = useMemo(
-    () => debounce(setQueryParams, 500),
-    [],
-  )
+    orderBy: "hot",
+  });
+  const debouncedSetQueryParams = useMemo(() => debounce(setQueryParams, 500), []);
 
-  const { operatorFilter, setOperatorFilter } = useOperatorFilter()
-  const [selectedUser, setSelectedUser] = useState<MaaUserInfo>()
-  const [neoLayout, setNeoLayout] = useAtom(neoLayoutAtom)
-  const [tab, setTab] = useState<'operation' | 'operationSet'>('operation')
-  const [multiselect, setMultiselect] = useState(false)
+  const { operatorFilter, setOperatorFilter } = useOperatorFilter();
+  const [selectedUser, setSelectedUser] = useState<MaaUserInfo>();
+  const [neoLayout, setNeoLayout] = useAtom(neoLayoutAtom);
+  const [tab, setTab] = useState<"operation" | "operationSet">("operation");
+  const [multiselect, setMultiselect] = useState(false);
   // 独立保存已选中的具体关卡，用于按钮展示与弹层回显
-  const [selectedStageId, setSelectedStageId] = useState<string>('')
+  const [selectedStageId, setSelectedStageId] = useState<string>("");
   // tags 多选 AND
-  const [tags, setTags] = useState<string[]>([])
+  const [tags, setTags] = useState<string[]>([]);
 
   return (
     <>
@@ -64,24 +50,16 @@ export const Operations: ComponentType = withSuspensable(() => {
             id="operation-tabs"
             large
             selectedTabId={tab}
-            onChange={(newTab) =>
-              setTab(newTab as 'operation' | 'operationSet')
-            }
+            onChange={(newTab) => setTab(newTab as "operation" | "operationSet")}
           >
             <Tab
-              className={clsx(
-                'text-inherit',
-                tab !== 'operation' && 'opacity-75',
-              )}
+              className={clsx("text-inherit", tab !== "operation" && "opacity-75")}
               id="operation"
               title={t.components.Operations.operations}
             />
             <Divider className="self-center h-[1em]" />
             <Tab
-              className={clsx(
-                'text-inherit',
-                tab !== 'operationSet' && 'opacity-75',
-              )}
+              className={clsx("text-inherit", tab !== "operationSet" && "opacity-75")}
               id="operationSet"
               title={t.components.Operations.operation_sets}
             />
@@ -95,19 +73,11 @@ export const Operations: ComponentType = withSuspensable(() => {
             onClick={() => setMultiselect((v) => !v)}
           />
           <ButtonGroup>
-            <Button
-              icon="grid-view"
-              active={neoLayout}
-              onClick={() => setNeoLayout(true)}
-            />
-            <Button
-              icon="list"
-              active={!neoLayout}
-              onClick={() => setNeoLayout(false)}
-            />
+            <Button icon="grid-view" active={neoLayout} onClick={() => setNeoLayout(true)} />
+            <Button icon="list" active={!neoLayout} onClick={() => setNeoLayout(false)} />
           </ButtonGroup>
         </CardTitle>
-        {tab === 'operation' && (
+        {tab === "operation" && (
           <>
             <div className="flex flex-wrap items-center gap-2">
               <InputGroup
@@ -131,38 +101,34 @@ export const Operations: ComponentType = withSuspensable(() => {
                 <LevelSelectButton
                   value={selectedStageId}
                   onChange={(stageId) => {
-                    setSelectedStageId(stageId)
+                    setSelectedStageId(stageId);
                     setQueryParams((old) => ({
                       ...old,
                       levelKeyword: stageId,
-                    }))
+                    }));
                     // 主动触发一次刷新，确保立刻发起查询
-                    refreshOperations()
+                    refreshOperations();
                   }}
                   onFilter={(kw) => {
                     // 仅改变过滤关键字，不影响已选择的具体关卡展示
                     setQueryParams((old) => ({
                       ...old,
                       levelKeyword: kw,
-                    }))
+                    }));
                     // 主动触发一次刷新，确保立刻发起查询
-                    refreshOperations()
+                    refreshOperations();
                   }}
                 />
                 {/* 快捷筛选：如鸢 / 代号鸢 / 通用（AND） */}
-                <ButtonGroup
-                  minimal
-                  className="flex flex-wrap items-center gap-1"
-                >
+                <ButtonGroup minimal className="flex flex-wrap items-center gap-1">
                   {[
-                    { label: '只看如鸢', value: '如鸢', icon: IconNames.MANUAL },
-                    { label: '只看代号鸢', value: '代号鸢', icon: IconNames.GLOBE },
-                    { label: '通用', value: '通用', icon: IconNames.LAYERS } as const,
+                    { label: "只看如鸢", value: "如鸢", icon: IconNames.MANUAL },
+                    { label: "只看代号鸢", value: "代号鸢", icon: IconNames.GLOBE },
+                    { label: "通用", value: "通用", icon: IconNames.LAYERS } as const,
                   ].map(({ label, value, icon }) => {
-                    const quickTags = mapQuickPresetToTags(value)
+                    const quickTags = mapQuickPresetToTags(value);
                     const isActive =
-                      tags.length === quickTags.length &&
-                      quickTags.every((t) => tags.includes(t))
+                      tags.length === quickTags.length && quickTags.every((t) => tags.includes(t));
                     return (
                       <Button
                         key={label}
@@ -170,14 +136,14 @@ export const Operations: ComponentType = withSuspensable(() => {
                         icon={icon}
                         active={isActive}
                         onClick={() => {
-                          const next = isActive ? [] : quickTags
-                          setTags(next)
-                          refreshOperations()
+                          const next = isActive ? [] : quickTags;
+                          setTags(next);
+                          refreshOperations();
                         }}
                       >
                         {label}
                       </Button>
-                    )
+                    );
                   })}
                 </ButtonGroup>
                 {/* Tags 多选 AND 过滤器（首页隐藏） */}
@@ -185,66 +151,60 @@ export const Operations: ComponentType = withSuspensable(() => {
                   className="hidden"
                   value={tags}
                   onChange={(next) => {
-                    setTags(next)
-                    setSelectedStageId('')
-                    refreshOperations()
+                    setTags(next);
+                    setSelectedStageId("");
+                    refreshOperations();
                   }}
                 />
                 <UserFilter
                   user={selectedUser}
                   onChange={(user) => {
-                    setSelectedUser(user)
+                    setSelectedUser(user);
                     setQueryParams((old) => ({
                       ...old,
                       uploaderId: user?.id,
-                    }))
+                    }));
                   }}
                 />
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-4 mt-2">
-              <OperatorFilter
-                className=""
-                filter={operatorFilter}
-                onChange={setOperatorFilter}
-              />
+              <OperatorFilter className="" filter={operatorFilter} onChange={setOperatorFilter} />
               <div className="flex flex-wrap items-center ml-auto">
-                <H6 className="mb-0 mr-1 opacity-75">
-                  {t.components.Operations.sort_by}
-                </H6>
+                <H6 className="mb-0 mr-1 opacity-75">{t.components.Operations.sort_by}</H6>
                 <ButtonGroup minimal className="flex-wrap">
                   {(
                     [
                       {
-                        icon: 'flame',
+                        icon: "flame",
                         text: t.components.Operations.popularity,
-                        orderBy: 'hot',
-                        active: queryParams.orderBy === 'hot',
+                        orderBy: "hot",
+                        active: queryParams.orderBy === "hot",
                       },
                       {
-                        icon: 'time',
+                        icon: "time",
                         text: t.components.Operations.newest,
-                        orderBy: 'id',
-                        active: queryParams.orderBy === 'id',
+                        orderBy: "id",
+                        active: queryParams.orderBy === "id",
                       },
                       {
-                        icon: 'eye-open',
+                        icon: "eye-open",
                         text: t.components.Operations.views,
-                        orderBy: 'views',
-                        active: queryParams.orderBy === 'views',
+                        orderBy: "views",
+                        active: queryParams.orderBy === "views",
                       },
                     ] as const
                   ).map(({ icon, text, orderBy, active }) => (
                     <Button
                       key={orderBy}
                       className={clsx(
-                        '!px-2 !py-1 !border-none [&>.bp4-icon]:!mr-1',
-                        !active && 'opacity-75 !font-normal',
+                        "!px-2 !py-1 !border-none [&>.bp4-icon]:!mr-1",
+                        !active && "opacity-75 !font-normal",
                       )}
                       icon={icon}
-                      intent={active ? 'primary' : 'none'}
+                      intent={active ? "primary" : "none"}
                       onClick={() => {
-                        setQueryParams((old) => ({ ...old, orderBy }))
+                        setQueryParams((old) => ({ ...old, orderBy }));
                       }}
                     >
                       {text}
@@ -256,7 +216,7 @@ export const Operations: ComponentType = withSuspensable(() => {
           </>
         )}
 
-        {tab === 'operationSet' && (
+        {tab === "operationSet" && (
           <div className="flex flex-wrap items-center gap-2">
             <InputGroup
               className="max-w-md [&>input]:!rounded-md"
@@ -278,11 +238,11 @@ export const Operations: ComponentType = withSuspensable(() => {
             <UserFilter
               user={selectedUser}
               onChange={(user) => {
-                setSelectedUser(user)
+                setSelectedUser(user);
                 setQueryParams((old) => ({
                   ...old,
                   uploaderId: user?.id,
-                }))
+                }));
               }}
             />
           </div>
@@ -290,24 +250,21 @@ export const Operations: ComponentType = withSuspensable(() => {
       </Card>
 
       <div className="tabular-nums">
-        {tab === 'operation' && (
+        {tab === "operation" && (
           <OperationList
             {...queryParams}
             tags={tags}
             multiselect={multiselect}
             operator={operatorFilter.enabled ? operatorFilter : undefined}
             // 按热度排序时列表前几页的变化不会太频繁，可以不刷新第一页，节省点流量
-            revalidateFirstPage={queryParams.orderBy !== 'hot'}
+            revalidateFirstPage={queryParams.orderBy !== "hot"}
           />
         )}
-        {tab === 'operationSet' && (
-          <OperationSetList
-            {...queryParams}
-            creatorId={queryParams.uploaderId}
-          />
+        {tab === "operationSet" && (
+          <OperationSetList {...queryParams} creatorId={queryParams.uploaderId} />
         )}
       </div>
     </>
-  )
-})
-Operations.displayName = 'Operations'
+  );
+});
+Operations.displayName = "Operations";

@@ -1,7 +1,7 @@
-import Ajv from 'ajv'
+import Ajv from "ajv";
 
-import schema from './copilot.schema.json'
+import schema from "./copilot.schema.json";
 
-const copilotAjv = new Ajv({ allErrors: true })
-copilotAjv.addSchema(schema, 'copilot')
-export const copilotSchemaValidator = copilotAjv
+const copilotAjv = new Ajv({ allErrors: true });
+copilotAjv.addSchema(schema, "copilot");
+export const copilotSchemaValidator = copilotAjv;

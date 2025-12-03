@@ -1,47 +1,37 @@
-import ajvLocalizeZh from 'ajv-i18n/localize/zh'
-import {
-  DeepPartial,
-  ErrorOption,
-  FieldPath,
-  UseFormSetError,
-} from 'react-hook-form'
+import ajvLocalizeZh from "ajv-i18n/localize/zh";
+import { DeepPartial, ErrorOption, FieldPath, UseFormSetError } from "react-hook-form";
 
-import { CopilotDocV1 } from 'models/copilot.schema'
+import { CopilotDocV1 } from "models/copilot.schema";
 
-import { i18n } from '../../i18n/i18n'
-import { copilotSchemaValidator } from '../../models/copilot.schema.validator'
-import {
-  findActionType,
-  validTypesFollowingBulletTime,
-} from '../../models/types'
+import { i18n } from "../../i18n/i18n";
+import { copilotSchemaValidator } from "../../models/copilot.schema.validator";
+import { findActionType, validTypesFollowingBulletTime } from "../../models/types";
 
 export function validateOperation(
   operation: DeepPartial<CopilotDocV1.OperationSnakeCased>,
   setError: UseFormSetError<CopilotDocV1.Operation>,
 ): boolean {
-  const errors: Partial<
-    Record<FieldPath<CopilotDocV1.Operation> | 'global', ErrorOption>
-  > = {}
-  const globalErrors: string[] = []
+  const errors: Partial<Record<FieldPath<CopilotDocV1.Operation> | "global", ErrorOption>> = {};
+  const globalErrors: string[] = [];
 
-  const { actions, groups } = operation
+  const { actions, groups } = operation;
 
-  const emptyGroup = groups?.find((group) => (group?.opers?.length || 0) === 0)
+  const emptyGroup = groups?.find((group) => (group?.opers?.length || 0) === 0);
 
   if (emptyGroup) {
     globalErrors.push(
       i18n.components.editor.validation.empty_group({
-        name: emptyGroup.name || '',
+        name: emptyGroup.name || "",
       }),
-    )
+    );
   }
 
   if (Array.isArray(actions)) {
     for (let i = 0; i < actions.length; i++) {
-      const action = actions[i]
+      const action = actions[i];
 
       if (action?.type === CopilotDocV1.Type.BulletTime) {
-        const nextType = actions[i + 1]?.type
+        const nextType = actions[i + 1]?.type;
 
         if (!nextType || !validTypesFollowingBulletTime.includes(nextType)) {
           globalErrors.push(
@@ -52,7 +42,7 @@ export function validateOperation(
                 .map((type) => findActionType(type).alternativeValue)
                 .join(i18n.components.editor.validation.bullet_time_separator),
             }),
-          )
+          );
         }
       }
     }
@@ -64,43 +54,38 @@ export function validateOperation(
     ...operation,
     doc: {
       ...operation.doc,
-      details: operation.doc?.details || 'dummy',
+      details: operation.doc?.details || "dummy",
     },
-  }
+  };
 
-  const jsonSchemaValidation = copilotSchemaValidator.validate(
-    'copilot',
-    operation,
-  )
+  const jsonSchemaValidation = copilotSchemaValidator.validate("copilot", operation);
   console.log(
-    'jsonSchemaValidationResult',
+    "jsonSchemaValidationResult",
     jsonSchemaValidation,
-    'errors',
+    "errors",
     copilotSchemaValidator.errors,
-  )
+  );
 
   if (!jsonSchemaValidation && copilotSchemaValidator.errors) {
-    if (i18n.essentials.language === '简体中文') {
-      ajvLocalizeZh(copilotSchemaValidator.errors)
+    if (i18n.essentials.language === "简体中文") {
+      ajvLocalizeZh(copilotSchemaValidator.errors);
     }
 
     globalErrors.push(
       copilotSchemaValidator.errorsText(undefined, {
-        separator: '\n',
+        separator: "\n",
       }),
-    )
+    );
   }
 
   if (globalErrors.length > 0) {
-    errors.global = { message: globalErrors.join('\n') }
+    errors.global = { message: globalErrors.join("\n") };
   }
 
   if (Object.keys(errors).length > 0) {
-    Object.entries(errors).forEach(
-      ([key, value]) => value && setError(key as any, value),
-    )
-    return false
+    Object.entries(errors).forEach(([key, value]) => value && setError(key as any, value));
+    return false;
   }
 
-  return true
+  return true;
 }

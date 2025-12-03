@@ -1,4 +1,4 @@
-import { Button, Callout, NonIdealState } from '@blueprintjs/core'
+import { Button, Callout, NonIdealState } from "@blueprintjs/core";
 import {
   DndContext,
   DragEndEvent,
@@ -8,42 +8,37 @@ import {
   useDndContext,
   useSensor,
   useSensors,
-} from '@dnd-kit/core'
-import { SortableContext } from '@dnd-kit/sortable'
+} from "@dnd-kit/core";
+import { SortableContext } from "@dnd-kit/sortable";
 
-import { produce } from 'immer'
-import { atom, useAtom, useAtomValue } from 'jotai'
-import { selectAtom, useAtomCallback } from 'jotai/utils'
-import { FC, memo, useCallback, useMemo } from 'react'
+import { produce } from "immer";
+import { atom, useAtom, useAtomValue } from "jotai";
+import { selectAtom, useAtomCallback } from "jotai/utils";
+import { FC, memo, useCallback, useMemo } from "react";
 
-import { i18n, languageAtom, useTranslation } from '../../../i18n/i18n'
-import { getLocalizedOperatorName } from '../../../models/operator'
-import { Droppable, Sortable } from '../../dnd'
-import { AtomRenderer } from '../AtomRenderer'
-import {
-  EditorOperator,
-  editorAtoms,
-  traverseOperators,
-  useEdit,
-} from '../editor-state'
-import { createOperator } from '../reconciliation'
-import { EntityIssue } from '../validation/validation'
-import { OperatorItem } from './OperatorItem'
-import { OperatorSelect } from './OperatorSelect'
-import { useAddOperator } from './useAddOperator'
+import { i18n, languageAtom, useTranslation } from "../../../i18n/i18n";
+import { getLocalizedOperatorName } from "../../../models/operator";
+import { Droppable, Sortable } from "../../dnd";
+import { AtomRenderer } from "../AtomRenderer";
+import { EditorOperator, editorAtoms, traverseOperators, useEdit } from "../editor-state";
+import { createOperator } from "../reconciliation";
+import { EntityIssue } from "../validation/validation";
+import { OperatorItem } from "./OperatorItem";
+import { OperatorSelect } from "./OperatorSelect";
+import { useAddOperator } from "./useAddOperator";
 
-const globalContainerId = 'global'
+const globalContainerId = "global";
 
 const operatorIdsAtom = selectAtom(
   editorAtoms.operators,
   (operators) => operators.map((o) => o.id),
   (a, b) => a.join() === b.join(),
-)
+);
 
 export const OperatorEditor: FC = memo(() => {
-  const operatorIds = useAtomValue(operatorIdsAtom)
-  const edit = useEdit()
-  const t = useTranslation()
+  const operatorIds = useAtomValue(operatorIdsAtom);
+  const edit = useEdit();
+  const t = useTranslation();
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: { distance: 5 },
@@ -51,40 +46,38 @@ export const OperatorEditor: FC = memo(() => {
     useSensor(TouchSensor, {
       activationConstraint: { delay: 250, tolerance: 5 },
     }),
-  )
-  const [operatorAtoms, dispatchOperators] = useAtom(editorAtoms.operatorAtoms)
+  );
+  const [operatorAtoms, dispatchOperators] = useAtom(editorAtoms.operatorAtoms);
 
   const handleDragEnd = useAtomCallback(
     useCallback(
       (get, set, { active, over }: DragEndEvent) => {
         if (!over || active.id === over.id) {
-          return
+          return;
         }
-        const operation = get(editorAtoms.operation)
-        const activeIndex = operation.opers.findIndex(
-          (op) => op.id === active.id,
-        )
-        const overIndex = operation.opers.findIndex((op) => op.id === over.id)
+        const operation = get(editorAtoms.operation);
+        const activeIndex = operation.opers.findIndex((op) => op.id === active.id);
+        const overIndex = operation.opers.findIndex((op) => op.id === over.id);
         if (activeIndex === -1 || overIndex === -1) {
-          return
+          return;
         }
         const newOperation = produce(operation, (draft) => {
-          const [moved] = draft.opers.splice(activeIndex, 1)
-          draft.opers.splice(overIndex, 0, moved)
-        })
+          const [moved] = draft.opers.splice(activeIndex, 1);
+          draft.opers.splice(overIndex, 0, moved);
+        });
         if (newOperation !== operation) {
           edit(() => {
-            set(editorAtoms.operation, newOperation)
+            set(editorAtoms.operation, newOperation);
             return {
-              action: 'move-operator',
+              action: "move-operator",
               desc: i18n.actions.editor2.move_operator,
-            }
-          })
+            };
+          });
         }
       },
       [edit],
     ),
-  )
+  );
 
   return (
     <div className="h-full flex flex-col">
@@ -100,7 +93,7 @@ export const OperatorEditor: FC = memo(() => {
           />
         ) : (
           <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-            <Droppable id={globalContainerId} data={{ type: 'operator-list' }}>
+            <Droppable id={globalContainerId} data={{ type: "operator-list" }}>
               <SortableContext items={operatorIds}>
                 <ul className="flex flex-wrap gap-4 list-none p-0 m-0">
                   {operatorAtoms.map((operatorAtom) => (
@@ -112,7 +105,7 @@ export const OperatorEditor: FC = memo(() => {
                           className=""
                           id={operator.id}
                           data={{
-                            type: 'operator',
+                            type: "operator",
                             container: globalContainerId,
                           }}
                         >
@@ -123,13 +116,13 @@ export const OperatorEditor: FC = memo(() => {
                               onRemove={() =>
                                 edit(() => {
                                   dispatchOperators({
-                                    type: 'remove',
+                                    type: "remove",
                                     atom: operatorAtom,
-                                  })
+                                  });
                                   return {
-                                    action: 'remove-operator',
+                                    action: "remove-operator",
                                     desc: i18n.actions.editor2.delete_operator,
-                                  }
+                                  };
                                 })
                               }
                               {...attrs}
@@ -147,84 +140,83 @@ export const OperatorEditor: FC = memo(() => {
         )}
       </div>
     </div>
-  )
-})
-OperatorEditor.displayName = 'OperatorPanel'
+  );
+});
+OperatorEditor.displayName = "OperatorPanel";
 
 const CreateOperatorButton: FC<{}> = () => {
-  const addOperator = useAddOperator()
-  const t = useTranslation()
+  const addOperator = useAddOperator();
+  const t = useTranslation();
   return (
     <OperatorSelect
       markPicked
       onSelect={(name) => {
-        addOperator(createOperator({ name }))
+        addOperator(createOperator({ name }));
       }}
     >
       <Button minimal intent="primary" className="!py-1.5" icon="plus">
         {t.components.editor2.OperatorEditor.add_operator}
       </Button>
     </OperatorSelect>
-  )
-}
+  );
+};
 
 const OperatorDragOverlay = () => {
-  const { active } = useDndContext()
+  const { active } = useDndContext();
   const activeOperatorAtom = useMemo(
     () =>
       atom((get) => {
         if (active?.id) {
           for (const op of get(editorAtoms.operators)) {
             if (op.id === active.id) {
-              return op
+              return op;
             }
           }
           for (const group of get(editorAtoms.groups)) {
             for (const op of group.opers) {
               if (op.id === active.id) {
-                return op
+                return op;
               }
             }
           }
         }
-        return undefined
+        return undefined;
       }),
     [active?.id],
-  )
-  const activeOperator = useAtomValue(activeOperatorAtom)
+  );
+  const activeOperator = useAtomValue(activeOperatorAtom);
   return (
     <DragOverlay>
       {activeOperator && <OperatorItem onOverlay operator={activeOperator} />}
     </DragOverlay>
-  )
-}
+  );
+};
 
 const operatorErrorsAtom = atom((get) => {
-  const entityErrors = get(editorAtoms.visibleEntityErrors)
-  if (!entityErrors) return undefined
+  const entityErrors = get(editorAtoms.visibleEntityErrors);
+  if (!entityErrors) return undefined;
 
-  const opers = get(editorAtoms.operators)
-  const groups = get(editorAtoms.groups)
-  const operatorErrors: { operator: EditorOperator; errors: EntityIssue[] }[] =
-    []
+  const opers = get(editorAtoms.operators);
+  const groups = get(editorAtoms.groups);
+  const operatorErrors: { operator: EditorOperator; errors: EntityIssue[] }[] = [];
 
   for (const [id, errors] of Object.entries(entityErrors)) {
     traverseOperators({ opers, groups }, (operator) => {
       if (operator.id === id) {
-        operatorErrors.push({ operator, errors })
-        return true
+        operatorErrors.push({ operator, errors });
+        return true;
       }
-      return false
-    })
+      return false;
+    });
   }
-  return operatorErrors.length ? operatorErrors : undefined
-})
+  return operatorErrors.length ? operatorErrors : undefined;
+});
 
 const OperatorError = () => {
-  const errors = useAtomValue(operatorErrorsAtom)
-  const language = useAtomValue(languageAtom)
-  const t = useTranslation()
-  if (!errors) return null
+  const errors = useAtomValue(operatorErrorsAtom);
+  const language = useAtomValue(languageAtom);
+  const t = useTranslation();
+  if (!errors) return null;
 
   return (
     <Callout intent="danger" icon={null} className="mb-4 p-2 text-xs">
@@ -245,5 +237,5 @@ const OperatorError = () => {
         )),
       )}
     </Callout>
-  )
-}
+  );
+};

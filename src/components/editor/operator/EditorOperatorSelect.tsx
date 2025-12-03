@@ -1,22 +1,22 @@
-import { Button } from '@blueprintjs/core'
+import { Button } from "@blueprintjs/core";
 
-import { useMemo } from 'react'
-import { FieldValues, useController } from 'react-hook-form'
+import { useMemo } from "react";
+import { FieldValues, useController } from "react-hook-form";
 
 import {
   DetailedSelect,
   DetailedSelectChoice,
   DetailedSelectItem,
-} from 'components/editor/DetailedSelect'
-import { EditorFieldProps } from 'components/editor/EditorFieldProps'
+} from "components/editor/DetailedSelect";
+import { EditorFieldProps } from "components/editor/EditorFieldProps";
 
-import { useTranslation } from '../../../i18n/i18n'
+import { useTranslation } from "../../../i18n/i18n";
 
 export const EditorOperatorSelect = <T extends FieldValues>({
   name,
   control,
 }: EditorFieldProps<T>) => {
-  const t = useTranslation()
+  const t = useTranslation();
 
   const {
     field: { onChange, onBlur, value, ref },
@@ -24,127 +24,106 @@ export const EditorOperatorSelect = <T extends FieldValues>({
     name,
     control,
     rules: {
-      required:
-        t.components.editor.operator.EditorOperatorSelect
-          .please_select_operator,
+      required: t.components.editor.operator.EditorOperatorSelect.please_select_operator,
     },
-  })
+  });
 
   const menuItems: DetailedSelectItem[] = useMemo(
     () => [
       {
-        type: 'header',
-        header:
-          t.components.editor.operator.EditorOperatorSelect
-            .operator_deploy_retreat,
+        type: "header",
+        header: t.components.editor.operator.EditorOperatorSelect.operator_deploy_retreat,
       },
       {
-        type: 'choice',
-        icon: 'new-object',
+        type: "choice",
+        icon: "new-object",
         title: t.components.editor.operator.EditorOperatorSelect.deploy,
-        value: 'Deploy',
-        description:
-          t.components.editor.operator.EditorOperatorSelect.deploy_description,
+        value: "Deploy",
+        description: t.components.editor.operator.EditorOperatorSelect.deploy_description,
       },
       {
-        type: 'choice',
-        icon: 'graph-remove',
+        type: "choice",
+        icon: "graph-remove",
         title: t.components.editor.operator.EditorOperatorSelect.retreat,
-        value: 'Retreat',
-        description:
-          t.components.editor.operator.EditorOperatorSelect.retreat_description,
+        value: "Retreat",
+        description: t.components.editor.operator.EditorOperatorSelect.retreat_description,
       },
       {
-        type: 'header',
-        header:
-          t.components.editor.operator.EditorOperatorSelect.operator_skills,
+        type: "header",
+        header: t.components.editor.operator.EditorOperatorSelect.operator_skills,
       },
       {
-        type: 'choice',
-        icon: 'target',
+        type: "choice",
+        icon: "target",
         title: t.components.editor.operator.EditorOperatorSelect.use_skill,
-        value: 'Skill',
+        value: "Skill",
+        description: t.components.editor.operator.EditorOperatorSelect.use_skill_description,
+      },
+      {
+        type: "choice",
+        icon: "swap-horizontal",
+        title: t.components.editor.operator.EditorOperatorSelect.switch_skill_usage,
+        value: "SkillUsage",
         description:
-          t.components.editor.operator.EditorOperatorSelect
-            .use_skill_description,
+          t.components.editor.operator.EditorOperatorSelect.switch_skill_usage_description,
       },
       {
-        type: 'choice',
-        icon: 'swap-horizontal',
-        title:
-          t.components.editor.operator.EditorOperatorSelect.switch_skill_usage,
-        value: 'SkillUsage',
-        description:
-          t.components.editor.operator.EditorOperatorSelect
-            .switch_skill_usage_description,
+        type: "header",
+        header: t.components.editor.operator.EditorOperatorSelect.battle_control,
       },
       {
-        type: 'header',
-        header:
-          t.components.editor.operator.EditorOperatorSelect.battle_control,
-      },
-      {
-        type: 'choice',
-        icon: 'fast-forward',
+        type: "choice",
+        icon: "fast-forward",
         title: t.components.editor.operator.EditorOperatorSelect.toggle_speed,
-        value: 'SpeedUp',
-        description:
-          t.components.editor.operator.EditorOperatorSelect
-            .toggle_speed_description,
+        value: "SpeedUp",
+        description: t.components.editor.operator.EditorOperatorSelect.toggle_speed_description,
       },
       {
-        type: 'choice',
-        icon: 'fast-backward',
+        type: "choice",
+        icon: "fast-backward",
         title: t.components.editor.operator.EditorOperatorSelect.bullet_time,
-        value: 'BulletTime',
-        description:
-          t.components.editor.operator.EditorOperatorSelect
-            .bullet_time_description,
+        value: "BulletTime",
+        description: t.components.editor.operator.EditorOperatorSelect.bullet_time_description,
       },
       {
-        type: 'choice',
-        icon: 'antenna',
+        type: "choice",
+        icon: "antenna",
         title: t.components.editor.operator.EditorOperatorSelect.auto_mode,
-        value: 'SkillDaemon',
-        description:
-          t.components.editor.operator.EditorOperatorSelect
-            .auto_mode_description,
+        value: "SkillDaemon",
+        description: t.components.editor.operator.EditorOperatorSelect.auto_mode_description,
       },
       {
-        type: 'header',
+        type: "header",
         header: t.components.editor.operator.EditorOperatorSelect.miscellaneous,
       },
       {
-        type: 'choice',
-        icon: 'paragraph',
-        title:
-          t.components.editor.operator.EditorOperatorSelect.print_description,
-        value: 'Ouput',
-        description:
-          t.components.editor.operator.EditorOperatorSelect
-            .print_description_details,
+        type: "choice",
+        icon: "paragraph",
+        title: t.components.editor.operator.EditorOperatorSelect.print_description,
+        value: "Ouput",
+        description: t.components.editor.operator.EditorOperatorSelect.print_description_details,
       },
     ],
     [t],
-  )
+  );
   const selectedAction = menuItems.find(
-    (action) => action.type === 'choice' && action.value === value,
-  ) as DetailedSelectChoice | undefined
+    (action) => action.type === "choice" && action.value === value,
+  ) as DetailedSelectChoice | undefined;
 
   return (
     <DetailedSelect
       items={menuItems}
       onItemSelect={(item) => {
-        onChange(item.value)
+        onChange(item.value);
       }}
       value={selectedAction?.value}
     >
       <Button
         large
-        icon={selectedAction?.icon || 'slash'}
+        icon={selectedAction?.icon || "slash"}
         text={
           selectedAction
-            ? typeof selectedAction.title === 'function'
+            ? typeof selectedAction.title === "function"
               ? selectedAction.title()
               : selectedAction.title
             : t.components.editor.operator.EditorOperatorSelect.select_operator
@@ -154,5 +133,5 @@ export const EditorOperatorSelect = <T extends FieldValues>({
         ref={ref}
       />
     </DetailedSelect>
-  )
-}
+  );
+};

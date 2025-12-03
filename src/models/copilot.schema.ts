@@ -1,64 +1,63 @@
-import { OpDifficulty } from './operation'
+import { OpDifficulty } from "./operation";
 
 /**
  * MAA Copilot 战斗协议 v1
  * https://maa.plus/docs/zh-cn/protocol/copilot-schema.html
  */
 export namespace CopilotDocV1 {
-  export const VERSION = 3
+  export const VERSION = 3;
 
   export interface Operation {
-    version?: number
-    actions?: Action[] | SimingActionMap
-    doc: Doc
-    groups?: Group[]
-    minimumRequired: string
-    opers?: Operator[]
+    version?: number;
+    actions?: Action[] | SimingActionMap;
+    doc: Doc;
+    groups?: Group[];
+    minimumRequired: string;
+    opers?: Operator[];
     /**
      * 关卡冗余信息，供 editorv2 直接回显使用
      */
-    levelMeta?: LevelMeta
+    levelMeta?: LevelMeta;
     /**
      * 活动关卡的司命识别关键字，供导出 Siming 配置时使用
      */
-    levelRecognitionName?: string
+    levelRecognitionName?: string;
     /**
      * 活动关卡自定义难度描述，优先用于导出 Siming 配置
      */
-    activityDifficultyOverride?: string
+    activityDifficultyOverride?: string;
     /**
      * 必填。除危机合约外，均为关卡中文名
      */
-    stageName: string
-    difficulty?: OpDifficulty
-    simingActions?: SimingActionMap
+    stageName: string;
+    difficulty?: OpDifficulty;
+    simingActions?: SimingActionMap;
   }
 
-  export type OperationSnakeCased =
-    import('type-fest').SnakeCasedPropertiesDeep<Operation>
+  export type OperationSnakeCased = import("type-fest").SnakeCasedPropertiesDeep<Operation>;
 
   interface ActionBase {
     /** Required in editor; should be stripped when exporting. */
-    _id?: string
+    _id?: string;
     // Action common optional fields
-    doc?: string
-    docColor?: string
-    costs?: number
-    costChanges?: number
-    kills?: number
-    cooling?: number
-    preDelay?: number
-    rearDelay?: number
-    postDelay?: number
+    doc?: string;
+    docColor?: string;
+    costs?: number;
+    costChanges?: number;
+    kills?: number;
+    cooling?: number;
+    preDelay?: number;
+    rearDelay?: number;
+    postDelay?: number;
   }
 
   export interface ActionDeploy extends ActionBase {
-    direction: Direction
+    direction: Direction;
     // location: any[]
     // should be
-    location: [number, number]
-    name: string
-    type: Type.Deploy
+    location: [number, number];
+    name: string;
+    type: Type.Deploy;
   }
 
   export type ActionSkillOrRetreatOrBulletTime = ActionBase &
@@ -66,55 +65,55 @@ export namespace CopilotDocV1 {
       | {
           // location: any[]
           // should be
-          location: [number, number]
-          name?: string
-          type: Type.Skill | Type.Retreat | Type.BulletTime
+          location: [number, number];
+          name?: string;
+          type: Type.Skill | Type.Retreat | Type.BulletTime;
         }
       | {
           // location?: any[]
           // should be
-          location?: [number, number]
-          name: string
-          type: Type.Skill | Type.Retreat | Type.BulletTime
+          location?: [number, number];
+          name: string;
+          type: Type.Skill | Type.Retreat | Type.BulletTime;
         }
-    )
+    );
 
   export interface ActionSkillUsage extends ActionBase {
-    name: string
-    skillUsage: SkillUsageType
-    type: Type.SkillUsage
-    skillTimes?: number
+    name: string;
+    skillUsage: SkillUsageType;
+    type: Type.SkillUsage;
+    skillTimes?: number;
   }
 
   export interface ActionUtil extends ActionBase {
-    type: Type.SpeedUp | Type.Output | Type.SkillDaemon
+    type: Type.SpeedUp | Type.Output | Type.SkillDaemon;
   }
 
   export interface ActionMoveCamera extends ActionBase {
-    type: Type.MoveCamera
-    distance: [number, number]
+    type: Type.MoveCamera;
+    distance: [number, number];
   }
 
-  export type SimingActionMap = Record<string, SimingAction>
+  export type SimingActionMap = Record<string, SimingAction>;
 
   export interface SimingAction {
-    action?: string
-    target?: number[]
-    begin?: number[]
-    end?: number[]
-    recognition?: string
-    expected?: string
-    roi?: number[]
-    preDelay?: number
-    postDelay?: number
-    rearDelay?: number
-    duration?: number
-    textDoc?: string
-    template?: string | string[]
-    timeout?: number
-    greenMask?: boolean
-    next?: string[]
-    [key: string]: unknown
+    action?: string;
+    target?: number[];
+    begin?: number[];
+    end?: number[];
+    recognition?: string;
+    expected?: string;
+    roi?: number[];
+    preDelay?: number;
+    postDelay?: number;
+    rearDelay?: number;
+    duration?: number;
+    textDoc?: string;
+    template?: string | string[];
+    timeout?: number;
+    greenMask?: boolean;
+    next?: string[];
+    [key: string]: unknown;
   }
 
   export type Action =
@@ -122,59 +121,59 @@ export namespace CopilotDocV1 {
     | ActionSkillOrRetreatOrBulletTime
     | ActionSkillUsage
     | ActionUtil
-    | ActionMoveCamera
+    | ActionMoveCamera;
 
   export enum Direction {
-    Left = 'Left',
-    Right = 'Right',
-    Up = 'Up',
-    Down = 'Down',
-    None = 'None',
+    Left = "Left",
+    Right = "Right",
+    Up = "Up",
+    Down = "Down",
+    None = "None",
   }
 
   export enum Type {
-    BulletTime = 'BulletTime',
-    Deploy = 'Deploy',
-    Output = 'Output',
-    Retreat = 'Retreat',
-    Skill = 'Skill',
-    SkillDaemon = 'SkillDaemon',
-    SkillUsage = 'SkillUsage',
-    SpeedUp = 'SpeedUp',
-    MoveCamera = 'MoveCamera',
+    BulletTime = "BulletTime",
+    Deploy = "Deploy",
+    Output = "Output",
+    Retreat = "Retreat",
+    Skill = "Skill",
+    SkillDaemon = "SkillDaemon",
+    SkillUsage = "SkillUsage",
+    SpeedUp = "SpeedUp",
+    MoveCamera = "MoveCamera",
   }
 
   export interface Doc {
-    details?: string
-    detailsColor?: string
-    title: string
-    titleColor?: string
+    details?: string;
+    detailsColor?: string;
+    title: string;
+    titleColor?: string;
   }
 
   export interface Group {
     /** Required in editor; should be stripped when exporting. */
-    _id?: string
-    name: string
-    opers?: Operator[]
+    _id?: string;
+    name: string;
+    opers?: Operator[];
   }
 
   export interface Operator {
     /** Required in editor; should be stripped when exporting. */
-    _id?: string
+    _id?: string;
     /**
      * 必填
      */
-    name: string
-    requirements?: Requirements
+    name: string;
+    requirements?: Requirements;
     /**
      * 可选，默认 1，取值范围 [1, 3]
      */
-    skill?: number
-    skillUsage?: SkillUsageType
+    skill?: number;
+    skillUsage?: SkillUsageType;
     /**
      * 技能使用次数，可选，默认为 1
      */
-    skillTimes?: number
+    skillTimes?: number;
   }
 
   export enum SkillUsageType {
@@ -196,14 +195,14 @@ export namespace CopilotDocV1 {
     Automatically = 3,
   }
 
-  export type SkillTimes = number
+  export type SkillTimes = number;
 
   export interface Requirements {
-    elite?: number
-    level?: number
-    module?: Module
-    potentiality?: number
-    skillLevel?: number
+    elite?: number;
+    level?: number;
+    module?: Module;
+    potentiality?: number;
+    skillLevel?: number;
   }
 
   export enum Module {
@@ -219,13 +218,13 @@ export namespace CopilotDocV1 {
   }
 
   export interface LevelMeta {
-    stageId?: string
-    levelId?: string
-    name?: string
-    catOne?: string
-    catTwo?: string
-    catThree?: string
-    width?: number
-    height?: number
+    stageId?: string;
+    levelId?: string;
+    name?: string;
+    catOne?: string;
+    catTwo?: string;
+    catThree?: string;
+    width?: number;
+    height?: number;
   }
 }

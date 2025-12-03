@@ -1,4 +1,4 @@
-import { CopilotSetListRes, CopilotSetRes } from 'maa-copilot-client'
+import { CopilotSetListRes, CopilotSetRes } from "maa-copilot-client";
 
-export type OperationSet = CopilotSetRes
-export type OperationSetListItem = CopilotSetListRes
+export type OperationSet = CopilotSetRes;
+export type OperationSetListItem = CopilotSetListRes;

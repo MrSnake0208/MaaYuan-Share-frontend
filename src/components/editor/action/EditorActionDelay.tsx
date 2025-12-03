@@ -1,23 +1,25 @@
-import { useFormState } from 'react-hook-form'
-import { SetOptional } from 'type-fest'
+import { useFormState } from "react-hook-form";
+import { SetOptional } from "type-fest";
 
-import { EditorFieldProps } from 'components/editor/EditorFieldProps'
-import { EditorIntegerInput } from 'components/editor/EditorIntegerInput'
-import type { CopilotDocV1 } from 'models/copilot.schema'
+import { EditorFieldProps } from "components/editor/EditorFieldProps";
+import { EditorIntegerInput } from "components/editor/EditorIntegerInput";
+import type { CopilotDocV1 } from "models/copilot.schema";
 
-import { useTranslation } from '../../../i18n/i18n'
-import { FormField2 } from '../../FormField'
+import { useTranslation } from "../../../i18n/i18n";
+import { FormField2 } from "../../FormField";
 
-interface EditorActionDelayProps
-  extends SetOptional<EditorFieldProps<CopilotDocV1.Action, number>, 'name'> {}
+interface EditorActionDelayProps extends SetOptional<
+  EditorFieldProps<CopilotDocV1.Action, number>,
+  "name"
+> {}
 
 export const EditorActionPreDelay = ({
-  name = 'preDelay',
+  name = "preDelay",
   control,
   ...controllerProps
 }: EditorActionDelayProps) => {
-  const t = useTranslation()
-  const { errors } = useFormState({ control, name })
+  const t = useTranslation();
+  const { errors } = useFormState({ control, name });
 
   return (
     <FormField2
@@ -25,9 +27,7 @@ export const EditorActionPreDelay = ({
       className="mr-2 lg:mr-4"
       field={name}
       error={errors[name]}
-      description={
-        t.components.editor.action.EditorActionDelay.delay_description
-      }
+      description={t.components.editor.action.EditorActionDelay.delay_description}
     >
       <EditorIntegerInput
         NumericInputProps={{
@@ -42,25 +42,23 @@ export const EditorActionPreDelay = ({
         {...controllerProps}
       />
     </FormField2>
-  )
-}
+  );
+};
 
 export const EditorActionRearDelay = ({
-  name = 'rearDelay',
+  name = "rearDelay",
   control,
   ...controllerProps
 }: EditorActionDelayProps) => {
-  const t = useTranslation()
-  const { errors } = useFormState({ control, name })
+  const t = useTranslation();
+  const { errors } = useFormState({ control, name });
 
   return (
     <FormField2
       label={t.components.editor.action.EditorActionDelay.post_delay}
       field={name}
       error={errors[name]}
-      description={
-        t.components.editor.action.EditorActionDelay.delay_description
-      }
+      description={t.components.editor.action.EditorActionDelay.delay_description}
     >
       <EditorIntegerInput
         NumericInputProps={{
@@ -75,5 +73,5 @@ export const EditorActionRearDelay = ({
         {...controllerProps}
       />
     </FormField2>
-  )
-}
+  );
+};

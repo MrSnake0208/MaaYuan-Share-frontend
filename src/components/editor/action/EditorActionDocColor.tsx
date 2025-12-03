@@ -1,25 +1,27 @@
-import { Button, Icon, MenuItem } from '@blueprintjs/core'
-import { Select2 } from '@blueprintjs/select'
+import { Button, Icon, MenuItem } from "@blueprintjs/core";
+import { Select2 } from "@blueprintjs/select";
 
-import { useController } from 'react-hook-form'
-import { SetOptional } from 'type-fest'
+import { useController } from "react-hook-form";
+import { SetOptional } from "type-fest";
 
-import { FormField2 } from 'components/FormField'
-import { EditorFieldProps } from 'components/editor/EditorFieldProps'
-import type { CopilotDocV1 } from 'models/copilot.schema'
-import { actionDocColors } from 'models/operator'
+import { FormField2 } from "components/FormField";
+import { EditorFieldProps } from "components/editor/EditorFieldProps";
+import type { CopilotDocV1 } from "models/copilot.schema";
+import { actionDocColors } from "models/operator";
 
-import { useTranslation } from '../../../i18n/i18n'
+import { useTranslation } from "../../../i18n/i18n";
 
-interface EditorActionDocColorProps
-  extends SetOptional<EditorFieldProps<CopilotDocV1.Action, string>, 'name'> {}
+interface EditorActionDocColorProps extends SetOptional<
+  EditorFieldProps<CopilotDocV1.Action, string>,
+  "name"
+> {}
 
 export const EditorActionDocColor = ({
-  name = 'docColor',
+  name = "docColor",
   control,
   ...controllerProps
 }: EditorActionDocColorProps) => {
-  const t = useTranslation()
+  const t = useTranslation();
 
   const {
     field: { onChange, onBlur, value, ref },
@@ -27,20 +29,18 @@ export const EditorActionDocColor = ({
   } = useController({
     name,
     control,
-    defaultValue: 'Gray',
+    defaultValue: "Gray",
     ...controllerProps,
-  })
+  });
 
-  const selected = actionDocColors.find((item) => item.value === value)
+  const selected = actionDocColors.find((item) => item.value === value);
 
   return (
     <FormField2
       label={t.components.editor.action.EditorActionDocColor.description_color}
       field={name}
       error={errors[name]}
-      description={
-        t.components.editor.action.EditorActionDocColor.color_description
-      }
+      description={t.components.editor.action.EditorActionDocColor.color_description}
     >
       <Select2
         filterable={false}
@@ -53,18 +53,14 @@ export const EditorActionDocColor = ({
             onFocus={handleFocus}
             text={
               <span>
-                <Icon
-                  icon="full-circle"
-                  color={color?.value}
-                  className="mr-2"
-                />
+                <Icon icon="full-circle" color={color?.value} className="mr-2" />
                 <span style={{ color: color?.value }}>{color?.title()}</span>
               </span>
             }
           />
         )}
         onItemSelect={(item) => {
-          onChange(item.value)
+          onChange(item.value);
         }}
         resetOnSelect={true}
       >
@@ -74,5 +70,5 @@ export const EditorActionDocColor = ({
         </Button>
       </Select2>
     </FormField2>
-  )
-}
+  );
+};

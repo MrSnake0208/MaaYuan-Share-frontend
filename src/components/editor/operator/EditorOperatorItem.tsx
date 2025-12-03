@@ -1,25 +1,21 @@
-import { Card, Elevation, Icon } from '@blueprintjs/core'
+import { Card, Elevation, Icon } from "@blueprintjs/core";
 
-import clsx from 'clsx'
-import { useAtomValue } from 'jotai'
+import clsx from "clsx";
+import { useAtomValue } from "jotai";
 
-import type { CopilotDocV1 } from 'models/copilot.schema'
+import type { CopilotDocV1 } from "models/copilot.schema";
 
-import { languageAtom, useTranslation } from '../../../i18n/i18n'
-import {
-  OPERATORS,
-  getLocalizedOperatorName,
-  getSkillUsageTitle,
-} from '../../../models/operator'
-import { OperatorAvatar } from '../../OperatorAvatar'
-import { SortableItemProps } from '../../dnd'
-import { CardDeleteOption, CardEditOption } from '../CardOptions'
+import { languageAtom, useTranslation } from "../../../i18n/i18n";
+import { OPERATORS, getLocalizedOperatorName, getSkillUsageTitle } from "../../../models/operator";
+import { OperatorAvatar } from "../../OperatorAvatar";
+import { SortableItemProps } from "../../dnd";
+import { CardDeleteOption, CardEditOption } from "../CardOptions";
 
 interface EditorOperatorItemProps extends Partial<SortableItemProps> {
-  operator: CopilotDocV1.Operator
-  editing?: boolean
-  onEdit?: () => void
-  onRemove?: () => void
+  operator: CopilotDocV1.Operator;
+  editing?: boolean;
+  onEdit?: () => void;
+  onRemove?: () => void;
 }
 
 export const EditorOperatorItem = ({
@@ -31,22 +27,22 @@ export const EditorOperatorItem = ({
   attributes,
   listeners,
 }: EditorOperatorItemProps) => {
-  const t = useTranslation()
-  const language = useAtomValue(languageAtom)
-  const id = OPERATORS.find(({ name }) => name === operator.name)?.id
+  const t = useTranslation();
+  const language = useAtomValue(languageAtom);
+  const id = OPERATORS.find(({ name }) => name === operator.name)?.id;
   const skillUsage = getSkillUsageTitle(
     operator.skillUsage as CopilotDocV1.SkillUsageType,
     operator.skillTimes,
-  )
+  );
 
   return (
     <Card
       elevation={Elevation.TWO}
       className={clsx(
-        'flex items-start',
-        editing && 'bg-gray-100',
-        isDragging && 'opacity-30',
-        'h-[72px] w-[calc(4.5*72px)]',
+        "flex items-start",
+        editing && "bg-gray-100",
+        isDragging && "opacity-30",
+        "h-[72px] w-[calc(4.5*72px)]",
       )}
     >
       <Icon
@@ -71,5 +67,5 @@ export const EditorOperatorItem = ({
       <CardEditOption active={editing} onClick={onEdit} />
       <CardDeleteOption className="-mr-3" onClick={onRemove} />
     </Card>
-  )
-}
+  );
+};

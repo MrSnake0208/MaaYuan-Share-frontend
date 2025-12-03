@@ -1,21 +1,18 @@
-import {
-  CommentsAreaInfo,
-  QueriesCommentsAreaRequest,
-} from 'maa-copilot-client'
-import useSWRInfinite from 'swr/infinite'
+import { CommentsAreaInfo, QueriesCommentsAreaRequest } from "maa-copilot-client";
+import useSWRInfinite from "swr/infinite";
 
-import { CommentApi } from 'utils/maa-copilot-client'
+import { CommentApi } from "utils/maa-copilot-client";
 
-import { i18n } from '../i18n/i18n'
-import { CommentRating } from '../models/comment'
-import { Operation } from '../models/operation'
+import { i18n } from "../i18n/i18n";
+import { CommentRating } from "../models/comment";
+import { Operation } from "../models/operation";
 
 export interface UseCommentsParams {
-  operationId: Operation['id']
-  descending?: boolean
-  orderBy?: 'likeCount' | 'uploadTime'
+  operationId: Operation["id"];
+  descending?: boolean;
+  orderBy?: "likeCount" | "uploadTime";
 
-  suspense?: boolean
+  suspense?: boolean;
 }
 
 export function useComments({
@@ -32,15 +29,15 @@ export function useComments({
   } = useSWRInfinite(
     (pageIndex, previousPage: CommentsAreaInfo) => {
       if (previousPage && !previousPage?.hasNext) {
-        return null // reached the end
+        return null; // reached the end
       }
 
       if (!isFinite(+operationId)) {
-        throw new Error(i18n.apis.comment.invalid_operation_id)
+        throw new Error(i18n.apis.comment.invalid_operation_id);
       }
 
       return [
-        'comments',
+        "comments",
         {
           copilotId: operationId,
           limit: 50,
@@ -48,24 +45,24 @@ export function useComments({
           desc: descending,
           orderBy,
         } satisfies QueriesCommentsAreaRequest,
-      ]
+      ];
     },
     async ([, req]) => {
       const res = await new CommentApi({
-        sendToken: 'never',
+        sendToken: "never",
         requireData: true,
-      }).queriesCommentsArea(req)
-      return res.data!
+      }).queriesCommentsArea(req);
+      return res.data!;
     },
     {
       suspense,
       focusThrottleInterval: 1000 * 60 * 30,
     },
-  )
+  );
 
-  const isReachingEnd = pages?.some((page) => !page.hasNext)
+  const isReachingEnd = pages?.some((page) => !page.hasNext);
 
-  const comments = pages?.map((el) => el.data).flat()
+  const comments = pages?.map((el) => el.data).flat();
 
   return {
     comments,
@@ -73,13 +70,13 @@ export function useComments({
     mutate,
     isValidating,
     isReachingEnd,
-  }
+  };
 }
 
 export async function sendComment(req: {
-  message: string
-  operationId: number
-  fromCommentId?: string
+  message: string;
+  operationId: number;
+  fromCommentId?: string;
 }) {
   await new CommentApi().sendComments({
     commentsAddDTO: {
@@ -87,22 +84,19 @@ export async function sendComment(req: {
       copilotId: req.operationId,
       fromCommentId: req.fromCommentId,
       notification: false,
-      commentStatus: 'ENABLED',
+      commentStatus: "ENABLED",
     },
-  })
+  });
 }
 
 export async function deleteComment(req: { commentId: string }) {
-  await new CommentApi().deleteComments({ commentsDeleteDTO: req })
+  await new CommentApi().deleteComments({ commentsDeleteDTO: req });
 }
 
-export async function rateComment(req: {
-  commentId: string
-  rating: CommentRating
-}) {
-  await new CommentApi().ratesComments({ commentsRatingDTO: req })
+export async function rateComment(req: { commentId: string; rating: CommentRating }) {
+  await new CommentApi().ratesComments({ commentsRatingDTO: req });
 }
 
 export async function topComment(req: { commentId: string; topping: boolean }) {
-  await new CommentApi().toppingComments({ commentsToppingDTO: req })
+  await new CommentApi().toppingComments({ commentsToppingDTO: req });
 }

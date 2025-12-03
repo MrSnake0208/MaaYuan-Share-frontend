@@ -1,52 +1,40 @@
-import { Divider, H4, H5, Icon } from '@blueprintjs/core'
+import { Divider, H4, H5, Icon } from "@blueprintjs/core";
 
-import clsx from 'clsx'
-import { languageAtom, useTranslation } from 'i18n/i18n'
-import { useAtomValue } from 'jotai'
-import {
-  FC,
-  HTMLAttributes,
-  ImgHTMLAttributes,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import clsx from "clsx";
+import { languageAtom, useTranslation } from "i18n/i18n";
+import { useAtomValue } from "jotai";
+import { FC, HTMLAttributes, ImgHTMLAttributes, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   DEFAULTPROFID,
   DEFAULTSUBPROFID,
   useOperatorFilterProvider,
-} from 'components/editor/operator/sheet/sheetOperator/SheetOperatorFilterProvider'
-import { PROFESSIONS } from 'models/operator'
+} from "components/editor/operator/sheet/sheetOperator/SheetOperatorFilterProvider";
+import { PROFESSIONS } from "models/operator";
 
 export interface ProfClassification {}
 
 export const ProfClassification: FC<ProfClassification> = () => {
-  const t = useTranslation()
-  const language = useAtomValue(languageAtom)
+  const t = useTranslation();
+  const language = useAtomValue(languageAtom);
   const {
     useProfFilterState: [{ selectedProf }, setProfFilter],
-  } = useOperatorFilterProvider()
+  } = useOperatorFilterProvider();
 
   const formattedProfessions = useMemo(
     () => [
       {
         id: DEFAULTPROFID.ALL,
-        name: t.components.editor.operator.sheet.sheetOperator
-          .ProfClassificationWithFilters.all,
-        name_en:
-          t.components.editor.operator.sheet.sheetOperator
-            .ProfClassificationWithFilters.all,
+        name: t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.all,
+        name_en: t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.all,
         sub: [],
       },
       {
         id: DEFAULTPROFID.FAV,
-        name: t.components.editor.operator.sheet.sheetOperator
-          .ProfClassificationWithFilters.favorites,
+        name: t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters
+          .favorites,
         name_en:
-          t.components.editor.operator.sheet.sheetOperator
-            .ProfClassificationWithFilters.favorites,
+          t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.favorites,
         sub: [],
       },
       ...PROFESSIONS.map((profession) => ({
@@ -55,62 +43,53 @@ export const ProfClassification: FC<ProfClassification> = () => {
       })),
       {
         id: DEFAULTPROFID.OTHERS,
-        name: t.components.editor.operator.sheet.sheetOperator
-          .ProfClassificationWithFilters.others,
+        name: t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.others,
         name_en:
-          t.components.editor.operator.sheet.sheetOperator
-            .ProfClassificationWithFilters.others,
+          t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.others,
         sub: [],
       },
     ],
     [t],
-  )
+  );
   const aggregatedSubProfs = useMemo(() => {
-    const seen = new Set<string>()
+    const seen = new Set<string>();
     const subs: {
-      id: string
-      name: string
-      name_en?: string
-    }[] = []
+      id: string;
+      name: string;
+      name_en?: string;
+    }[] = [];
     formattedProfessions
-      .filter(
-        (prof) => !(Object.values(DEFAULTPROFID) as string[]).includes(prof.id),
-      )
+      .filter((prof) => !(Object.values(DEFAULTPROFID) as string[]).includes(prof.id))
       .forEach((prof) => {
         prof.sub?.forEach((sub) => {
           if (!seen.has(sub.id)) {
-            seen.add(sub.id)
-            subs.push(sub)
+            seen.add(sub.id);
+            subs.push(sub);
           }
-        })
-      })
-    return subs
-  }, [formattedProfessions])
+        });
+      });
+    return subs;
+  }, [formattedProfessions]);
 
   const subProfs = useMemo(() => {
     return [
       {
         id: DEFAULTSUBPROFID.ALL,
-        name: t.components.editor.operator.sheet.sheetOperator
-          .ProfClassificationWithFilters.all,
-        name_en:
-          t.components.editor.operator.sheet.sheetOperator
-            .ProfClassificationWithFilters.all,
+        name: t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.all,
+        name_en: t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.all,
       },
       {
         id: DEFAULTSUBPROFID.SELECTED,
-        name: t.components.editor.operator.sheet.sheetOperator
-          .ProfClassificationWithFilters.selected,
+        name: t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters
+          .selected,
         name_en:
-          t.components.editor.operator.sheet.sheetOperator
-            .ProfClassificationWithFilters.selected,
+          t.components.editor.operator.sheet.sheetOperator.ProfClassificationWithFilters.selected,
       },
       ...((Object.values(DEFAULTPROFID) as string[]).includes(selectedProf[0])
         ? aggregatedSubProfs
-        : formattedProfessions.find(({ id }) => id === selectedProf[0])?.sub ||
-          []),
-    ]
-  }, [aggregatedSubProfs, selectedProf, formattedProfessions, t])
+        : formattedProfessions.find(({ id }) => id === selectedProf[0])?.sub || []),
+    ];
+  }, [aggregatedSubProfs, selectedProf, formattedProfessions, t]);
 
   return (
     <div>
@@ -119,8 +98,8 @@ export const ProfClassification: FC<ProfClassification> = () => {
           <li key={subProf.id} className="flex items-center justify-center">
             <H4
               className={clsx(
-                'truncate cursor-pointer opacity-60 hover:underline hover:opacity-90 m-0 !text-xs sm:!text-sm',
-                selectedProf.includes(subProf.id) && '!opacity-100 underline',
+                "truncate cursor-pointer opacity-60 hover:underline hover:opacity-90 m-0 !text-xs sm:!text-sm",
+                selectedProf.includes(subProf.id) && "!opacity-100 underline",
               )}
               onClick={() =>
                 setProfFilter(({ selectedProf, ...rest }) => ({
@@ -129,9 +108,7 @@ export const ProfClassification: FC<ProfClassification> = () => {
                 }))
               }
             >
-              {language === 'zh_tw' && subProf.name_en
-                ? subProf.name_en
-                : subProf.name}
+              {language === "zh_tw" && subProf.name_en ? subProf.name_en : subProf.name}
             </H4>
           </li>
         ))}
@@ -142,9 +119,7 @@ export const ProfClassification: FC<ProfClassification> = () => {
           <ProfIcon
             key={prof.id}
             profId={prof.id}
-            name={
-              language === 'zh_tw' && prof.name_en ? prof.name_en : prof.name
-            }
+            name={language === "zh_tw" && prof.name_en ? prof.name_en : prof.name}
             selected={selectedProf.includes(prof.id)}
             onProfClick={() =>
               setProfFilter((prev) => ({
@@ -156,23 +131,17 @@ export const ProfClassification: FC<ProfClassification> = () => {
         ))}
       </UlWithArrow>
     </div>
-  )
-}
+  );
+};
 
 interface ProfIconProp extends ImgHTMLAttributes<HTMLImageElement> {
-  name: string
-  profId: string
-  selected: boolean
-  onProfClick: () => void
+  name: string;
+  profId: string;
+  selected: boolean;
+  onProfClick: () => void;
 }
 
-const ProfIcon: FC<ProfIconProp> = ({
-  name,
-  profId,
-  selected,
-  onProfClick,
-  ...restImgProps
-}) => {
+const ProfIcon: FC<ProfIconProp> = ({ name, profId, selected, onProfClick, ...restImgProps }) => {
   return (
     <li
       className="grow cursor-pointer relative flex flex-col items-center justify-center gap-1 py-1 px-2 min-w-[56px]"
@@ -188,53 +157,50 @@ const ProfIcon: FC<ProfIconProp> = ({
       ) : (
         <img
           {...restImgProps}
-          className={clsx(
-            'w-8 h-6 object-contain dark:invert-0',
-            restImgProps.className,
-          )}
-          src={'/assets/prof-icons/' + profId + '.png'}
+          className={clsx("w-8 h-6 object-contain dark:invert-0", restImgProps.className)}
+          src={"/assets/prof-icons/" + profId + ".png"}
           alt=""
           title={name}
         />
       )}
     </li>
-  )
-}
+  );
+};
 
 interface UlWithArrowProp extends HTMLAttributes<HTMLUListElement> {}
 
 const UlWithArrow: FC<UlWithArrowProp> = ({ className, ...ulProps }) => {
-  const containerRef = useRef<HTMLUListElement>(null)
-  const [showLeft, setShowLeft] = useState(false)
-  const [showRight, setShowRight] = useState(false)
+  const containerRef = useRef<HTMLUListElement>(null);
+  const [showLeft, setShowLeft] = useState(false);
+  const [showRight, setShowRight] = useState(false);
 
-  const isOverflow = useMemo(() => showLeft || showRight, [showLeft, showRight])
+  const isOverflow = useMemo(() => showLeft || showRight, [showLeft, showRight]);
 
   useEffect(() => {
     const checkScroll = () => {
-      const el = containerRef.current
-      if (!el) return
-      const { scrollLeft, scrollWidth, clientWidth } = el
+      const el = containerRef.current;
+      if (!el) return;
+      const { scrollLeft, scrollWidth, clientWidth } = el;
 
-      setShowLeft(scrollLeft > 0)
-      setShowRight(scrollLeft + clientWidth < scrollWidth - 1)
-    }
+      setShowLeft(scrollLeft > 0);
+      setShowRight(scrollLeft + clientWidth < scrollWidth - 1);
+    };
 
-    const el = containerRef.current
-    if (!el) return
+    const el = containerRef.current;
+    if (!el) return;
 
-    checkScroll()
-    el.addEventListener('scroll', checkScroll)
+    checkScroll();
+    el.addEventListener("scroll", checkScroll);
 
-    const resizeObserver = new ResizeObserver(checkScroll)
-    resizeObserver.observe(el)
-    resizeObserver.observe(el.firstElementChild as Element)
+    const resizeObserver = new ResizeObserver(checkScroll);
+    resizeObserver.observe(el);
+    resizeObserver.observe(el.firstElementChild as Element);
 
     return () => {
-      el.removeEventListener('scroll', checkScroll)
-      resizeObserver.disconnect()
-    }
-  }, [])
+      el.removeEventListener("scroll", checkScroll);
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   return (
     <div className="flex items-center relative w-full">
@@ -248,8 +214,8 @@ const UlWithArrow: FC<UlWithArrowProp> = ({ className, ...ulProps }) => {
         {...ulProps}
         ref={containerRef}
         className={clsx(
-          'flex overflow-auto items-center w-full',
-          !isOverflow && 'justify-center',
+          "flex overflow-auto items-center w-full",
+          !isOverflow && "justify-center",
           className,
         )}
       />
@@ -260,5 +226,5 @@ const UlWithArrow: FC<UlWithArrowProp> = ({ className, ...ulProps }) => {
         />
       )}
     </div>
-  )
-}
+  );
+};

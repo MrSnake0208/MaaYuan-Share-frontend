@@ -1,28 +1,20 @@
-import { Button, Card, Elevation, H4, Icon, Tag } from '@blueprintjs/core'
-import { Tooltip2 } from '@blueprintjs/popover2'
+import { Button, Card, Elevation, H4, Icon, Tag } from "@blueprintjs/core";
+import { Tooltip2 } from "@blueprintjs/popover2";
 
-import { copyShortCode } from 'services/operation'
+import { copyShortCode } from "services/operation";
 
-import { ReLink } from 'components/ReLink'
-import { RelativeTime } from 'components/RelativeTime'
-import { OperationSetListItem } from 'models/operation-set'
+import { ReLink } from "components/ReLink";
+import { RelativeTime } from "components/RelativeTime";
+import { OperationSetListItem } from "models/operation-set";
 
-import { useTranslation } from '../i18n/i18n'
-import { Paragraphs } from './Paragraphs'
-import { UserName } from './UserName'
+import { useTranslation } from "../i18n/i18n";
+import { Paragraphs } from "./Paragraphs";
+import { UserName } from "./UserName";
 
-export const NeoOperationSetCard = ({
-  operationSet,
-}: {
-  operationSet: OperationSetListItem
-}) => {
-  const t = useTranslation()
+export const NeoOperationSetCard = ({ operationSet }: { operationSet: OperationSetListItem }) => {
+  const t = useTranslation();
   return (
-    <Card
-      interactive={true}
-      elevation={Elevation.TWO}
-      className="relative flex flex-col gap-2"
-    >
+    <Card interactive={true} elevation={Elevation.TWO} className="relative flex flex-col gap-2">
       <ReLink
         search={{ opset: operationSet.id }}
         className="block no-underline hover:no-underline hover:text-inherit"
@@ -34,10 +26,8 @@ export const NeoOperationSetCard = ({
             className="flex-1 whitespace-nowrap overflow-hidden text-ellipsis"
           >
             <H4 className="p-0 m-0 mr-20 whitespace-nowrap overflow-hidden text-ellipsis">
-              {operationSet.status === 'PRIVATE' && (
-                <Tag className="mr-1">
-                  {t.components.OperationSetCard.private}
-                </Tag>
+              {operationSet.status === "PRIVATE" && (
+                <Tag className="mr-1">{t.components.OperationSetCard.private}</Tag>
               )}
               {operationSet.name}
             </H4>
@@ -62,41 +52,25 @@ export const NeoOperationSetCard = ({
             </span>
 
             <Icon icon="time" className="ml-4 mr-1" />
-            <RelativeTime
-              Tooltip2Props={{ placement: 'top' }}
-              moment={operationSet.createTime}
-            />
+            <RelativeTime Tooltip2Props={{ placement: "top" }} moment={operationSet.createTime} />
           </div>
           <div className="flex-1" />
           <div className="text-zinc-500">
             <Icon icon="user" className="mr-1.5" />
-            <UserName userId={operationSet.creatorId}>
-              {operationSet.creator}
-            </UserName>
+            <UserName userId={operationSet.creatorId}>{operationSet.creator}</UserName>
           </div>
         </div>
       </ReLink>
 
-      <CardActions
-        className="absolute top-4 right-4"
-        operationSet={operationSet}
-      />
+      <CardActions className="absolute top-4 right-4" operationSet={operationSet} />
     </Card>
-  )
-}
+  );
+};
 
-export const OperationSetCard = ({
-  operationSet,
-}: {
-  operationSet: OperationSetListItem
-}) => {
-  const t = useTranslation()
+export const OperationSetCard = ({ operationSet }: { operationSet: OperationSetListItem }) => {
+  const t = useTranslation();
   return (
-    <Card
-      interactive={true}
-      elevation={Elevation.TWO}
-      className="relative mb-4 sm:mb-2 last:mb-0"
-    >
+    <Card interactive={true} elevation={Elevation.TWO} className="relative mb-4 sm:mb-2 last:mb-0">
       <ReLink
         search={{ opset: operationSet.id }}
         className="block no-underline hover:no-underline hover:text-inherit"
@@ -124,16 +98,11 @@ export const OperationSetCard = ({
               </span>
 
               <Icon icon="time" className="ml-4 mr-1" />
-              <RelativeTime
-                Tooltip2Props={{ placement: 'top' }}
-                moment={operationSet.createTime}
-              />
+              <RelativeTime Tooltip2Props={{ placement: "top" }} moment={operationSet.createTime} />
             </div>
             <div>
               <Icon icon="user" className="mr-1.5" />
-              <UserName userId={operationSet.creatorId}>
-                {operationSet.creator}
-              </UserName>
+              <UserName userId={operationSet.creatorId}>{operationSet.creator}</UserName>
             </div>
           </div>
         </div>
@@ -147,22 +116,19 @@ export const OperationSetCard = ({
         </div>
       </ReLink>
 
-      <CardActions
-        className="absolute top-4 xl:top-12 right-[18px]"
-        operationSet={operationSet}
-      />
+      <CardActions className="absolute top-4 xl:top-12 right-[18px]" operationSet={operationSet} />
     </Card>
-  )
-}
+  );
+};
 
 const CardActions = ({
   className,
   operationSet,
 }: {
-  className?: string
-  operationSet: OperationSetListItem
+  className?: string;
+  operationSet: OperationSetListItem;
 }) => {
-  const t = useTranslation()
+  const t = useTranslation();
   return (
     <div className={className}>
       <Tooltip2
@@ -177,11 +143,11 @@ const CardActions = ({
           small
           icon="clipboard"
           onClick={(e) => {
-            e.stopPropagation()
-            copyShortCode(operationSet)
+            e.stopPropagation();
+            copyShortCode(operationSet);
           }}
         />
       </Tooltip2>
     </div>
-  )
-}
+  );
+};

@@ -1,1 +1,1 @@
-export const MAX_ACTIVE_OPERATORS = 5
+export const MAX_ACTIVE_OPERATORS = 5;

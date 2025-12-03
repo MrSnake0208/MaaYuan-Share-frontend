@@ -1,47 +1,44 @@
-import { Button, Divider, H5 } from '@blueprintjs/core'
+import { Button, Divider, H5 } from "@blueprintjs/core";
 
-import clsx from 'clsx'
-import { debounce } from 'lodash-es'
-import { FC } from 'react'
+import clsx from "clsx";
+import { debounce } from "lodash-es";
+import { FC } from "react";
 
-import { useTranslation } from '../../../../../../i18n/i18n'
-import {
-  defaultRarityFilter,
-  useOperatorFilterProvider,
-} from '../SheetOperatorFilterProvider'
+import { useTranslation } from "../../../../../../i18n/i18n";
+import { defaultRarityFilter, useOperatorFilterProvider } from "../SheetOperatorFilterProvider";
 
-const selectClass = 'scale-90'
+const selectClass = "scale-90";
 
 export interface OperatorRaritySelectProp {}
 
 export const OperatorRaritySelect: FC<OperatorRaritySelectProp> = () => {
-  const t = useTranslation()
+  const t = useTranslation();
   const {
     useRarityFilterState: [{ selectedRarity, reverse }, setRarityFilter],
-  } = useOperatorFilterProvider()
+  } = useOperatorFilterProvider();
 
   return (
     <>
       <div className="flex items-center">
         <H5 className="m-0 mr-1">
           {
-            t.components.editor.operator.sheet.sheetOperator.toolbox
-              .OperatorRaritySelect.display_by_rarity
+            t.components.editor.operator.sheet.sheetOperator.toolbox.OperatorRaritySelect
+              .display_by_rarity
           }
         </H5>
         <Button
           icon="reset"
           minimal
           title={
-            t.components.editor.operator.sheet.sheetOperator.toolbox
-              .OperatorRaritySelect.reset_selection
+            t.components.editor.operator.sheet.sheetOperator.toolbox.OperatorRaritySelect
+              .reset_selection
           }
           onClick={() => setRarityFilter(defaultRarityFilter)}
         />
       </div>
       <div className="flex my-1">
         {defaultRarityFilter.selectedRarity.map((rarityIndex) => {
-          const isSelect = selectedRarity.includes(rarityIndex)
+          const isSelect = selectedRarity.includes(rarityIndex);
           return (
             <Button
               key={rarityIndex}
@@ -56,15 +53,14 @@ export const OperatorRaritySelect: FC<OperatorRaritySelectProp> = () => {
                     ...rest,
                     selectedRarity: isSelect
                       ? selectedRarity.filter(
-                          (selectedRarityIndex) =>
-                            selectedRarityIndex !== rarityIndex,
+                          (selectedRarityIndex) => selectedRarityIndex !== rarityIndex,
                         )
                       : [...selectedRarity, rarityIndex],
                   })),
                 150,
               )}
             />
-          )
+          );
         })}
       </div>
       <div className="flex">
@@ -80,8 +76,8 @@ export const OperatorRaritySelect: FC<OperatorRaritySelectProp> = () => {
             }))
           }
           title={
-            t.components.editor.operator.sheet.sheetOperator.toolbox
-              .OperatorRaritySelect.sort_ascending
+            t.components.editor.operator.sheet.sheetOperator.toolbox.OperatorRaritySelect
+              .sort_ascending
           }
         />
         <Button
@@ -96,13 +92,13 @@ export const OperatorRaritySelect: FC<OperatorRaritySelectProp> = () => {
             }))
           }
           title={
-            t.components.editor.operator.sheet.sheetOperator.toolbox
-              .OperatorRaritySelect.sort_descending
+            t.components.editor.operator.sheet.sheetOperator.toolbox.OperatorRaritySelect
+              .sort_descending
           }
         />
       </div>
       <Divider />
       {/* <Button text="确认" className={POPOVER2_DISMISS} onClick={submitFilter} /> */}
     </>
-  )
-}
+  );
+};

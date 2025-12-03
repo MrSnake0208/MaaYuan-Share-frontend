@@ -1,19 +1,19 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from "react-router-dom";
 
-import { OperationViewer } from 'components/viewer/OperationViewer'
+import { OperationViewer } from "components/viewer/OperationViewer";
 
 export const ViewPage = () => {
-  const { id } = useParams()
-  const navigate = useNavigate()
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   if (!id) {
-    navigate('/')
-    return null
+    navigate("/");
+    return null;
   }
 
   return (
     <div className="pb-16">
       <OperationViewer operationId={+id} onCloseDrawer={() => {}} />
     </div>
-  )
-}
+  );
+};

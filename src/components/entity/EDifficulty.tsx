@@ -1,41 +1,38 @@
-import { Tag } from '@blueprintjs/core'
-import { Tooltip2 } from '@blueprintjs/popover2'
+import { Tag } from "@blueprintjs/core";
+import { Tooltip2 } from "@blueprintjs/popover2";
 
-import clsx from 'clsx'
-import { FC, ReactNode } from 'react'
+import clsx from "clsx";
+import { FC, ReactNode } from "react";
 
-import { OpDifficulty, OpDifficultyBitFlag } from 'models/operation'
+import { OpDifficulty, OpDifficultyBitFlag } from "models/operation";
 
-import { useTranslation } from '../../i18n/i18n'
+import { useTranslation } from "../../i18n/i18n";
 
 const DifficultyTag: FC<{
-  tooltip?: string | JSX.Element
-  content: ReactNode
-  hardLevel?: boolean
+  tooltip?: string | JSX.Element;
+  content: ReactNode;
+  hardLevel?: boolean;
 }> = ({ tooltip, content, hardLevel }) => {
   return (
-    <Tooltip2
-      placement="bottom"
-      content={<div className="max-w-sm">{tooltip}</div>}
-    >
+    <Tooltip2 placement="bottom" content={<div className="max-w-sm">{tooltip}</div>}>
       <Tag
         className={clsx(
-          'transition border border-solid !text-xs cursor-help tracking-tight !px-2 !py-1 !mx-1 !my-1 leading-none !min-h-0',
+          "transition border border-solid !text-xs cursor-help tracking-tight !px-2 !py-1 !mx-1 !my-1 leading-none !min-h-0",
           hardLevel
-            ? 'bg-red-400 hover:bg-red-500 border-red-700 text-red-900'
-            : 'bg-slate-200 hover:bg-slate-300 border-slate-300  text-slate-700 dark:bg-slate-900 dark:text-slate-100',
+            ? "bg-red-400 hover:bg-red-500 border-red-700 text-red-900"
+            : "bg-slate-200 hover:bg-slate-300 border-slate-300  text-slate-700 dark:bg-slate-900 dark:text-slate-100",
         )}
       >
         {content}
       </Tag>
     </Tooltip2>
-  )
-}
+  );
+};
 
 export const EDifficulty: FC<{
-  difficulty: OpDifficulty
+  difficulty: OpDifficulty;
 }> = ({ difficulty }) => {
-  const t = useTranslation()
+  const t = useTranslation();
   const descriptions = {
     regular: {
       title: t.components.entity.EDifficulty.regular,
@@ -45,10 +42,10 @@ export const EDifficulty: FC<{
       title: t.components.entity.EDifficulty.hard,
       description: t.components.entity.EDifficulty.hard_description,
     },
-  }
+  };
 
   if (difficulty === OpDifficulty.UNKNOWN) {
-    return <></>
+    return <></>;
     // return (
     //   <DifficultyTag
     //     tooltip={
@@ -72,7 +69,7 @@ export const EDifficulty: FC<{
     // )
   }
 
-  const children: JSX.Element[] = []
+  const children: JSX.Element[] = [];
 
   if (difficulty & OpDifficultyBitFlag.REGULAR) {
     children.push(
@@ -81,7 +78,7 @@ export const EDifficulty: FC<{
         tooltip={descriptions.regular.description}
         content={descriptions.regular.title}
       />,
-    )
+    );
   }
 
   if (difficulty & OpDifficultyBitFlag.HARD) {
@@ -92,8 +89,8 @@ export const EDifficulty: FC<{
         content={descriptions.hard.title}
         hardLevel
       />,
-    )
+    );
   }
 
-  return <span className="ml-1">{children}</span>
-}
+  return <span className="ml-1">{children}</span>;
+};

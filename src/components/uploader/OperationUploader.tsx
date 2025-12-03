@@ -8,48 +8,42 @@ import {
   Spinner,
   SpinnerSize,
   Tag,
-} from '@blueprintjs/core'
-import { Tooltip2 } from '@blueprintjs/popover2'
+} from "@blueprintjs/core";
+import { Tooltip2 } from "@blueprintjs/popover2";
 
-import { useLevels } from 'apis/level'
-import { createOperation } from 'apis/operation'
-import { CopilotInfoStatusEnum } from 'maa-copilot-client'
-import { ComponentType, useState } from 'react'
-import { useList } from 'react-use'
+import { useLevels } from "apis/level";
+import { createOperation } from "apis/operation";
+import { CopilotInfoStatusEnum } from "maa-copilot-client";
+import { ComponentType, useState } from "react";
+import { useList } from "react-use";
 
-import { withSuspensable } from 'components/Suspensable'
-import { AppToaster } from 'components/Toaster'
-import { DrawerLayout } from 'components/drawer/DrawerLayout'
+import { withSuspensable } from "components/Suspensable";
+import { AppToaster } from "components/Toaster";
+import { DrawerLayout } from "components/drawer/DrawerLayout";
 
-import { useTranslation } from '../../i18n/i18n'
-import { findLevelByStageName } from '../../models/level'
-import { formatError } from '../../utils/error'
-import { toEditorOperation } from '../editor2/reconciliation'
-import {
-  SimingOperation,
-  toSimingOperationRemote,
-} from '../editor2/siming-export'
-import { parseOperationLoose } from '../editor2/validation/schema'
-import { parseOperationFile, patchOperation, validateOperation } from './utils'
+import { useTranslation } from "../../i18n/i18n";
+import { findLevelByStageName } from "../../models/level";
+import { formatError } from "../../utils/error";
+import { toEditorOperation } from "../editor2/reconciliation";
+import { SimingOperation, toSimingOperationRemote } from "../editor2/siming-export";
+import { parseOperationLoose } from "../editor2/validation/schema";
+import { parseOperationFile, patchOperation, validateOperation } from "./utils";
 
 interface FileEntry {
-  file: File
-  error?: string
-  operation?: SimingOperation
-  uploaded?: boolean
+  file: File;
+  error?: string;
+  operation?: SimingOperation;
+  uploaded?: boolean;
 }
 
 export const OperationUploader: ComponentType = withSuspensable(() => {
-  const t = useTranslation()
-  const [files, { set: setFiles, update: updateFileWhere }] =
-    useList<FileEntry>([])
+  const t = useTranslation();
+  const [files, { set: setFiles, update: updateFileWhere }] = useList<FileEntry>([]);
 
-  const [globalErrors, setGlobalErrors] = useState(null as string[] | null)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const [operationStatus] = useState<CopilotInfoStatusEnum>(
-    CopilotInfoStatusEnum.Private,
-  )
+  const [globalErrors, setGlobalErrors] = useState(null as string[] | null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [operationStatus] = useState<CopilotInfoStatusEnum>(CopilotInfoStatusEnum.Private);
 
   // reasons are in the order of keys
   const nonUploadableReason = Object.entries({
@@ -59,78 +53,69 @@ export const OperationUploader: ComponentType = withSuspensable(() => {
     [t.components.uploader.OperationUploader.contains_uploaded]: files.some(
       (file) => file.uploaded,
     ),
-    [t.components.uploader.OperationUploader.file_errors]: files.some(
-      (file) => file.error,
-    ),
-    [t.components.uploader.OperationUploader.errors_exist]:
-      globalErrors?.length,
-  }).find(([, value]) => value)?.[0]
+    [t.components.uploader.OperationUploader.file_errors]: files.some((file) => file.error),
+    [t.components.uploader.OperationUploader.errors_exist]: globalErrors?.length,
+  }).find(([, value]) => value)?.[0];
 
-  const isUploadable = !nonUploadableReason
+  const isUploadable = !nonUploadableReason;
 
-  const { data: levels, error: levelError } = useLevels({ suspense: true })
+  const { data: levels, error: levelError } = useLevels({ suspense: true });
 
   if (levelError) {
-    setGlobalErrors([levelError.message])
+    setGlobalErrors([levelError.message]);
   }
 
   const handleFileSelect = async (event: React.FormEvent<HTMLInputElement>) => {
-    setGlobalErrors(null)
+    setGlobalErrors(null);
 
     if (event.currentTarget.files?.length) {
-      setIsProcessing(true)
+      setIsProcessing(true);
 
       const toFileEntry = async (file: File): Promise<FileEntry> => {
-        const entry: FileEntry = { file }
+        const entry: FileEntry = { file };
 
         try {
-          const parsed = await parseOperationFile(file)
-          const patched = patchOperation(parsed, levels)
+          const parsed = await parseOperationFile(file);
+          const patched = patchOperation(parsed, levels);
 
-          const baseOperation = parseOperationLoose(patched)
-          const editorOperation = toEditorOperation(baseOperation)
+          const baseOperation = parseOperationLoose(patched);
+          const editorOperation = toEditorOperation(baseOperation);
 
           if (Array.isArray((patched as { actions?: unknown }).actions)) {
-            validateOperation(patched)
+            validateOperation(patched);
           }
 
           const selectedLevel = findLevelByStageName(
             levels,
-            (baseOperation as any).stageName ??
-              (baseOperation as any).stage_name ??
-              '',
-          )
-          entry.operation = await toSimingOperationRemote(
-            baseOperation,
-            editorOperation,
-            { level: selectedLevel },
-          )
+            (baseOperation as any).stageName ?? (baseOperation as any).stage_name ?? "",
+          );
+          entry.operation = await toSimingOperationRemote(baseOperation, editorOperation, {
+            level: selectedLevel,
+          });
         } catch (e) {
-          entry.error = formatError(e)
-          console.warn(e)
+          entry.error = formatError(e);
+          console.warn(e);
         }
 
-        return entry
-      }
+        return entry;
+      };
 
-      setFiles(
-        await Promise.all(Array.from(event.currentTarget.files, toFileEntry)),
-      )
+      setFiles(await Promise.all(Array.from(event.currentTarget.files, toFileEntry)));
 
-      setIsProcessing(false)
+      setIsProcessing(false);
     } else {
-      setFiles([])
+      setFiles([]);
     }
-  }
+  };
 
   const handleOperationSubmit = async () => {
     if (!isUploadable || !files.length) {
-      return
+      return;
     }
 
-    setIsUploading(true)
+    setIsUploading(true);
     try {
-      let successCount = 0
+      let successCount = 0;
 
       await Promise.allSettled(
         files.map((file) =>
@@ -139,37 +124,37 @@ export const OperationUploader: ComponentType = withSuspensable(() => {
             status: operationStatus,
           })
             .then(() => {
-              successCount++
+              successCount++;
               updateFileWhere((candidate) => candidate === file, {
                 ...file,
                 uploaded: true,
-              })
+              });
             })
             .catch((e) => {
-              console.warn(e)
+              console.warn(e);
               updateFileWhere((candidate) => candidate === file, {
                 ...file,
                 error: t.components.uploader.OperationUploader.upload_failed({
                   error: formatError(e),
                 }),
-              })
+              });
             }),
         ),
-      )
+      );
 
-      const errorCount = files.length - successCount
+      const errorCount = files.length - successCount;
 
       AppToaster.show({
-        intent: 'success',
+        intent: "success",
         message: t.components.uploader.OperationUploader.upload_complete({
           successCount,
           errorCount,
         }),
-      })
+      });
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
+  };
 
   return (
     <DrawerLayout
@@ -216,7 +201,7 @@ export const OperationUploader: ComponentType = withSuspensable(() => {
                 : t.components.uploader.OperationUploader.choose_files
             }
             inputProps={{
-              accept: '.json',
+              accept: ".json",
               multiple: true,
             }}
             onInputChange={handleFileSelect}
@@ -231,9 +216,7 @@ export const OperationUploader: ComponentType = withSuspensable(() => {
           content={nonUploadableReason}
         >
           {(() => {
-            const settledCount = files.filter(
-              (file) => file.uploaded || file.error,
-            ).length
+            const settledCount = files.filter((file) => file.uploaded || file.error).length;
 
             return (
               // do not use <Button> because its disabled state does not work well with Tooltip
@@ -243,12 +226,9 @@ export const OperationUploader: ComponentType = withSuspensable(() => {
                 disabled={!isUploadable}
                 icon={
                   isUploading ? (
-                    <Spinner
-                      size={SpinnerSize.SMALL}
-                      value={settledCount / files.length}
-                    />
+                    <Spinner size={SpinnerSize.SMALL} value={settledCount / files.length} />
                   ) : (
-                    'cloud-upload'
+                    "cloud-upload"
                   )
                 }
                 onClick={handleOperationSubmit}
@@ -257,7 +237,7 @@ export const OperationUploader: ComponentType = withSuspensable(() => {
                   ? `${settledCount}/${files.length}`
                   : t.components.uploader.OperationUploader.upload}
               </AnchorButton>
-            )
+            );
           })()}
         </Tooltip2>
 
@@ -284,13 +264,12 @@ export const OperationUploader: ComponentType = withSuspensable(() => {
             className="mt-2"
             title={file.name}
             key={index}
-            intent={uploaded ? 'success' : error ? 'danger' : 'none'}
-            icon={!uploaded && !error ? 'document' : undefined}
+            intent={uploaded ? "success" : error ? "danger" : "none"}
+            icon={!uploaded && !error ? "document" : undefined}
           >
             <p className="text-black/60">
               {operation
-                ? operation.doc.title ||
-                  t.components.uploader.OperationUploader.untitled
+                ? operation.doc.title || t.components.uploader.OperationUploader.untitled
                 : null}
             </p>
             {error && <p className="text-red-500">{error}</p>}
@@ -298,5 +277,5 @@ export const OperationUploader: ComponentType = withSuspensable(() => {
         ))}
       </div>
     </DrawerLayout>
-  )
-})
+  );
+});

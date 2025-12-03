@@ -1,13 +1,13 @@
-import { Button, IconName } from '@blueprintjs/core'
+import { Button, IconName } from "@blueprintjs/core";
 
-import { useEffect, useRef, useState } from 'react'
-import { Control, FieldValues, useFormState } from 'react-hook-form'
+import { useEffect, useRef, useState } from "react";
+import { Control, FieldValues, useFormState } from "react-hook-form";
 
 interface FormSubmitButtonProps<T extends FieldValues> {
-  className?: string
-  control: Control<T>
-  icon?: IconName
-  children?: React.ReactNode
+  className?: string;
+  control: Control<T>;
+  icon?: IconName;
+  children?: React.ReactNode;
 }
 
 export const FormSubmitButton = <T extends FieldValues>({
@@ -16,35 +16,35 @@ export const FormSubmitButton = <T extends FieldValues>({
   icon,
   children,
 }: FormSubmitButtonProps<T>) => {
-  const { isSubmitSuccessful } = useFormState({ control })
+  const { isSubmitSuccessful } = useFormState({ control });
 
-  const [deferredSuccessful, setDeferredSuccessful] = useState(false)
-  const resetTimer = useRef(-1)
+  const [deferredSuccessful, setDeferredSuccessful] = useState(false);
+  const resetTimer = useRef(-1);
 
   useEffect(() => {
     if (isSubmitSuccessful) {
-      setDeferredSuccessful(true)
+      setDeferredSuccessful(true);
 
       resetTimer.current = window.setTimeout(() => {
-        setDeferredSuccessful(false)
-      }, 1000)
+        setDeferredSuccessful(false);
+      }, 1000);
     } else {
-      setDeferredSuccessful(false)
+      setDeferredSuccessful(false);
     }
 
     return () => {
-      clearTimeout(resetTimer.current)
-    }
-  }, [isSubmitSuccessful])
+      clearTimeout(resetTimer.current);
+    };
+  }, [isSubmitSuccessful]);
 
   return (
     <Button
       className={className}
-      intent={deferredSuccessful ? 'success' : 'primary'}
+      intent={deferredSuccessful ? "success" : "primary"}
       type="submit"
-      icon={deferredSuccessful ? 'tick' : icon}
+      icon={deferredSuccessful ? "tick" : icon}
     >
       {children}
     </Button>
-  )
-}
+  );
+};

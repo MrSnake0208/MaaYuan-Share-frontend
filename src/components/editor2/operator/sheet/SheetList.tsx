@@ -1,46 +1,46 @@
-import { Button } from '@blueprintjs/core'
-import { Popover2 } from '@blueprintjs/popover2'
+import { Button } from "@blueprintjs/core";
+import { Popover2 } from "@blueprintjs/popover2";
 
-import { FC, useCallback, useEffect, useRef } from 'react'
+import { FC, useCallback, useEffect, useRef } from "react";
 
-import { OperatorBackToTop } from 'components/editor/operator/sheet/sheetOperator/toolBox/OperatorBackToTop'
-import { OperatorMutipleSelect } from 'components/editor/operator/sheet/sheetOperator/toolBox/OperatorMutipleSelect'
-import { OperatorRaritySelect } from 'components/editor/operator/sheet/sheetOperator/toolBox/OperatorRaritySelect'
+import { OperatorBackToTop } from "components/editor/operator/sheet/sheetOperator/toolBox/OperatorBackToTop";
+import { OperatorMutipleSelect } from "components/editor/operator/sheet/sheetOperator/toolBox/OperatorMutipleSelect";
+import { OperatorRaritySelect } from "components/editor/operator/sheet/sheetOperator/toolBox/OperatorRaritySelect";
 
-import { OperatorNoData } from '../../../editor/operator/sheet/SheetNoneData'
+import { OperatorNoData } from "../../../editor/operator/sheet/SheetNoneData";
 import {
   defaultPagination,
   useOperatorFilterProvider,
-} from '../../../editor/operator/sheet/sheetOperator/SheetOperatorFilterProvider'
-import { SheetOperatorItem } from '../../../editor/operator/sheet/sheetOperator/SheetOperatorItem'
-import { ShowMore } from '../../../editor/operator/sheet/sheetOperator/ShowMore'
-import { ProfClassification } from './ProfClassification'
+} from "../../../editor/operator/sheet/sheetOperator/SheetOperatorFilterProvider";
+import { SheetOperatorItem } from "../../../editor/operator/sheet/sheetOperator/SheetOperatorItem";
+import { ShowMore } from "../../../editor/operator/sheet/sheetOperator/ShowMore";
+import { ProfClassification } from "./ProfClassification";
 
 interface SheetListProps {}
 
 export const SheetList: FC<SheetListProps> = () => {
-  const operatorScrollRef = useRef<HTMLDivElement>(null)
+  const operatorScrollRef = useRef<HTMLDivElement>(null);
 
   const toTop = useCallback(
     () =>
       operatorScrollRef?.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-        inline: 'nearest',
+        behavior: "smooth",
+        block: "start",
+        inline: "nearest",
       }),
     [operatorScrollRef],
-  )
+  );
 
   const {
     operatorFiltered: { data: operatorFilteredData },
     useProfFilterState: [{ selectedProf }],
     usePaginationFilterState: [_, setPaginationFilter],
-  } = useOperatorFilterProvider()
+  } = useOperatorFilterProvider();
 
   useEffect(() => {
-    toTop()
-    setPaginationFilter(defaultPagination)
-  }, [selectedProf, setPaginationFilter, toTop])
+    toTop();
+    setPaginationFilter(defaultPagination);
+  }, [selectedProf, setPaginationFilter, toTop]);
 
   return (
     <div className="flex flex-col h-full">
@@ -54,10 +54,7 @@ export const SheetList: FC<SheetListProps> = () => {
                 ref={operatorScrollRef}
               >
                 {operatorFilteredData.map(({ name }, index) => (
-                  <div
-                    className="flex items-center justify-center w-full h-25"
-                    key={index}
-                  >
+                  <div className="flex items-center justify-center w-full h-25" key={index}>
                     <SheetOperatorItem name={name} showSkillTrigger={false} />
                   </div>
                 ))}
@@ -88,5 +85,5 @@ export const SheetList: FC<SheetListProps> = () => {
       </div>
       <ProfClassification />
     </div>
-  )
-}
+  );
+};

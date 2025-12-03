@@ -1,41 +1,27 @@
-import {
-  Alert,
-  Button,
-  Card,
-  Collapse,
-  Icon,
-  Intent,
-  Menu,
-  MenuItem,
-} from '@blueprintjs/core'
-import { Popover2 } from '@blueprintjs/popover2'
+import { Alert, Button, Card, Collapse, Icon, Intent, Menu, MenuItem } from "@blueprintjs/core";
+import { Popover2 } from "@blueprintjs/popover2";
 
-import clsx from 'clsx'
-import { useAtom } from 'jotai'
-import { cloneDeep, isEqual, omit } from 'lodash-es'
-import { FC, ReactNode, useRef, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import clsx from "clsx";
+import { useAtom } from "jotai";
+import { cloneDeep, isEqual, omit } from "lodash-es";
+import { FC, ReactNode, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 
-import { CardDeleteOption } from 'components/editor/CardOptions'
-import { favGroupAtom, ignoreKeyDic } from 'store/useFavGroups'
+import { CardDeleteOption } from "components/editor/CardOptions";
+import { favGroupAtom, ignoreKeyDic } from "store/useFavGroups";
 
-import { useTranslation } from '../../../../../i18n/i18n'
-import { Group, Operator } from '../../EditorSheet'
-import { GroupListModifyProp } from '../SheetGroup'
-import { OperatorNoData } from '../SheetNoneData'
-import { useSheet } from '../SheetProvider'
-import { CollapseButton, SheetGroupOperatorSelectProp } from './CollapseButton'
-import {
-  OperatorInGroupItem,
-  OperatorInGroupItemProp,
-} from './OperatorInGroupItem'
-import { SheetOperatorEditor } from './SheetOperatorEditor'
+import { useTranslation } from "../../../../../i18n/i18n";
+import { Group, Operator } from "../../EditorSheet";
+import { GroupListModifyProp } from "../SheetGroup";
+import { OperatorNoData } from "../SheetNoneData";
+import { useSheet } from "../SheetProvider";
+import { CollapseButton, SheetGroupOperatorSelectProp } from "./CollapseButton";
+import { OperatorInGroupItem, OperatorInGroupItemProp } from "./OperatorInGroupItem";
+import { SheetOperatorEditor } from "./SheetOperatorEditor";
 
-export interface GroupItemProps
-  extends SheetGroupOperatorSelectProp,
-    GroupListModifyProp {
-  exist: boolean
-  pinned: boolean
+export interface GroupItemProps extends SheetGroupOperatorSelectProp, GroupListModifyProp {
+  exist: boolean;
+  pinned: boolean;
 }
 
 const GroupTitle = ({
@@ -43,41 +29,41 @@ const GroupTitle = ({
   // editable,
   renameSubmit,
 }: {
-  editable: boolean
-  renameSubmit?: (newName: string) => void
-  groupTitle: string
+  editable: boolean;
+  renameSubmit?: (newName: string) => void;
+  groupTitle: string;
 }) => {
-  const t = useTranslation()
-  const editable = !!renameSubmit
-  const [editName, setEditName] = useState('')
-  const [nameEditState, setNameEditState] = useState(false)
-  const [alertState, setAlertState] = useState(false)
-  const { register, handleSubmit, reset } = useForm<Group>()
+  const t = useTranslation();
+  const editable = !!renameSubmit;
+  const [editName, setEditName] = useState("");
+  const [nameEditState, setNameEditState] = useState(false);
+  const [alertState, setAlertState] = useState(false);
+  const { register, handleSubmit, reset } = useForm<Group>();
   // handle differ priority of capture events
-  const ignoreBlur = useRef(false)
+  const ignoreBlur = useRef(false);
   const blurHandle = () => {
     if (!ignoreBlur.current) {
-      if (groupTitle !== editName && editName) setAlertState(true)
-      setNameEditState(false)
-    } else ignoreBlur.current = false
-  }
+      if (groupTitle !== editName && editName) setAlertState(true);
+      setNameEditState(false);
+    } else ignoreBlur.current = false;
+  };
   const editCancel = () => {
-    setNameEditState(false)
-    setEditName(groupTitle)
-    reset()
-    setAlertState(false)
-  }
-  const inputRef = useRef<HTMLInputElement | null>(null)
-  const { ref, ...registerRest } = register('name', {
+    setNameEditState(false);
+    setEditName(groupTitle);
+    reset();
+    setAlertState(false);
+  };
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const { ref, ...registerRest } = register("name", {
     onBlur: blurHandle,
     value: editName,
     onChange: (e) => setEditName(e.target.value),
-  })
+  });
   const editContinue = () => {
-    setNameEditState(true)
-    setAlertState(false)
-    inputRef.current?.focus()
-  }
+    setNameEditState(true);
+    setAlertState(false);
+    inputRef.current?.focus();
+  };
 
   return (
     <>
@@ -85,40 +71,28 @@ const GroupTitle = ({
         onConfirm={editContinue}
         intent={Intent.DANGER}
         onCancel={editCancel}
-        confirmButtonText={
-          t.components.editor.operator.sheet.sheetGroup.SheetGroupItem.cancel
-        }
-        cancelButtonText={
-          t.components.editor.operator.sheet.sheetGroup.SheetGroupItem.confirm
-        }
+        confirmButtonText={t.components.editor.operator.sheet.sheetGroup.SheetGroupItem.cancel}
+        cancelButtonText={t.components.editor.operator.sheet.sheetGroup.SheetGroupItem.confirm}
         isOpen={alertState}
       >
-        <p>
-          {
-            t.components.editor.operator.sheet.sheetGroup.SheetGroupItem
-              .unsaved_changes
-          }
-        </p>
+        <p>{t.components.editor.operator.sheet.sheetGroup.SheetGroupItem.unsaved_changes}</p>
       </Alert>
       <form
         className="flex items-center"
         onSubmit={handleSubmit(() => {
-          ignoreBlur.current = true
-          renameSubmit?.(editName || groupTitle)
-          setNameEditState(false)
-          inputRef.current?.blur()
+          ignoreBlur.current = true;
+          renameSubmit?.(editName || groupTitle);
+          setNameEditState(false);
+          inputRef.current?.blur();
         })}
       >
         <div className="flex items-center w-full">
           <Icon icon="people" />
           <input
-            title={
-              t.components.editor.operator.sheet.sheetGroup.SheetGroupItem
-                .edit_group_name
-            }
+            title={t.components.editor.operator.sheet.sheetGroup.SheetGroupItem.edit_group_name}
             className={clsx(
-              'ml-1 w-full bg-transparent text-xs',
-              !editable && 'placeholder:text-current',
+              "ml-1 w-full bg-transparent text-xs",
+              !editable && "placeholder:text-current",
             )}
             autoComplete="off"
             disabled={!editable}
@@ -126,39 +100,31 @@ const GroupTitle = ({
             placeholder={groupTitle}
             type="text"
             ref={(e) => {
-              ref(e)
-              inputRef.current = e
+              ref(e);
+              inputRef.current = e;
             }}
             onKeyDown={(e) => {
-              if (e.key.toLowerCase() === 'enter') e.preventDefault()
+              if (e.key.toLowerCase() === "enter") e.preventDefault();
             }}
             {...registerRest}
           />
           {nameEditState && (
-            <Button
-              minimal
-              icon="tick"
-              type="submit"
-              onMouseDown={(e) => e.preventDefault()}
-            />
+            <Button minimal icon="tick" type="submit" onMouseDown={(e) => e.preventDefault()} />
           )}
         </div>
       </form>
     </>
-  )
-}
+  );
+};
 
-type ItemType = 'recommend' | 'selected' | 'fav'
+type ItemType = "recommend" | "selected" | "fav";
 
 export interface SheetGroupItemProp {
-  groupInfo: Group
-  itemType: ItemType
+  groupInfo: Group;
+  itemType: ItemType;
 }
 
-export const SheetGroupItem: FC<SheetGroupItemProp> = ({
-  groupInfo,
-  itemType,
-}) => {
+export const SheetGroupItem: FC<SheetGroupItemProp> = ({ groupInfo, itemType }) => {
   const {
     selected,
     onGroupNameChange,
@@ -168,19 +134,13 @@ export const SheetGroupItem: FC<SheetGroupItemProp> = ({
   } = useSheetGroupItemController({
     groupInfo,
     itemType,
-  })
-  const [operatorCollapse, setOperatorCollapse] = useState(
-    defaultOperatorCollapseOpen,
-  )
+  });
+  const [operatorCollapse, setOperatorCollapse] = useState(defaultOperatorCollapseOpen);
 
   return (
     <Card interactive={!selected} className="mt-1 mx-0.5">
       <div className="flex items-center justify-between">
-        <GroupTitle
-          groupTitle={groupInfo.name}
-          editable
-          renameSubmit={onGroupNameChange}
-        />
+        <GroupTitle groupTitle={groupInfo.name} editable renameSubmit={onGroupNameChange} />
         <div className="flex items-center">
           <CollapseButton
             isCollapse={operatorCollapse}
@@ -204,65 +164,52 @@ export const SheetGroupItem: FC<SheetGroupItemProp> = ({
         </div>
       </Collapse>
     </Card>
-  )
-}
+  );
+};
 
 type SheetGroupItemController = {
-  selected: boolean
-  onGroupNameChange: ((name: string) => void) | undefined
-  defaultOperatorCollapseOpen: boolean
-  onOperatorSkillChange: OperatorInGroupItemProp['onOperatorSkillChange']
-  ActionList: ReactNode
-}
+  selected: boolean;
+  onGroupNameChange: ((name: string) => void) | undefined;
+  defaultOperatorCollapseOpen: boolean;
+  onOperatorSkillChange: OperatorInGroupItemProp["onOperatorSkillChange"];
+  ActionList: ReactNode;
+};
 
 const useSheetGroupItemController = ({
   groupInfo: { name, opers = [], ...rest },
   itemType,
 }: SheetGroupItemProp): SheetGroupItemController => {
-  const t = useTranslation()
-  const { submitGroupInSheet, removeGroup, existedGroups } = useSheet()
-  const [favGroup, setFavGroup] = useAtom(favGroupAtom)
+  const t = useTranslation();
+  const { submitGroupInSheet, removeGroup, existedGroups } = useSheet();
+  const [favGroup, setFavGroup] = useAtom(favGroupAtom);
 
   switch (itemType) {
-    case 'selected': {
-      const findFavByName = favGroup.find(
-        ({ name: nameInFav }) => nameInFav === name,
-      )
-      const pinned = isEqual({ name, opers }, findFavByName)
+    case "selected": {
+      const findFavByName = favGroup.find(({ name: nameInFav }) => nameInFav === name);
+      const pinned = isEqual({ name, opers }, findFavByName);
 
-      const onPinChange: GroupPinOptionProp['onPinChange'] = () => {
-        const newFavGroup = [
-          ...favGroup.filter(({ name: nameInFav }) => nameInFav !== name),
-        ]
-        setFavGroup(
-          pinned
-            ? newFavGroup
-            : [...newFavGroup, cloneDeep({ name, opers, ...rest })],
-        )
-      }
+      const onPinChange: GroupPinOptionProp["onPinChange"] = () => {
+        const newFavGroup = [...favGroup.filter(({ name: nameInFav }) => nameInFav !== name)];
+        setFavGroup(pinned ? newFavGroup : [...newFavGroup, cloneDeep({ name, opers, ...rest })]);
+      };
       return {
         selected: true,
-        onGroupNameChange: (name: string) =>
-          submitGroupInSheet({ opers, ...rest, name }),
+        onGroupNameChange: (name: string) => submitGroupInSheet({ opers, ...rest, name }),
         defaultOperatorCollapseOpen: true,
         onOperatorSkillChange: (operator: Operator) => {
           opers.splice(
-            opers.findIndex(
-              ({ name: nameInExist }) => nameInExist === operator.name,
-            ),
+            opers.findIndex(({ name: nameInExist }) => nameInExist === operator.name),
             1,
             operator,
-          )
-          submitGroupInSheet({ opers, name, ...rest })
+          );
+          submitGroupInSheet({ opers, name, ...rest });
         },
         ActionList: (
           <>
             <CardDeleteOption
               onClick={() =>
                 removeGroup(
-                  existedGroups.findIndex(
-                    ({ name: nameInExist }) => nameInExist === name,
-                  ),
+                  existedGroups.findIndex(({ name: nameInExist }) => nameInExist === name),
                 )
               }
             />
@@ -273,9 +220,9 @@ const useSheetGroupItemController = ({
             />
           </>
         ),
-      }
+      };
     }
-    case 'recommend': {
+    case "recommend": {
       return {
         selected: false,
         onGroupNameChange: undefined,
@@ -287,27 +234,20 @@ const useSheetGroupItemController = ({
               minimal
               icon="arrow-left"
               title={
-                t.components.editor.operator.sheet.sheetGroup.SheetGroupItem
-                  .use_recommended_group
+                t.components.editor.operator.sheet.sheetGroup.SheetGroupItem.use_recommended_group
               }
               onClick={() => submitGroupInSheet({ name, opers })}
             />
           </>
         ),
-      }
+      };
     }
-    case 'fav': {
-      const selected = existedGroups.find(
-        ({ name: nameInExist }) => nameInExist === name,
-      )
-      const equal = selected
-        ? isEqual(omit(selected, ...ignoreKeyDic), { name, opers })
-        : false
-      const onPinChange: GroupPinOptionProp['onPinChange'] = () => {
-        setFavGroup(
-          favGroup.filter(({ name: nameInFav }) => nameInFav !== name),
-        )
-      }
+    case "fav": {
+      const selected = existedGroups.find(({ name: nameInExist }) => nameInExist === name);
+      const equal = selected ? isEqual(omit(selected, ...ignoreKeyDic), { name, opers }) : false;
+      const onPinChange: GroupPinOptionProp["onPinChange"] = () => {
+        setFavGroup(favGroup.filter(({ name: nameInFav }) => nameInFav !== name));
+      };
 
       return {
         selected: false,
@@ -319,34 +259,29 @@ const useSheetGroupItemController = ({
         defaultOperatorCollapseOpen: false,
         onOperatorSkillChange: (operator: Operator) => {
           opers.splice(
-            opers.findIndex(
-              ({ name: nameInExist }) => nameInExist === operator.name,
-            ),
+            opers.findIndex(({ name: nameInExist }) => nameInExist === operator.name),
             1,
             operator,
-          )
+          );
           favGroup.splice(
-            favGroup.findIndex(
-              ({ name: nameInFav }) => nameInFav === operator.name,
-            ),
+            favGroup.findIndex(({ name: nameInFav }) => nameInFav === operator.name),
             1,
             { name, opers, ...rest },
-          )
-          setFavGroup(favGroup)
+          );
+          setFavGroup(favGroup);
         },
         ActionList: (
           <>
             <Button
               minimal
               disabled={!!selected}
-              icon={selected && equal ? 'tick' : 'arrow-left'}
+              icon={selected && equal ? "tick" : "arrow-left"}
               title={
                 selected
                   ? equal
-                    ? t.components.editor.operator.sheet.sheetGroup
-                        .SheetGroupItem.already_added
-                    : t.components.editor.operator.sheet.sheetGroup
-                        .SheetGroupItem.same_name_detected
+                    ? t.components.editor.operator.sheet.sheetGroup.SheetGroupItem.already_added
+                    : t.components.editor.operator.sheet.sheetGroup.SheetGroupItem
+                        .same_name_detected
                   : t.components.editor.operator.sheet.sheetGroup.SheetGroupItem
                       .use_recommended_group
               }
@@ -355,7 +290,7 @@ const useSheetGroupItemController = ({
             <GroupPinOption pinned onPinChange={onPinChange} />
           </>
         ),
-      }
+      };
     }
     default:
       return {
@@ -364,31 +299,24 @@ const useSheetGroupItemController = ({
         defaultOperatorCollapseOpen: false,
         onOperatorSkillChange: undefined,
         ActionList: <></>,
-      }
+      };
   }
-}
+};
 
 interface GroupPinOptionProp {
-  pinned: boolean
-  onPinChange?: () => void
-  isDuplicate?: boolean
+  pinned: boolean;
+  onPinChange?: () => void;
+  isDuplicate?: boolean;
 }
 
-const GroupPinOption: FC<GroupPinOptionProp> = ({
-  pinned,
-  onPinChange,
-  isDuplicate = false,
-}) => {
-  const t = useTranslation()
+const GroupPinOption: FC<GroupPinOptionProp> = ({ pinned, onPinChange, isDuplicate = false }) => {
+  const t = useTranslation();
 
   const pinText = pinned
-    ? t.components.editor.operator.sheet.sheetGroup.SheetGroupItem
-        .remove_from_favorites
+    ? t.components.editor.operator.sheet.sheetGroup.SheetGroupItem.remove_from_favorites
     : isDuplicate
-      ? t.components.editor.operator.sheet.sheetGroup.SheetGroupItem
-          .will_replace_same_name
-      : t.components.editor.operator.sheet.sheetGroup.SheetGroupItem
-          .add_to_favorites
+      ? t.components.editor.operator.sheet.sheetGroup.SheetGroupItem.will_replace_same_name
+      : t.components.editor.operator.sheet.sheetGroup.SheetGroupItem.add_to_favorites;
 
   return (
     <Popover2
@@ -401,7 +329,7 @@ const GroupPinOption: FC<GroupPinOptionProp> = ({
         <Menu className="p-0">
           <MenuItem
             text={pinText}
-            icon={pinned ? 'star' : isDuplicate ? 'warning-sign' : 'star-empty'}
+            icon={pinned ? "star" : isDuplicate ? "warning-sign" : "star-empty"}
             onClick={onPinChange}
           />
         </Menu>
@@ -409,10 +337,10 @@ const GroupPinOption: FC<GroupPinOptionProp> = ({
     >
       <Button
         minimal
-        icon={pinned ? 'star' : 'star-empty'}
+        icon={pinned ? "star" : "star-empty"}
         title={pinText}
         onClick={pinned || isDuplicate ? undefined : onPinChange}
       />
     </Popover2>
-  )
-}
+  );
+};

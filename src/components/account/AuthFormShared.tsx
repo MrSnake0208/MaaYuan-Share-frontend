@@ -1,26 +1,16 @@
-import { InputGroup, InputGroupProps2 } from '@blueprintjs/core'
+import { InputGroup, InputGroupProps2 } from "@blueprintjs/core";
 
-import {
-  ControllerProps,
-  FieldValues,
-  Path,
-  UseControllerProps,
-} from 'react-hook-form'
+import { ControllerProps, FieldValues, Path, UseControllerProps } from "react-hook-form";
 
-import { FormField, FormFieldProps } from 'components/FormField'
-import { REGEX_EMAIL, REGEX_USERNAME } from 'utils/regexes'
+import { FormField, FormFieldProps } from "components/FormField";
+import { REGEX_EMAIL, REGEX_USERNAME } from "utils/regexes";
 
-import { useTranslation } from '../../i18n/i18n'
+import { useTranslation } from "../../i18n/i18n";
 
-export type RuleKeys =
-  | 'email'
-  | 'password'
-  | 'username'
-  | 'registertoken'
-  | 'registercode'
+export type RuleKeys = "email" | "password" | "username" | "registertoken" | "registercode";
 
-function useRules(): Record<RuleKeys, UseControllerProps['rules']> {
-  const t = useTranslation()
+function useRules(): Record<RuleKeys, UseControllerProps["rules"]> {
+  const t = useTranslation();
   return {
     email: {
       required: t.components.account.AuthFormShared.email_required,
@@ -69,20 +59,18 @@ function useRules(): Record<RuleKeys, UseControllerProps['rules']> {
     registercode: {
       required: t.components.account.AuthFormShared.registration_code_required,
     },
-  }
+  };
 }
 
-export type AuthFormFieldProps<
-  T extends FieldValues,
-  P extends Path<T> = Path<T>,
-> = Pick<FormFieldProps<T, P>, 'control' | 'error' | 'field'> & {
-  label?: string
-  register?: boolean
-  autoComplete?: string
-  inputGroupProps?: (
-    ...params: Parameters<ControllerProps<T, P>['render']>
-  ) => InputGroupProps2
-}
+export type AuthFormFieldProps<T extends FieldValues, P extends Path<T> = Path<T>> = Pick<
+  FormFieldProps<T, P>,
+  "control" | "error" | "field"
+> & {
+  label?: string;
+  register?: boolean;
+  autoComplete?: string;
+  inputGroupProps?: (...params: Parameters<ControllerProps<T, P>["render"]>) => InputGroupProps2;
+};
 
 export const AuthFormEmailField = <T extends FieldValues>({
   label,
@@ -90,12 +78,12 @@ export const AuthFormEmailField = <T extends FieldValues>({
   error,
   field,
   register,
-  autoComplete = 'email',
+  autoComplete = "email",
   inputGroupProps,
 }: AuthFormFieldProps<T>) => {
-  const t = useTranslation()
-  const rules = useRules()
-  type RenderParams = Parameters<ControllerProps<T, typeof field>['render']>
+  const t = useTranslation();
+  const rules = useRules();
+  type RenderParams = Parameters<ControllerProps<T, typeof field>["render"]>;
 
   return (
     <FormField<T, typeof field>
@@ -104,7 +92,7 @@ export const AuthFormEmailField = <T extends FieldValues>({
       control={control}
       error={error}
       ControllerProps={{
-        rules: rules.email as ControllerProps<T, typeof field>['rules'],
+        rules: rules.email as ControllerProps<T, typeof field>["rules"],
         render: (renderProps: RenderParams[0]) => (
           <InputGroup
             id={field}
@@ -113,19 +101,17 @@ export const AuthFormEmailField = <T extends FieldValues>({
             autoFocus
             autoComplete={autoComplete}
             {...renderProps.field}
-            value={renderProps.field.value || ''}
+            value={renderProps.field.value || ""}
             {...inputGroupProps?.(renderProps)}
           />
         ),
       }}
       FormGroupProps={{
-        helperText:
-          register &&
-          t.components.account.AuthFormShared.email_verification_note,
+        helperText: register && t.components.account.AuthFormShared.email_verification_note,
       }}
     />
-  )
-}
+  );
+};
 
 export const AuthRegistrationTokenField = <T extends FieldValues>({
   label,
@@ -133,41 +119,38 @@ export const AuthRegistrationTokenField = <T extends FieldValues>({
   error,
   field,
   register,
-  autoComplete = '',
+  autoComplete = "",
   inputGroupProps,
 }: AuthFormFieldProps<T>) => {
-  const t = useTranslation()
-  const rules = useRules()
-  type RenderParams = Parameters<ControllerProps<T, typeof field>['render']>
+  const t = useTranslation();
+  const rules = useRules();
+  type RenderParams = Parameters<ControllerProps<T, typeof field>["render"]>;
 
   return (
     <FormField<T, typeof field>
-      label={
-        label || t.components.account.AuthFormShared.email_verification_code
-      }
+      label={label || t.components.account.AuthFormShared.email_verification_code}
       field={field}
       control={control}
       error={error}
       ControllerProps={{
-        rules: rules.registertoken as ControllerProps<T, typeof field>['rules'],
+        rules: rules.registertoken as ControllerProps<T, typeof field>["rules"],
         render: (renderProps: RenderParams[0]) => (
           <InputGroup
             id={field}
             placeholder="123456"
             autoComplete={autoComplete}
             {...renderProps.field}
-            value={renderProps.field.value || ''}
+            value={renderProps.field.value || ""}
             {...inputGroupProps?.(renderProps)}
           />
         ),
       }}
       FormGroupProps={{
-        helperText:
-          register && t.components.account.AuthFormShared.enter_email_code,
+        helperText: register && t.components.account.AuthFormShared.enter_email_code,
       }}
     />
-  )
-}
+  );
+};
 
 export const AuthRegistrationCodeField = <T extends FieldValues>({
   label,
@@ -175,12 +158,12 @@ export const AuthRegistrationCodeField = <T extends FieldValues>({
   error,
   field,
   register,
-  autoComplete = '',
+  autoComplete = "",
   inputGroupProps,
 }: AuthFormFieldProps<T>) => {
-  const t = useTranslation()
-  const rules = useRules()
-  type RenderParams = Parameters<ControllerProps<T, typeof field>['render']>
+  const t = useTranslation();
+  const rules = useRules();
+  type RenderParams = Parameters<ControllerProps<T, typeof field>["render"]>;
 
   return (
     <FormField<T, typeof field>
@@ -189,14 +172,14 @@ export const AuthRegistrationCodeField = <T extends FieldValues>({
       control={control}
       error={error}
       ControllerProps={{
-        rules: rules.registercode as ControllerProps<T, typeof field>['rules'],
+        rules: rules.registercode as ControllerProps<T, typeof field>["rules"],
         render: (renderProps: RenderParams[0]) => (
           <InputGroup
             id={field}
             placeholder={t.components.account.AuthFormShared.registration_code}
             autoComplete={autoComplete}
             {...renderProps.field}
-            value={renderProps.field.value || ''}
+            value={renderProps.field.value || ""}
             {...inputGroupProps?.(renderProps)}
           />
         ),
@@ -205,20 +188,20 @@ export const AuthRegistrationCodeField = <T extends FieldValues>({
         helperText: register ? undefined : undefined,
       }}
     />
-  )
-}
+  );
+};
 
 export const AuthFormPasswordField = <T extends FieldValues>({
   label,
   control,
   error,
   field,
-  autoComplete = 'current-password',
+  autoComplete = "current-password",
   inputGroupProps,
 }: AuthFormFieldProps<T>) => {
-  const t = useTranslation()
-  const rules = useRules()
-  type RenderParams = Parameters<ControllerProps<T, typeof field>['render']>
+  const t = useTranslation();
+  const rules = useRules();
+  type RenderParams = Parameters<ControllerProps<T, typeof field>["render"]>;
 
   return (
     <FormField<T, typeof field>
@@ -227,7 +210,7 @@ export const AuthFormPasswordField = <T extends FieldValues>({
       control={control}
       error={error}
       ControllerProps={{
-        rules: rules.password as ControllerProps<T, typeof field>['rules'],
+        rules: rules.password as ControllerProps<T, typeof field>["rules"],
         render: (renderProps: RenderParams[0]) => (
           <InputGroup
             id={field}
@@ -235,26 +218,26 @@ export const AuthFormPasswordField = <T extends FieldValues>({
             type="password"
             autoComplete={autoComplete}
             {...renderProps.field}
-            value={renderProps.field.value || ''}
+            value={renderProps.field.value || ""}
             {...inputGroupProps?.(renderProps)}
           />
         ),
       }}
     />
-  )
-}
+  );
+};
 
 export const AuthFormUsernameField = <T extends FieldValues>({
   label,
   control,
   error,
   field,
-  autoComplete = 'username',
+  autoComplete = "username",
   inputGroupProps,
 }: AuthFormFieldProps<T>) => {
-  const t = useTranslation()
-  const rules = useRules()
-  type RenderParams = Parameters<ControllerProps<T, typeof field>['render']>
+  const t = useTranslation();
+  const rules = useRules();
+  type RenderParams = Parameters<ControllerProps<T, typeof field>["render"]>;
 
   return (
     <FormField<T, typeof field>
@@ -263,18 +246,18 @@ export const AuthFormUsernameField = <T extends FieldValues>({
       control={control}
       error={error}
       ControllerProps={{
-        rules: rules.username as ControllerProps<T, typeof field>['rules'],
+        rules: rules.username as ControllerProps<T, typeof field>["rules"],
         render: (renderProps: RenderParams[0]) => (
           <InputGroup
             id={field}
             placeholder="绣球书法家"
             autoComplete={autoComplete}
             {...renderProps.field}
-            value={renderProps.field.value || ''}
+            value={renderProps.field.value || ""}
             {...inputGroupProps?.(renderProps)}
           />
         ),
       }}
     />
-  )
-}
+  );
+};

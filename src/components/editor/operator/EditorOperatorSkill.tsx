@@ -1,54 +1,50 @@
-import { Button, IconName, MenuItem } from '@blueprintjs/core'
-import { Select2 } from '@blueprintjs/select'
+import { Button, IconName, MenuItem } from "@blueprintjs/core";
+import { Select2 } from "@blueprintjs/select";
 
-import { useMemo } from 'react'
-import { useController } from 'react-hook-form'
+import { useMemo } from "react";
+import { useController } from "react-hook-form";
 
-import { EditorFieldProps } from 'components/editor/EditorFieldProps'
-import type { CopilotDocV1 } from 'models/copilot.schema'
+import { EditorFieldProps } from "components/editor/EditorFieldProps";
+import type { CopilotDocV1 } from "models/copilot.schema";
 
-import { useTranslation } from '../../../i18n/i18n'
+import { useTranslation } from "../../../i18n/i18n";
 
 interface EditorOperatorSkillChoice {
-  icon?: IconName
-  title: string
-  value: number | null
+  icon?: IconName;
+  title: string;
+  value: number | null;
 }
 
-interface EditorOperatorSkillProps
-  extends EditorFieldProps<CopilotDocV1.Operator, number> {}
+interface EditorOperatorSkillProps extends EditorFieldProps<CopilotDocV1.Operator, number> {}
 
-export const EditorOperatorSkill = ({
-  name,
-  control,
-}: EditorOperatorSkillProps) => {
-  const t = useTranslation()
+export const EditorOperatorSkill = ({ name, control }: EditorOperatorSkillProps) => {
+  const t = useTranslation();
 
   const {
     field: { onChange, onBlur, value, ref },
   } = useController({
     name,
     control,
-  })
+  });
 
   const items = useMemo<EditorOperatorSkillChoice[]>(
     () => [
       {
-        icon: 'cog',
+        icon: "cog",
         title: t.components.editor.operator.EditorOperatorSkill.skill_number({
           count: 1,
         }),
         value: 1,
       },
       {
-        icon: 'cog',
+        icon: "cog",
         title: t.components.editor.operator.EditorOperatorSkill.skill_number({
           count: 2,
         }),
         value: 2,
       },
       {
-        icon: 'cog',
+        icon: "cog",
         title: t.components.editor.operator.EditorOperatorSkill.skill_number({
           count: 3,
         }),
@@ -56,9 +52,9 @@ export const EditorOperatorSkill = ({
       },
     ],
     [t],
-  )
+  );
 
-  const selected = items.find((item) => item.value === (value ?? 1))
+  const selected = items.find((item) => item.value === (value ?? 1));
 
   return (
     <Select2<EditorOperatorSkillChoice>
@@ -76,7 +72,7 @@ export const EditorOperatorSkill = ({
         />
       )}
       onItemSelect={(item) => {
-        onChange(item.value)
+        onChange(item.value);
       }}
     >
       <Button
@@ -87,5 +83,5 @@ export const EditorOperatorSkill = ({
         ref={ref}
       />
     </Select2>
-  )
-}
+  );
+};

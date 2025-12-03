@@ -1,7 +1,7 @@
-import { FCC } from 'types'
+import { FCC } from "types";
 
 export const DrawerLayout: FCC<{
-  title: JSX.Element
+  title: JSX.Element;
 }> = ({ title, children }) => {
   return (
     <section className="flex flex-col relative h-full">
@@ -11,5 +11,5 @@ export const DrawerLayout: FCC<{
 
       {children}
     </section>
-  )
-}
+  );
+};

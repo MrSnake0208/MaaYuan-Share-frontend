@@ -1,10 +1,10 @@
-import { Button, NonIdealState } from '@blueprintjs/core'
-import { ErrorBoundary } from '@sentry/react'
+import { Button, NonIdealState } from "@blueprintjs/core";
+import { ErrorBoundary } from "@sentry/react";
 
-import { ComponentType } from 'react'
-import { FCC } from 'types'
+import { ComponentType } from "react";
+import { FCC } from "types";
 
-import { i18n } from '../i18n/i18n'
+import { i18n } from "../i18n/i18n";
 
 export const GlobalErrorBoundary: FCC = ({ children }) => {
   return (
@@ -15,11 +15,7 @@ export const GlobalErrorBoundary: FCC = ({ children }) => {
           title={i18n.essentials.error_occurred}
           description={i18n.essentials.render_error}
           action={
-            <Button
-              intent="primary"
-              icon="refresh"
-              onClick={() => window.location.reload()}
-            >
+            <Button intent="primary" icon="refresh" onClick={() => window.location.reload()}>
               {i18n.essentials.refresh_page}
             </Button>
           }
@@ -28,8 +24,8 @@ export const GlobalErrorBoundary: FCC = ({ children }) => {
     >
       {children}
     </ErrorBoundary>
-  )
-}
+  );
+};
 
 export function withGlobalErrorBoundary<P extends {}>(
   Component: ComponentType<P>,
@@ -39,12 +35,12 @@ export function withGlobalErrorBoundary<P extends {}>(
       <GlobalErrorBoundary>
         <Component {...props} />
       </GlobalErrorBoundary>
-    )
-  }
+    );
+  };
 
   // Format for display in DevTools
-  const name = Component.displayName || Component.name || 'Unknown'
-  Wrapped.displayName = `withGlobalErrorBoundary(${name})`
+  const name = Component.displayName || Component.name || "Unknown";
+  Wrapped.displayName = `withGlobalErrorBoundary(${name})`;
 
-  return Wrapped
+  return Wrapped;
 }

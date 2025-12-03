@@ -1,17 +1,17 @@
-import { Button, Drawer, DrawerSize } from '@blueprintjs/core'
+import { Button, Drawer, DrawerSize } from "@blueprintjs/core";
 
-import { FC, useState } from 'react'
+import { FC, useState } from "react";
 
-import { CopilotDocV1 } from 'models/copilot.schema'
+import { CopilotDocV1 } from "models/copilot.schema";
 
-import { useTranslation } from '../../../i18n/i18n'
-import { SheetGroupContainer } from './sheet/SheetGroup'
-import { SheetOperatorContainer } from './sheet/SheetOperator'
-import { SheetProvider, SheetProviderProp } from './sheet/SheetProvider'
+import { useTranslation } from "../../../i18n/i18n";
+import { SheetGroupContainer } from "./sheet/SheetGroup";
+import { SheetOperatorContainer } from "./sheet/SheetOperator";
+import { SheetProvider, SheetProviderProp } from "./sheet/SheetProvider";
 
-type EditorSheetProps = Omit<SheetProviderProp, 'children'>
-export type Group = CopilotDocV1.Group
-export type Operator = CopilotDocV1.Operator
+type EditorSheetProps = Omit<SheetProviderProp, "children">;
+export type Group = CopilotDocV1.Group;
+export type Operator = CopilotDocV1.Operator;
 
 const EditorOperatorSheet = (sheetProps: EditorSheetProps) => (
   <SheetProvider {...sheetProps}>
@@ -20,11 +20,11 @@ const EditorOperatorSheet = (sheetProps: EditorSheetProps) => (
       <SheetGroupContainer />
     </article>
   </SheetProvider>
-)
+);
 
 export const EditorSheetTrigger: FC<EditorSheetProps> = (sheetProps) => {
-  const t = useTranslation()
-  const [open, setOpen] = useState(false)
+  const t = useTranslation();
+  const [open, setOpen] = useState(false);
 
   return (
     <>
@@ -42,5 +42,5 @@ export const EditorSheetTrigger: FC<EditorSheetProps> = (sheetProps) => {
         fill
       />
     </>
-  )
-}
+  );
+};

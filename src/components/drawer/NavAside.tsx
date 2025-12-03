@@ -1,29 +1,29 @@
-import { Drawer, Menu, MenuDivider } from '@blueprintjs/core'
-import { MenuItem2 } from '@blueprintjs/popover2'
+import { Drawer, Menu, MenuDivider } from "@blueprintjs/core";
+import { MenuItem2 } from "@blueprintjs/popover2";
 
-import { useLinks } from 'hooks/useLinks'
-import { useAtomValue, useSetAtom } from 'jotai'
-import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { useLinks } from "hooks/useLinks";
+import { useAtomValue, useSetAtom } from "jotai";
+import { useState } from "react";
+import { NavLink } from "react-router-dom";
 
-import { navAtom, toggleExpandNavAtom } from 'store/nav'
+import { navAtom, toggleExpandNavAtom } from "store/nav";
 
-import { useTranslation } from '../../i18n/i18n'
-import { useCurrentSize } from '../../utils/useCurrenSize'
-import { AnnPanel } from '../announcement/AnnPanel'
-import { OperationSetEditorDialog } from '../operation-set/OperationSetEditor'
+import { useTranslation } from "../../i18n/i18n";
+import { useCurrentSize } from "../../utils/useCurrenSize";
+import { AnnPanel } from "../announcement/AnnPanel";
+import { OperationSetEditorDialog } from "../operation-set/OperationSetEditor";
 
 export const NavAside = () => {
-  const t = useTranslation()
-  const { isMD } = useCurrentSize()
-  const nav = useAtomValue(navAtom)
-  const toggleNav = useSetAtom(toggleExpandNavAtom)
+  const t = useTranslation();
+  const { isMD } = useCurrentSize();
+  const nav = useAtomValue(navAtom);
+  const toggleNav = useSetAtom(toggleExpandNavAtom);
 
-  const [showOperationSetDialog, setShowOperationSetDialog] = useState(false)
+  const [showOperationSetDialog, setShowOperationSetDialog] = useState(false);
 
-  const { NAV_LINKS, SOCIAL_LINKS } = useLinks()
+  const { NAV_LINKS, SOCIAL_LINKS } = useLinks();
 
-  if (!isMD) return null
+  if (!isMD) return null;
 
   return (
     <>
@@ -58,8 +58,8 @@ export const NavAside = () => {
             text={t.components.drawer.NavAside.create_job_set}
             className="p-2 rounded-md"
             onClick={() => {
-              setShowOperationSetDialog(true)
-              toggleNav()
+              setShowOperationSetDialog(true);
+              toggleNav();
             }}
           />
           <AnnPanel
@@ -100,5 +100,5 @@ export const NavAside = () => {
         onClose={() => setShowOperationSetDialog(false)}
       />
     </>
-  )
-}
+  );
+};

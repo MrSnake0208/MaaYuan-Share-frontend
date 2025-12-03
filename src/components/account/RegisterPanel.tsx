@@ -1,49 +1,46 @@
-import { Button } from '@blueprintjs/core'
+import { Button } from "@blueprintjs/core";
 
-import { register, sendRegistrationEmail } from 'apis/auth'
-import { FC, useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { register, sendRegistrationEmail } from "apis/auth";
+import { FC, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
-import { AppToaster } from 'components/Toaster'
-import { formatError } from 'utils/error'
-import { REGEX_EMAIL } from 'utils/regexes'
-import { wrapErrorMessage } from 'utils/wrapErrorMessage'
+import { AppToaster } from "components/Toaster";
+import { formatError } from "utils/error";
+import { REGEX_EMAIL } from "utils/regexes";
+import { wrapErrorMessage } from "utils/wrapErrorMessage";
 
-import { useTranslation } from '../../i18n/i18n'
+import { useTranslation } from "../../i18n/i18n";
 import {
   AuthFormEmailField,
   AuthFormPasswordField,
   AuthFormUsernameField,
   AuthRegistrationCodeField,
   AuthRegistrationTokenField,
-} from './AuthFormShared'
+} from "./AuthFormShared";
 
 export interface RegisterFormValues {
-  email: string
-  password: string
-  username: string
-  registrationToken?: string
-  registrationCode?: string
+  email: string;
+  password: string;
+  username: string;
+  registrationToken?: string;
+  registrationCode?: string;
 }
 
 export const RegisterPanel: FC<{
-  onComplete: () => void
+  onComplete: () => void;
 }> = ({ onComplete }) => {
-  const t = useTranslation()
+  const t = useTranslation();
   const useRegCode =
-    ((import.meta as any).env?.VITE_USE_REG_CODE ?? '')
-      .toString()
-      .toLowerCase() === 'true'
+    ((import.meta as any).env?.VITE_USE_REG_CODE ?? "").toString().toLowerCase() === "true";
 
   const {
     control,
     handleSubmit,
     formState: { errors, isValid, isDirty, isSubmitting },
     getValues,
-  } = useForm<RegisterFormValues>()
-  const [isSendEmailButtonDisabled, setSendEmailButtonDisabled] =
-    useState(false)
-  const [countdown, setCountdown] = useState(60)
+  } = useForm<RegisterFormValues>();
+  const [isSendEmailButtonDisabled, setSendEmailButtonDisabled] = useState(false);
+  const [countdown, setCountdown] = useState(60);
   const onSubmit = async (val: RegisterFormValues) => {
     await wrapErrorMessage(
       (e) =>
@@ -55,39 +52,39 @@ export const RegisterPanel: FC<{
         username: val.username,
         password: val.password,
         ...(useRegCode
-          ? { registrationCode: val.registrationCode || '' }
-          : { registrationToken: val.registrationToken || '' }),
+          ? { registrationCode: val.registrationCode || "" }
+          : { registrationToken: val.registrationToken || "" }),
       }),
-    )
+    );
     AppToaster.show({
-      intent: 'success',
+      intent: "success",
       message: t.components.account.RegisterPanel.registration_success,
-    })
-    onComplete()
-  }
+    });
+    onComplete();
+  };
   const handleCountdownTick = () => {
-    setCountdown((prevCountdown) => prevCountdown - 1)
-  }
+    setCountdown((prevCountdown) => prevCountdown - 1);
+  };
   useEffect(() => {
-    let countdownInterval
+    let countdownInterval;
     if (countdown <= 0) {
-      setCountdown(60)
-      setSendEmailButtonDisabled(false)
+      setCountdown(60);
+      setSendEmailButtonDisabled(false);
     } else if (isSendEmailButtonDisabled) {
-      countdownInterval = setInterval(handleCountdownTick, 1000)
+      countdownInterval = setInterval(handleCountdownTick, 1000);
     }
-    return () => clearInterval(countdownInterval)
-  }, [isSendEmailButtonDisabled, countdown])
+    return () => clearInterval(countdownInterval);
+  }, [isSendEmailButtonDisabled, countdown]);
 
   const onEmailSubmit = async () => {
     try {
-      const val = getValues()
+      const val = getValues();
       if (!REGEX_EMAIL.test(val.email)) {
         AppToaster.show({
-          intent: 'danger',
+          intent: "danger",
           message: t.components.account.RegisterPanel.invalid_email,
-        })
-        return
+        });
+        return;
       }
       if (!useRegCode) {
         await wrapErrorMessage(
@@ -96,33 +93,24 @@ export const RegisterPanel: FC<{
               error: formatError(e),
             }),
           sendRegistrationEmail({ email: val.email }),
-        )
+        );
       }
       AppToaster.show({
-        intent: 'success',
+        intent: "success",
         message: t.components.account.RegisterPanel.email_sent_success,
-      })
-      setSendEmailButtonDisabled(true)
+      });
+      setSendEmailButtonDisabled(true);
     } catch (e) {
-      console.warn(e)
+      console.warn(e);
     }
-  }
+  };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <AuthFormEmailField
-        register
-        control={control}
-        error={errors.email}
-        field="email"
-      />
+      <AuthFormEmailField register control={control} error={errors.email} field="email" />
       {!useRegCode && (
         <div className="mt-6 flex justify-end">
           <Button
-            disabled={
-              (!isValid && !isDirty) ||
-              isSubmitting ||
-              isSendEmailButtonDisabled
-            }
+            disabled={(!isValid && !isDirty) || isSubmitting || isSendEmailButtonDisabled}
             intent="primary"
             type="button"
             icon="envelope"
@@ -153,17 +141,9 @@ export const RegisterPanel: FC<{
         />
       )}
 
-      <AuthFormUsernameField
-        control={control}
-        error={errors.username}
-        field="username"
-      />
+      <AuthFormUsernameField control={control} error={errors.username} field="username" />
 
-      <AuthFormPasswordField
-        control={control}
-        error={errors.password}
-        field="password"
-      />
+      <AuthFormPasswordField control={control} error={errors.password} field="password" />
 
       <div className="mt-6 flex justify-end">
         <Button
@@ -178,5 +158,5 @@ export const RegisterPanel: FC<{
         </Button>
       </div>
     </form>
-  )
-}
+  );
+};

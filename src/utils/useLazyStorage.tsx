@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useLatest } from 'react-use'
+import { useEffect, useState } from "react";
+import { useLatest } from "react-use";
 
 /**
  * Persists state in localStorage when the component unmounts or the page is closed.
@@ -14,32 +14,29 @@ export function useLazyStorage<T>(
   reviver?: (savedValue: T | null, defaultValue: T) => T,
 ) {
   const [value, setValue] = useState<T>(() => {
-    let savedValue: T | null = null
+    let savedValue: T | null = null;
 
     try {
-      savedValue = JSON.parse(localStorage.getItem(storageKey) || 'null')
+      savedValue = JSON.parse(localStorage.getItem(storageKey) || "null");
     } catch (e) {
-      console.warn(e)
+      console.warn(e);
     }
 
-    return reviver
-      ? reviver(savedValue, defaultValue)
-      : (savedValue ?? defaultValue)
-  })
+    return reviver ? reviver(savedValue, defaultValue) : (savedValue ?? defaultValue);
+  });
 
-  const latestValue = useLatest(value)
+  const latestValue = useLatest(value);
 
   useEffect(() => {
-    const onUnload = () =>
-      localStorage.setItem(storageKey, JSON.stringify(latestValue.current))
+    const onUnload = () => localStorage.setItem(storageKey, JSON.stringify(latestValue.current));
 
-    window.addEventListener('beforeunload', onUnload)
+    window.addEventListener("beforeunload", onUnload);
 
     return () => {
-      onUnload()
-      window.removeEventListener('beforeunload', onUnload)
-    }
-  }, [storageKey, latestValue])
+      onUnload();
+      window.removeEventListener("beforeunload", onUnload);
+    };
+  }, [storageKey, latestValue]);
 
-  return [value, setValue] as const
+  return [value, setValue] as const;
 }

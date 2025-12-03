@@ -7,49 +7,39 @@ import {
   NonIdealState,
   Tag,
   ToastProps,
-} from '@blueprintjs/core'
+} from "@blueprintjs/core";
 
-import {
-  addToOperationSet,
-  removeFromOperationSet,
-  useOperationSets,
-} from 'apis/operation-set'
-import clsx from 'clsx'
-import { useAtomValue } from 'jotai'
-import { compact, isEqual } from 'lodash-es'
-import { FC, memo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { addToOperationSet, removeFromOperationSet, useOperationSets } from "apis/operation-set";
+import clsx from "clsx";
+import { useAtomValue } from "jotai";
+import { compact, isEqual } from "lodash-es";
+import { FC, memo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { AppToaster } from 'components/Toaster'
-import { OperationSetEditorDialog } from 'components/operation-set/OperationSetEditor'
-import { formatError } from 'utils/error'
-import { useNetworkState } from 'utils/useNetworkState'
+import { AppToaster } from "components/Toaster";
+import { OperationSetEditorDialog } from "components/operation-set/OperationSetEditor";
+import { formatError } from "utils/error";
+import { useNetworkState } from "utils/useNetworkState";
 
-import { useTranslation } from '../../i18n/i18n'
-import { authAtom } from '../../store/auth'
+import { useTranslation } from "../../i18n/i18n";
+import { authAtom } from "../../store/auth";
 
 interface AddToOperationSetButtonProps extends ButtonProps {
-  operationIds: number[]
+  operationIds: number[];
 }
 
 export const AddToOperationSetButton: FC<AddToOperationSetButtonProps> = memo(
   ({ operationIds, ...props }) => {
-    const t = useTranslation()
-    const [isOpen, setIsOpen] = useState(false)
+    const t = useTranslation();
+    const [isOpen, setIsOpen] = useState(false);
 
     return (
       <>
-        <Button
-          {...props}
-          disabled={!operationIds.length}
-          onClick={() => setIsOpen(true)}
-        />
+        <Button {...props} disabled={!operationIds.length} onClick={() => setIsOpen(true)} />
         <Dialog
-          title={t.components.operationSet.AddToOperationSet.add_to_job_set_title(
-            {
-              count: operationIds.length,
-            },
-          )}
+          title={t.components.operationSet.AddToOperationSet.add_to_job_set_title({
+            count: operationIds.length,
+          })}
           icon="add-to-folder"
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}
@@ -61,29 +51,24 @@ export const AddToOperationSetButton: FC<AddToOperationSetButtonProps> = memo(
           />
         </Dialog>
       </>
-    )
+    );
   },
-  (prevProps, nextProps) =>
-    isEqual(prevProps.operationIds, nextProps.operationIds),
-)
-AddToOperationSetButton.displayName = 'AddToOperationSetButton'
+  (prevProps, nextProps) => isEqual(prevProps.operationIds, nextProps.operationIds),
+);
+AddToOperationSetButton.displayName = "AddToOperationSetButton";
 
 interface AddToOperationSetProps {
-  operationIds: number[]
-  isOpen: boolean
-  onSuccess: () => void
+  operationIds: number[];
+  isOpen: boolean;
+  onSuccess: () => void;
 }
 
-function AddToOperationSet({
-  operationIds,
-  onSuccess,
-}: AddToOperationSetProps) {
-  const t = useTranslation()
-  const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
-  const singleOperationId =
-    operationIds.length > 1 ? undefined : operationIds[0]
-  const auth = useAtomValue(authAtom)
+function AddToOperationSet({ operationIds, onSuccess }: AddToOperationSetProps) {
+  const t = useTranslation();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const singleOperationId = operationIds.length > 1 ? undefined : operationIds[0];
+  const auth = useAtomValue(authAtom);
 
   const {
     operationSets,
@@ -94,100 +79,90 @@ function AddToOperationSet({
   } = useOperationSets({
     disabled: !auth.userId,
     creatorId: auth.userId,
-  })
+  });
 
   const {
     networkState: { loading, error: submitError },
     start,
     finish,
-  } = useNetworkState()
+  } = useNetworkState();
 
-  const [editorOpen, setEditorOpen] = useState(false)
-  const [onlyShowAdded, setOnlyShowAdded] = useState(false)
-  const [checkboxOverrides, setCheckboxOverrides] = useState(
-    {} as Record<number, boolean>,
-  )
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [onlyShowAdded, setOnlyShowAdded] = useState(false);
+  const [checkboxOverrides, setCheckboxOverrides] = useState({} as Record<number, boolean>);
 
   const error =
     submitError ||
     listError ||
-    (!auth.userId
-      ? t.components.operationSet.AddToOperationSet.not_logged_in
-      : undefined)
+    (!auth.userId ? t.components.operationSet.AddToOperationSet.not_logged_in : undefined);
 
   const operationSetList =
     singleOperationId && onlyShowAdded
       ? operationSets?.filter(
-          (set) =>
-            checkboxOverrides[set.id] ??
-            set.copilotIds.includes(operationIds[0]),
+          (set) => checkboxOverrides[set.id] ?? set.copilotIds.includes(operationIds[0]),
         )
-      : operationSets
+      : operationSets;
 
   const defaultChecked = (operationSetId: number) =>
     singleOperationId
       ? !!operationSets?.find(
-          (set) =>
-            set.id === operationSetId &&
-            set.copilotIds.includes(singleOperationId),
+          (set) => set.id === operationSetId && set.copilotIds.includes(singleOperationId),
         )
-      : false
+      : false;
 
   const onSubmit = async () => {
-    if (loading || !operationSets?.length) return
+    if (loading || !operationSets?.length) return;
 
-    start()
+    start();
 
     try {
-      const tasks = Object.entries(checkboxOverrides).map(
-        async ([idKey, checked]) => {
-          const id = +idKey
-          if (isNaN(id)) return undefined
+      const tasks = Object.entries(checkboxOverrides).map(async ([idKey, checked]) => {
+        const id = +idKey;
+        if (isNaN(id)) return undefined;
 
-          if (checked && !defaultChecked(id)) {
-            await addToOperationSet({
-              operationSetId: id,
-              operationIds,
-            })
-            return id
-          } else if (!checked && defaultChecked(id)) {
-            await removeFromOperationSet({
-              operationSetId: id,
-              operationIds,
-            })
-            return id
-          }
+        if (checked && !defaultChecked(id)) {
+          await addToOperationSet({
+            operationSetId: id,
+            operationIds,
+          });
+          return id;
+        } else if (!checked && defaultChecked(id)) {
+          await removeFromOperationSet({
+            operationSetId: id,
+            operationIds,
+          });
+          return id;
+        }
 
-          return undefined
-        },
-      )
-      const processedIds = compact(await Promise.all(tasks))
+        return undefined;
+      });
+      const processedIds = compact(await Promise.all(tasks));
       if (processedIds.length) {
-        let action: ToastProps['action']
+        let action: ToastProps["action"];
 
         if (processedIds.length === 1) {
-          const search = new URLSearchParams(searchParams)
-          search.set('opset', processedIds[0].toString())
+          const search = new URLSearchParams(searchParams);
+          search.set("opset", processedIds[0].toString());
           action = {
             text: t.components.operationSet.AddToOperationSet.click_to_view,
-            className: '!px-1',
+            className: "!px-1",
             onClick: () => navigate({ search: search.toString() }),
-          }
+          };
         }
 
         AppToaster.show({
-          intent: 'success',
+          intent: "success",
           message: t.components.operationSet.AddToOperationSet.added_to_job_set,
           action,
-        })
+        });
       }
 
-      finish(null)
-      onSuccess()
+      finish(null);
+      onSuccess();
     } catch (e) {
-      finish(e as Error)
+      finish(e as Error);
     }
-  }
+  };
 
   return (
     <>
@@ -208,8 +183,7 @@ function AddToOperationSet({
             description={
               operationSets?.length === 0
                 ? t.components.operationSet.AddToOperationSet.no_job_sets_yet
-                : t.components.operationSet.AddToOperationSet
-                    .no_added_job_sets_yet
+                : t.components.operationSet.AddToOperationSet.no_added_job_sets_yet
             }
           />
         )}
@@ -219,18 +193,18 @@ function AddToOperationSet({
             <div key={id}>
               <Checkbox
                 className={clsx(
-                  'flex items-center m-0 p-2 !pl-10 hover:bg-slate-200 dark:hover:bg-slate-800 [&>.bp4-control-indicator]:mt-0',
+                  "flex items-center m-0 p-2 !pl-10 hover:bg-slate-200 dark:hover:bg-slate-800 [&>.bp4-control-indicator]:mt-0",
                   checkboxOverrides[id] !== undefined &&
                     checkboxOverrides[id] !== defaultChecked(id) &&
-                    'font-bold',
+                    "font-bold",
                 )}
                 checked={checkboxOverrides[id] ?? defaultChecked(id)}
                 onChange={(e) => {
-                  const checked = (e.target as HTMLInputElement).checked
-                  setCheckboxOverrides((prev) => ({ ...prev, [id]: checked }))
+                  const checked = (e.target as HTMLInputElement).checked;
+                  setCheckboxOverrides((prev) => ({ ...prev, [id]: checked }));
                 }}
               >
-                {status === 'PRIVATE' && (
+                {status === "PRIVATE" && (
                   <Tag minimal className="mr-1">
                     {t.components.operationSet.AddToOperationSet.private}
                   </Tag>
@@ -262,9 +236,7 @@ function AddToOperationSet({
           <Checkbox
             label={t.components.operationSet.AddToOperationSet.show_only_added}
             checked={onlyShowAdded}
-            onChange={(e) =>
-              setOnlyShowAdded((e.target as HTMLInputElement).checked)
-            }
+            onChange={(e) => setOnlyShowAdded((e.target as HTMLInputElement).checked)}
           />
         )}
         <Button className="ml-auto" onClick={() => setEditorOpen(true)}>
@@ -283,10 +255,10 @@ function AddToOperationSet({
       <OperationSetEditorDialog
         isOpen={editorOpen}
         onClose={() => {
-          setEditorOpen(false)
-          setSize(1)
+          setEditorOpen(false);
+          setSize(1);
         }}
       />
     </>
-  )
+  );
 }

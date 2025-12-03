@@ -1,55 +1,41 @@
-import {
-  Alert,
-  Button,
-  H3,
-  H4,
-  H5,
-  Icon,
-  Menu,
-  MenuItem,
-  NonIdealState,
-} from '@blueprintjs/core'
-import { Popover2 } from '@blueprintjs/popover2'
-import { ErrorBoundary } from '@sentry/react'
+import { Alert, Button, H3, H4, H5, Icon, Menu, MenuItem, NonIdealState } from "@blueprintjs/core";
+import { Popover2 } from "@blueprintjs/popover2";
+import { ErrorBoundary } from "@sentry/react";
 
-import {
-  deleteOperationSet,
-  useOperationSet,
-  useRefreshOperationSets,
-} from 'apis/operation-set'
-import { useAtom } from 'jotai'
-import { ComponentType, FC, useEffect, useState } from 'react'
-import { copyShortCode } from 'services/operation'
+import { deleteOperationSet, useOperationSet, useRefreshOperationSets } from "apis/operation-set";
+import { useAtom } from "jotai";
+import { ComponentType, FC, useEffect, useState } from "react";
+import { copyShortCode } from "services/operation";
 
-import { FactItem } from 'components/FactItem'
-import { OperationList } from 'components/OperationList'
-import { Paragraphs } from 'components/Paragraphs'
-import { RelativeTime } from 'components/RelativeTime'
-import { withSuspensable } from 'components/Suspensable'
-import { AppToaster } from 'components/Toaster'
-import { DrawerLayout } from 'components/drawer/DrawerLayout'
-import { OperationSetEditorDialog } from 'components/operation-set/OperationSetEditor'
-import { OperationSet } from 'models/operation-set'
-import { authAtom, isAdmin } from 'store/auth'
-import { wrapErrorMessage } from 'utils/wrapErrorMessage'
+import { FactItem } from "components/FactItem";
+import { OperationList } from "components/OperationList";
+import { Paragraphs } from "components/Paragraphs";
+import { RelativeTime } from "components/RelativeTime";
+import { withSuspensable } from "components/Suspensable";
+import { AppToaster } from "components/Toaster";
+import { DrawerLayout } from "components/drawer/DrawerLayout";
+import { OperationSetEditorDialog } from "components/operation-set/OperationSetEditor";
+import { OperationSet } from "models/operation-set";
+import { authAtom, isAdmin } from "store/auth";
+import { wrapErrorMessage } from "utils/wrapErrorMessage";
 
-import { i18nDefer, useTranslation } from '../../i18n/i18n'
-import { formatError } from '../../utils/error'
-import { UserName } from '../UserName'
+import { i18nDefer, useTranslation } from "../../i18n/i18n";
+import { formatError } from "../../utils/error";
+import { UserName } from "../UserName";
 
 const ManageMenu: FC<{
-  operationSet: OperationSet
-  onUpdate: () => void
+  operationSet: OperationSet;
+  onUpdate: () => void;
 }> = ({ operationSet, onUpdate }) => {
-  const t = useTranslation()
-  const refreshOperationSets = useRefreshOperationSets()
+  const t = useTranslation();
+  const refreshOperationSets = useRefreshOperationSets();
 
-  const [loading, setLoading] = useState(false)
-  const [editorOpen, setEditorOpen] = useState(false)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleDelete = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       await wrapErrorMessage(
         (e) =>
@@ -57,22 +43,22 @@ const ManageMenu: FC<{
             error: formatError(e),
           }),
         deleteOperationSet({ id: operationSet.id }),
-      )
+      );
 
-      refreshOperationSets()
+      refreshOperationSets();
 
       AppToaster.show({
-        intent: 'success',
+        intent: "success",
         message: t.components.viewer.OperationSetViewer.delete_success,
-      })
-      setDeleteDialogOpen(false)
-      onUpdate()
+      });
+      setDeleteDialogOpen(false);
+      onUpdate();
     } catch (e) {
-      console.warn(e)
+      console.warn(e);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <>
@@ -113,48 +99,48 @@ const ManageMenu: FC<{
         />
       </Menu>
     </>
-  )
-}
+  );
+};
 
 export const OperationSetViewer: ComponentType<{
-  operationSetId: OperationSet['id']
-  onCloseDrawer: () => void
+  operationSetId: OperationSet["id"];
+  onCloseDrawer: () => void;
 }> = withSuspensable(
   function OperationSetViewer({ operationSetId, onCloseDrawer }) {
-    const t = useTranslation()
+    const t = useTranslation();
     const { data: operationSet, error } = useOperationSet({
       id: operationSetId,
       suspense: true,
-    })
+    });
 
     useEffect(() => {
       // on finished loading, scroll to #fragment if any
       if (operationSet) {
-        const fragment = window.location.hash
+        const fragment = window.location.hash;
         if (fragment) {
-          const el = document.querySelector(fragment)
+          const el = document.querySelector(fragment);
           if (el) {
-            el.scrollIntoView({ behavior: 'smooth' })
+            el.scrollIntoView({ behavior: "smooth" });
           }
         }
       }
-    }, [operationSet])
+    }, [operationSet]);
 
-    const [auth] = useAtom(authAtom)
+    const [auth] = useAtom(authAtom);
 
     // make eslint happy: we got Suspense out there
-    if (!operationSet) throw new Error('unreachable')
+    if (!operationSet) throw new Error("unreachable");
 
     useEffect(() => {
       if (error) {
         AppToaster.show({
-          intent: 'danger',
+          intent: "danger",
           message: t.components.viewer.OperationSetViewer.refresh_failed({
             error: formatError(error),
           }),
-        })
+        });
       }
-    }, [error, t])
+    }, [error, t]);
 
     return (
       <DrawerLayout
@@ -171,10 +157,7 @@ export const OperationSetViewer: ComponentType<{
               // 与 OperationViewer 保持一致：使用 Portal 并提升层级，避免在 Drawer 标题区域被裁剪/遮挡
               <Popover2
                 content={
-                  <ManageMenu
-                    operationSet={operationSet}
-                    onUpdate={() => onCloseDrawer()}
-                  />
+                  <ManageMenu operationSet={operationSet} onUpdate={() => onCloseDrawer()} />
                 }
                 usePortal={true}
                 portalClassName="operation-viewer-portal"
@@ -203,29 +186,22 @@ export const OperationSetViewer: ComponentType<{
             <NonIdealState
               icon="issue"
               title={t.components.viewer.OperationSetViewer.render_error}
-              description={
-                t.components.viewer.OperationSetViewer.render_problem
-              }
+              description={t.components.viewer.OperationSetViewer.render_problem}
             />
           }
         >
           <OperationSetViewerInner operationSet={operationSet} />
         </ErrorBoundary>
       </DrawerLayout>
-    )
+    );
   },
   {
-    pendingTitle:
-      i18nDefer.components.viewer.OperationSetViewer.loading_task_set,
+    pendingTitle: i18nDefer.components.viewer.OperationSetViewer.loading_task_set,
   },
-)
+);
 
-function OperationSetViewerInner({
-  operationSet,
-}: {
-  operationSet: OperationSet
-}) {
-  const t = useTranslation()
+function OperationSetViewerInner({ operationSet }: { operationSet: OperationSet }) {
+  const t = useTranslation();
 
   return (
     <div className="h-full overflow-auto py-4 px-8 pt-8">
@@ -237,19 +213,13 @@ function OperationSetViewerInner({
         </div>
 
         <div className="flex flex-col items-start select-none tabular-nums">
-          <FactItem
-            title={t.components.viewer.OperationSetViewer.published_at}
-            icon="time"
-          >
+          <FactItem title={t.components.viewer.OperationSetViewer.published_at} icon="time">
             <span className="text-gray-800 dark:text-slate-100 font-bold">
               <RelativeTime moment={operationSet.createTime} />
             </span>
           </FactItem>
 
-          <FactItem
-            title={t.components.viewer.OperationSetViewer.author}
-            icon="user"
-          >
+          <FactItem title={t.components.viewer.OperationSetViewer.author} icon="user">
             <UserName
               className="text-gray-800 dark:text-slate-100 font-bold"
               userId={operationSet.creatorId}
@@ -267,9 +237,7 @@ function OperationSetViewerInner({
           <NonIdealState
             icon="issue"
             title={t.components.viewer.OperationSetViewer.render_error}
-            description={
-              t.components.viewer.OperationSetViewer.render_preview_problem
-            }
+            description={t.components.viewer.OperationSetViewer.render_preview_problem}
             className="h-96 bg-stripe rounded"
           />
         }
@@ -277,25 +245,20 @@ function OperationSetViewerInner({
         <OperationSetViewerInnerDetails operationSet={operationSet} />
       </ErrorBoundary>
     </div>
-  )
+  );
 }
 
-function OperationSetViewerInnerDetails({
-  operationSet,
-}: {
-  operationSet: OperationSet
-}) {
-  const t = useTranslation()
+function OperationSetViewerInnerDetails({ operationSet }: { operationSet: OperationSet }) {
+  const t = useTranslation();
 
   return (
     <div className="flex flex-col">
       <H5 className="mb-4 text-slate-600">
-        {t.components.viewer.OperationSetViewer.task_list}(
-        {operationSet.copilotIds.length})
+        {t.components.viewer.OperationSetViewer.task_list}({operationSet.copilotIds.length})
       </H5>
       <div className="flex flex-col mb-4 max-w-screen-2xl">
         <OperationList operationIds={operationSet.copilotIds} />
       </div>
     </div>
-  )
+  );
 }

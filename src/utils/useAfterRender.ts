@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from "react";
 
-type AfterRenderCallback = () => void
+type AfterRenderCallback = () => void;
 
 /**
  * Behaves (almost?) the same as Vue's nextTick.
@@ -18,24 +18,24 @@ type AfterRenderCallback = () => void
  * }
  */
 export function useAfterRender() {
-  type Listener = () => void
-  const listeners = useRef<Listener[]>([])
+  type Listener = () => void;
+  const listeners = useRef<Listener[]>([]);
 
   const afterRender = (callback?: AfterRenderCallback) => {
     return new Promise<void>((resolve) => {
       listeners.current.push(() => {
-        if (callback) callback()
-        resolve()
-      })
-    })
-  }
+        if (callback) callback();
+        resolve();
+      });
+    });
+  };
 
   useEffect(() => {
     if (listeners.current.length > 0) {
-      listeners.current.forEach((listener) => listener())
-      listeners.current = []
+      listeners.current.forEach((listener) => listener());
+      listeners.current = [];
     }
-  })
+  });
 
-  return { afterRender }
+  return { afterRender };
 }

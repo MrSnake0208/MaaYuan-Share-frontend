@@ -1,12 +1,12 @@
-import { Button } from '@blueprintjs/core'
+import { Button } from "@blueprintjs/core";
 
-import { useAtomValue, useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from "jotai";
 
-import { navAtom, toggleExpandNavAtom } from 'store/nav'
+import { navAtom, toggleExpandNavAtom } from "store/nav";
 
 export const NavExpandButton = () => {
-  const { expanded = false } = useAtomValue(navAtom)
-  const toggleExpand = useSetAtom(toggleExpandNavAtom)
+  const { expanded = false } = useAtomValue(navAtom);
+  const toggleExpand = useSetAtom(toggleExpandNavAtom);
 
   return (
     <Button
@@ -15,5 +15,5 @@ export const NavExpandButton = () => {
       onClick={() => toggleExpand()}
       icon="menu"
     />
-  )
-}
+  );
+};
