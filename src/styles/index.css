@@ -1,1 +1,4 @@
 @import './global.css';
+body {
+  cursor: url("/maay-cursor.ico") 0 0, auto;
+}
