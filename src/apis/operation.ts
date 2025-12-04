@@ -9,6 +9,7 @@ import {
 import useSWR, { SWRConfiguration } from "swr";
 import useSWRInfinite from "swr/infinite";
 
+import { isHiddenInHotSort } from "../constants/hot-sort-blocklist";
 import { toCopilotOperation } from "models/converter";
 import { OpRatingType, Operation, OperationMetadata } from "models/operation";
 import { ShortCodeContent, parseShortCode } from "models/shortCode";
@@ -215,11 +216,18 @@ export function useOperations({
   const operations = operationIds?.length
     ? operationIds?.map((id) => _operations?.find((v) => v.id === id)).filter((v) => !!v)
     : _operations;
+  const enableHotBlocklist = orderBy === "hot" && !operationIds?.length;
+  const filteredOperations = enableHotBlocklist
+    ? operations.filter((op) => !isHiddenInHotSort(op))
+    : operations;
+  const filteredTotal = enableHotBlocklist
+    ? Math.max(0, total - (operations.length - filteredOperations.length))
+    : total;
 
   return {
     error,
-    operations,
-    total,
+    operations: filteredOperations,
+    total: filteredTotal,
     setSize,
     isValidating,
     isReachingEnd,
