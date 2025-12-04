@@ -2,9 +2,6 @@ import "@blueprintjs/core/lib/css/blueprint.css";
 import "@blueprintjs/icons/lib/css/blueprint-icons.css";
 import "@blueprintjs/popover2/lib/css/blueprint-popover2.css";
 import "@blueprintjs/select/lib/css/blueprint-select.css";
-import * as Sentry from "@sentry/react";
-import { BrowserTracing } from "@sentry/tracing";
-
 import "normalize.css";
 import React, { lazy } from "react";
 import ReactDOM from "react-dom/client";
@@ -22,23 +19,6 @@ import { IndexPage } from "./pages/index";
 import "./styles/blueprint.less";
 
 import "./styles/index.css";
-
-Sentry.init({
-  dsn: "https://0a2bb44996194bb7aff8d0e32dcacb55@o1299554.ingest.sentry.io/6545242",
-  integrations: [new BrowserTracing(), new Sentry.Replay()],
-  tracesSampleRate: 0.05,
-
-  replaysSessionSampleRate: 0.001,
-  replaysOnErrorSampleRate: 0.1,
-
-  debug: import.meta.env.DEV,
-
-  enabled: import.meta.env.PROD,
-  beforeSend: (event) => {
-    if (import.meta.env.DEV) return null;
-    return event;
-  },
-});
 
 ReactGA.initialize("G-K3MCHSLB5K");
 
