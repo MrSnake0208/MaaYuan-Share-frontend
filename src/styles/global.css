@@ -493,6 +493,14 @@ body.theme-maayuan .bp4-button:not(.bp4-minimal) {
   color: #fff8ec;
 }
 
+body.theme-maayuan .bp4-button:not(.bp4-minimal) .bp4-icon {
+  color: #fff;
+}
+
+body.theme-maayuan .bp4-button:not(.bp4-minimal) .bp4-icon svg path {
+  fill: currentColor;
+}
+
 body.theme-maayuan .bp4-button.bp4-minimal {
   color: var(--maayuan-text);
 }
@@ -501,9 +509,39 @@ body.theme-maayuan .bp4-button.bp4-minimal:hover {
   background-color: rgba(215, 137, 53, 0.14);
 }
 
+body.theme-maayuan .bp4-button-group.bp4-minimal .bp4-button {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--maayuan-text);
+}
+
+body.theme-maayuan .bp4-button-group.bp4-minimal .bp4-button.bp4-intent-primary {
+  color: var(--maayuan-accent-strong);
+}
+
+body.theme-maayuan .bp4-button-group.bp4-minimal .bp4-button:hover {
+  background-color: rgba(215, 137, 53, 0.14);
+}
+
+body.theme-maayuan .bp4-button-group.bp4-minimal .bp4-icon {
+  color: currentColor;
+}
+
+body.theme-maayuan .bp4-button-group.bp4-minimal .bp4-icon svg path {
+  fill: currentColor;
+}
+
 body.theme-maayuan .bp4-tag {
   background-color: var(--maayuan-surface-strong);
   color: var(--maayuan-text-strong);
+}
+
+body.theme-maayuan .operation-card-tags .bp4-tag {
+  color: #fff !important;
+}
+
+body.theme-maayuan .operation-card-tags .bp4-tag * {
+  color: inherit !important;
 }
 
 body.theme-maayuan .bp4-input,
