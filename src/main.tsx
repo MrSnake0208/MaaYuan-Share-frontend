@@ -49,6 +49,139 @@ if (navigator.userAgent.includes("Win")) {
   document.documentElement.classList.add("platform--non-windows");
 }
 
+const maaYuanBackgrounds = [
+  "MaaYuan-侦探皮（透明底）.png",
+  "MaaYuan-兔女郎（透明底）.png",
+  "MaaYuan-南瓜头（透明底）.png",
+  "MaaYuan-原皮（透明底）.png",
+  "MaaYuan-原色牛皮（透明底）.png",
+  "MaaYuan-原色皮（透明底）.png",
+  "MaaYuan-周岁（透明底）.png",
+  "MaaYuan-天使（透明底）.png",
+  "MaaYuan-幽灵床单（透明底）.png",
+  "MaaYuan-广狐版（透明底）.png",
+  "MaaYuan-恶魔（透明底）.png",
+  "MaaYuan-牛牛（透明底）.png",
+  "MaaYuan-牛皮（透明底）.png",
+  "MaaYuan-牛郎（透明底）.png",
+  "MaaYuan-簪花头（透明底）.png",
+  "MaaYuan-织女（透明底）.png",
+  "MaaYuan-蜜蜂皮（透明底）.png",
+  "MaaYuan-豹皮（透明底）.png",
+  "MaaYuan-飞云版（透明底）.png",
+  "MaaYuan-魂皮（透明底）.png",
+  "MaaYuan-魔女（透明底）.png",
+  "MaaYuan-麦麦（透明底）.png",
+  "MaaYuan-黑猫版（透明底）.png",
+];
+
+const maaYuanTileSize = 220;
+const maaYuanPatternSize = 2400;
+const maaYuanRepeatMultiplier = 3;
+const maaYuanMinGap = 16;
+const maaYuanPlacementAttempts = 80;
+let maaYuanPatternPromise: Promise<string | null> | null = null;
+
+const loadImage = (src: string) =>
+  new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+
+const buildMaaYuanPattern = () => {
+  if (maaYuanPatternPromise) return maaYuanPatternPromise;
+
+  maaYuanPatternPromise = (async () => {
+    if (!maaYuanBackgrounds.length) return null;
+
+    const namesToPlace = Array.from(
+      { length: maaYuanBackgrounds.length * maaYuanRepeatMultiplier },
+      (_, index) => maaYuanBackgrounds[index % maaYuanBackgrounds.length],
+    );
+    const placements: { name: string; x: number; y: number }[] = [];
+    const maxX = maaYuanPatternSize - maaYuanTileSize - maaYuanMinGap;
+    const maxY = maaYuanPatternSize - maaYuanTileSize - maaYuanMinGap;
+
+    namesToPlace.forEach((name) => {
+      for (let attempt = 0; attempt < maaYuanPlacementAttempts; attempt += 1) {
+        const x = Math.floor(Math.random() * maxX);
+        const y = Math.floor(Math.random() * maxY);
+        const overlaps = placements.some(
+          (pos) =>
+            Math.abs(pos.x - x) < maaYuanTileSize + maaYuanMinGap &&
+            Math.abs(pos.y - y) < maaYuanTileSize + maaYuanMinGap,
+        );
+        if (!overlaps) {
+          placements.push({ name, x, y });
+          break;
+        }
+      }
+    });
+
+    if (!placements.length) return null;
+
+    const images = await Promise.all(
+      placements.map((item) => loadImage(`/maayuan/${encodeURIComponent(item.name)}`)),
+    );
+
+    const canvas = document.createElement("canvas");
+    canvas.width = maaYuanPatternSize;
+    canvas.height = maaYuanPatternSize;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    images.forEach((img, index) => {
+      const pos = placements[index];
+      ctx.drawImage(img, pos.x, pos.y, maaYuanTileSize, maaYuanTileSize);
+    });
+
+    return canvas.toDataURL("image/png");
+  })().catch(() => {
+    maaYuanPatternPromise = null;
+    return null;
+  });
+
+  return maaYuanPatternPromise;
+};
+
+const applyMaaYuanBackground = () => {
+  const wrapper = document.querySelector(".docs-content-wrapper") as HTMLElement | null;
+  const targets = [document.body, wrapper].filter(Boolean) as HTMLElement[];
+
+  if (!document.body.classList.contains("theme-maayuan") || !maaYuanBackgrounds.length) {
+    targets.forEach((el) => {
+      el.style.backgroundImage = "";
+      el.style.backgroundRepeat = "";
+      el.style.backgroundSize = "";
+      el.style.backgroundPosition = "";
+      el.style.backgroundAttachment = "";
+    });
+    maaYuanPatternPromise = null;
+    return;
+  }
+
+  buildMaaYuanPattern().then((dataUrl) => {
+    if (!dataUrl) return;
+    const patternSize = maaYuanPatternSize;
+    targets.forEach((el) => {
+      el.style.backgroundImage = `url("${dataUrl}")`;
+      el.style.backgroundRepeat = "repeat";
+      el.style.backgroundSize = `${patternSize}px ${patternSize}px`;
+      el.style.backgroundPosition = "0 0";
+      el.style.backgroundAttachment = "fixed";
+    });
+  });
+};
+
+applyMaaYuanBackground();
+
+new MutationObserver(applyMaaYuanBackground).observe(document.body, {
+  attributes: true,
+  attributeFilter: ["class"],
+});
+
 clearOutdatedSwrCache();
 
 const CreatePageLazy = withSuspensable(
