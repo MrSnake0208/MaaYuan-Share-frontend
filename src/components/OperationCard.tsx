@@ -372,8 +372,8 @@ const OperatorTags = ({ operation }: { operation: Operation }) => {
         const starLevel = Math.min(5, Math.max(0, stats.starLevel));
         const showStar = stats.hasStar;
         const baseStatTexts = [
-          stats.hasAttack ? `攻: ${Math.max(0, stats.attack)}` : null,
           stats.hasHp ? `血: ${Math.max(0, stats.hp)}` : null,
+          stats.hasAttack ? `攻: ${Math.max(0, stats.attack)}` : null,
         ].filter((text): text is string => Boolean(text));
 
         return (

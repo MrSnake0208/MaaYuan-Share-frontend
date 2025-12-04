@@ -306,43 +306,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
               {controlsEnabled && (
                 <li className="flex flex-col gap-1">
                   <div className="flex items-center">
-                    <span className="text-xs opacity-80 w-12 ml-2">攻击力</span>
-                    <NumericInput2
-                      intOnly
-                      min={0}
-                      buttonPosition="none"
-                      title={"攻击力"}
-                      value={Math.max(0, getStats(operator, info?.rarity).attack)}
-                      containerClassName="flex-1 min-w-0"
-                      inputClassName={clsx(
-                        "h-6 !w-24 !px-2 !leading-8",
-                        "text-center font-bold text-base",
-                        "!rounded-md !border-2 transition-colors",
-                        // 亮色主题
-                        "!bg-white !text-slate-800 !border-slate-400",
-                        "focus:!border-sky-500 focus:!ring-2 focus:!ring-sky-400",
-                        // 暗色主题：提高前景/边框对比度与聚焦可见度
-                        "dark:!bg-slate-800 dark:!text-slate-100 dark:!border-slate-300",
-                        "dark:focus:!border-sky-400 dark:focus:!ring-sky-400",
-                      )}
-                      onValueChange={(_, valueStr) => {
-                        edit(() => {
-                          let v = Number(valueStr);
-                          if (!Number.isFinite(v)) return { action: "skip", desc: "skip" };
-                          v = Math.max(0, Math.round(v));
-                          const next = setStats(operator, { attack: v });
-                          onChange?.(next);
-                          return {
-                            action: "set-operator-attack",
-                            desc: "设置密探攻击",
-                            squashBy: operator.id,
-                          };
-                        });
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center ml-2">
-                    <span className="text-xs opacity-80 w-12">生命值</span>
+                    <span className="text-xs opacity-80 w-12 ml-2">生命值</span>
                     <NumericInput2
                       intOnly
                       min={0}
@@ -371,6 +335,42 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                           return {
                             action: "set-operator-hp",
                             desc: "设置密探生命",
+                            squashBy: operator.id,
+                          };
+                        });
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center ml-2">
+                    <span className="text-xs opacity-80 w-12">攻击力</span>
+                    <NumericInput2
+                      intOnly
+                      min={0}
+                      buttonPosition="none"
+                      title={"攻击力"}
+                      value={Math.max(0, getStats(operator, info?.rarity).attack)}
+                      containerClassName="flex-1 min-w-0"
+                      inputClassName={clsx(
+                        "h-6 !w-24 !px-2 !leading-8",
+                        "text-center font-bold text-base",
+                        "!rounded-md !border-2 transition-colors",
+                        // 亮色主题
+                        "!bg-white !text-slate-800 !border-slate-400",
+                        "focus:!border-sky-500 focus:!ring-2 focus:!ring-sky-400",
+                        // 暗色主题：提高前景/边框对比度与聚焦可见度
+                        "dark:!bg-slate-800 dark:!text-slate-100 dark:!border-slate-300",
+                        "dark:focus:!border-sky-400 dark:focus:!ring-sky-400",
+                      )}
+                      onValueChange={(_, valueStr) => {
+                        edit(() => {
+                          let v = Number(valueStr);
+                          if (!Number.isFinite(v)) return { action: "skip", desc: "skip" };
+                          v = Math.max(0, Math.round(v));
+                          const next = setStats(operator, { attack: v });
+                          onChange?.(next);
+                          return {
+                            action: "set-operator-attack",
+                            desc: "设置密探攻击",
                             squashBy: operator.id,
                           };
                         });
