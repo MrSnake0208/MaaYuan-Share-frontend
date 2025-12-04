@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes operation-gold-marquee {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.operation-tag-gold-marquee {
+  background-image: linear-gradient(90deg, #b8860b, #f7ce68, #b8860b);
+  background-size: 200% 100%;
+  animation: operation-gold-marquee 3s linear infinite;
+  color: #fff;
+}

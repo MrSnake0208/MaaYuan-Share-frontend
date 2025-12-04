@@ -45,6 +45,12 @@ export const NeoOperationCard = ({
     (operation.metadata as any)?.source_type;
   const sourceLabel =
     sourceType === "original" ? "【原创】" : sourceType === "repost" ? "【搬运】" : "";
+  const sourceTag =
+    sourceType === "original"
+      ? { label: "原创", color: "#0ca678", marquee: true }
+      : sourceType === "repost"
+        ? { label: "搬运", color: "#7f8c8d" }
+        : null;
 
   try {
     // 诊断：输出元数据形态与映射结果
@@ -78,7 +84,6 @@ export const NeoOperationCard = ({
               className="whitespace-nowrap overflow-hidden text-ellipsis"
             >
               <H4 className="p-0 m-0 mr-20 flex items-center overflow-hidden">
-                {sourceLabel && <span className="mr-1 shrink-0">{sourceLabel}</span>}
                 <span className="whitespace-nowrap overflow-hidden text-ellipsis">
                   {operation.parsedContent.doc.title}
                 </span>
@@ -131,6 +136,25 @@ export const NeoOperationCard = ({
                     <div className="flex items-center">
                       <div className="flex whitespace-pre">
                         <span className="text-xs">如鸢</span>
+                      </div>
+                    </div>
+                  </Tag>
+                )}
+                {sourceTag && (
+                  <Tag
+                    className={clsx(
+                      "transition border border-solid !text-xs tracking-tight !px-2 !py-1 !my-1 leading-none !min-h-0 bg-slate-200 border-slate-300 text-slate-700 dark:bg-slate-900 dark:text-slate-100",
+                      sourceTag.marquee && "operation-tag-gold-marquee",
+                    )}
+                    style={
+                      sourceTag.marquee
+                        ? { color: "#fff" }
+                        : { backgroundColor: sourceTag.color, color: "#fff" }
+                    }
+                  >
+                    <div className="flex items-center">
+                      <div className="flex whitespace-pre">
+                        <span className="text-xs">{sourceTag.label}</span>
                       </div>
                     </div>
                   </Tag>
@@ -208,6 +232,12 @@ export const OperationCard = ({ operation }: { operation: Operation }) => {
     (operation.metadata as any)?.source_type;
   const sourceLabel =
     sourceType === "original" ? "【原创】" : sourceType === "repost" ? "【搬运】" : "";
+  const sourceTag =
+    sourceType === "original"
+      ? { label: "原创", color: "#0ca678", marquee: true }
+      : sourceType === "repost"
+        ? { label: "搬运", color: "#6b7280" }
+        : null;
 
   try {
     // 诊断：输出元数据形态与映射结果
@@ -239,7 +269,6 @@ export const OperationCard = ({ operation }: { operation: Operation }) => {
               <div className="flex flex-col gap-3">
                 <div className="flex gap-2">
                   <H4 className="inline-block pb-1 border-b-2 border-zinc-200 border-solid mb-2">
-                    {sourceLabel && <span className="mr-1">{sourceLabel}</span>}
                     {operation.parsedContent.doc.title}
                     {operation.status === CopilotInfoStatusEnum.Private && (
                       <Tag minimal className="ml-2 font-normal opacity-75">
@@ -289,6 +318,25 @@ export const OperationCard = ({ operation }: { operation: Operation }) => {
                         <div className="flex items-center">
                           <div className="flex whitespace-pre">
                             <span className="text-xs">如鸢</span>
+                          </div>
+                        </div>
+                      </Tag>
+                    )}
+                    {sourceTag && (
+                      <Tag
+                        className={clsx(
+                          "transition border border-solid !text-xs tracking-tight !p-1 leading-none !min-h-0 dark:bg-slate-900 dark:text-slate-100",
+                          sourceTag.marquee && "operation-tag-gold-marquee",
+                        )}
+                        style={
+                          sourceTag.marquee
+                            ? { color: "#fff" }
+                            : { backgroundColor: sourceTag.color, color: "#fff" }
+                        }
+                      >
+                        <div className="flex items-center">
+                          <div className="flex whitespace-pre">
+                            <span className="text-xs">{sourceTag.label}</span>
                           </div>
                         </div>
                       </Tag>
