@@ -552,6 +552,26 @@ body.theme-maayuan .bp4-file-upload-input {
   color: var(--maayuan-text);
 }
 
+/* MaaYuan 主题下的循环数值输入，避免背景色覆盖周围文字 */
+body.theme-maayuan .editor-loop-range-input {
+  background: var(--maayuan-surface);
+  border-color: var(--maayuan-border);
+  color: var(--maayuan-text);
+  box-shadow: 0 6px 16px rgba(73, 59, 44, 0.15);
+}
+
+body.theme-maayuan .editor-loop-range-input .bp4-input,
+body.theme-maayuan .editor-loop-range-input .bp4-input-group,
+body.theme-maayuan .editor-loop-range-input .bp4-control-group {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+body.theme-maayuan .editor-loop-range-input .bp4-input {
+  color: inherit;
+}
+
 body.theme-maayuan .bp4-input::placeholder,
 body.theme-maayuan textarea.bp4-input::placeholder,
 body.theme-maayuan .bp4-file-upload-input::placeholder {
