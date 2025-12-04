@@ -455,3 +455,85 @@ body,
   --chip-border: #0ea5e9;
   --chip-color: #bae6fd;
 }
+
+/* MaaYuan-inspired warm paper theme */
+body.theme-maayuan {
+  --maayuan-bg: #f6edd0;
+  --maayuan-surface: #fff8ec;
+  --maayuan-surface-strong: #dfcfb2;
+  --maayuan-text: #2a251a;
+  --maayuan-text-strong: #493b2c;
+  --maayuan-accent: #d78935;
+  --maayuan-accent-strong: #8f5112;
+  --maayuan-border: #9c7a4d;
+
+  background-color: var(--maayuan-bg);
+  color: var(--maayuan-text);
+  background-image: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.24), transparent 28%),
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.2), transparent 20%),
+    linear-gradient(135deg, #f6edd0 0%, #fff8ec 65%, #f6edd0 100%);
+}
+
+body.theme-maayuan a {
+  color: var(--maayuan-accent);
+}
+
+body.theme-maayuan .bp4-navbar,
+body.theme-maayuan .docs-content-wrapper,
+body.theme-maayuan .bp4-card,
+body.theme-maayuan .panel-shadow,
+body.theme-maayuan .card-shadow-subtle {
+  background-color: var(--maayuan-surface);
+  color: var(--maayuan-text);
+}
+
+body.theme-maayuan .bp4-button:not(.bp4-minimal) {
+  background-color: var(--maayuan-accent);
+  border-color: var(--maayuan-accent-strong);
+  color: #fff8ec;
+}
+
+body.theme-maayuan .bp4-button.bp4-minimal {
+  color: var(--maayuan-text);
+}
+
+body.theme-maayuan .bp4-button.bp4-minimal:hover {
+  background-color: rgba(215, 137, 53, 0.14);
+}
+
+body.theme-maayuan .bp4-tag {
+  background-color: var(--maayuan-surface-strong);
+  color: var(--maayuan-text-strong);
+}
+
+body.theme-maayuan .bp4-input,
+body.theme-maayuan textarea.bp4-input,
+body.theme-maayuan .bp4-file-upload-input {
+  background-color: var(--maayuan-surface);
+  border-color: var(--maayuan-border);
+  color: var(--maayuan-text);
+}
+
+body.theme-maayuan .bp4-input::placeholder,
+body.theme-maayuan textarea.bp4-input::placeholder,
+body.theme-maayuan .bp4-file-upload-input::placeholder {
+  color: #9c7a4d;
+}
+
+body.theme-maayuan .bp4-popover2 .bp4-popover2-content {
+  background-color: var(--maayuan-surface);
+  color: var(--maayuan-text);
+}
+
+body.theme-maayuan .bg-white,
+body.theme-maayuan .bg-zinc-50,
+body.theme-maayuan .bg-slate-100 {
+  background-color: var(--maayuan-surface) !important;
+  color: var(--maayuan-text);
+}
+
+body.theme-maayuan .text-gray-800,
+body.theme-maayuan .text-zinc-600,
+body.theme-maayuan .text-slate-700 {
+  color: var(--maayuan-text) !important;
+}

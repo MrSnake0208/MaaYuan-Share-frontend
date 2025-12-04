@@ -1,28 +1,42 @@
 import { Button } from "@blueprintjs/core";
-
 import { useCallback, useEffect, useState } from "react";
 
+type ThemeName = "light" | "maayuan" | "dark";
+
 const themeMedia = window.matchMedia("(prefers-color-scheme: light)");
+const themeOrder: ThemeName[] = ["light", "maayuan", "dark"];
+const themeIcon: Record<ThemeName, "flash" | "tint" | "moon"> = {
+  light: "flash",
+  maayuan: "tint",
+  dark: "moon",
+};
+
+const getInitialTheme = (): ThemeName => {
+  const saved = localStorage.getItem("theme") as ThemeName | null;
+  if (saved && themeOrder.includes(saved)) return saved;
+  return themeMedia.matches ? "light" : "dark";
+};
 
 export const ThemeSwitchButton = () => {
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "");
+  const [theme, setTheme] = useState<ThemeName>(getInitialTheme());
+
+  const applyTheme = useCallback((next: ThemeName) => {
+    document.body.classList.toggle("bp4-dark", next === "dark");
+    document.body.classList.toggle("dark", next === "dark");
+    document.body.classList.toggle("theme-maayuan", next === "maayuan");
+    document.body.dataset.theme = next;
+    localStorage.setItem("theme", next);
+  }, []);
+
   const handleThemeSwitch = useCallback(() => {
-    const isCurrentDark = theme === "dark";
-    setTheme(isCurrentDark ? "light" : "dark");
-    localStorage.setItem("theme", isCurrentDark ? "light" : "dark");
+    const currentIndex = themeOrder.indexOf(theme);
+    const next = themeOrder[(currentIndex + 1) % themeOrder.length];
+    setTheme(next);
   }, [theme]);
+
   useEffect(() => {
-    if (!themeMedia.matches && !localStorage.getItem("theme")) {
-      handleThemeSwitch();
-      return;
-    }
-    if (theme === "dark") {
-      document.body.classList.add("bp4-dark");
-      document.body.classList.add("dark");
-    } else {
-      document.body.classList.remove("bp4-dark");
-      document.body.classList.remove("dark");
-    }
-  }, [theme, handleThemeSwitch]);
-  return <Button onClick={handleThemeSwitch} icon={theme === "dark" ? "moon" : "flash"} />;
+    applyTheme(theme);
+  }, [theme, applyTheme]);
+
+  return <Button onClick={handleThemeSwitch} icon={themeIcon[theme]} />;
 };
