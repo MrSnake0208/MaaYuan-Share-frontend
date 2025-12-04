@@ -122,6 +122,12 @@ export const NumericInput2 = ({
 
         setEndsWithDot(str.endsWith("."));
 
+        // 允许用户清空输入，回调为 0，便于重输
+        if (str.trim() === "") {
+          onValueChange?.(0, str, inputEl);
+          return;
+        }
+
         num = parseFloat(str);
 
         if (Number.isNaN(num) || !Number.isFinite(num)) {
