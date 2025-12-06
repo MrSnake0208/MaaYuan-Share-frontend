@@ -124,7 +124,7 @@ export const Operations: ComponentType = withSuspensable(() => {
                   {[
                     { label: "只看如鸢", value: "如鸢", icon: IconNames.MANUAL },
                     { label: "只看代号鸢", value: "代号鸢", icon: IconNames.GLOBE },
-                    { label: "通用", value: "通用", icon: IconNames.LAYERS } as const,
+                    // { label: "通用", value: "通用", icon: IconNames.LAYERS } as const,
                   ].map(({ label, value, icon }) => {
                     const quickTags = mapQuickPresetToTags(value);
                     const isActive =
