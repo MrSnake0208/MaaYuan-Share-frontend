@@ -162,10 +162,10 @@ export const NeoOperationCard = ({
               </span>
             </div>
 
-            <div className="grow text-gray-700 leading-normal">
+            <div className="grow text-gray-700 leading-normal max-h-48 overflow-hidden">
               <Paragraphs
                 content={operation.parsedContent.doc.details}
-                limitHeight={21 * 13.5} // 13 lines, 21px per line; the extra 0.5 line is intentional so the `mask` effect is obvious
+                limitHeight={21 * 8} // clamp to ~8 lines
               />
             </div>
 
@@ -253,7 +253,7 @@ export const OperationCard = ({ operation }: { operation: Operation }) => {
   }
 
   return (
-    <li className="mb-4 sm:mb-2 last:mb-0 relative">
+    <li className="mb-4 sm:mb-2 last:mb-0 relative h-full">
       <ReLinkRenderer
         search={{ op: operation.id }}
         render={({ onClick, onKeyDown }) => (
@@ -263,6 +263,7 @@ export const OperationCard = ({ operation }: { operation: Operation }) => {
             tabIndex={0}
             onClick={onClick}
             onKeyDown={onKeyDown}
+            className="flex flex-col h-full"
           >
             <div className="flex flex-wrap mb-4 sm:mb-2">
               {/* title */}
@@ -380,11 +381,11 @@ export const OperationCard = ({ operation }: { operation: Operation }) => {
                 </div>
               </div>
             </div>
-            <div className="flex md:flex-row flex-col gap-4">
-              <div className="text-gray-700 leading-normal md:w-1/2">
+            <div className="flex md:flex-row flex-col gap-4 flex-1">
+              <div className="text-gray-700 leading-normal md:w-1/2 max-h-48 overflow-hidden">
                 <Paragraphs
                   content={operation.parsedContent.doc.details}
-                  limitHeight={21 * 13.5} // 13 lines, 21px per line; the extra 0.5 line is intentional so the `mask` effect is obvious
+                  limitHeight={21 * 8} // clamp to ~8 lines
                 />
               </div>
               <div className="md:w-1/2">
@@ -412,7 +413,7 @@ const OperatorTags = ({ operation }: { operation: Operation }) => {
   }
 
   return (
-    <div className="flex flex-wrap items-start">
+    <div className="flex flex-nowrap items-start overflow-x-auto">
       {opers?.map((operator, index) => {
         const operatorName = operator.name;
         const displayName = getLocalizedOperatorName(operatorName, language);
