@@ -1,14 +1,15 @@
 import useSWR from "swr";
 
+const API_URL = import.meta.env.VITE_API;
+
 const ONE_DAY = 1000 * 60 * 60 * 24;
 const emptyArray: any[] = [];
-
-const API_URL = import.meta.env.VITE_API;
 
 async function fetchLevelsV2() {
   const resp = await fetch(`${API_URL}/arknights/level/v2`, {
     headers: { "content-type": "application/json" },
   });
+
   if (!resp.ok) {
     throw new Error(`request failed: ${resp.status}`);
   }

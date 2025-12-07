@@ -22,6 +22,12 @@ declare module "maa-copilot-client" {
   }
 }
 
+if (!import.meta.env.VITE_API) {
+  throw new Error("env var VITE_API is not set");
+}
+
+const API_URL = import.meta.env.VITE_API;
+
 interface ApiOptions {
   /**
    * 是否发送 token
@@ -41,12 +47,6 @@ interface ApiOptions {
    */
   requireData?: boolean;
 }
-
-if (!import.meta.env.VITE_API) {
-  throw new Error("env var VITE_API is not set");
-}
-
-const API_URL = import.meta.env.VITE_API;
 
 // 把函数返回值里的 data 字段标记为 required
 type RequireData<T> = T extends (...params: infer P) => Promise<infer R>

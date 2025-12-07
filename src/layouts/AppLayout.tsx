@@ -8,6 +8,7 @@ import { AccountManager } from "components/AccountManager";
 import { BackToTop } from "components/BackToTop";
 import { LanguageSwitcher } from "components/LanguageSwitcher";
 import { NavExpandButton } from "components/NavExpandButton";
+import { ServerSwitchButton } from "components/ServerSwitchButton";
 import { ThemeSwitchButton } from "components/ThemeSwitchButton";
 import { NavAside } from "components/drawer/NavAside";
 
@@ -49,6 +50,7 @@ export const AppLayout: FCC = ({ children }) => {
           <NavExpandButton />
           <LanguageSwitcher />
           <ThemeSwitchButton />
+          <ServerSwitchButton />
           <AccountManager />
         </div>
       </Navbar>
