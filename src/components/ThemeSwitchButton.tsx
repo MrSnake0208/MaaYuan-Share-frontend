@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from "react";
 
 type ThemeName = "light" | "maayuan" | "dark";
 
-const themeMedia = window.matchMedia("(prefers-color-scheme: light)");
 const themeOrder: ThemeName[] = ["light", "maayuan", "dark"];
 const themeIcon: Record<ThemeName, "flash" | "tint" | "moon"> = {
   light: "flash",
@@ -14,7 +13,7 @@ const themeIcon: Record<ThemeName, "flash" | "tint" | "moon"> = {
 const getInitialTheme = (): ThemeName => {
   const saved = localStorage.getItem("theme") as ThemeName | null;
   if (saved && themeOrder.includes(saved)) return saved;
-  return themeMedia.matches ? "light" : "dark";
+  return "maayuan";
 };
 
 export const ThemeSwitchButton = () => {
