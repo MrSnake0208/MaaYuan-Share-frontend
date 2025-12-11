@@ -6,6 +6,16 @@ from typing import Any, Tuple
 
 import feishu_common as fc
 
+# 特殊拼音/ID 映射，兼容外部约定
+PINYIN_OVERRIDES: dict[str, Tuple[str, str]] = {
+    "宓": ("fu", "f"),
+}
+
+ID_OVERRIDES: dict[str, str] = {
+    "char_084_chendeng·shuwang": "char_084_chendengsp.webp",
+    "char_085_shizimiao·fuzhu": "char_085_shizimiaosp.webp",
+}
+
 # 固定职业/子职业枚举，保持与前端 operators.json 结构一致
 PROFESSIONS = [
     {
@@ -129,6 +139,9 @@ def _pinyin_pair(name: str) -> Tuple[str, str]:
     """
     返回 (全拼, 首字母)。若缺少依赖则回退为原名。
     """
+    override = PINYIN_OVERRIDES.get(name)
+    if override:
+        return override
     try:
         from pypinyin import lazy_pinyin, Style
 
@@ -180,6 +193,7 @@ def transform_operators(records: list, token: str) -> list:
         seq = _to_int(_get_text(f.get("序号"))) or (index + 1)
         id_suffix = (py_full or name or "unknown").replace(" ", "").lower()
         op_id = f"char_{seq:03d}_{id_suffix}"
+        op_id = ID_OVERRIDES.get(op_id, op_id)
 
         data.append(
             {
