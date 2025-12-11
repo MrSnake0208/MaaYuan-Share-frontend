@@ -1380,75 +1380,87 @@
       "discs": [
         {
           "desp": "初始能量+3",
-          "ot_name": "初是+3",
+          "ot_name": "初始能量+3",
           "color": "金",
-          "abbreviation": "初始+3"
+          "abbreviation": "初始+3",
+          "__abbrEdited": true
         },
         {
           "desp": "转换为【道者形】时，自身进入防御状态(1回合)随后为我方至体附加护盾(2回合)，护量相当于自身20%最大生命",
           "ot_name": "仁心护持",
           "color": "金",
-          "abbreviation": "仁心护持"
+          "abbreviation": "仁心护持",
+          "__abbrEdited": false
         },
         {
           "desp": "敌人的【生魂】不再降低本体的持续伤害免伤，<远逝无归>中令敌人失去生命的效果的数额减半。但【生魂】在本体受到持续伤害以外的伤害时也会失去生命，且自身使用技能后，可获得5层【牵念】",
           "ot_name": "身魂俱殁",
           "color": "金",
-          "abbreviation": "身魂俱殁"
+          "abbreviation": "身魂俱殁",
+          "__abbrEdited": false
         },
         {
           "desp": "战斗开始时，获得100层【牵念】。本场战斗首次转换为【道者形】时，为敌方全体附加【惊魄】。【惊魄】：持续伤害，伤害量为施加者80%的攻击力",
           "ot_name": "念兹在兹",
           "color": "金",
-          "abbreviation": "念兹在兹"
+          "abbreviation": "念兹在兹",
+          "__abbrEdited": false
         },
         {
           "desp": "敌人每受到一次持续伤害，自身获得1层【牵念】",
           "ot_name": "重灵降诛",
           "color": "金",
-          "abbreviation": "重灵降诛"
+          "abbreviation": "重灵降诛",
+          "__abbrEdited": false
         },
         {
           "desp": "初始能量+1",
           "ot_name": "初始能量+1",
           "color": "紫",
-          "abbreviation": "初始+1"
+          "abbreviation": "初始+1",
+          "__abbrEdited": true
         },
         {
           "desp": "防御时，恢复10%最大生命值的生命",
           "ot_name": "防御时恢复生命",
           "color": "紫",
-          "abbreviation": "防御回血"
+          "abbreviation": "防御回血",
+          "__abbrEdited": true
         },
         {
           "desp": "最大生命值提升8%",
           "ot_name": "最大生命值中幅提升",
           "color": "紫",
-          "abbreviation": "生命中幅"
+          "abbreviation": "生命中幅",
+          "__abbrEdited": true
         },
         {
           "desp": "攻击力提升8%",
           "ot_name": "攻击力中幅提升",
           "color": "紫",
-          "abbreviation": "攻击中幅"
+          "abbreviation": "攻击中幅",
+          "__abbrEdited": true
         },
         {
           "desp": "生命值低于50%时，自身攻击力提升10%",
           "ot_name": "生命低时攻击提升",
           "color": "蓝",
-          "abbreviation": "血低攻高"
+          "abbreviation": "血低攻高",
+          "__abbrEdited": true
         },
         {
           "desp": "攻击力提升3%",
           "ot_name": "攻击力小幅提升",
           "color": "蓝",
-          "abbreviation": "攻击小幅"
+          "abbreviation": "攻击小幅",
+          "__abbrEdited": true
         },
         {
           "desp": "普攻的伤害系数增加5%",
           "ot_name": "普攻伤害小幅增加",
           "color": "蓝",
-          "abbreviation": "普攻小幅"
+          "abbreviation": "普攻小幅",
+          "__abbrEdited": true
         }
       ]
     },
@@ -9125,6 +9137,186 @@
           "ot_name": "防御减伤提升",
           "abbreviation": "防御减伤",
           "desp": "防御时额外使自身防御系数提升10"
+        }
+      ]
+    },
+    {
+      "id": "char_106_kuailiang",
+      "name": "蒯良",
+      "rarity": 5,
+      "prof": "火",
+      "subProf": "guidao",
+      "alias": "kuailiang kl “蒯良” 蒯良",
+      "name_en": "蒯良",
+      "discs": [
+        {
+          "__abbrEdited": true,
+          "ot_name": "初始能量+1",
+          "abbreviation": "初始+1",
+          "color": "紫",
+          "desp": "初始能量+1"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "防御时恢复生命",
+          "abbreviation": "防御恢复",
+          "color": "紫",
+          "desp": "防御时，恢复10%最大生命值的生命"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "最大生命大幅提升",
+          "abbreviation": "生命大幅",
+          "desp": "最大生命提升12%"
+        },
+        {
+          "__abbrEdited": false,
+          "ot_name": "端审谨言",
+          "abbreviation": "端审谨言",
+          "desp": "<秉拂>转为吸收除自身外的友方密探20%最大生命的生命于自身的【拂尘】中，这部分生命可以恢复"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "防御减伤提升",
+          "abbreviation": "减伤提升",
+          "color": "蓝",
+          "desp": "防御时额外使自身防御系数提升10"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "最大生命中幅提升",
+          "abbreviation": "生命中幅",
+          "color": "紫",
+          "desp": "最大生命提升8%"
+        },
+        {
+          "__abbrEdited": false,
+          "ot_name": "君子慎独",
+          "abbreviation": "君子慎独",
+          "desp": "自身拥有【拂尘】后，若自身【拂尘】存储未达到上限，则除自身外我方火属性密探下拉防御后，将其35%最大生命的生命封印于【拂尘】中，该部分封印的生命无法恢复或回溯"
+        },
+        {
+          "__abbrEdited": false,
+          "ot_name": "祸福无门",
+          "abbreviation": "祸福无门",
+          "desp": "自身生命每降低1%，普攻增伤和技能增伤提升0.5"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "最大生命小幅提升",
+          "abbreviation": "生命小幅",
+          "color": "蓝",
+          "desp": "最大生命提升3%"
+        },
+        {
+          "__abbrEdited": false,
+          "ot_name": "因来果报",
+          "abbreviation": "因来果报",
+          "desp": "战斗开始时，若敌人存在风属性的敌人，则我方全体最大生命提升20%"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "生命高时提升攻击",
+          "abbreviation": "血高攻高",
+          "color": "紫",
+          "desp": "生命值高于50%时，自身攻击力提升10%"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "生命低时攻击提升",
+          "abbreviation": "血低攻高",
+          "color": "蓝",
+          "desp": "生命值低于50%时，自身攻击力提升10%"
+        }
+      ]
+    },
+    {
+      "id": "char_107_guonvwang",
+      "name": "郭女王",
+      "rarity": 5,
+      "prof": "水",
+      "subProf": "pojun",
+      "alias": "guonvwang gnw “郭女王” 郭女王",
+      "name_en": "郭女王",
+      "discs": [
+        {
+          "__abbrEdited": true,
+          "ot_name": "初始能量+1",
+          "abbreviation": "初始+1",
+          "desp": "初始能量+1",
+          "color": "紫"
+        },
+        {
+          "__abbrEdited": true,
+          "desp": "攻击力提升12%",
+          "color": "金",
+          "ot_name": "攻击力大幅提升",
+          "abbreviation": "攻击大幅"
+        },
+        {
+          "__abbrEdited": false,
+          "ot_name": "卡学历",
+          "abbreviation": "卡学历",
+          "desp": "【伴身】以外的我方密探损失生命时，每损失2000生命，<张仲剑>获得1层充能"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "初始能量+2",
+          "abbreviation": "初始+2",
+          "desp": "初始能量+2"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "攻击力小幅提升",
+          "abbreviation": "攻击小幅",
+          "color": "蓝",
+          "desp": "攻击力提升3%"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "最大生命中幅提升",
+          "abbreviation": "生命中幅",
+          "color": "紫",
+          "desp": "最大生命提升8%"
+        },
+        {
+          "__abbrEdited": false,
+          "desp": "引爆<张仲剑>后，本回合若使用技能，技能的效果会执行2次(若引爆后郭女王死亡则无法触发)",
+          "ot_name": "两声对",
+          "abbreviation": "两声对"
+        },
+        {
+          "__abbrEdited": false,
+          "desp": "下拉防御后，消耗【伴身】20%最大生命，提升自身20水属性增伤(2回合，可叠加2层)，本回合可以额外进行一次行动。这个效果一回合只能触发1次",
+          "ot_name": "龙飞紫极",
+          "abbreviation": "龙飞紫极"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "最大生命小幅提升",
+          "abbreviation": "生命小幅",
+          "color": "蓝",
+          "desp": "最大生命提升3%"
+        },
+        {
+          "__abbrEdited": true,
+          "desp": "普攻的伤害类型变为触发伤害，且可以为我方全体附加护盾(1回合，可叠加3层)，护盾量为自身20%的攻击力。使用普攻后，通过消耗【件身】10%最大生命，可以额外进行一次行动，这个效果一回合可以触发2次",
+          "ot_name": "我甄的宓了!",
+          "abbreviation": "我甄宓了"
+        },
+        {
+          "__abbrEdited": true,
+          "ot_name": "攻击力中幅提升",
+          "abbreviation": "攻击中幅",
+          "color": "紫",
+          "desp": "攻击力提升8%"
+        },
+        {
+          "__abbrEdited": true,
+          "color": "蓝",
+          "desp": "生命值高于50%时，自身攻击力提升10%",
+          "ot_name": "生命高时攻击提升",
+          "abbreviation": "血高攻高"
         }
       ]
     }
