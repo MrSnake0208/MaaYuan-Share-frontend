@@ -12,8 +12,8 @@ PINYIN_OVERRIDES: dict[str, Tuple[str, str]] = {
 }
 
 ID_OVERRIDES: dict[str, str] = {
-    "char_084_chendeng·shuwang": "char_084_chendengsp.webp",
-    "char_085_shizimiao·fuzhu": "char_085_shizimiaosp.webp",
+    "char_084_chendeng·shuwang": "char_084_chendengsp",
+    "char_085_shizimiao·fuzhu": "char_085_shizimiaosp",
 }
 
 # 固定职业/子职业枚举，保持与前端 operators.json 结构一致
@@ -139,17 +139,28 @@ def _pinyin_pair(name: str) -> Tuple[str, str]:
     """
     返回 (全拼, 首字母)。若缺少依赖则回退为原名。
     """
-    override = PINYIN_OVERRIDES.get(name)
-    if override:
-        return override
+    override_full = PINYIN_OVERRIDES.get(name)
+    if override_full:
+        return override_full
     try:
         from pypinyin import lazy_pinyin, Style
 
-        full = "".join(lazy_pinyin(name, style=Style.NORMAL))
-        initials = "".join(lazy_pinyin(name, style=Style.FIRST_LETTER))
+        full_parts = []
+        initials_parts = []
+        for ch in name:
+            override = PINYIN_OVERRIDES.get(ch)
+            if override:
+                full_parts.append(override[0])
+                initials_parts.append(override[1])
+                continue
+            full_parts.append("".join(lazy_pinyin(ch, style=Style.NORMAL)))
+            initials_parts.append("".join(lazy_pinyin(ch, style=Style.FIRST_LETTER)))
+
+        full = "".join(full_parts)
+        initials = "".join(initials_parts)
         return full, initials
     except Exception:
-            return name, name
+        return name, name
 
 
 def transform_operators(records: list, token: str) -> list:
