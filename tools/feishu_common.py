@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 # === 0. 基础配置（强烈建议用环境变量读取） ===
 APP_ID     = os.getenv("FEISHU_APP_ID",     "")
-APP_SECRET = os.getenv("FEISHU_APP_SECRET", "QXv2Ejh0MzKYcIPCqG5v2ee5lI0gT4MP")
+APP_SECRET = os.getenv("FEISHU_APP_SECRET", "")
 BASE_URL   = "https://open.feishu.cn"
 SITE_DATA_DIR = pathlib.Path(__file__).parent.parent / "src" / "models" / "generated"
 FEISHU_IMAGE_DIR = pathlib.Path(__file__).parent.parent / "public" / "images" / "feishu"
