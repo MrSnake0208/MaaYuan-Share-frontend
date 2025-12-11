@@ -61,3 +61,8 @@ jobs:
           
           # 提交变更
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update operators data [skip ci]" && git push)
+
+  deploy-to-nas:
+    needs: sync-operators
+    uses: ./.github/workflows/nas_deploy.yml
+    secrets: inherit
