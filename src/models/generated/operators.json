@@ -8550,11 +8550,11 @@
       ]
     },
     {
-      "id": "char_101_lvbudawangjiadao",
-      "name": "吕布大王驾到",
-      "name_en": "吕布大王驾到",
-      "alias": "lvbudawangjiadao lbdwjd “吕布大王驾到” 吕布大王驾到",
-      "alt_name": "吕布大王驾到",
+      "id": "char_101_lvbudawangjiadaoa",
+      "name": "吕布大王驾到啊",
+      "name_en": "吕布大王驾到啊",
+      "alias": "lvbudawangjiadaoa lbdwjda “吕布大王驾到啊” 吕布大王驾到啊",
+      "alt_name": "吕布大王驾到啊",
       "rarity": 5,
       "prof": "地",
       "subProf": "pojun",
