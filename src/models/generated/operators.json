@@ -8550,11 +8550,11 @@
       ]
     },
     {
-      "id": "char_101_lvbubuzaijia",
-      "name": "吕布不在家",
-      "name_en": "吕布不在家",
-      "alias": "lvbubuzaijia lbbzj “吕布不在家” 吕布不在家",
-      "alt_name": "吕布不在家",
+      "id": "char_101_lvbu",
+      "name": "吕布",
+      "name_en": "吕布",
+      "alias": "lvbu lb “吕布” 吕布",
+      "alt_name": "吕布",
       "rarity": 5,
       "prof": "地",
       "subProf": "pojun",
