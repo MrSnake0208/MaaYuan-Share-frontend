@@ -52,6 +52,8 @@ export function OperatorAvatar({
 
   const commonClassName = "ring-inset ring-2 border-solid rounded-md object-cover";
 
+  const fallbackSrc = `/assets/operator-avatars/404.webp`;
+
   return id ? (
     <img
       className={clsx(sizingClassName, colorClassName, commonClassName, className)}
@@ -61,6 +63,12 @@ export function OperatorAvatar({
       loading="lazy"
       width={sourceSize}
       height={sourceSize}
+      onError={(event) => {
+        const target = event.currentTarget;
+        if (target.dataset.fallbackApplied === "true") return;
+        target.dataset.fallbackApplied = "true";
+        target.src = fallbackSrc;
+      }}
     />
   ) : (
     <div
