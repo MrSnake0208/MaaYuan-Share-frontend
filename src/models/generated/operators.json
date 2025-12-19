@@ -8478,7 +8478,7 @@
         {
           "ot_name": "孕蝶",
           "abbreviation": "孕蝶",
-          "color": "橙",
+          "color": "金",
           "desp": "使用技能解除【酣睡】状态时，获得3点能量，但2回合内自身陷入混乱无法行动"
         },
         {
@@ -9136,6 +9136,28 @@
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
       ]
+    },
+    {
+      "id": "char_108_fazheng",
+      "name": "法正",
+      "name_en": "法正",
+      "alias": "fazheng fz “法正” 法正",
+      "alt_name": "法正",
+      "rarity": 5,
+      "prof": "阴",
+      "subProf": "shenji",
+      "discs": []
+    },
+    {
+      "id": "char_109_chenqun",
+      "name": "陈群",
+      "name_en": "陈群",
+      "alias": "chenqun cq “陈群” 陈群",
+      "alt_name": "陈群",
+      "rarity": 5,
+      "prof": "地",
+      "subProf": "shenji",
+      "discs": []
     }
   ],
   "PROFESSIONS": [
