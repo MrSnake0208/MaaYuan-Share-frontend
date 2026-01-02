@@ -384,16 +384,16 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                 ? [0, 1, 2].map((slot) => {
                     const slots = getDiscSlots(operator);
                     const idx1 = slots[slot]?.disc ?? 0;
-                    const selectedItem = idx1 > 0 ? discList[idx1 - 1] : undefined;
                     const selectedIsAny = idx1 === -1;
                     const selectedIsForbidden = idx1 <= -2;
-                    const forbiddenDiscIndex1 = selectedIsForbidden ? -idx1 - 1 : 0;
-                    const forbiddenItem =
-                      selectedIsForbidden && forbiddenDiscIndex1 > 0
-                        ? discList[forbiddenDiscIndex1 - 1]
-                        : undefined;
+                    const selectedDiscIndex1 = idx1 > 0 ? idx1 : selectedIsForbidden ? -idx1 - 1 : 0;
+                    const selectedItem =
+                      selectedDiscIndex1 > 0 ? discList[selectedDiscIndex1 - 1] : undefined;
                     return (
-                      <li key={"disc-slot-" + slot} className="relative h-8 flex gap-1 ml-1">
+                      <li
+                        key={"disc-slot-" + slot}
+                        className="relative h-8 flex items-center gap-1 ml-1"
+                      >
                         <Select
                           filterable={false}
                           items={[
@@ -404,13 +404,6 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                               idx: -1,
                             } as any,
                             ...discList.map((d, idx) => ({ ...d, idx })),
-                            ...discList.map((d, idx) => ({
-                              ...d,
-                              idx: -(idx + 3),
-                              name: `不能有：${d.name}`,
-                              abbreviation: `禁${d.abbreviation}`,
-                              desp: `不能有：${d.desp}`,
-                            })),
                           ]}
                           itemRenderer={(item, { handleClick, handleFocus, modifiers }) => (
                             <MenuItem
@@ -424,12 +417,17 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                               title={item.desp}
                               onClick={handleClick}
                               onFocus={handleFocus}
-                              selected={item.idx === -1 ? idx1 === -1 : item.idx + 1 === idx1}
+                              selected={
+                                item.idx === -1 ? idx1 === -1 : item.idx + 1 === selectedDiscIndex1
+                              }
                             />
                           )}
                           onItemSelect={(item) => {
                             edit(() => {
-                              const chosen = (item as any).idx === -1 ? -1 : (item as any).idx + 1;
+                              const discIndex1 =
+                                (item as any).idx === -1 ? -1 : (item as any).idx + 1;
+                              const chosen =
+                                discIndex1 > 0 && selectedIsForbidden ? -(discIndex1 + 1) : discIndex1;
                               const next = setDiscSlot(operator, slot, {
                                 disc: chosen,
                               });
@@ -452,9 +450,9 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                             minimal
                             title={
                               selectedItem
-                                ? selectedItem.desp
-                                : forbiddenItem
-                                  ? `不能有：${forbiddenItem.desp}`
+                                ? selectedIsForbidden
+                                  ? `不能有：${selectedItem.desp}`
+                                  : selectedItem.desp
                                 : selectedIsAny
                                   ? "任意"
                                   : `选择命盘${slot + 1}`
@@ -462,21 +460,58 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                             className={clsx(
                               "w-[7ch] whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current",
                               selectedItem
-                                ? discColorClasses(selectedItem.color)
-                                : forbiddenItem
-                                  ? clsx(discColorClasses(forbiddenItem.color), "!border-red-600 dark:!border-red-400")
+                                ? clsx(
+                                    discColorClasses(selectedItem.color),
+                                    selectedIsForbidden && "!border-red-600 dark:!border-red-400",
+                                  )
                                 : "!bg-gray-300 dark:!bg-gray-600 opacity-15 dark:opacity-25 hover:opacity-30 dark:hover:opacity-50",
                             )}
                           >
                             {selectedItem
                               ? selectedItem.abbreviation
-                              : forbiddenItem
-                                ? `禁${forbiddenItem.abbreviation}`
                               : selectedIsAny
                                 ? "任意"
                                 : `命盘${slot + 1}`}
                           </Button>
                         </Select>
+
+                        <Button
+                          small
+                          minimal
+                          disabled={!selectedItem || selectedIsAny}
+                          title={
+	                            !selectedItem || selectedIsAny
+	                              ? "请选择命盘后可禁用"
+	                              : selectedIsForbidden
+	                                ? "取消：不能有该命盘"
+	                                : "设置：不能有该命盘"
+                          }
+                          className={clsx(
+                            "w-[3ch] whitespace-nowrap !p-0 px-1 self-center flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current",
+                            selectedIsForbidden
+                              ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300"
+                              : "bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200",
+                          )}
+                          onClick={() => {
+	                            edit(() => {
+	                              if (!selectedItem || selectedDiscIndex1 <= 0) {
+	                                return { action: "skip", desc: "skip" };
+                              }
+                              const nextDisc = selectedIsForbidden
+                                ? selectedDiscIndex1
+                                : -(selectedDiscIndex1 + 1);
+                              const next = setDiscSlot(operator, slot, { disc: nextDisc });
+                              onChange?.(next);
+                              return {
+                                action: "toggle-operator-disc-forbidden",
+                                desc: "切换命盘禁用",
+                                squashBy: operator.id,
+                              };
+                            });
+                          }}
+                        >
+                          禁
+                        </Button>
 
                         {/* 星石选择 */}
                         <Select
