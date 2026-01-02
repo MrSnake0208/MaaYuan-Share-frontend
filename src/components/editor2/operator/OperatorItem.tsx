@@ -386,6 +386,12 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                     const idx1 = slots[slot]?.disc ?? 0;
                     const selectedItem = idx1 > 0 ? discList[idx1 - 1] : undefined;
                     const selectedIsAny = idx1 === -1;
+                    const selectedIsForbidden = idx1 <= -2;
+                    const forbiddenDiscIndex1 = selectedIsForbidden ? -idx1 - 1 : 0;
+                    const forbiddenItem =
+                      selectedIsForbidden && forbiddenDiscIndex1 > 0
+                        ? discList[forbiddenDiscIndex1 - 1]
+                        : undefined;
                     return (
                       <li key={"disc-slot-" + slot} className="relative h-8 flex gap-1 ml-1">
                         <Select
@@ -398,6 +404,13 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                               idx: -1,
                             } as any,
                             ...discList.map((d, idx) => ({ ...d, idx })),
+                            ...discList.map((d, idx) => ({
+                              ...d,
+                              idx: -(idx + 3),
+                              name: `不能有：${d.name}`,
+                              abbreviation: `禁${d.abbreviation}`,
+                              desp: `不能有：${d.desp}`,
+                            })),
                           ]}
                           itemRenderer={(item, { handleClick, handleFocus, modifiers }) => (
                             <MenuItem
@@ -440,6 +453,8 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                             title={
                               selectedItem
                                 ? selectedItem.desp
+                                : forbiddenItem
+                                  ? `不能有：${forbiddenItem.desp}`
                                 : selectedIsAny
                                   ? "任意"
                                   : `选择命盘${slot + 1}`
@@ -448,11 +463,15 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                               "w-[7ch] whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current",
                               selectedItem
                                 ? discColorClasses(selectedItem.color)
+                                : forbiddenItem
+                                  ? clsx(discColorClasses(forbiddenItem.color), "!border-red-600 dark:!border-red-400")
                                 : "!bg-gray-300 dark:!bg-gray-600 opacity-15 dark:opacity-25 hover:opacity-30 dark:hover:opacity-50",
                             )}
                           >
                             {selectedItem
                               ? selectedItem.abbreviation
+                              : forbiddenItem
+                                ? `禁${forbiddenItem.abbreviation}`
                               : selectedIsAny
                                 ? "任意"
                                 : `命盘${slot + 1}`}
