@@ -277,20 +277,22 @@ export const OperationViewer: ComponentType<{
       navigate(`/editor?shortcode=${encodeURIComponent(shortCode)}`);
     };
 
-    return (
-      <DrawerLayout
-        title={
-          <>
-            <Icon icon="document" />
-            <span className="ml-2">{t.components.viewer.OperationViewer.maa_copilot_task}</span>
+	    return (
+	      <DrawerLayout
+	        title={
+	          <>
+	            <div className="flex min-w-0 items-center gap-2">
+	              <Icon icon="document" />
+	              <span className="min-w-0 truncate">
+	                {t.components.viewer.OperationViewer.maa_copilot_task}
+	              </span>
+	            </div>
 
-            <div className="flex-1" />
-
-            <div className="flex flex-wrap items-center gap-2 md:gap-4">
-              {(operation.uploaderId === auth.userId || isAdmin(auth)) && (
-                // 使用 Portal 渲染，避免被头部容器裁剪/遮挡；提升层级与全局样式一致
-                <Popover2
-                  content={
+	            <div className="ml-auto flex flex-wrap items-center justify-end gap-2 md:gap-4">
+	              {(operation.uploaderId === auth.userId || isAdmin(auth)) && (
+	                // 使用 Portal 渲染，避免被头部容器裁剪/遮挡；提升层级与全局样式一致
+	                <Popover2
+	                  content={
                     <ManageMenu
                       operation={operation}
                       onRevalidateOperation={() => mutate()}
@@ -301,13 +303,13 @@ export const OperationViewer: ComponentType<{
                   // 仅对本弹层提升层级，避免被 Drawer 内容遮挡
                   portalClassName="operation-viewer-portal"
                 >
-                  <Button
-                    icon="wrench"
-                    text={t.components.viewer.OperationViewer.manage}
-                    rightIcon="caret-down"
-                  />
-                </Popover2>
-              )}
+	                  <Button
+	                    icon="wrench"
+	                    text={t.components.viewer.OperationViewer.manage}
+	                    rightIcon="caret-down"
+	                  />
+	                </Popover2>
+	              )}
 
               <Button
                 icon="download"
@@ -548,13 +550,20 @@ const OperatorCard: FC<{
                   >
                     <div
                       className={clsx(
-                        "bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current",
+                        "bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current relative",
                         discColorClasses(d.color),
                         forbidden && "!border-red-600 dark:!border-red-400",
                       )}
                     >
-                      <span className="bp4-button-text">
-                        {forbidden ? `×${d.abbreviation as string}` : (d.abbreviation as string)}
+                      <span className="bp4-button-text inline-flex w-full min-w-0 items-center justify-center gap-1 overflow-hidden">
+                        {forbidden ? (
+                          <span className="w-4 h-4 shrink-0 rounded-full bg-red-600 text-white border border-white/80 text-[12px] leading-[14px] inline-flex items-center justify-center">
+                            ×
+                          </span>
+                        ) : null}
+                        <span className={clsx("min-w-0 truncate", forbidden && "opacity-60")}>
+                          {d.abbreviation as string}
+                        </span>
                       </span>
                     </div>
                   </Tooltip2>

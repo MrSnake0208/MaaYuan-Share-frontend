@@ -142,45 +142,45 @@ export const OperationSetViewer: ComponentType<{
       }
     }, [error, t]);
 
-    return (
-      <DrawerLayout
-        title={
-          <>
-            <Icon icon="document" />
-            <span className="ml-2">
-              {t.components.viewer.OperationSetViewer.maa_copilot_task_set}
-            </span>
+	    return (
+	      <DrawerLayout
+	        title={
+	          <>
+	            <div className="flex min-w-0 items-center gap-2">
+	              <Icon icon="document" />
+	              <span className="min-w-0 truncate">
+	                {t.components.viewer.OperationSetViewer.maa_copilot_task_set}
+	              </span>
+	            </div>
 
-            <div className="flex-1" />
+	            <div className="ml-auto flex flex-wrap items-center justify-end gap-2 md:gap-4">
+	              {(operationSet.creatorId === auth.userId || isAdmin(auth)) && (
+	                // 与 OperationViewer 保持一致：使用 Portal 并提升层级，避免在 Drawer 标题区域被裁剪/遮挡
+	                <Popover2
+	                  content={
+	                    <ManageMenu operationSet={operationSet} onUpdate={() => onCloseDrawer()} />
+	                  }
+	                  usePortal={true}
+	                  portalClassName="operation-viewer-portal"
+	                >
+	                  <Button
+	                    icon="wrench"
+	                    text={t.components.viewer.OperationSetViewer.manage}
+	                    rightIcon="caret-down"
+	                  />
+	                </Popover2>
+	              )}
 
-            {(operationSet.creatorId === auth.userId || isAdmin(auth)) && (
-              // 与 OperationViewer 保持一致：使用 Portal 并提升层级，避免在 Drawer 标题区域被裁剪/遮挡
-              <Popover2
-                content={
-                  <ManageMenu operationSet={operationSet} onUpdate={() => onCloseDrawer()} />
-                }
-                usePortal={true}
-                portalClassName="operation-viewer-portal"
-              >
-                <Button
-                  className="ml-4"
-                  icon="wrench"
-                  text={t.components.viewer.OperationSetViewer.manage}
-                  rightIcon="caret-down"
-                />
-              </Popover2>
-            )}
-
-            <Button
-              className="ml-4"
-              icon="clipboard"
-              text={t.components.viewer.OperationSetViewer.copy_secret_code}
-              intent="primary"
-              onClick={() => copyShortCode(operationSet)}
-            />
-          </>
-        }
-      >
+	              <Button
+	                icon="clipboard"
+	                text={t.components.viewer.OperationSetViewer.copy_secret_code}
+	                intent="primary"
+	                onClick={() => copyShortCode(operationSet)}
+	              />
+	            </div>
+	          </>
+	        }
+	      >
         <ErrorBoundary
           fallback={
             <NonIdealState
