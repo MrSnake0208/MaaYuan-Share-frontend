@@ -427,20 +427,29 @@ const OperatorCard: FC<{
   const discList = (info as any)?.discs ?? [];
   const slots = getDiscSlots(operator);
   const selectedDiscs = slots.filter((s) => s.disc !== 0).map((s) => s);
+  type SelectedDiscDisplay = { _slot: number; item: any; forbidden: boolean };
   const selectedDiscsDisplay = selectedDiscs
-    .map((s) => {
+    .map((s): SelectedDiscDisplay | null => {
       if (s.disc === -1) {
         return {
           _slot: s.index,
           item: { name: "任意", abbreviation: "任意", desp: "任意" } as any,
+          forbidden: false,
         };
       }
+      if (typeof s.disc === "number" && s.disc <= -2) {
+        const discIndex1 = -s.disc - 1;
+        if (discIndex1 > 0 && discIndex1 <= discList.length) {
+          return { _slot: s.index, item: discList[discIndex1 - 1], forbidden: true };
+        }
+        return null;
+      }
       if (typeof s.disc === "number" && s.disc > 0 && s.disc <= discList.length) {
-        return { _slot: s.index, item: discList[s.disc - 1] };
+        return { _slot: s.index, item: discList[s.disc - 1], forbidden: false };
       }
       return null;
     })
-    .filter(Boolean) as { _slot: number; item: any }[];
+    .filter(Boolean) as SelectedDiscDisplay[];
 
   const discColorClasses = (color?: string) => {
     switch (color) {
@@ -527,13 +536,13 @@ const OperatorCard: FC<{
         })()}
         {selectedDiscs?.length > 0 && (
           <div className="mt-1 mx-[-4px] grid gap-1">
-            {selectedDiscsDisplay.map(({ item: d, _slot }, i: number) => {
+            {selectedDiscsDisplay.map(({ item: d, _slot, forbidden }, i: number) => {
               const star = slots.find((s) => s.index === _slot)?.starStone;
               return (
                 <div key={i} className={clsx("flex gap-1", !showExtras && "justify-center")}>
                   {/* 提升命盘描述 Tooltip 的层级，避免被 Drawer 内容遮挡 */}
                   <Tooltip2
-                    content={d.desp}
+                    content={forbidden ? `不能有：${d.desp}` : d.desp}
                     usePortal={true}
                     portalClassName="operation-viewer-portal"
                   >
@@ -541,9 +550,12 @@ const OperatorCard: FC<{
                       className={clsx(
                         "bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current",
                         discColorClasses(d.color),
+                        forbidden && "!border-red-600 dark:!border-red-400",
                       )}
                     >
-                      <span className="bp4-button-text">{d.abbreviation as string}</span>
+                      <span className="bp4-button-text">
+                        {forbidden ? `×${d.abbreviation as string}` : (d.abbreviation as string)}
+                      </span>
                     </div>
                   </Tooltip2>
                   {showExtras && (
