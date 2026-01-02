@@ -405,23 +405,32 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                             } as any,
                             ...discList.map((d, idx) => ({ ...d, idx })),
                           ]}
-                          itemRenderer={(item, { handleClick, handleFocus, modifiers }) => (
-                            <MenuItem
-                              roleStructure="listoption"
-                              key={item.idx}
-                              className={clsx(
-                                "min-w-40 !rounded-none text-sm font-serif text-slate-700 dark:text-slate-200",
-                                modifiers.active && Classes.ACTIVE,
-                              )}
-                              text={item.abbreviation + (item.color ? ` · ${item.color}` : "")}
-                              title={item.desp}
-                              onClick={handleClick}
-                              onFocus={handleFocus}
-                              selected={
-                                item.idx === -1 ? idx1 === -1 : item.idx + 1 === selectedDiscIndex1
-                              }
-                            />
-                          )}
+                          itemRenderer={(item, { handleClick, handleFocus, modifiers }) => {
+                            const isSelected =
+                              item.idx === -1 ? idx1 === -1 : item.idx + 1 === selectedDiscIndex1;
+                            return (
+                              <MenuItem
+                                roleStructure="listoption"
+                                key={item.idx}
+                                className={clsx(
+                                  "min-w-40 !rounded-none text-sm font-serif text-slate-700 dark:text-slate-200",
+                                  modifiers.active && Classes.ACTIVE,
+                                )}
+                                text={item.abbreviation + (item.color ? ` · ${item.color}` : "")}
+                                title={item.desp}
+                                onClick={handleClick}
+                                onFocus={handleFocus}
+                                selected={isSelected}
+                                labelElement={
+                                  isSelected && selectedIsForbidden && selectedDiscIndex1 > 0 ? (
+                                    <span className="font-serif font-bold text-red-700 dark:text-red-300">
+                                      ×
+                                    </span>
+                                  ) : undefined
+                                }
+                              />
+                            );
+                          }}
                           onItemSelect={(item) => {
                             edit(() => {
                               const discIndex1 =
@@ -458,7 +467,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                                   : `选择命盘${slot + 1}`
                             }
                             className={clsx(
-                              "w-[7ch] whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current",
+                              "w-[7ch] whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current relative",
                               selectedItem
                                 ? clsx(
                                     discColorClasses(selectedItem.color),
@@ -467,11 +476,20 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                                 : "!bg-gray-300 dark:!bg-gray-600 opacity-15 dark:opacity-25 hover:opacity-30 dark:hover:opacity-50",
                             )}
                           >
-                            {selectedItem
-                              ? selectedItem.abbreviation
-                              : selectedIsAny
-                                ? "任意"
-                                : `命盘${slot + 1}`}
+                            <span className={clsx(selectedItem && selectedIsForbidden && "opacity-35")}>
+                              {selectedItem
+                                ? selectedItem.abbreviation
+                                : selectedIsAny
+                                  ? "任意"
+                                  : `命盘${slot + 1}`}
+                            </span>
+                            {selectedItem && selectedIsForbidden ? (
+                              <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                                <span className="w-6 h-6 rounded-full bg-red-600 text-white border-2 border-white/80 text-lg leading-[1] flex items-center justify-center">
+                                  ×
+                                </span>
+                              </span>
+                            ) : null}
                           </Button>
                         </Select>
 
