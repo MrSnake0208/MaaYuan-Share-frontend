@@ -9154,6 +9154,28 @@
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
       ]
+    },
+    {
+      "id": "char_110_fenggongzhu",
+      "name": "酆公珠",
+      "name_en": "酆公珠",
+      "alias": "fenggongzhu fgz “酆公珠” 酆公珠",
+      "alt_name": "酆公珠",
+      "rarity": 5,
+      "prof": "阳",
+      "subProf": "shenji",
+      "discs": []
+    },
+    {
+      "id": "char_111_fenggongjiu",
+      "name": "酆公玖",
+      "name_en": "酆公玖",
+      "alias": "fenggongjiu fgj “酆公玖” 酆公玖",
+      "alt_name": "酆公玖",
+      "rarity": 5,
+      "prof": "阳",
+      "subProf": "shenji",
+      "discs": []
     }
   ],
   "PROFESSIONS": [
