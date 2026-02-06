@@ -54,11 +54,13 @@ const BASIC_ACTION_OPTIONS = [
   { value: "普", label: "A" },
   { value: "大", label: "↑" },
   { value: "下", label: "↓" },
+  { value: "sp", label: "SP" },
 ] as const;
 const BASIC_ACTION_LABEL_MAP: Record<RoundFormState["basicAction"], string> = {
   普: "A",
   大: "↑",
   下: "↓",
+  sp: "SP",
 };
 
 const getActionSortableId = (roundKey: string, index: number) => `${roundKey}-action-${index}`;

@@ -37,3 +37,4 @@ operations-log.md
 # Git worktrees (Crystal)
 /worktrees/
 /worktree-*/
+.ace-tool/

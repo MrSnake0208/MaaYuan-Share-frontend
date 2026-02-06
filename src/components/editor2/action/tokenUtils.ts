@@ -1,4 +1,4 @@
-export type BasicActionSymbol = "普" | "大" | "下";
+export type BasicActionSymbol = "普" | "大" | "下" | "sp";
 
 export type ChipVariant = "warm" | "danger" | "info" | "teal" | "success" | "neutral";
 
@@ -6,6 +6,7 @@ export const BASIC_ACTION_VARIANTS: Record<BasicActionSymbol, ChipVariant> = {
   普: "warm",
   大: "danger",
   下: "info",
+  sp: "success",
 };
 
 export const CHIP_VARIANT_DOT_CLASS: Record<ChipVariant, string> = {
