@@ -42,9 +42,9 @@ jobs:
       - name: Atomically switch release
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          host: ${{ secrets.VPS_HOST_C }}
+          username: ${{ secrets.VPS_USER_C }}
+          key: ${{ secrets.VPS_SSH_KEY_C }}
           script: |
             sudo mkdir -p /var/www/
             sudo mv /var/www/myshare /var/www/myshare_old || true
