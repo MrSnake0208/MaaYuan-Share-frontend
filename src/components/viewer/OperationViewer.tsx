@@ -432,15 +432,8 @@ const OperatorCard: FC<{
   type SelectedDiscDisplay = { _slot: number; item: any; forbidden: boolean };
   const selectedDiscsDisplay = selectedDiscs
     .map((s): SelectedDiscDisplay | null => {
-      if (s.disc === -1) {
-        return {
-          _slot: s.index,
-          item: { name: "任意", abbreviation: "任意", desp: "任意" } as any,
-          forbidden: false,
-        };
-      }
-      if (typeof s.disc === "number" && s.disc <= -2) {
-        const discIndex1 = -s.disc - 1;
+      if (typeof s.disc === "number" && s.disc < 0) {
+        const discIndex1 = -s.disc;
         if (discIndex1 > 0 && discIndex1 <= discList.length) {
           return { _slot: s.index, item: discList[discIndex1 - 1], forbidden: true };
         }

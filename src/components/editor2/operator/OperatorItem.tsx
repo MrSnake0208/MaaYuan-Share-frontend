@@ -384,9 +384,8 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                 ? [0, 1, 2].map((slot) => {
                     const slots = getDiscSlots(operator);
                     const idx1 = slots[slot]?.disc ?? 0;
-                    const selectedIsAny = idx1 === -1;
-                    const selectedIsForbidden = idx1 <= -2;
-                    const selectedDiscIndex1 = idx1 > 0 ? idx1 : selectedIsForbidden ? -idx1 - 1 : 0;
+                    const selectedIsForbidden = idx1 < 0;
+                    const selectedDiscIndex1 = idx1 > 0 ? idx1 : selectedIsForbidden ? -idx1 : 0;
                     const selectedItem =
                       selectedDiscIndex1 > 0 ? discList[selectedDiscIndex1 - 1] : undefined;
                     return (
@@ -396,18 +395,9 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                       >
                         <Select
                           filterable={false}
-                          items={[
-                            {
-                              name: "任意",
-                              abbreviation: "任意",
-                              desp: "任意",
-                              idx: -1,
-                            } as any,
-                            ...discList.map((d, idx) => ({ ...d, idx })),
-                          ]}
+                          items={discList.map((d, idx) => ({ ...d, idx }))}
                           itemRenderer={(item, { handleClick, handleFocus, modifiers }) => {
-                            const isSelected =
-                              item.idx === -1 ? idx1 === -1 : item.idx + 1 === selectedDiscIndex1;
+                            const isSelected = item.idx + 1 === selectedDiscIndex1;
                             return (
                               <MenuItem
                                 roleStructure="listoption"
@@ -433,10 +423,8 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                           }}
                           onItemSelect={(item) => {
                             edit(() => {
-                              const discIndex1 =
-                                (item as any).idx === -1 ? -1 : (item as any).idx + 1;
-                              const chosen =
-                                discIndex1 > 0 && selectedIsForbidden ? -(discIndex1 + 1) : discIndex1;
+                              const discIndex1 = (item as any).idx + 1;
+                              const chosen = selectedIsForbidden ? -discIndex1 : discIndex1;
                               const next = setDiscSlot(operator, slot, {
                                 disc: chosen,
                               });
@@ -462,9 +450,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                                 ? selectedIsForbidden
                                   ? `不能有：${selectedItem.desp}`
                                   : selectedItem.desp
-                                : selectedIsAny
-                                  ? "任意"
-                                  : `选择命盘${slot + 1}`
+                                : `选择命盘${slot + 1}`
                             }
                             className={clsx(
                               "w-[7ch] whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current relative",
@@ -479,9 +465,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                             <span className={clsx(selectedItem && selectedIsForbidden && "opacity-35")}>
                               {selectedItem
                                 ? selectedItem.abbreviation
-                                : selectedIsAny
-                                  ? "任意"
-                                  : `命盘${slot + 1}`}
+                                : `命盘${slot + 1}`}
                             </span>
                             {selectedItem && selectedIsForbidden ? (
                               <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -496,13 +480,13 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                         <Button
                           small
                           minimal
-                          disabled={!selectedItem || selectedIsAny}
+                          disabled={!selectedItem}
                           title={
-	                            !selectedItem || selectedIsAny
-	                              ? "请选择命盘后可禁用"
-	                              : selectedIsForbidden
-	                                ? "取消：不能有该命盘"
-	                                : "设置：不能有该命盘"
+                            !selectedItem
+                              ? "请选择命盘后可禁用"
+                              : selectedIsForbidden
+                                ? "取消：不能有该命盘"
+                                : "设置：不能有该命盘"
                           }
                           className={clsx(
                             "w-[3ch] whitespace-nowrap !p-0 px-1 self-center flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current",
@@ -511,13 +495,13 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                               : "bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200",
                           )}
                           onClick={() => {
-	                            edit(() => {
-	                              if (!selectedItem || selectedDiscIndex1 <= 0) {
-	                                return { action: "skip", desc: "skip" };
+                            edit(() => {
+                              if (!selectedItem || selectedDiscIndex1 <= 0) {
+                                return { action: "skip", desc: "skip" };
                               }
                               const nextDisc = selectedIsForbidden
                                 ? selectedDiscIndex1
-                                : -(selectedDiscIndex1 + 1);
+                                : -selectedDiscIndex1;
                               const next = setDiscSlot(operator, slot, { disc: nextDisc });
                               onChange?.(next);
                               return {
