@@ -1,4 +1,4 @@
-import { Button, Navbar, Tag } from "@blueprintjs/core";
+import { Button, Callout, Navbar, Tag } from "@blueprintjs/core";
 
 import { useLinks } from "hooks/useLinks";
 import { Link, NavLink } from "react-router-dom";
@@ -56,7 +56,14 @@ export const AppLayout: FCC = ({ children }) => {
       </Navbar>
       <NavAside />
 
-      <div className="docs-content-wrapper pt-14">{children}</div>
+      <div className="bg-amber-100 border-b border-amber-300 px-4 py-2 mt-14">
+        <Callout intent="warning" icon="warning-sign" className="max-w-[96rem] mx-auto !bg-amber-50">
+          <span className="font-medium">系统更新通知：</span>
+          近期优化了命盘 ID 生成逻辑，移除了"任意"选项并调整了禁用状态的编码方式。此变更可能导致部分旧作业的命盘信息显示异常，如遇问题请重新编辑保存作业。
+        </Callout>
+      </div>
+
+      <div className="docs-content-wrapper">{children}</div>
 
       <BackToTop />
     </div>
