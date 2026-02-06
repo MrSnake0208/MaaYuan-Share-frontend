@@ -30,9 +30,9 @@ jobs:
       - name: Upload new version to tmp folder
         uses: appleboy/scp-action@v0.1.5
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          host: ${{ secrets.VPS_HOST_C }}
+          username: ${{ secrets.VPS_USER_C }}
+          key: ${{ secrets.VPS_SSH_KEY_C }}
           source: './dist/*'
           target: '/tmp/myshare-frontend_tmp/'
           overwrite: true
