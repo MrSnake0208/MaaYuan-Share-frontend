@@ -38,3 +38,7 @@ operations-log.md
 /worktrees/
 /worktree-*/
 .ace-tool/
+
+# Claude Code
+.claude/
+CLAUDE.md
