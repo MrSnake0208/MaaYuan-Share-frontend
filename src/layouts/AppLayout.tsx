@@ -1,7 +1,7 @@
 import { Button, Icon, Navbar, Tag } from "@blueprintjs/core";
 
 import { useLinks } from "hooks/useLinks";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { FCC } from "types";
 
 import { AccountManager } from "components/AccountManager";
@@ -14,6 +14,8 @@ import { NavAside } from "components/drawer/NavAside";
 
 export const AppLayout: FCC = ({ children }) => {
   const { NAV_LINKS } = useLinks();
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
 
   return (
     <div className="flex flex-col h-full w-full bg-zinc-50 dark:bg-[#2f343c]">
@@ -56,28 +58,30 @@ export const AppLayout: FCC = ({ children }) => {
       </Navbar>
       <NavAside />
 
-      <div className="px-4 pt-3 pb-0 mt-14 mb-[-12px]">
-        <div className="max-w-[96rem] mx-auto">
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500" />
-            <div className="px-4 py-3 flex items-center gap-3">
-              <div className="w-7 h-7 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0 animate-pulse">
-                <Icon
-                  icon="warning-sign"
-                  className="text-amber-600 dark:text-amber-400"
-                  size={14}
-                />
+      {isHomePage && (
+        <div className="px-4 pt-3 pb-0 mt-14 mb-[-12px]">
+          <div className="max-w-[96rem] mx-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500" />
+              <div className="px-4 py-3 flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0 animate-pulse">
+                  <Icon
+                    icon="warning-sign"
+                    className="text-amber-600 dark:text-amber-400"
+                    size={14}
+                  />
+                </div>
+                <p className="text-sm text-gray-700 dark:text-gray-300 flex-1 leading-relaxed">
+                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                    系统更新通知：
+                  </span>
+                  近期优化了命盘 ID 生成逻辑，移除了"任意"选项并调整了禁用状态的编码方式。此变更可能导致部分旧作业的命盘信息显示异常，如遇问题请重新编辑保存作业。
+                </p>
               </div>
-              <p className="text-sm text-gray-700 dark:text-gray-300 flex-1 leading-relaxed">
-              <span className="font-medium text-gray-900 dark:text-gray-100">
-                系统更新通知：
-              </span>
-              近期优化了命盘 ID 生成逻辑，移除了"任意"选项并调整了禁用状态的编码方式。此变更可能导致部分旧作业的命盘信息显示异常，如遇问题请重新编辑保存作业。
-            </p>
-          </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className="docs-content-wrapper">{children}</div>
 
