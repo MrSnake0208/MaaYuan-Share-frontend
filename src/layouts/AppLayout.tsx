@@ -83,7 +83,7 @@ export const AppLayout: FCC = ({ children }) => {
         </div>
       )}
 
-      <div className="docs-content-wrapper">{children}</div>
+      <div className="docs-content-wrapper mt-14">{children}</div>
 
       <BackToTop />
     </div>
