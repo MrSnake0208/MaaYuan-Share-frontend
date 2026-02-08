@@ -1,4 +1,5 @@
 import { Button, Icon, Navbar, Tag } from "@blueprintjs/core";
+import clsx from "clsx";
 
 import { useLinks } from "hooks/useLinks";
 import { Link, NavLink, useLocation } from "react-router-dom";
@@ -83,7 +84,7 @@ export const AppLayout: FCC = ({ children }) => {
         </div>
       )}
 
-      <div className="docs-content-wrapper mt-14">{children}</div>
+      <div className={clsx("docs-content-wrapper", !isHomePage && "mt-14")}>{children}</div>
 
       <BackToTop />
     </div>
