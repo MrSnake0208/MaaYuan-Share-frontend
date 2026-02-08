@@ -54,7 +54,7 @@ const BASIC_ACTION_OPTIONS = [
   { value: "普", label: "A" },
   { value: "大", label: "↑" },
   { value: "下", label: "↓" },
-  { value: "sp", label: "SP" },
+  // { value: "sp", label: "SP" }, // 暂时隐藏 SP 按钮
 ] as const;
 const BASIC_ACTION_LABEL_MAP: Record<RoundFormState["basicAction"], string> = {
   普: "A",
