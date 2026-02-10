@@ -66,3 +66,8 @@ jobs:
     needs: sync-operators
     uses: ./.github/workflows/nas_deploy.yml
     secrets: inherit
+
+  deploy-to-gce:
+    needs: sync-operators
+    uses: ./.github/workflows/gce_deploy.yml
+    secrets: inherit
