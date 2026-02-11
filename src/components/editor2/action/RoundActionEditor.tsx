@@ -68,9 +68,7 @@ const EXTRA_TYPES = [
   { value: "wait", label: "等待" },
   { value: "left", label: "切换至左侧目标" },
   { value: "right", label: "切换至右侧目标" },
-  { value: "lvbu", label: "吕布·切换形态" },
   { value: "auto", label: "开启自动战斗" },
-  { value: "sp", label: "史子眇sp" },
 ] as const;
 const RESTART_TYPES = [
   { value: "full", label: "全灭重开" },
@@ -706,7 +704,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
         return actionLabel ? `${prefix}（${actionLabel}）` : prefix;
       };
 
-      const baseMatch = token.match(/^(\d)([普大下sp])$/);
+      const baseMatch = token.match(/^(\d)([普大下]|sp)$/);
       if (baseMatch) {
         const slot = Number(baseMatch[1]);
         const actionSymbol = baseMatch[2] as RoundFormState["basicAction"];
@@ -716,7 +714,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
 
       if (token.startsWith("额外:")) {
         const extraPayload = token.slice("额外:".length);
-        const againMatch = extraPayload.match(/^([1-5])([普大下sp])$/);
+        const againMatch = extraPayload.match(/^([1-5])([普大下]|sp)$/);
         if (againMatch) {
           const actionSymbol = againMatch[2] as RoundFormState["basicAction"];
           return "再动·" + BASIC_ACTION_LABEL_MAP[actionSymbol];

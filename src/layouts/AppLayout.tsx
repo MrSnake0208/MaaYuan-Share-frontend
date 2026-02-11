@@ -76,7 +76,7 @@ export const AppLayout: FCC = ({ children }) => {
                   <span className="font-medium text-gray-900 dark:text-gray-100">
                     系统更新通知：
                   </span>
-                  近期优化了命盘 ID 生成逻辑，移除了"任意"选项并调整了禁用状态的编码方式。此变更可能导致部分旧作业的命盘信息显示异常，如遇问题请重新编辑保存作业。
+                  为适配更多密探 SP，编辑器将采用「通用 SP」替代原有的「吕布 SP」与「史子渺 SP」选项。已生成的作业不受影响，可正常执行。
                 </p>
               </div>
             </div>
