@@ -768,7 +768,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
       return "未设定";
     }
 
-    const baseMatch = token.match(/^(\d)([普大下sp])$/);
+    const baseMatch = token.match(/^(\d)([普大下]|sp)$/);
     if (baseMatch) {
       const actionSymbol = baseMatch[2] as RoundFormState["basicAction"];
       return BASIC_ACTION_LABEL_MAP[actionSymbol];
@@ -776,7 +776,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
 
     if (token.startsWith("额外:")) {
       const extraPayload = token.slice("额外:".length);
-      const againMatch = extraPayload.match(/^(\d)([普大下sp])$/);
+      const againMatch = extraPayload.match(/^(\d)([普大下]|sp)$/);
       if (againMatch) {
         const actionSymbol = againMatch[2] as RoundFormState["basicAction"];
         return `额外·${BASIC_ACTION_LABEL_MAP[actionSymbol]}`;
