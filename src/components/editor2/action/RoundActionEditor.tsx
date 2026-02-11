@@ -54,7 +54,7 @@ const BASIC_ACTION_OPTIONS = [
   { value: "普", label: "A" },
   { value: "大", label: "↑" },
   { value: "下", label: "↓" },
-  // { value: "sp", label: "SP" }, // 暂时隐藏 SP 按钮
+  { value: "sp", label: "SP" },
 ] as const;
 const BASIC_ACTION_LABEL_MAP: Record<RoundFormState["basicAction"], string> = {
   普: "A",
@@ -706,7 +706,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
         return actionLabel ? `${prefix}（${actionLabel}）` : prefix;
       };
 
-      const baseMatch = token.match(/^(\d)([普大下])$/);
+      const baseMatch = token.match(/^(\d)([普大下sp])$/);
       if (baseMatch) {
         const slot = Number(baseMatch[1]);
         const actionSymbol = baseMatch[2] as RoundFormState["basicAction"];
@@ -716,7 +716,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
 
       if (token.startsWith("额外:")) {
         const extraPayload = token.slice("额外:".length);
-        const againMatch = extraPayload.match(/^([1-5])([普大下])$/);
+        const againMatch = extraPayload.match(/^([1-5])([普大下sp])$/);
         if (againMatch) {
           const actionSymbol = againMatch[2] as RoundFormState["basicAction"];
           return "再动·" + BASIC_ACTION_LABEL_MAP[actionSymbol];
@@ -768,7 +768,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
       return "未设定";
     }
 
-    const baseMatch = token.match(/^(\d)([普大下])$/);
+    const baseMatch = token.match(/^(\d)([普大下sp])$/);
     if (baseMatch) {
       const actionSymbol = baseMatch[2] as RoundFormState["basicAction"];
       return BASIC_ACTION_LABEL_MAP[actionSymbol];
@@ -776,7 +776,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
 
     if (token.startsWith("额外:")) {
       const extraPayload = token.slice("额外:".length);
-      const againMatch = extraPayload.match(/^(\d)([普大下])$/);
+      const againMatch = extraPayload.match(/^(\d)([普大下sp])$/);
       if (againMatch) {
         const actionSymbol = againMatch[2] as RoundFormState["basicAction"];
         return `额外·${BASIC_ACTION_LABEL_MAP[actionSymbol]}`;

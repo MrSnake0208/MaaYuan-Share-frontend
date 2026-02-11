@@ -45,6 +45,7 @@ const BASIC_ACTION_SUMMARY_MAP: Record<BasicActionSymbol, string> = {
   普: "A",
   大: "↑",
   下: "↓",
+  sp: "SP",
 };
 
 export const ActionSequenceViewer: FC<ActionSequenceViewerProps> = ({ operation }) => {

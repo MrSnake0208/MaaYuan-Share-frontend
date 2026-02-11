@@ -134,6 +134,31 @@ const ACTION_TEMPLATES: Record<string, SimingActionConfig> = {
     target: [646, 1060, 5, 5],
     post_delay: 3000,
   },
+  "1号位SP": {
+    action: "Click",
+    target: [56, 1060, 5, 5],
+    post_delay: 5000,
+  },
+  "2号位SP": {
+    action: "Click",
+    target: [180, 1060, 5, 5],
+    post_delay: 5000,
+  },
+  "3号位SP": {
+    action: "Click",
+    target: [357, 1060, 5, 5],
+    post_delay: 5000,
+  },
+  "4号位SP": {
+    action: "Click",
+    target: [496, 1060, 5, 5],
+    post_delay: 5000,
+  },
+  "5号位SP": {
+    action: "Click",
+    target: [646, 1060, 5, 5],
+    post_delay: 5000,
+  },
   切换敌人: {
     action: "Swipe",
     begin: [77, 991, 5, 5],
@@ -231,7 +256,7 @@ function cloneConfig(config: SimingActionConfig | undefined): SimingActionConfig
 }
 
 function templateKeyFromToken(token: string): string | undefined {
-  const match = token.match(/^(\d)([普大下])$/);
+  const match = token.match(/^(\d)([普大下sp])$/);
   if (!match) {
     return undefined;
   }
@@ -243,6 +268,9 @@ function templateKeyFromToken(token: string): string | undefined {
   }
   if (type === "大") {
     return `${position}号位上拉`;
+  }
+  if (type === "sp") {
+    return `${position}号位SP`;
   }
   return `${position}号位下拉`;
 }
@@ -262,6 +290,9 @@ function resolveDelayForTemplate(
   }
   if (templateKey.endsWith("下拉")) {
     return delays.defense;
+  }
+  if (templateKey.endsWith("SP")) {
+    return delays.ultimate;
   }
   return undefined;
 }
@@ -686,7 +717,7 @@ export function simingActionsToRoundActions(
 
 function inferSimingToken(action: CopilotDocV1.SimingAction): string | undefined {
   const text = action.textDoc?.trim();
-  if (text && /^\\d[普大下]$/.test(text)) {
+  if (text && /^\\d[普大下sp]$/.test(text)) {
     return text;
   }
   if (text && text.startsWith("再动")) {

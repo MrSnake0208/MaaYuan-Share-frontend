@@ -18,6 +18,7 @@ type ParsedTokenKind =
   | "normal"
   | "ultimate"
   | "defense"
+  | "sp"
   | "again"
   | "wait"
   | "switchLeft"
@@ -98,7 +99,7 @@ function parseToken(token: string): {
   slot?: number;
   payload?: number | string;
 } {
-  const mainMatch = token.match(/^(\d)([普大下])$/);
+  const mainMatch = token.match(/^(\d)([普大下sp])$/);
   if (mainMatch) {
     const slot = Number(mainMatch[1]);
     const symbol = mainMatch[2];
@@ -110,6 +111,9 @@ function parseToken(token: string): {
     }
     if (symbol === "下") {
       return { kind: "defense", slot };
+    }
+    if (symbol === "sp") {
+      return { kind: "sp", slot };
     }
   }
 
@@ -141,11 +145,11 @@ function parseToken(token: string): {
       return { kind: "extraSp" };
     }
 
-    const againMatch = modifier?.match(/^(\d)([普大下])$/);
+    const againMatch = modifier?.match(/^(\d)([普大下sp])$/);
     if (againMatch) {
       const slot = Number(againMatch[1]);
       const symbol = againMatch[2];
-      const payload = symbol === "普" ? "normal" : symbol === "大" ? "ultimate" : "defense";
+      const payload = symbol === "普" ? "normal" : symbol === "大" ? "ultimate" : symbol === "下" ? "defense" : "sp";
       return { kind: "again", slot, payload };
     }
   }
@@ -179,6 +183,7 @@ function mapParsedAction(action: ParsedRoundAction, options?: MappingOptions): E
     case "normal":
     case "ultimate":
     case "defense":
+    case "sp":
     case "again": {
       const descriptor = describeAttack(action, slotConfig.name);
       return createAction({
@@ -292,6 +297,8 @@ function describeAttack(action: ParsedRoundAction, slotName: string): string {
       return `${slotName} ↑`;
     case "defense":
       return `${slotName} ↓`;
+    case "sp":
+      return `${slotName} SP`;
     case "again":
       return `${slotName} 再次行动${describeAgainVariant(action.payload)}`;
     default:
@@ -305,6 +312,9 @@ function describeAgainVariant(payload?: number | string) {
   }
   if (payload === "defense") {
     return "（↓）";
+  }
+  if (payload === "sp") {
+    return "（SP）";
   }
   return "（A）";
 }
@@ -410,6 +420,9 @@ function guessTokenFromAction(action: EditorAction): string {
       ) {
         return `${slot}下`;
       }
+      if (action.doc?.includes("SP")) {
+        return `${slot}sp`;
+      }
       if (action.doc?.includes("再次行动")) {
         const variant = action.doc.match(/再次行动（(.+?)）/);
         const symbol = mapVariantToSymbol(variant ? variant[1] : undefined);
@@ -441,6 +454,9 @@ function mapVariantToSymbol(label?: string) {
   }
   if (normalized.includes("↓") || normalized.includes("下") || normalized.includes("防")) {
     return "下";
+  }
+  if (normalized.toUpperCase().includes("SP")) {
+    return "sp";
   }
   if (normalized.toUpperCase().includes("A") || normalized.includes("普")) {
     return "普";
