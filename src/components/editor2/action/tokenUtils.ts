@@ -33,14 +33,14 @@ export function extractSlotFromToken(rawToken: string): SlotKey | null {
     return null;
   }
 
-  const baseMatch = token.match(/^([1-5])([普大下sp])$/);
+  const baseMatch = token.match(/^([1-5])([普大下]|sp)$/);
   if (baseMatch) {
     return baseMatch[1] as SlotKey;
   }
 
   if (token.startsWith("额外:")) {
     const payload = token.slice("额外:".length);
-    const againMatch = payload.match(/^([1-5])([普大下sp])$/);
+    const againMatch = payload.match(/^([1-5])([普大下]|sp)$/);
     if (againMatch) {
       return againMatch[1] as SlotKey;
     }
@@ -237,7 +237,7 @@ export function resolveChipVariant(rawToken: string): ChipVariant {
     return "neutral";
   }
 
-  const baseMatch = token.match(/^([1-5])([普大下sp])$/);
+  const baseMatch = token.match(/^([1-5])([普大下]|sp)$/);
   if (baseMatch) {
     const symbol = baseMatch[2] as BasicActionSymbol;
     return BASIC_ACTION_VARIANTS[symbol];
@@ -246,7 +246,7 @@ export function resolveChipVariant(rawToken: string): ChipVariant {
   if (token.startsWith("额外:")) {
     const extraPayload = token.slice("额外:".length);
     const normalizedExtraPayload = extraPayload.toLowerCase();
-    const againMatch = extraPayload.match(/^([1-5])([普大下sp])$/);
+    const againMatch = extraPayload.match(/^([1-5])([普大下]|sp)$/);
     if (againMatch) {
       const actionSymbol = againMatch[2] as BasicActionSymbol;
       return BASIC_ACTION_VARIANTS[actionSymbol];
