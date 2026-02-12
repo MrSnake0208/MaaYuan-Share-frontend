@@ -2329,6 +2329,14 @@
             "cn": "已下载作业 JSON 文件",
             "zh_tw": "已下載作業 JSON 文件"
           },
+          "json_copy_failed": {
+            "cn": "JSON 复制失败：{{error}}",
+            "zh_tw": "JSON 複製失敗：{{error}}"
+          },
+          "json_download_failed": {
+            "cn": "JSON 下载失败：{{error}}",
+            "zh_tw": "JSON 下載失敗：{{error}}"
+          },
           "import": {
             "cn": "导入",
             "zh_tw": "導入"

@@ -37,8 +37,14 @@ export const SourceEditorHeader: FC<SourceEditorHeaderProps> = ({ text, onChange
       const obj = JSON.parse(text) as Record<string, unknown>;
       const sanitized = stripOperationExportFields(obj);
       output = JSON.stringify(sanitized, null, 2);
-    } catch (_) {
-      // ignore parse error, fallback to original text
+    } catch (e) {
+      AppToaster.show({
+        message: t.components.editor.source.SourceEditorHeader.json_copy_failed({
+          error: e instanceof Error ? e.message : String(e),
+        }),
+        intent: "danger",
+      });
+      return;
     }
     navigator.clipboard.writeText(output);
 
@@ -56,8 +62,14 @@ export const SourceEditorHeader: FC<SourceEditorHeaderProps> = ({ text, onChange
       const sanitized = stripOperationExportFields(parsed);
       output = JSON.stringify(sanitized, null, 2);
       title = (sanitized as unknown as CopilotDocV1.Operation).doc.title;
-    } catch (error) {
-      console.warn(error);
+    } catch (e) {
+      AppToaster.show({
+        message: t.components.editor.source.SourceEditorHeader.json_download_failed({
+          error: e instanceof Error ? e.message : String(e),
+        }),
+        intent: "danger",
+      });
+      return;
     }
 
     const blob = new Blob([output], {

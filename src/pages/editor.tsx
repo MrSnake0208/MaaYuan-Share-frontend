@@ -425,15 +425,15 @@ export const EditorPage = withSuspensable(() => {
               }
             : undefined);
 
-        const operation = await toSimingOperationRemote(baseOperation, editorOperationWithMeta, {
-          level: levelForExport,
-        });
         const status =
           editorMetadata.visibility === "public"
             ? CopilotInfoStatusEnum.Public
             : CopilotInfoStatusEnum.Private;
 
         const upload = async () => {
+          const operation = await toSimingOperationRemote(baseOperation, editorOperationWithMeta, {
+            level: levelForExport,
+          });
           if (id) {
             await updateOperation({
               id,

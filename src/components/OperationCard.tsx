@@ -49,7 +49,7 @@ export const NeoOperationCard = ({
     sourceType === "original"
       ? { label: "原创", color: "#0ca678", marquee: true }
       : sourceType === "repost"
-        ? { label: "搬运", color: "#7f8c8d" }
+        ? { label: "搬运", color: "#0ca678" }
         : null;
 
   try {
@@ -236,7 +236,7 @@ export const OperationCard = ({ operation }: { operation: Operation }) => {
     sourceType === "original"
       ? { label: "原创", color: "#0ca678", marquee: true }
       : sourceType === "repost"
-        ? { label: "搬运", color: "#6b7280" }
+        ? { label: "搬运", color: "#0ca678" }
         : null;
 
   try {

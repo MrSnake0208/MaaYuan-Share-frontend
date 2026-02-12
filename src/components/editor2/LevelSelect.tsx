@@ -91,6 +91,9 @@ export const LevelSelect: FC<LevelSelectProps> = ({
   });
   const [activeItem, setActiveItem] = useState<Level | "createNewItem" | null>(null);
 
+  // 标记：用户是否主动点击了 X 清除按钮，避免 fallback effect 立即恢复显示
+  const clearedByUserRef = useRef(false);
+
   const selectedLevel = useMemo(() => {
     if (!value) return null;
     const fromStageName = findLevelByStageName(levels, value);
@@ -172,6 +175,11 @@ export const LevelSelect: FC<LevelSelectProps> = ({
   useEffect(() => {
     if (value !== previousValueRef.current) {
       previousValueRef.current = value;
+
+      // 用户选择了新关卡时，重置清除标记
+      if (value?.trim()) {
+        clearedByUserRef.current = false;
+      }
 
       if (selectedLevel && !isCustomLevel(selectedLevel)) {
         const category = getLevelCategory(selectedLevel);
@@ -296,6 +304,10 @@ export const LevelSelect: FC<LevelSelectProps> = ({
     if (!fallbackLevel) {
       return;
     }
+    // 用户主动清除后，不从 fallbackLevel 恢复显示
+    if (clearedByUserRef.current) {
+      return;
+    }
     const formatted = formatLevelInputValue(fallbackLevel);
     if (!formatted) {
       return;
@@ -410,6 +422,7 @@ export const LevelSelect: FC<LevelSelectProps> = ({
             query={query}
             onQueryChange={(query) => updateQuery(query, false)}
             onReset={() => {
+              clearedByUserRef.current = true;
               setActiveItem(null);
               if (!disabled) {
                 onChange("");

@@ -173,6 +173,10 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
     if (!fallbackLevel?.stageId?.trim()) {
       return;
     }
+    // 用户主动清除了关卡时，不自动恢复
+    if (levelClearedByUserRef.current) {
+      return;
+    }
     edit(() => {
       setInfo((prev) => {
         if (!prev.stageName?.trim()) {
@@ -194,6 +198,9 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
 
   // 记录用户是否主动编辑过 catThree，以避免后续被默认值覆盖
   const catThreeEditedRef = useRef(false);
+
+  // 记录用户是否主动清除了关卡选择，以避免 hydration effect 重新恢复
+  const levelClearedByUserRef = useRef(false);
 
   // 当关卡或 catThree 变化时，将 catThree 按关卡 key 持久化到 localStorage
   useEffect(() => {
@@ -247,6 +254,8 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
           fallbackLevel={fallbackLevel}
           defaultCategory={defaultCategory}
           onChange={(stageId, level) => {
+            // 追踪用户是否主动清除了关卡
+            levelClearedByUserRef.current = !stageId && !level;
             edit(() => {
               setInfo((prev) => {
                 const prevMeta = prev.levelMeta;
