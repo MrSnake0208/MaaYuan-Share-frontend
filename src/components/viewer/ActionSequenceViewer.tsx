@@ -45,7 +45,7 @@ const BASIC_ACTION_SUMMARY_MAP: Record<BasicActionSymbol, string> = {
   普: "A",
   大: "↑",
   下: "↓",
-  sp: "SP",
+  sp: "圈",
 };
 
 export const ActionSequenceViewer: FC<ActionSequenceViewerProps> = ({ operation }) => {
@@ -436,7 +436,7 @@ function formatTokenLabel(
     return language === "zh_tw" ? "Unspecified Action" : "未设定动作";
   }
 
-  const baseMatch = trimmed.match(/^(\d)([普大下])$/);
+  const baseMatch = trimmed.match(/^(\d)([普大下]|sp)$/);
   if (baseMatch) {
     const slot = Number(baseMatch[1]);
     const symbol = baseMatch[2] as BasicActionSymbol;
@@ -449,7 +449,7 @@ function formatTokenLabel(
       const wait = payload.split(":")[1] ?? "0";
       return language === "zh_tw" ? `Extra: Wait ${wait}ms` : `额外:等待 ${wait}ms`;
     }
-    const againMatch = payload.match(/^(\d)([普大下])$/);
+    const againMatch = payload.match(/^(\d)([普大下]|sp)$/);
     if (againMatch) {
       const slot = Number(againMatch[1]);
       const symbol = againMatch[2] as BasicActionSymbol;
@@ -500,11 +500,13 @@ function symbolToActionLabel(symbol: BasicActionSymbol, language: Language): str
   if (language === "zh_tw") {
     if (symbol === "普") return "Normal Attack";
     if (symbol === "大") return "Ultimate";
-    return "Defense";
+    if (symbol === "下") return "Defense";
+    return "SP";
   }
   if (symbol === "普") return "普攻";
   if (symbol === "大") return "大招";
-  return "下拉";
+  if (symbol === "下") return "下拉";
+  return "圈";
 }
 
 function groupTokensForTable(tokens: DisplayToken[], slotAssignments: SlotAssignments) {
@@ -532,7 +534,7 @@ function formatTokenSummary(rawToken: string, language: Language): string {
     return language === "zh_tw" ? "未設定" : "未设定";
   }
 
-  const baseMatch = token.match(/^(\d)([普大下])$/);
+  const baseMatch = token.match(/^(\d)([普大下]|sp)$/);
   if (baseMatch) {
     const symbol = baseMatch[2] as BasicActionSymbol;
     return BASIC_ACTION_SUMMARY_MAP[symbol];
@@ -540,7 +542,7 @@ function formatTokenSummary(rawToken: string, language: Language): string {
 
   if (token.startsWith("额外:")) {
     const payload = token.slice("额外:".length);
-    const againMatch = payload.match(/^([1-5])([普大下])$/);
+    const againMatch = payload.match(/^([1-5])([普大下]|sp)$/);
     if (againMatch) {
       const symbol = againMatch[2] as BasicActionSymbol;
       const prefix = language === "zh_tw" ? "再動·" : "再动·";
