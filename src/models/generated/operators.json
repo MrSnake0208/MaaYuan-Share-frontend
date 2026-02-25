@@ -9324,14 +9324,25 @@
       ]
     },
     {
-      "id": "char_112_unknown",
-      "name": "",
-      "name_en": "",
-      "alias": "“”",
-      "alt_name": "",
-      "rarity": 0,
-      "prof": "",
-      "subProf": "",
+      "id": "char_112_pangde",
+      "name": "庞德",
+      "name_en": "庞德",
+      "alias": "pangde pd “庞德” 庞德",
+      "alt_name": "庞德",
+      "rarity": 5,
+      "prof": "水",
+      "subProf": "pojun",
+      "discs": []
+    },
+    {
+      "id": "char_113_luzhi",
+      "name": "卢植",
+      "name_en": "卢植",
+      "alias": "luzhi lz “卢植” 卢植",
+      "alt_name": "卢植",
+      "rarity": 5,
+      "prof": "地",
+      "subProf": "guidao",
       "discs": []
     }
   ],
