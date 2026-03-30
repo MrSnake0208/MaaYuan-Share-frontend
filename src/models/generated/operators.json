@@ -9490,6 +9490,28 @@
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
       ]
+    },
+    {
+      "id": "char_114_chenji",
+      "name": "陈纪",
+      "name_en": "陈纪",
+      "alias": "chenji cj “陈纪” 陈纪",
+      "alt_name": "陈纪",
+      "rarity": 5,
+      "prof": "水",
+      "subProf": "guidao",
+      "discs": []
+    },
+    {
+      "id": "char_115_chenying",
+      "name": "陈应",
+      "name_en": "陈应",
+      "alias": "chenying cy “陈应” 陈应",
+      "alt_name": "陈应",
+      "rarity": 5,
+      "prof": "风",
+      "subProf": "pojun",
+      "discs": []
     }
   ],
   "PROFESSIONS": [
