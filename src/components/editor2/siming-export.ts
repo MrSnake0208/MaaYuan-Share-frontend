@@ -816,6 +816,29 @@ export function toSimingOperation(
   };
 }
 
+function normalizeSimingActionFormat(actions: SimingActionMap): SimingActionMap {
+  const result: SimingActionMap = {};
+  for (const [key, config] of Object.entries(actions)) {
+    const normalized = { ...config };
+    // 将嵌套 action 格式转换为平铺格式
+    if (normalized.action && typeof normalized.action === "object") {
+      const nestedAction = normalized.action as { type?: string; param?: Record<string, unknown> };
+      if (nestedAction.type) {
+        normalized.action = nestedAction.type;
+      }
+      if (nestedAction.param) {
+        for (const [paramKey, paramValue] of Object.entries(nestedAction.param)) {
+          if (!(paramKey in normalized)) {
+            normalized[paramKey] = paramValue;
+          }
+        }
+      }
+    }
+    result[key] = normalized;
+  }
+  return result;
+}
+
 // Remote generator: delegate Siming JSON building to MaaYuan-SiMing backend
 export async function toSimingOperationRemote(
   baseOperation: CopilotOperationLoose,
@@ -1015,6 +1038,6 @@ export async function toSimingOperationRemote(
 
   return {
     ...(rest as Omit<CopilotOperationLoose, "actions">),
-    actions,
+    actions: normalizeSimingActionFormat(actions),
   };
 }
