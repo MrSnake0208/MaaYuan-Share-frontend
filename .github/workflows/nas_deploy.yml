@@ -36,6 +36,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
           source: './dist/*'
           target: '/tmp/mysharefrontend_index_tmp/'
           overwrite: true
@@ -47,6 +48,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
           script: |
             sudo mkdir -p "/vol1/@appdata/1Panel/1panel/apps/openresty/openresty/www/sites/mysharefrontend"
             sudo mv "/vol1/@appdata/1Panel/1panel/apps/openresty/openresty/www/sites/mysharefrontend/index" "/vol1/@appdata/1Panel/1panel/apps/openresty/openresty/www/sites/mysharefrontend/index_old" || true
