@@ -130,6 +130,7 @@ export function groupTokensBySlotWithExtraAttribution(
     if (/^[1-5][普大下]$/.test(payload)) return false;
     if (payload === "左侧目标") return true;
     if (payload === "右侧目标") return true;
+    if (payload === "关卡内互动") return true;
     if (payload.startsWith("等待")) return true; // 等待 或 等待:ms
     // 若提供 slotAssignments，则视“吕布”/“史子眇sp”为允许并执行定向吸附
     const normalized = payload.replace(/\s+/g, "").toLowerCase();
@@ -256,6 +257,9 @@ export function resolveChipVariant(rawToken: string): ChipVariant {
       return "neutral";
     }
     if (extraPayload.includes("左侧") || extraPayload.includes("右侧")) {
+      return "teal";
+    }
+    if (extraPayload.includes("关卡内互动")) {
       return "teal";
     }
     if (extraPayload.includes("吕布")) {

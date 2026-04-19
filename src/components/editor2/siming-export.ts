@@ -215,6 +215,14 @@ const EXTRA_ACTION_TEMPLATES: Record<string, SimingActionConfig> = {
     pre_delay: 500,
     post_delay: 5000,
   },
+  关卡内互动: {
+    text_doc: "关卡内互动",
+    focus: "点击关卡内互动",
+    action: "Click",
+    target: [662, 398, 18, 22],
+    pre_delay: 500,
+    post_delay: 1500,
+  },
 };
 
 const ORANGE_RESTART_LABEL = "重开:无橙星";
@@ -597,6 +605,10 @@ function handleExtraAction(
     return special;
   }
 
+  if (raw === "关卡内互动") {
+    return cloneConfig(EXTRA_ACTION_TEMPLATES["关卡内互动"]);
+  }
+
   const templateKey = templateKeyFromToken(raw);
   const config = cloneConfig(templateKey ? ACTION_TEMPLATES[templateKey] : undefined);
   const override = resolveDelayForTemplate(templateKey, delays);
@@ -742,6 +754,9 @@ function inferSimingToken(action: CopilotDocV1.SimingAction): string | undefined
   }
   if (text === "额外:史子眇sp") {
     return "额外:史子眇sp";
+  }
+  if (text === "关卡内互动") {
+    return "额外:关卡内互动";
   }
   if (text && text.endsWith("号位阵亡检测")) {
     const digit = text.charAt(0);

@@ -41,7 +41,7 @@ interface ActionEditorProps {
 interface RoundFormState {
   slot: string;
   basicAction: BasicActionSymbol;
-  extraType: "wait" | "left" | "right" | "lvbu" | "auto" | "sp";
+  extraType: "wait" | "left" | "right" | "lvbu" | "auto" | "sp" | "interaction";
   extraSlot: string;
   extraAction: BasicActionSymbol;
   waitMs: string;
@@ -69,6 +69,7 @@ const EXTRA_TYPES = [
   { value: "left", label: "切换至左侧目标" },
   { value: "right", label: "切换至右侧目标" },
   { value: "auto", label: "开启自动战斗" },
+  { value: "interaction", label: "关卡内互动" },
 ] as const;
 const RESTART_TYPES = [
   { value: "full", label: "全灭重开" },
@@ -652,6 +653,9 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
         case "sp":
           handleAddToken(roundKey, "额外:史子眇sp");
           break;
+        case "interaction":
+          handleAddToken(roundKey, "额外:关卡内互动");
+          break;
         default:
           break;
       }
@@ -740,6 +744,9 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
         if (extraPayload === "史子眇sp") {
           return "史子眇sp";
         }
+        if (extraPayload === "关卡内互动") {
+          return "关卡内互动";
+        }
 
         return extraPayload;
       }
@@ -799,6 +806,9 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
       }
       if (extraPayload === "史子眇sp") {
         return "史子眇sp";
+      }
+      if (extraPayload === "关卡内互动") {
+        return "关卡内互动";
       }
 
       return extraPayload;

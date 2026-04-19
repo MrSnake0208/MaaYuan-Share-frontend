@@ -463,6 +463,9 @@ function formatTokenLabel(
     if (payload === "右侧目标") {
       return language === "zh_tw" ? "Extra: Switch to Right Target" : "额外:右侧目标";
     }
+    if (payload === "关卡内互动") {
+      return language === "zh_tw" ? "額外:互動" : "额外:关卡内互动";
+    }
     return language === "zh_tw" ? `Extra: ${payload}` : `额外:${payload}`;
   }
 
@@ -569,6 +572,9 @@ function formatTokenSummary(rawToken: string, language: Language): string {
     }
     if (payload === "史子眇sp") {
       return "史子眇sp";
+    }
+    if (payload === "关卡内互动") {
+      return language === "zh_tw" ? "互動" : "关卡内互动";
     }
 
     return language === "zh_tw" ? convertToTraditional(payload) : payload;

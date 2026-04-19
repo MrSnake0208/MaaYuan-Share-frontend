@@ -30,6 +30,7 @@ type ParsedTokenKind =
   | "extraLvbu"
   | "extraAuto"
   | "extraSp"
+  | "extraInteraction"
   | "unknown";
 
 interface SlotConfig {
@@ -143,6 +144,10 @@ function parseToken(token: string): {
 
     if (modifier === "史子眇sp") {
       return { kind: "extraSp" };
+    }
+
+    if (modifier === "关卡内互动") {
+      return { kind: "extraInteraction" };
     }
 
     const againMatch = modifier?.match(/^(\d)([普大下sp])$/);
@@ -266,6 +271,13 @@ function mapParsedAction(action: ParsedRoundAction, options?: MappingOptions): E
         type: CopilotDocV1.Type.Output,
         doc: formatDoc(docPrefix, "点击史子眇sp", "额外:史子眇sp"),
         intermediatePostDelay: SP_POST_DELAY,
+      });
+    }
+    case "extraInteraction": {
+      return createAction({
+        type: CopilotDocV1.Type.Output,
+        doc: formatDoc(docPrefix, "关卡内互动", "额外:关卡内互动"),
+        intermediatePostDelay: postDelay,
       });
     }
     default: {
@@ -395,6 +407,9 @@ function guessTokenFromAction(action: EditorAction): string {
       }
       if (action.doc?.includes("史子眇sp")) {
         return "额外:史子眇sp";
+      }
+      if (action.doc?.includes("关卡内互动")) {
+        return "额外:关卡内互动";
       }
       if (action.doc?.includes("等待")) {
         const waitMatch = action.doc.match(/等待(\d+)毫秒/);

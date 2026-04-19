@@ -76,7 +76,7 @@ export const AppLayout: FCC = ({ children }) => {
                   <span className="font-medium text-gray-900 dark:text-gray-100">
                     系统更新通知：
                   </span>
-                  为适配更多密探 SP，编辑器将采用「通用 SP」替代原有的「吕布 SP」与「史子渺 SP」选项。已生成的作业不受影响，可正常执行。
+                  现已支持影战-点击工具箱的操作，请添加【额外动作-关卡内互动】。
                 </p>
               </div>
             </div>
