@@ -26,6 +26,8 @@ type ParsedTokenKind =
   | "restartFull"
   | "restartManual"
   | "restartOrange"
+  | "restartPurple"
+  | "restartBlue"
   | "restartDown"
   | "extraLvbu"
   | "extraAuto"
@@ -170,6 +172,12 @@ function parseToken(token: string): {
     if (type === "无橙星") {
       return { kind: "restartOrange" };
     }
+    if (type === "无紫星") {
+      return { kind: "restartPurple" };
+    }
+    if (type === "无蓝星") {
+      return { kind: "restartBlue" };
+    }
     const downMatch = token.match(/重开:检测(\d)号位阵亡/);
     if (downMatch) {
       return { kind: "restartDown", slot: Number(downMatch[1]) };
@@ -241,6 +249,20 @@ function mapParsedAction(action: ParsedRoundAction, options?: MappingOptions): E
       return createAction({
         type: CopilotDocV1.Type.SkillDaemon,
         doc: formatDoc(docPrefix, "触发无橙星检测", "重开:无橙星"),
+        intermediatePostDelay: postDelay,
+      });
+    }
+    case "restartPurple": {
+      return createAction({
+        type: CopilotDocV1.Type.SkillDaemon,
+        doc: formatDoc(docPrefix, "触发无紫星检测", "重开:无紫星"),
+        intermediatePostDelay: postDelay,
+      });
+    }
+    case "restartBlue": {
+      return createAction({
+        type: CopilotDocV1.Type.SkillDaemon,
+        doc: formatDoc(docPrefix, "触发无蓝星检测", "重开:无蓝星"),
         intermediatePostDelay: postDelay,
       });
     }
@@ -388,6 +410,12 @@ function guessTokenFromAction(action: EditorAction): string {
     case CopilotDocV1.Type.SkillDaemon:
       if (action.doc?.includes("无橙星")) {
         return "重开:无橙星";
+      }
+      if (action.doc?.includes("无紫星")) {
+        return "重开:无紫星";
+      }
+      if (action.doc?.includes("无蓝星")) {
+        return "重开:无蓝星";
       }
       if (action.doc?.includes("左上角")) {
         return "重开:左上角";

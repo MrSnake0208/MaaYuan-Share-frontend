@@ -45,7 +45,7 @@ interface RoundFormState {
   extraSlot: string;
   extraAction: BasicActionSymbol;
   waitMs: string;
-  restartType: "full" | "manual" | "orange" | "down";
+  restartType: "full" | "manual" | "orange" | "purple" | "blue" | "down";
   restartSlot: string;
 }
 
@@ -75,6 +75,8 @@ const RESTART_TYPES = [
   { value: "full", label: "全灭重开" },
   { value: "manual", label: "左上角重开" },
   { value: "orange", label: "无橙星重开" },
+  { value: "purple", label: "无紫星重开" },
+  { value: "blue", label: "无蓝星重开" },
   { value: "down", label: "阵亡检测重开" },
 ] as const;
 const DEFAULT_WAIT_MS = 1000;
@@ -674,6 +676,12 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
         case "orange":
           token = "重开:无橙星";
           break;
+        case "purple":
+          token = "重开:无紫星";
+          break;
+        case "blue":
+          token = "重开:无蓝星";
+          break;
         case "down": {
           const slot = form.restartSlot || "1";
           token = "重开:检测" + slot + "号位阵亡";
@@ -755,6 +763,12 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
         if (token === "重开:无橙星") {
           return "无橙星重开";
         }
+        if (token === "重开:无紫星") {
+          return "无紫星重开";
+        }
+        if (token === "重开:无蓝星") {
+          return "无蓝星重开";
+        }
         if (token.startsWith("重开:检测")) {
           return token.replace("重开:", "");
         }
@@ -816,6 +830,12 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
 
     if (token === "重开:无橙星") {
       return "无橙星";
+    }
+    if (token === "重开:无紫星") {
+      return "无紫星";
+    }
+    if (token === "重开:无蓝星") {
+      return "无蓝星";
     }
     if (token === "重开:左上角") {
       return "左上角重开";

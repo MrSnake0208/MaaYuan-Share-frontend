@@ -477,6 +477,15 @@ function formatTokenLabel(
     if (rest === "左上角") {
       return language === "zh_tw" ? "Restart: Manual" : trimmed;
     }
+    if (rest === "无橙星") {
+      return language === "zh_tw" ? "Restart: No Orange Star" : trimmed;
+    }
+    if (rest === "无紫星") {
+      return language === "zh_tw" ? "Restart: No Purple Star" : trimmed;
+    }
+    if (rest === "无蓝星") {
+      return language === "zh_tw" ? "Restart: No Blue Star" : trimmed;
+    }
     return language === "zh_tw" ? `Restart: ${rest}` : trimmed;
   }
 
@@ -583,6 +592,12 @@ function formatTokenSummary(rawToken: string, language: Language): string {
   if (token.startsWith("重开:")) {
     if (token === "重开:无橙星") {
       return language === "zh_tw" ? "無橙星" : "无橙星";
+    }
+    if (token === "重开:无紫星") {
+      return language === "zh_tw" ? "無紫星" : "无紫星";
+    }
+    if (token === "重开:无蓝星") {
+      return language === "zh_tw" ? "無藍星" : "无蓝星";
     }
     if (token === "重开:左上角") {
       return language === "zh_tw" ? "左上角重開" : "左上角重开";

@@ -226,12 +226,30 @@ const EXTRA_ACTION_TEMPLATES: Record<string, SimingActionConfig> = {
 };
 
 const ORANGE_RESTART_LABEL = "重开:无橙星";
+const PURPLE_RESTART_LABEL = "重开:无紫星";
+const BLUE_RESTART_LABEL = "重开:无蓝星";
 const DOWN_RESTART_PREFIX = "重开:检测";
 
 const ORANGE_DETECTION_TEMPLATE: SimingActionConfig = {
   recognition: "ColorMatch",
   upper: [255, 255, 120],
   lower: [180, 160, 40],
+  roi: [58, 160, 103, 88],
+  next: [],
+};
+
+const PURPLE_DETECTION_TEMPLATE: SimingActionConfig = {
+  recognition: "ColorMatch",
+  upper: [198, 115, 227],
+  lower: [112, 54, 133],
+  roi: [58, 160, 103, 88],
+  next: [],
+};
+
+const BLUE_DETECTION_TEMPLATE: SimingActionConfig = {
+  recognition: "ColorMatch",
+  upper: [79, 142, 189],
+  lower: [59, 122, 169],
   roi: [58, 160, 103, 88],
   next: [],
 };
@@ -356,6 +374,8 @@ function buildRoundNodes(
   }
 
   const roundsWithOrangeRestart = new Set<string>();
+  const roundsWithPurpleRestart = new Set<string>();
+  const roundsWithBlueRestart = new Set<string>();
   let maxRoundWithActions = 0;
 
   entries.forEach(([roundKey, actions]) => {
@@ -369,6 +389,14 @@ function buildRoundNodes(
         roundsWithOrangeRestart.add(roundKey);
         return false;
       }
+      if (token === PURPLE_RESTART_LABEL) {
+        roundsWithPurpleRestart.add(roundKey);
+        return false;
+      }
+      if (token === BLUE_RESTART_LABEL) {
+        roundsWithBlueRestart.add(roundKey);
+        return false;
+      }
       if (token.startsWith(DOWN_RESTART_PREFIX)) {
         return true;
       }
@@ -377,6 +405,12 @@ function buildRoundNodes(
 
     if (actionList.some((entry) => entry?.[0]?.trim() === ORANGE_RESTART_LABEL)) {
       roundsWithOrangeRestart.add(roundKey);
+    }
+    if (actionList.some((entry) => entry?.[0]?.trim() === PURPLE_RESTART_LABEL)) {
+      roundsWithPurpleRestart.add(roundKey);
+    }
+    if (actionList.some((entry) => entry?.[0]?.trim() === BLUE_RESTART_LABEL)) {
+      roundsWithBlueRestart.add(roundKey);
     }
 
     if (hasNodeAction) {
@@ -442,11 +476,19 @@ function buildRoundNodes(
 
     if (roundsWithOrangeRestart.has(roundKey)) {
       ensureNext(result, detectionKey, `第${roundKey}回合橙星检测`);
+    } else if (roundsWithPurpleRestart.has(roundKey)) {
+      ensureNext(result, detectionKey, `第${roundKey}回合紫星检测`);
+    } else if (roundsWithBlueRestart.has(roundKey)) {
+      ensureNext(result, detectionKey, `第${roundKey}回合蓝星检测`);
     } else if (firstToken && firstToken.includes("检测")) {
       ensureNext(result, detectionKey, `回合${roundKey}行动1`);
     } else if (firstToken && firstToken.startsWith("重开:")) {
       if (firstToken === ORANGE_RESTART_LABEL) {
         ensureNext(result, detectionKey, `第${roundKey}回合橙星检测`);
+      } else if (firstToken === PURPLE_RESTART_LABEL) {
+        ensureNext(result, detectionKey, `第${roundKey}回合紫星检测`);
+      } else if (firstToken === BLUE_RESTART_LABEL) {
+        ensureNext(result, detectionKey, `第${roundKey}回合蓝星检测`);
       } else if (firstToken === RESTART_FULL_LABEL) {
         ensureNext(result, detectionKey, RESTART_FULL_TARGET);
       } else if (firstToken === RESTART_MANUAL_LABEL) {
@@ -471,6 +513,24 @@ function buildRoundNodes(
       result[orangeKey] = orangeConfig;
     }
 
+    if (roundsWithPurpleRestart.has(roundKey)) {
+      const purpleKey = `第${roundKey}回合紫星检测`;
+      const purpleConfig = ensureNextArray(cloneConfig(PURPLE_DETECTION_TEMPLATE) ?? { next: [] });
+      purpleConfig.text_doc = `第${roundKey}回合紫星检测`;
+      purpleConfig.focus = `第${roundKey}回合有紫星`;
+      purpleConfig.next = [`回合${roundKey}行动1`];
+      result[purpleKey] = purpleConfig;
+    }
+
+    if (roundsWithBlueRestart.has(roundKey)) {
+      const blueKey = `第${roundKey}回合蓝星检测`;
+      const blueConfig = ensureNextArray(cloneConfig(BLUE_DETECTION_TEMPLATE) ?? { next: [] });
+      blueConfig.text_doc = `第${roundKey}回合蓝星检测`;
+      blueConfig.focus = `第${roundKey}回合有蓝星`;
+      blueConfig.next = [`回合${roundKey}行动1`];
+      result[blueKey] = blueConfig;
+    }
+
     let currentActionKey: string | null = detectionKey;
     let actualActionIndex = 1;
 
@@ -481,6 +541,14 @@ function buildRoundNodes(
       }
 
       if (token === ORANGE_RESTART_LABEL) {
+        return;
+      }
+
+      if (token === PURPLE_RESTART_LABEL) {
+        return;
+      }
+
+      if (token === BLUE_RESTART_LABEL) {
         return;
       }
 
@@ -721,6 +789,14 @@ export function simingActionsToRoundActions(
     const orangeKey = `第${roundKey}回合橙星检测`;
     if (next.includes(orangeKey) && !tokens.some((entry) => entry[0] === ORANGE_RESTART_LABEL)) {
       tokens.unshift([ORANGE_RESTART_LABEL]);
+    }
+    const purpleKey = `第${roundKey}回合紫星检测`;
+    if (next.includes(purpleKey) && !tokens.some((entry) => entry[0] === PURPLE_RESTART_LABEL)) {
+      tokens.unshift([PURPLE_RESTART_LABEL]);
+    }
+    const blueKey = `第${roundKey}回合蓝星检测`;
+    if (next.includes(blueKey) && !tokens.some((entry) => entry[0] === BLUE_RESTART_LABEL)) {
+      tokens.unshift([BLUE_RESTART_LABEL]);
     }
   });
 
