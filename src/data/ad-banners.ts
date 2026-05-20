@@ -17,6 +17,11 @@ export const defaultAdBanners: AdBannerConfigItem[] = [
     alt: "MuMu",
   },
   {
+    image: "/biubiu.png",
+    link: "https://www.biubiu001.com/?cfrom=maayuan",
+    alt: "biubiu",
+  },
+  {
     image: "/mirror.png",
     link: "https://mirrorchyan.com/zh/projects?rid=MaaYuan&source=navtop",
     alt: "Mirror",
