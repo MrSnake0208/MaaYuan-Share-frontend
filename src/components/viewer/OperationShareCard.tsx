@@ -6,76 +6,172 @@ import type {
   OperationShareOperator,
 } from './operationShareModel'
 
+const palette = {
+  accent: '#b85f3f',
+  brand: '#176b64',
+  border: '#49645c',
+  ink: '#24312f',
+  muted: '#63716d',
+  paper: '#f6f3eb',
+  panel: '#fffdf8',
+  stripe: '#ebe1d2',
+}
+
 const cardStyle: CSSProperties = {
   width: 1080,
   boxSizing: 'border-box',
-  background: '#f8fafc',
-  color: '#172033',
-  padding: 56,
+  background: palette.paper,
+  color: palette.ink,
+  padding: '52px 52px 40px',
   fontFamily: 'Inter, "PingFang SC", "Microsoft YaHei", sans-serif',
 }
 
-function OperatorItem({ operator }: { operator: OperationShareOperator }) {
+function operatorAvatar(operator: OperationShareOperator) {
+  return operator.avatarId
+    ? `/assets/operator-avatars/webp96/${operator.avatarId}.webp`
+    : '/assets/operator-avatars/404.webp'
+}
+
+function applyAvatarFallback(image: HTMLImageElement) {
+  if (image.dataset.fallbackApplied === 'true') return
+  image.dataset.fallbackApplied = 'true'
+  image.src = '/assets/operator-avatars/404.webp'
+}
+
+function OperatorColumn({
+  operator,
+  slot,
+}: {
+  operator?: OperationShareOperator
+  slot: number
+}) {
+  if (!operator) {
+    return (
+      <div className="flex min-h-[238px] flex-col items-center justify-center px-2 text-center">
+        <div
+          className="flex h-[118px] w-[118px] items-center justify-center border-2 border-dashed text-lg font-semibold"
+          style={{ borderColor: '#9aaba5', color: palette.muted }}
+        >
+          {slot} 号位
+        </div>
+        <div
+          className="mt-4 text-base font-semibold"
+          style={{ color: palette.muted }}
+        >
+          未配置密探
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex min-w-0 flex-col items-center text-center">
-      <img
-        alt={operator.name}
-        className="h-28 w-28 rounded-md border-2 border-slate-200 bg-white object-cover"
-        height={112}
-        loading="eager"
-        onError={(event) => {
-          const image = event.currentTarget
-          if (image.dataset.fallbackApplied === 'true') return
-          image.dataset.fallbackApplied = 'true'
-          image.src = '/assets/operator-avatars/404.webp'
-        }}
-        src={
-          operator.avatarId
-            ? `/assets/operator-avatars/webp96/${operator.avatarId}.webp`
-            : '/assets/operator-avatars/404.webp'
-        }
-        width={112}
-      />
-      <div className="mt-3 text-xl font-bold leading-tight">
+    <div className="flex min-h-[238px] flex-col items-center px-2 pb-4 pt-5 text-center">
+      <div className="relative">
+        <img
+          alt={operator.name}
+          className="h-[118px] w-[118px] border-[3px] border-white bg-white object-cover shadow-sm"
+          height={118}
+          loading="eager"
+          onError={(event) => applyAvatarFallback(event.currentTarget)}
+          src={operatorAvatar(operator)}
+          width={118}
+        />
+        <span
+          className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-sm font-bold text-white"
+          style={{ background: palette.brand }}
+        >
+          {slot}
+        </span>
+      </div>
+      <div className="mt-3 text-[21px] font-bold leading-tight">
         {operator.name}
       </div>
-      <div className="mt-1 text-sm text-slate-500">
-        {operator.slot ? `${operator.slot} 号位` : '可替换密探'}
-      </div>
-      <div className="mt-2 flex flex-wrap justify-center gap-2 text-sm text-slate-700">
-        {operator.skill ? <span>技能 {operator.skill}</span> : null}
+      <div
+        className="mt-2 min-h-10 text-[13px] font-medium leading-5"
+        style={{ color: palette.muted }}
+      >
+        {operator.skill ? <div>技能 {operator.skill}</div> : null}
         {operator.elite !== undefined && operator.level !== undefined ? (
-          <span>
+          <div>
             精英 {operator.elite} · Lv.{operator.level}
-          </span>
+          </div>
         ) : null}
-        {operator.module ? <span>{operator.module}模组</span> : null}
+        {operator.module ? <div>{operator.module}模组</div> : null}
       </div>
     </div>
   )
 }
 
-function actionColors(raw: string) {
-  if (raw.includes('sp') || raw.includes('大'))
-    return 'bg-rose-100 text-rose-800'
-  if (raw.includes('下')) return 'bg-amber-100 text-amber-800'
-  if (raw.includes('等待')) return 'bg-slate-200 text-slate-700'
-  return 'bg-sky-100 text-sky-800'
+function SubstituteOperator({
+  operator,
+}: {
+  operator: OperationShareOperator
+}) {
+  return (
+    <div className="flex w-[148px] items-center gap-3">
+      <img
+        alt={operator.name}
+        className="h-14 w-14 shrink-0 border-2 border-white bg-white object-cover shadow-sm"
+        height={56}
+        loading="eager"
+        onError={(event) => applyAvatarFallback(event.currentTarget)}
+        src={operatorAvatar(operator)}
+        width={56}
+      />
+      <div className="min-w-0 text-left">
+        <div className="break-words text-base font-bold leading-tight">
+          {operator.name}
+        </div>
+        <div className="mt-1 text-xs" style={{ color: palette.muted }}>
+          {operator.skill ? `技能 ${operator.skill}` : '可替换'}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function actionStyle(raw: string): CSSProperties {
+  if (raw.includes('sp') || raw.includes('大')) {
+    return { background: '#f4d9d1', color: '#8d392c' }
+  }
+  if (raw.includes('下')) {
+    return { background: '#f2dfb9', color: '#795410' }
+  }
+  if (raw.includes('等待')) {
+    return { background: '#dfe4e2', color: '#4d5b57' }
+  }
+  return { background: '#d8e9e4', color: '#155d57' }
 }
 
 function ActionList({ actions }: { actions: OperationShareAction[] }) {
-  if (actions.length === 0)
-    return <span className="text-sm text-slate-400">暂无动作</span>
+  if (actions.length === 0) {
+    return (
+      <span className="text-lg" style={{ color: '#a7b0ad' }}>
+        —
+      </span>
+    )
+  }
+
   return (
     <div className="flex flex-wrap justify-center gap-2">
       {actions.map((action, index) => (
         <span
           key={`${action.raw}-${index}`}
-          className={`inline-flex rounded px-2 py-1 text-sm font-semibold ${actionColors(action.raw)}`}
+          className="inline-flex rounded-[3px] px-2.5 py-1.5 text-[15px] font-bold leading-tight"
+          style={actionStyle(action.raw)}
         >
           {action.label}
         </span>
       ))}
+    </div>
+  )
+}
+
+function SectionTitle({ children }: { children: string }) {
+  return (
+    <div className="flex items-center gap-4">
+      <h2 className="shrink-0 text-[22px] font-bold">{children}</h2>
+      <div className="h-px flex-1" style={{ background: '#b9c4c0' }} />
     </div>
   )
 }
@@ -89,58 +185,157 @@ export function OperationShareCard({
 }) {
   return (
     <div ref={cardRef} style={cardStyle}>
-      <header className="border-b-4 border-cyan-600 pb-8">
-        <div className="text-lg font-bold uppercase text-cyan-700">
-          MaaYuan Share
+      <header className="flex items-start justify-between gap-10">
+        <div className="min-w-0 flex-1">
+          <div
+            className="text-[15px] font-bold uppercase tracking-[0.18em]"
+            style={{ color: palette.brand }}
+          >
+            MaaYuan · 作业分享
+          </div>
+          <h1
+            className="mt-4 break-words text-[44px] font-bold leading-[1.18]"
+            style={{ color: '#172522' }}
+          >
+            {model.title}
+          </h1>
         </div>
-        <h1 className="mt-3 text-5xl font-bold leading-tight text-slate-950">
-          {model.title}
-        </h1>
-        <div className="mt-5 flex gap-8 text-xl text-slate-600">
-          <span>关卡：{model.stage}</span>
-          <span>作者：{model.author}</span>
+        <div
+          className="mt-1 shrink-0 border-l-4 py-1 pl-5 text-right"
+          style={{ borderColor: palette.accent }}
+        >
+          <div
+            className="text-sm font-semibold"
+            style={{ color: palette.muted }}
+          >
+            关卡
+          </div>
+          <div className="mt-1 max-w-[260px] break-words text-[25px] font-bold leading-tight">
+            {model.stage}
+          </div>
+          <div className="mt-3 text-sm" style={{ color: palette.muted }}>
+            作者 · {model.author}
+          </div>
         </div>
       </header>
 
       <section className="mt-10">
-        <h2 className="text-2xl font-bold text-slate-900">密探阵容</h2>
-        {model.operators.length > 0 ? (
-          <div className="mt-6 grid grid-cols-5 gap-6">
-            {model.operators.map((operator) => (
-              <OperatorItem
-                key={`${operator.slot}-${operator.rawName}`}
-                operator={operator}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="mt-5 rounded border border-dashed border-slate-300 p-8 text-center text-slate-500">
-            此作业未配置密探
-          </div>
-        )}
+        <SectionTitle>作战编排</SectionTitle>
+        <table
+          className="mt-5 w-full table-fixed border-collapse text-center"
+          style={{ borderColor: palette.border }}
+        >
+          <thead>
+            <tr>
+              <th
+                className="w-[110px] border-2 px-3 text-[21px] font-bold"
+                style={{ borderColor: palette.border, background: '#e6ded0' }}
+              >
+                回合
+              </th>
+              {model.actionSlots.map((slot) => (
+                <th
+                  key={slot}
+                  className="border-2 p-0 align-top"
+                  style={{
+                    borderColor: palette.border,
+                    background: palette.panel,
+                  }}
+                >
+                  <OperatorColumn
+                    operator={model.operators[slot - 1]}
+                    slot={slot}
+                  />
+                </th>
+              ))}
+              <th
+                className="w-[118px] border-2 px-3 text-lg font-bold"
+                style={{ borderColor: palette.border, background: '#e6ded0' }}
+              >
+                其他动作
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {model.rounds.length > 0 ? (
+              model.rounds.map((round, roundIndex) => {
+                const background =
+                  roundIndex % 2 === 0 ? '#f4ecdf' : palette.stripe
+                return (
+                  <tr key={round.round} style={{ background }}>
+                    <th
+                      className="border-2 px-3 py-6 text-[19px] leading-tight"
+                      style={{ borderColor: palette.border }}
+                    >
+                      <span className="block text-[28px] font-bold">
+                        {round.round}
+                      </span>
+                      <span className="mt-1 block text-sm font-semibold">
+                        回合
+                      </span>
+                    </th>
+                    {model.actionSlots.map((slot) => (
+                      <td
+                        key={slot}
+                        className="border-2 px-2 py-6 align-middle"
+                        style={{ borderColor: palette.border }}
+                      >
+                        <ActionList actions={round.slots[slot] ?? []} />
+                      </td>
+                    ))}
+                    <td
+                      className="border-2 px-2 py-6 align-middle"
+                      style={{ borderColor: palette.border }}
+                    >
+                      <ActionList actions={round.others} />
+                    </td>
+                  </tr>
+                )
+              })
+            ) : (
+              <tr style={{ background: '#f4ecdf' }}>
+                <td
+                  className="border-2 px-4 py-8 text-base font-medium"
+                  colSpan={model.actionSlots.length + 2}
+                  style={{ borderColor: palette.border, color: palette.muted }}
+                >
+                  此作业未定义动作序列
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </section>
 
       {model.groups.length > 0 ? (
-        <section className="mt-10">
-          <h2 className="text-2xl font-bold text-slate-900">可替换密探</h2>
-          <div className="mt-5 space-y-5">
+        <section className="mt-9">
+          <SectionTitle>可替换密探</SectionTitle>
+          <div className="mt-4 border-y" style={{ borderColor: '#b9c4c0' }}>
             {model.groups.map((group, index) => (
               <div
                 key={`${group.name}-${index}`}
-                className="rounded border border-slate-200 bg-white p-5"
+                className="flex min-h-[92px] items-center gap-6 px-4 py-4"
+                style={{
+                  background: index % 2 === 0 ? palette.panel : '#eee8dc',
+                }}
               >
-                <h3 className="text-xl font-bold">{group.name}</h3>
+                <h3
+                  className="w-[150px] shrink-0 border-r pr-5 text-lg font-bold"
+                  style={{ borderColor: '#b9c4c0' }}
+                >
+                  {group.name}
+                </h3>
                 {group.operators.length > 0 ? (
-                  <div className="mt-5 grid grid-cols-5 gap-6">
+                  <div className="flex flex-1 flex-wrap gap-x-5 gap-y-3">
                     {group.operators.map((operator, operatorIndex) => (
-                      <OperatorItem
+                      <SubstituteOperator
                         key={`${operator.rawName}-${operatorIndex}`}
                         operator={operator}
                       />
                     ))}
                   </div>
                 ) : (
-                  <div className="mt-3 text-slate-500">
+                  <div className="text-sm" style={{ color: palette.muted }}>
                     该密探组未配置可替换密探
                   </div>
                 )}
@@ -150,54 +345,12 @@ export function OperationShareCard({
         </section>
       ) : null}
 
-      <section className="mt-10">
-        <h2 className="text-2xl font-bold text-slate-900">动作序列</h2>
-        {model.rounds.length > 0 ? (
-          <table className="mt-5 w-full table-fixed border-collapse overflow-hidden rounded bg-white text-center">
-            <thead>
-              <tr className="bg-slate-800 text-white">
-                <th className="w-28 border border-slate-300 px-3 py-4">回合</th>
-                {model.actionSlots.map((slot) => (
-                  <th key={slot} className="border border-slate-300 px-3 py-4">
-                    {model.operators[slot - 1]?.name || `密探 ${slot}`}
-                    <div className="mt-1 text-xs font-normal text-slate-300">
-                      {slot} 号位
-                    </div>
-                  </th>
-                ))}
-                <th className="border border-slate-300 px-3 py-4">其他动作</th>
-              </tr>
-            </thead>
-            <tbody>
-              {model.rounds.map((round) => (
-                <tr key={round.round}>
-                  <th className="border border-slate-200 bg-slate-100 px-3 py-5 text-lg">
-                    第 {round.round} 回合
-                  </th>
-                  {model.actionSlots.map((slot) => (
-                    <td
-                      key={slot}
-                      className="border border-slate-200 px-3 py-5 align-top"
-                    >
-                      <ActionList actions={round.slots[slot] ?? []} />
-                    </td>
-                  ))}
-                  <td className="border border-slate-200 px-3 py-5 align-top">
-                    <ActionList actions={round.others} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div className="mt-5 rounded border border-dashed border-slate-300 p-8 text-center text-slate-500">
-            此作业未定义动作序列
-          </div>
-        )}
-      </section>
-
-      <footer className="mt-10 border-t border-slate-300 pt-5 text-right text-sm text-slate-500">
-        由 MaaYuan Share 生成
+      <footer
+        className="mt-9 flex items-center justify-between border-t pt-5 text-sm"
+        style={{ borderColor: '#b9c4c0', color: palette.muted }}
+      >
+        <span>MAAYUAN SHARE</span>
+        <span>让每一步都清晰可见</span>
       </footer>
     </div>
   )

@@ -79,7 +79,7 @@ export default function OperationShareDialog({
       await waitForCardResources(cardNode)
       const { toBlob } = await import('html-to-image')
       const nextBlob = await toBlob(cardNode, {
-        backgroundColor: '#f8fafc',
+        backgroundColor: '#f6f3eb',
         cacheBust: true,
         pixelRatio: calculateSharePixelRatio(cardNode.scrollHeight),
         skipFonts: true,
