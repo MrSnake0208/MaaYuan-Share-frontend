@@ -1,3 +1,5 @@
+import { Icon } from '@blueprintjs/core'
+
 import type { CSSProperties, Ref } from 'react'
 
 import type {
@@ -24,6 +26,31 @@ const cardStyle: CSSProperties = {
   color: palette.ink,
   padding: '52px 52px 40px',
   fontFamily: 'Inter, "PingFang SC", "Microsoft YaHei", sans-serif',
+}
+
+const STAR_LEVELS = [1, 2, 3, 4, 5] as const
+
+function OperatorStarLevel({ value }: { value: number }) {
+  return (
+    <div
+      aria-label={`${value} 星`}
+      className="mt-1 flex items-center justify-center gap-1 select-none"
+    >
+      {STAR_LEVELS.map((level) => (
+        <Icon
+          key={level}
+          aria-hidden
+          className={`h-4 w-4 ${
+            level <= value
+              ? 'text-yellow-500 opacity-100'
+              : 'text-gray-500 opacity-40'
+          }`}
+          icon="star"
+          iconSize={16}
+        />
+      ))}
+    </div>
+  )
 }
 
 function operatorAvatar(operator: OperationShareOperator) {
@@ -91,8 +118,8 @@ function OperatorColumn({
         style={{ color: palette.muted }}
       >
         {operator.skill ? <div>技能 {operator.skill}</div> : null}
-        {operator.rarity !== undefined ? (
-          <div>星级 {operator.rarity}</div>
+        {operator.starLevel !== undefined ? (
+          <OperatorStarLevel value={operator.starLevel} />
         ) : null}
         {operator.module ? <div>{operator.module}模组</div> : null}
       </div>
@@ -177,9 +204,11 @@ function SectionTitle({ children }: { children: string }) {
 export function OperationShareCard({
   model,
   cardRef,
+  qrDataUrl,
 }: {
   model: OperationShareModel
   cardRef?: Ref<HTMLDivElement>
+  qrDataUrl: string
 }) {
   return (
     <div ref={cardRef} style={cardStyle}>
@@ -198,21 +227,30 @@ export function OperationShareCard({
             {model.title}
           </h1>
         </div>
-        <div
-          className="mt-1 shrink-0 border-l-4 py-1 pl-5 text-right"
-          style={{ borderColor: palette.accent }}
-        >
+        <div className="mt-1 flex shrink-0 items-center gap-3">
+          <img
+            alt="作业链接二维码"
+            className="h-[88px] w-[88px] shrink-0 bg-white object-contain"
+            height={88}
+            src={qrDataUrl}
+            width={88}
+          />
           <div
-            className="text-sm font-semibold"
-            style={{ color: palette.muted }}
+            className="shrink-0 border-l-4 py-1 pl-3 text-right"
+            style={{ borderColor: palette.accent }}
           >
-            关卡
-          </div>
-          <div className="mt-1 max-w-[260px] break-words text-[25px] font-bold leading-tight">
-            {model.stage}
-          </div>
-          <div className="mt-3 text-sm" style={{ color: palette.muted }}>
-            作者 · {model.author}
+            <div
+              className="text-sm font-semibold"
+              style={{ color: palette.muted }}
+            >
+              关卡
+            </div>
+            <div className="mt-1 max-w-[260px] break-words text-[25px] font-bold leading-tight">
+              {model.stage}
+            </div>
+            <div className="mt-3 text-sm" style={{ color: palette.muted }}>
+              作者 · {model.author}
+            </div>
           </div>
         </div>
       </header>

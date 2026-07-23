@@ -11,6 +11,7 @@ import {
   ObjectUrlStore,
   buildOperationShareFilename,
   buildOperationShareModel,
+  buildOperationShareUrl,
   calculateSharePixelRatio,
 } from './operationShareModel'
 
@@ -66,10 +67,16 @@ export default function OperationShareDialog({
   const [status, setStatus] = useState<GenerationStatus>('idle')
   const [previewUrl, setPreviewUrl] = useState<string>()
   const [blob, setBlob] = useState<Blob>()
+  const [qrCode, setQrCode] = useState<{
+    operationId: number
+    dataUrl: string
+  }>()
+  const qrDataUrl =
+    qrCode?.operationId === operation.id ? qrCode.dataUrl : undefined
   const [error, setError] = useState<string>()
 
   const generate = useCallback(async () => {
-    if (!cardNode || generatingRef.current) return
+    if (!cardNode || !qrDataUrl || generatingRef.current) return
 
     const generation = ++generationRef.current
     generatingRef.current = true
@@ -99,7 +106,37 @@ export default function OperationShareDialog({
     } finally {
       if (generation === generationRef.current) generatingRef.current = false
     }
-  }, [cardNode])
+  }, [cardNode, qrDataUrl])
+
+  useEffect(() => {
+    let active = true
+    const createQrCode = async () => {
+      try {
+        const { toDataURL } = await import('qrcode')
+        const nextQrDataUrl = await toDataURL(
+          buildOperationShareUrl(operation.id, window.location.origin),
+          {
+            color: { dark: '#24312f', light: '#fffdf8' },
+            errorCorrectionLevel: 'M',
+            margin: 2,
+            width: 224,
+          },
+        )
+        if (active) {
+          setQrCode({ operationId: operation.id, dataUrl: nextQrDataUrl })
+        }
+      } catch (reason) {
+        if (!active) return
+        setStatus('error')
+        setError(formatError(reason))
+      }
+    }
+
+    void createQrCode()
+    return () => {
+      active = false
+    }
+  }, [operation.id])
 
   useEffect(() => {
     const urlStore = urlStoreRef.current
@@ -178,7 +215,13 @@ export default function OperationShareDialog({
         </Button>
       </div>
       <div aria-hidden className="fixed left-[-12000px] top-0">
-        <OperationShareCard cardRef={setCardNode} model={model} />
+        {qrDataUrl ? (
+          <OperationShareCard
+            cardRef={setCardNode}
+            model={model}
+            qrDataUrl={qrDataUrl}
+          />
+        ) : null}
       </div>
     </Dialog>
   )

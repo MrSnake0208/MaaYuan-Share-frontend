@@ -6,6 +6,7 @@ import {
   ObjectUrlStore,
   buildOperationShareFilename,
   buildOperationShareModel,
+  buildOperationShareUrl,
   calculateSharePixelRatio,
 } from './operationShareModel'
 
@@ -37,6 +38,19 @@ describe('operation share model', () => {
     })
     expect(model.groups[0].operators[0].rawName).toBe('替补密探')
     expect(model.rounds).toEqual([])
+  })
+
+  it('reads star_level from operation content instead of static rarity', () => {
+    const operation = createOperation()
+    const operator = operation.parsedContent.opers?.[0] as
+      | (CopilotDocV1.Operator & { star_level?: number })
+      | undefined
+    if (!operator) throw new Error('测试密探不存在')
+    operator.star_level = 4
+
+    const model = buildOperationShareModel(operation, 'cn')
+
+    expect(model.operators[0].starLevel).toBe(4)
   })
 
   it('uses stable fallbacks for incomplete legacy operations', () => {
@@ -132,6 +146,12 @@ describe('operation share model', () => {
 })
 
 describe('share image utilities', () => {
+  it('builds the QR code URL from the current origin and operation id', () => {
+    expect(buildOperationShareUrl(29533, 'https://share.maayuan.top')).toBe(
+      'https://share.maayuan.top/?op=29533',
+    )
+  })
+
   it('sanitizes download filenames', () => {
     expect(
       buildOperationShareFilename({ stage: '1/2', title: '攻略:<>"' }),

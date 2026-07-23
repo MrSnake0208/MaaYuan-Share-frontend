@@ -7,6 +7,7 @@ import {
   getModuleName,
   withDefaultRequirements,
 } from '../../models/operator'
+import { readOperatorStats } from '../../utils/operatorStats'
 import {
   buildOperationActionDisplay,
   formatTokenSummary,
@@ -18,10 +19,8 @@ export interface OperationShareOperator {
   name: string
   rawName: string
   avatarId?: string
-  rarity?: number
+  starLevel?: number
   skill?: number
-  elite?: number
-  level?: number
   module?: string
 }
 
@@ -75,6 +74,7 @@ function mapOperator(
     operator.requirements,
     info?.rarity,
   )
+  const stats = readOperatorStats(operator)
   const module =
     requirements.module === CopilotDocV1.Module.Default
       ? undefined
@@ -85,10 +85,10 @@ function mapOperator(
     name: getLocalizedOperatorName(operator.name, language),
     rawName: operator.name,
     avatarId: info?.id,
-    rarity: info?.rarity,
+    starLevel: stats.hasStar
+      ? Math.min(5, Math.max(0, stats.starLevel))
+      : undefined,
     skill: operator.skill,
-    elite: requirements.elite,
-    level: requirements.level,
     module,
   }
 }
@@ -179,6 +179,12 @@ export function buildOperationShareFilename(
   const stage = sanitizeFilePart(model.stage, '未知关卡')
   const title = sanitizeFilePart(model.title, '未命名作业')
   return `${stage}-${title}.png`
+}
+
+export function buildOperationShareUrl(operationId: number, origin: string) {
+  const url = new URL('/', origin)
+  url.searchParams.set('op', String(operationId))
+  return url.toString()
 }
 
 export function calculateSharePixelRatio(cardHeight: number) {
