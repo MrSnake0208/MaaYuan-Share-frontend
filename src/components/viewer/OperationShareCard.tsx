@@ -91,10 +91,8 @@ function OperatorColumn({
         style={{ color: palette.muted }}
       >
         {operator.skill ? <div>技能 {operator.skill}</div> : null}
-        {operator.elite !== undefined && operator.level !== undefined ? (
-          <div>
-            精英 {operator.elite} · Lv.{operator.level}
-          </div>
+        {operator.rarity !== undefined ? (
+          <div>星级 {operator.rarity}</div>
         ) : null}
         {operator.module ? <div>{operator.module}模组</div> : null}
       </div>
@@ -157,7 +155,7 @@ function ActionList({ actions }: { actions: OperationShareAction[] }) {
       {actions.map((action, index) => (
         <span
           key={`${action.raw}-${index}`}
-          className="inline-flex rounded-[3px] px-2.5 py-1.5 text-[15px] font-bold leading-tight"
+          className="inline-flex rounded-[3px] px-2.5 py-1.5 text-[24px] font-bold leading-tight"
           style={actionStyle(action.raw)}
         >
           {action.label}
@@ -264,7 +262,7 @@ export function OperationShareCard({
                 return (
                   <tr key={round.round} style={{ background }}>
                     <th
-                      className="border-2 px-3 py-6 text-[19px] leading-tight"
+                      className="border-2 px-3 py-3 text-[19px] leading-tight"
                       style={{ borderColor: palette.border }}
                     >
                       <span className="block text-[28px] font-bold">
@@ -277,14 +275,14 @@ export function OperationShareCard({
                     {model.actionSlots.map((slot) => (
                       <td
                         key={slot}
-                        className="border-2 px-2 py-6 align-middle"
+                        className="border-2 px-2 py-3 align-middle"
                         style={{ borderColor: palette.border }}
                       >
                         <ActionList actions={round.slots[slot] ?? []} />
                       </td>
                     ))}
                     <td
-                      className="border-2 px-2 py-6 align-middle"
+                      className="border-2 px-2 py-3 align-middle"
                       style={{ borderColor: palette.border }}
                     >
                       <ActionList actions={round.others} />

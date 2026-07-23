@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import { CopilotDocV1 } from '../../models/copilot.schema'
 import type { Operation } from '../../models/operation'
 import {
   ObjectUrlStore,
@@ -55,6 +56,78 @@ describe('operation share model', () => {
       operators: [],
       groups: [],
     })
+  })
+
+  it('keeps action order and compact symbols consistent with the action table', () => {
+    const operation = createOperation()
+    operation.parsedContent.actions = [
+      {
+        type: CopilotDocV1.Type.Skill,
+        name: '测试密探',
+        doc: '第1回合·动作1：测试密探 A [1普]',
+      },
+      {
+        type: CopilotDocV1.Type.Skill,
+        name: '测试密探',
+        doc: '第1回合·动作2：测试密探 ↑ [1大]',
+      },
+    ]
+
+    const model = buildOperationShareModel(operation, 'cn')
+
+    expect(model.rounds[0]?.slots[1]?.map((action) => action.label)).toEqual([
+      '1A',
+      '2↑',
+    ])
+  })
+
+  it('places left and right target switching actions in the other column', () => {
+    const operation = createOperation()
+    operation.parsedContent.actions = [
+      {
+        type: CopilotDocV1.Type.MoveCamera,
+        distance: [-1, 0],
+        doc: '第1回合·动作1：切换至左侧目标 [额外:左侧目标]',
+      },
+      {
+        type: CopilotDocV1.Type.Skill,
+        name: '测试密探',
+        doc: '第1回合·动作2：测试密探 A [1普]',
+      },
+      {
+        type: CopilotDocV1.Type.MoveCamera,
+        distance: [1, 0],
+        doc: '第1回合·动作3：切换至右侧目标 [额外:右侧目标]',
+      },
+    ]
+
+    const round = buildOperationShareModel(operation, 'cn').rounds[0]
+
+    expect(round?.slots[1]?.map((action) => action.label)).toEqual(['2A'])
+    expect(round?.others.map((action) => action.label)).toEqual([
+      '1右滑',
+      '3左滑',
+    ])
+  })
+
+  it('hides waiting actions from every share image column', () => {
+    const operation = createOperation()
+    operation.parsedContent.actions = [
+      {
+        type: CopilotDocV1.Type.Output,
+        doc: '第1回合·动作1：等待1000毫秒 [额外:等待:1000]',
+      },
+      {
+        type: CopilotDocV1.Type.Skill,
+        name: '测试密探',
+        doc: '第1回合·动作2：测试密探 A [1普]',
+      },
+    ]
+
+    const round = buildOperationShareModel(operation, 'cn').rounds[0]
+
+    expect(round?.slots[1]?.map((action) => action.label)).toEqual(['2A'])
+    expect(round?.others).toEqual([])
   })
 })
 

@@ -51,6 +51,20 @@ export interface OperationShareModel {
   rounds: OperationShareRound[]
 }
 
+function isTargetSwitchAction(raw: string) {
+  return raw === '额外:左侧目标' || raw === '额外:右侧目标'
+}
+
+function isHiddenShareAction(raw: string) {
+  return raw.startsWith('额外:等待')
+}
+
+function formatShareActionSummary(raw: string, language: Language) {
+  if (raw === '额外:左侧目标') return '右滑'
+  if (raw === '额外:右侧目标') return '左滑'
+  return formatTokenSummary(raw, language)
+}
+
 function mapOperator(
   operator: CopilotDocV1.Operator,
   language: Language,
@@ -97,24 +111,33 @@ export function buildOperationShareModel(
   const actionDisplay = buildOperationActionDisplay(operation, language)
   const rounds = actionDisplay.rounds.map((round) => {
     const grouped = groupTokensForTable(
-      round.tokens,
+      round.tokens.filter((token) => !isHiddenShareAction(token.raw)),
       actionDisplay.slotAssignments,
     )
     const slots: Record<number, OperationShareAction[]> = {}
+    const otherTokens = [...grouped.others]
     for (let slot = 1; slot <= 5; slot += 1) {
       const key = String(slot) as keyof typeof grouped.slotMap
-      slots[slot] = (grouped.slotMap[key] ?? []).map((token) => ({
-        raw: token.raw,
-        label: formatTokenSummary(token.raw, language),
-      }))
+      const slotTokens = grouped.slotMap[key] ?? []
+      otherTokens.push(
+        ...slotTokens.filter((token) => isTargetSwitchAction(token.raw)),
+      )
+      slots[slot] = slotTokens
+        .filter((token) => !isTargetSwitchAction(token.raw))
+        .map((token) => ({
+          raw: token.raw,
+          label: `${token.order + 1}${formatShareActionSummary(token.raw, language)}`,
+        }))
     }
     return {
       round: round.round,
       slots,
-      others: grouped.others.map((token) => ({
-        raw: token.raw,
-        label: token.label,
-      })),
+      others: otherTokens
+        .sort((left, right) => left.order - right.order)
+        .map((token) => ({
+          raw: token.raw,
+          label: `${token.order + 1}${formatShareActionSummary(token.raw, language)}`,
+        })),
     }
   })
 
