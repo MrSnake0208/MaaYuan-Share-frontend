@@ -33,6 +33,8 @@ import {
   FC,
   KeyboardEventHandler,
   MouseEventHandler,
+  Suspense,
+  lazy,
   useEffect,
   useState,
 } from "react";
@@ -70,6 +72,8 @@ import { ReLinkRenderer } from "../ReLink";
 import { UserName } from "../UserName";
 import { ActionSequenceViewer } from "./ActionSequenceViewer";
 import { CommentArea } from "./comment/CommentArea";
+
+const OperationShareDialog = lazy(() => import("./OperationShareDialog"));
 
 const ManageMenu: FC<{
   operation: Operation;
@@ -235,6 +239,7 @@ export const OperationViewer: ComponentType<{
     const { data: levels } = useLevels();
 
     const [auth] = useAtom(authAtom);
+    const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
     // make eslint happy: we got Suspense out there
     if (!operation) throw new Error("unreachable");
@@ -278,7 +283,8 @@ export const OperationViewer: ComponentType<{
     };
 
 	    return (
-	      <DrawerLayout
+	      <>
+	        <DrawerLayout
 	        title={
 	          <>
 	            <div className="flex min-w-0 items-center gap-2">
@@ -326,6 +332,12 @@ export const OperationViewer: ComponentType<{
               />
 
               <Button
+                icon="media"
+                text={t.components.viewer.OperationViewer.generate_share_image}
+                onClick={() => setShareDialogOpen(true)}
+              />
+
+              <Button
                 icon="clipboard"
                 text={t.components.viewer.OperationViewer.copy_secret_code}
                 intent="primary"
@@ -353,7 +365,16 @@ export const OperationViewer: ComponentType<{
         >
           <OperationViewerInner levels={levels} operation={operation} handleRating={handleRating} />
         </ErrorBoundary>
-      </DrawerLayout>
+	        </DrawerLayout>
+	        {shareDialogOpen ? (
+	          <Suspense fallback={null}>
+	            <OperationShareDialog
+	              operation={operation}
+	              onClose={() => setShareDialogOpen(false)}
+	            />
+	          </Suspense>
+	        ) : null}
+	      </>
     );
   },
   {

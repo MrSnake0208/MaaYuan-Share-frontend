@@ -25,14 +25,14 @@ interface ActionSequenceViewerProps {
 
 type EditorAction = import("../editor2/editor-state").EditorAction;
 
-type SlotAssignments = Partial<Record<number, { name?: string; rawName?: string }>>;
+export type SlotAssignments = Partial<Record<number, { name?: string; rawName?: string }>>;
 
-interface DisplayRound {
+export interface DisplayRound {
   round: number;
   tokens: DisplayToken[];
 }
 
-interface DisplayToken {
+export interface DisplayToken {
   raw: string;
   label: string;
   key: string;
@@ -52,24 +52,10 @@ export const ActionSequenceViewer: FC<ActionSequenceViewerProps> = ({ operation 
   const t = useTranslation();
   const language = useAtomValue(languageAtom);
 
-  const slotAssignments = useMemo(
-    () => buildSlotAssignments(operation, language),
+  const { rounds, slotAssignments } = useMemo(
+    () => buildOperationActionDisplay(operation, language),
     [operation, language],
   );
-
-  const { rounds } = useMemo(() => {
-    const standard = collectRoundsFromStandardActions(operation, slotAssignments, language);
-    if (standard) {
-      return standard;
-    }
-
-    const siming = collectRoundsFromSimingActions(operation, slotAssignments, language);
-    if (siming) {
-      return siming;
-    }
-
-    return { rounds: [], isSiming: false };
-  }, [operation, slotAssignments, language]);
 
   const [viewMode, setViewMode] = useState<ViewMode>("table");
 
@@ -410,6 +396,16 @@ function buildDisplayRounds(
     }));
 }
 
+export function buildOperationActionDisplay(operation: Operation, language: Language) {
+  const slotAssignments = buildSlotAssignments(operation, language);
+  const result =
+    collectRoundsFromStandardActions(operation, slotAssignments, language) ??
+    collectRoundsFromSimingActions(operation, slotAssignments, language) ??
+    { rounds: [], isSiming: false };
+
+  return { ...result, slotAssignments };
+}
+
 function buildSlotAssignments(operation: Operation, language: Language): SlotAssignments {
   const assignments: SlotAssignments = {};
   const opers = operation.parsedContent.opers ?? [];
@@ -521,7 +517,7 @@ function symbolToActionLabel(symbol: BasicActionSymbol, language: Language): str
   return "圈";
 }
 
-function groupTokensForTable(tokens: DisplayToken[], slotAssignments: SlotAssignments) {
+export function groupTokensForTable(tokens: DisplayToken[], slotAssignments: SlotAssignments) {
   const rawActions: string[][] = tokens.map((t) => [t.raw]);
   const { slotMap, others } = groupTokensBySlotWithExtraAttribution(rawActions, {
     slotAssignments,
@@ -540,7 +536,7 @@ function groupTokensForTable(tokens: DisplayToken[], slotAssignments: SlotAssign
   return { slotMap: mappedSlotMap, others: mappedOthers };
 }
 
-function formatTokenSummary(rawToken: string, language: Language): string {
+export function formatTokenSummary(rawToken: string, language: Language): string {
   const token = rawToken.trim();
   if (!token) {
     return language === "zh_tw" ? "未設定" : "未设定";

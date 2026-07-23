@@ -3140,6 +3140,38 @@
           "cn": "下载 JSON",
           "zh_tw": "下載 JSON"
         },
+        "generate_share_image": {
+          "cn": "生成分享图",
+          "zh_tw": "生成分享圖"
+        },
+        "share_image_dialog_title": {
+          "cn": "作业分享图",
+          "zh_tw": "作業分享圖"
+        },
+        "share_image_generating": {
+          "cn": "正在生成清晰 PNG…",
+          "zh_tw": "正在生成清晰 PNG…"
+        },
+        "share_image_failed": {
+          "cn": "分享图生成失败",
+          "zh_tw": "分享圖生成失敗"
+        },
+        "share_image_preview_alt": {
+          "cn": "作业分享图预览",
+          "zh_tw": "作業分享圖預覽"
+        },
+        "share_image_close": {
+          "cn": "关闭",
+          "zh_tw": "關閉"
+        },
+        "share_image_regenerate": {
+          "cn": "重新生成",
+          "zh_tw": "重新生成"
+        },
+        "share_image_download": {
+          "cn": "下载 PNG",
+          "zh_tw": "下載 PNG"
+        },
         "copy_secret_code": {
           "cn": "复制神秘代码",
           "zh_tw": "複製神秘代碼"
