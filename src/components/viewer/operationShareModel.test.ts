@@ -53,6 +53,23 @@ describe('operation share model', () => {
     expect(model.operators[0].starLevel).toBe(4)
   })
 
+  it('includes the original author only for reposted operations', () => {
+    const operation = createOperation()
+    operation.metadata = {
+      sourceType: 'repost',
+      repostAuthor: '原作者昵称',
+    }
+
+    expect(buildOperationShareModel(operation, 'cn').originalAuthor).toBe(
+      '原作者昵称',
+    )
+
+    operation.metadata.sourceType = 'original'
+    expect(
+      buildOperationShareModel(operation, 'cn').originalAuthor,
+    ).toBeUndefined()
+  })
+
   it('uses stable fallbacks for incomplete legacy operations', () => {
     const operation = createOperation()
     operation.uploader = ''

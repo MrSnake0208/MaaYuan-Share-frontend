@@ -44,6 +44,7 @@ export interface OperationShareModel {
   title: string
   stage: string
   author: string
+  originalAuthor?: string
   operators: OperationShareOperator[]
   groups: OperationShareGroup[]
   actionSlots: number[]
@@ -154,6 +155,10 @@ export function buildOperationShareModel(
       content.stageName?.trim() ||
       '未知关卡',
     author: operation.uploader?.trim() || '匿名作者',
+    originalAuthor:
+      operation.metadata?.sourceType === 'repost'
+        ? operation.metadata.repostAuthor?.trim() || undefined
+        : undefined,
     operators,
     groups,
     actionSlots: actionSlots.length > 0 ? actionSlots : [1, 2, 3, 4, 5],

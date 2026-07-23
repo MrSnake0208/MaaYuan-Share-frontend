@@ -249,8 +249,13 @@ export function OperationShareCard({
               {model.stage}
             </div>
             <div className="mt-3 text-sm" style={{ color: palette.muted }}>
-              作者 · {model.author}
+              作业作者 · {model.author}
             </div>
+            {model.originalAuthor ? (
+              <div className="mt-1 text-sm" style={{ color: palette.muted }}>
+                原打法作者 · {model.originalAuthor}
+              </div>
+            ) : null}
           </div>
         </div>
       </header>
