@@ -401,10 +401,7 @@ export function OperationShareCard({
                         className="border-2 px-2 py-3 align-middle"
                         style={{
                           borderColor: palette.border,
-                          background:
-                            config.cellColors[
-                              buildOperationShareCellKey(round.round, 'others')
-                            ] ?? background,
+                          background,
                         }}
                       >
                         <ActionList
@@ -420,10 +417,7 @@ export function OperationShareCard({
                         className="whitespace-pre-wrap break-words border-2 px-3 py-3 text-left text-[17px] font-medium leading-6 align-middle"
                         style={{
                           borderColor: palette.border,
-                          background:
-                            config.cellColors[
-                              buildOperationShareCellKey(round.round, 'notes')
-                            ] ?? background,
+                          background,
                           color: config.notes[round.round]
                             ? palette.ink
                             : '#a7b0ad',

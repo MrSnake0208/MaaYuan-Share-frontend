@@ -34,7 +34,7 @@ export interface OperationShareAction {
   label: string
 }
 
-export type OperationShareCellColumn = `slot-${number}` | 'others' | 'notes'
+export type OperationShareCellColumn = `slot-${number}`
 
 export interface OperationShareCardConfig {
   showTargetSwitches: boolean
@@ -56,7 +56,7 @@ export const OPERATION_SHARE_CELL_COLORS = [
 const OPERATION_SHARE_CARD_CONFIG_STORAGE_VERSION = 1
 const OPERATION_SHARE_CARD_CONFIG_STORAGE_PREFIX =
   'maa-copilot-operation-share-card-config'
-const SHARE_CELL_KEY_PATTERN = /^\d+:(?:slot-\d+|others|notes)$/
+const SHARE_CELL_KEY_PATTERN = /^\d+:slot-\d+$/
 const OPERATION_SHARE_CELL_COLOR_SET = new Set<string>(
   OPERATION_SHARE_CELL_COLORS,
 )

@@ -239,9 +239,10 @@ describe('share image utilities', () => {
           notes: { 1: 'x'.repeat(200), invalid: 3 },
           cellColors: {
             '1:others': '#F4D9D1',
+            '2:notes': '#f2dfb9',
             'bad-key': '#ffffff',
-            '2:notes': 'red',
-            '3:slot-1': '#abcdef',
+            '3:slot-1': '#D8E9E4',
+            '4:slot-2': '#abcdef',
           },
         },
       }),
@@ -252,7 +253,7 @@ describe('share image utilities', () => {
       showOtherActions: false,
       showNotes: true,
       notes: { 1: 'x'.repeat(160) },
-      cellColors: { '1:others': '#f4d9d1' },
+      cellColors: { '3:slot-1': '#d8e9e4' },
     })
   })
 

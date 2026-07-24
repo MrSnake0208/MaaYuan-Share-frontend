@@ -106,19 +106,12 @@ export default function OperationShareDialog({
   const editableColumns = useMemo<
     Array<{ key: OperationShareCellColumn; label: string }>
   >(
-    () => [
-      ...model.actionSlots.map((slot) => ({
+    () =>
+      model.actionSlots.map((slot) => ({
         key: `slot-${slot}` as OperationShareCellColumn,
         label: `${slot} 号位`,
       })),
-      ...(cardConfig.showOtherActions
-        ? ([{ key: 'others', label: '其他动作' }] as const)
-        : []),
-      ...(cardConfig.showNotes
-        ? ([{ key: 'notes', label: '备注' }] as const)
-        : []),
-    ],
-    [cardConfig.showNotes, cardConfig.showOtherActions, model.actionSlots],
+    [model.actionSlots],
   )
 
   const invalidatePreview = useCallback(() => {
@@ -136,15 +129,6 @@ export default function OperationShareDialog({
     checked: boolean,
   ) => {
     invalidatePreview()
-    if (!checked && option !== 'showTargetSwitches') {
-      const hiddenColumn = option === 'showNotes' ? 'notes' : 'others'
-      setSelectedCellKeys(
-        (current) =>
-          new Set(
-            [...current].filter((key) => !key.endsWith(`:${hiddenColumn}`)),
-          ),
-      )
-    }
     setCardConfig((current) => ({ ...current, [option]: checked }))
   }
 
@@ -411,15 +395,15 @@ export default function OperationShareDialog({
               </div>
               <div className="mt-3 max-h-56 overflow-auto rounded border border-slate-200">
                 <table className="w-full border-collapse bg-white text-center text-xs">
-                  <thead className="sticky top-0 bg-slate-100 text-slate-600">
+                  <thead className="text-slate-600">
                     <tr>
-                      <th className="border-b border-r border-slate-200 px-2 py-2">
+                      <th className="sticky top-0 z-10 border-b border-r border-slate-200 bg-slate-100 px-2 py-2 shadow-[0_1px_0_rgba(148,163,184,0.35)]">
                         回合
                       </th>
                       {editableColumns.map((column) => (
                         <th
                           key={column.key}
-                          className="border-b border-r border-slate-200 px-2 py-2 last:border-r-0"
+                          className="sticky top-0 z-10 border-b border-r border-slate-200 bg-slate-100 px-2 py-2 shadow-[0_1px_0_rgba(148,163,184,0.35)] last:border-r-0"
                         >
                           {column.label}
                         </th>
