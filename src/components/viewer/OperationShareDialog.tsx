@@ -8,6 +8,7 @@ import type { Operation } from '../../models/operation'
 import { formatError } from '../../utils/error'
 import { OperationShareCard } from './OperationShareCard'
 import {
+  OPERATION_SHARE_CELL_COLORS,
   ObjectUrlStore,
   type OperationShareCellColumn,
   buildOperationShareCellKey,
@@ -16,11 +17,21 @@ import {
   buildOperationShareUrl,
   calculateSharePixelRatio,
   createOperationShareCardConfig,
+  loadOperationShareCardConfig,
+  saveOperationShareCardConfig,
 } from './operationShareModel'
 
 type GenerationStatus = 'idle' | 'generating' | 'ready' | 'error'
 
 const RESOURCE_TIMEOUT_MS = 5000
+const CELL_COLOR_OPTIONS = [
+  { color: OPERATION_SHARE_CELL_COLORS[0], label: '暖米色' },
+  { color: OPERATION_SHARE_CELL_COLORS[1], label: '浅金色' },
+  { color: OPERATION_SHARE_CELL_COLORS[2], label: '鼠尾草绿' },
+  { color: OPERATION_SHARE_CELL_COLORS[3], label: '雾蓝灰' },
+  { color: OPERATION_SHARE_CELL_COLORS[4], label: '柔粉色' },
+  { color: OPERATION_SHARE_CELL_COLORS[5], label: '浅灰色' },
+] as const
 
 function delay(ms: number) {
   return new Promise<void>((resolve) => window.setTimeout(resolve, ms))
@@ -69,12 +80,11 @@ export default function OperationShareDialog({
   )
   const [cardNode, setCardNode] = useState<HTMLDivElement | null>(null)
   const [cardConfig, setCardConfig] = useState(() =>
-    createOperationShareCardConfig(),
+    loadOperationShareCardConfig(operation.id),
   )
   const [selectedCellKeys, setSelectedCellKeys] = useState<Set<string>>(
     () => new Set(),
   )
-  const [cellColor, setCellColor] = useState('#f6d9a8')
   const urlStoreRef = useRef(new ObjectUrlStore())
   const generationRef = useRef(0)
   const generatingRef = useRef(false)
@@ -88,6 +98,10 @@ export default function OperationShareDialog({
   const qrDataUrl =
     qrCode?.targetUrl === model.qrTargetUrl ? qrCode.dataUrl : undefined
   const [error, setError] = useState<string>()
+
+  useEffect(() => {
+    saveOperationShareCardConfig(operation.id, cardConfig)
+  }, [cardConfig, operation.id])
 
   const editableColumns = useMemo<
     Array<{ key: OperationShareCellColumn; label: string }>
@@ -140,16 +154,17 @@ export default function OperationShareDialog({
     })
   }
 
-  const applyCellColor = () => {
+  const applyCellColor = (color: string) => {
     if (selectedCellKeys.size === 0) return
     invalidatePreview()
     setCardConfig((current) => {
       const cellColors = { ...current.cellColors }
       selectedCellKeys.forEach((key) => {
-        cellColors[key] = cellColor
+        cellColors[key] = color
       })
       return { ...current, cellColors }
     })
+    setSelectedCellKeys(new Set())
   }
 
   const clearCellColor = () => {
@@ -162,6 +177,15 @@ export default function OperationShareDialog({
       })
       return { ...current, cellColors }
     })
+    setSelectedCellKeys(new Set())
+  }
+
+  const restoreDefaults = () => {
+    const defaults = createOperationShareCardConfig()
+    invalidatePreview()
+    setSelectedCellKeys(new Set())
+    setCardConfig(defaults)
+    saveOperationShareCardConfig(operation.id, defaults)
   }
 
   const generate = useCallback(async () => {
@@ -258,11 +282,16 @@ export default function OperationShareDialog({
         >
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h3 className="text-base font-semibold text-slate-800">
-                生成前编辑
-              </h3>
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-base font-semibold text-slate-800">
+                  生成前编辑
+                </h3>
+                <Button icon="reset" minimal onClick={restoreDefaults} small>
+                  恢复至默认
+                </Button>
+              </div>
               <p className="mt-1 text-sm text-slate-500">
-                配置展示内容、逐回合备注，并为多个动作单元格批量设置颜色。
+                配置会按当前作业自动缓存；可设置展示内容、逐回合备注和单元格颜色。
               </p>
             </div>
             <div className="flex flex-wrap gap-x-5 gap-y-2">
@@ -321,27 +350,28 @@ export default function OperationShareDialog({
                     动作单元格配色
                   </h4>
                   <p className="mt-1 text-xs text-slate-500">
-                    勾选一个或多个单元格，再应用或清除颜色。
+                    勾选一个或多个单元格，点击颜色即可应用并取消选择。
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <input
-                    aria-label="单元格颜色"
-                    className="h-8 w-10 cursor-pointer rounded border border-slate-300 bg-white p-0.5"
-                    onChange={(event) =>
-                      setCellColor(event.currentTarget.value)
-                    }
-                    type="color"
-                    value={cellColor}
-                  />
-                  <Button
-                    disabled={selectedCellKeys.size === 0}
-                    icon="tint"
-                    onClick={applyCellColor}
-                    small
+                  <div
+                    aria-label="单元格背景色"
+                    className="flex items-center gap-1.5 rounded border border-slate-200 bg-slate-50 p-1"
+                    role="group"
                   >
-                    应用颜色
-                  </Button>
+                    {CELL_COLOR_OPTIONS.map((option) => (
+                      <button
+                        key={option.color}
+                        aria-label={`应用${option.label}`}
+                        className="h-8 w-8 rounded border border-slate-300 transition-transform enabled:hover:scale-105 enabled:focus:outline-none enabled:focus:ring-2 enabled:focus:ring-sky-500 enabled:focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-40"
+                        disabled={selectedCellKeys.size === 0}
+                        onClick={() => applyCellColor(option.color)}
+                        style={{ backgroundColor: option.color }}
+                        title={`应用${option.label}`}
+                        type="button"
+                      />
+                    ))}
+                  </div>
                   <Button
                     disabled={selectedCellKeys.size === 0}
                     icon="eraser"

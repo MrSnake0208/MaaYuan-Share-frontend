@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { CopilotDocV1 } from '../../models/copilot.schema'
 import type { Operation } from '../../models/operation'
 import {
+  OPERATION_SHARE_CELL_COLORS,
   ObjectUrlStore,
   buildOperationShareCellKey,
   buildOperationShareFilename,
@@ -11,6 +12,8 @@ import {
   calculateSharePixelRatio,
   createOperationShareCardConfig,
   filterOperationShareActions,
+  loadOperationShareCardConfig,
+  saveOperationShareCardConfig,
 } from './operationShareModel'
 
 function createOperation(): Operation {
@@ -165,6 +168,16 @@ describe('operation share model', () => {
 })
 
 describe('share image utilities', () => {
+  function createMemoryStorage() {
+    const values = new Map<string, string>()
+    return {
+      getItem: vi.fn((key: string) => values.get(key) ?? null),
+      setItem: vi.fn((key: string, value: string) => {
+        values.set(key, value)
+      }),
+    }
+  }
+
   it('creates independent editable card configurations', () => {
     const first = createOperationShareCardConfig()
     const second = createOperationShareCardConfig()
@@ -189,6 +202,54 @@ describe('share image utilities', () => {
       { raw: '额外:开大', label: '2大' },
     ])
     expect(filterOperationShareActions(actions, true)).toBe(actions)
+  })
+
+  it('persists editable card settings per operation', () => {
+    const storage = createMemoryStorage()
+    const config = createOperationShareCardConfig()
+    config.showTargetSwitches = false
+    config.showNotes = true
+    config.notes[2] = '第二回合先等待'
+    config.cellColors['2:slot-3'] = OPERATION_SHARE_CELL_COLORS[2]
+
+    expect(saveOperationShareCardConfig(100, config, storage)).toBe(true)
+    expect(loadOperationShareCardConfig(100, storage)).toEqual(config)
+    expect(loadOperationShareCardConfig(101, storage)).toEqual(
+      createOperationShareCardConfig(),
+    )
+  })
+
+  it('falls back safely when cached settings are invalid', () => {
+    const storage = createMemoryStorage()
+    storage.getItem.mockReturnValueOnce('{invalid json')
+
+    expect(loadOperationShareCardConfig(100, storage)).toEqual(
+      createOperationShareCardConfig(),
+    )
+
+    storage.getItem.mockReturnValueOnce(
+      JSON.stringify({
+        version: 1,
+        config: {
+          showTargetSwitches: false,
+          showNotes: true,
+          notes: { 1: 'x'.repeat(200), invalid: 3 },
+          cellColors: {
+            '1:others': '#F4D9D1',
+            'bad-key': '#ffffff',
+            '2:notes': 'red',
+            '3:slot-1': '#abcdef',
+          },
+        },
+      }),
+    )
+
+    expect(loadOperationShareCardConfig(100, storage)).toEqual({
+      showTargetSwitches: false,
+      showNotes: true,
+      notes: { 1: 'x'.repeat(160) },
+      cellColors: { '1:others': '#f4d9d1' },
+    })
   })
 
   it('builds the QR code URL from the current origin and operation id', () => {

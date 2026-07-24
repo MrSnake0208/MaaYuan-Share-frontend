@@ -43,6 +43,23 @@ export interface OperationShareCardConfig {
   cellColors: Record<string, string>
 }
 
+export const OPERATION_SHARE_CELL_COLORS = [
+  '#f4ecdf',
+  '#f2dfb9',
+  '#d8e9e4',
+  '#dbe7ea',
+  '#f4d9d1',
+  '#dfe4e2',
+] as const
+
+const OPERATION_SHARE_CARD_CONFIG_STORAGE_VERSION = 1
+const OPERATION_SHARE_CARD_CONFIG_STORAGE_PREFIX =
+  'maa-copilot-operation-share-card-config'
+const SHARE_CELL_KEY_PATTERN = /^\d+:(?:slot-\d+|others|notes)$/
+const OPERATION_SHARE_CELL_COLOR_SET = new Set<string>(
+  OPERATION_SHARE_CELL_COLORS,
+)
+
 export interface OperationShareRound {
   round: number
   slots: Record<number, OperationShareAction[]>
@@ -79,6 +96,95 @@ export function createOperationShareCardConfig(): OperationShareCardConfig {
     showNotes: false,
     notes: {},
     cellColors: {},
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function normalizeOperationShareCardConfig(
+  value: unknown,
+): OperationShareCardConfig {
+  const defaults = createOperationShareCardConfig()
+  if (!isRecord(value)) return defaults
+
+  const notes: Record<number, string> = {}
+  if (isRecord(value.notes)) {
+    Object.entries(value.notes).forEach(([round, note]) => {
+      if (/^\d+$/.test(round) && typeof note === 'string') {
+        notes[Number(round)] = note.slice(0, 160)
+      }
+    })
+  }
+
+  const cellColors: Record<string, string> = {}
+  if (isRecord(value.cellColors)) {
+    Object.entries(value.cellColors).forEach(([key, color]) => {
+      if (
+        SHARE_CELL_KEY_PATTERN.test(key) &&
+        typeof color === 'string' &&
+        OPERATION_SHARE_CELL_COLOR_SET.has(color.toLowerCase())
+      ) {
+        cellColors[key] = color.toLowerCase()
+      }
+    })
+  }
+
+  return {
+    showTargetSwitches:
+      typeof value.showTargetSwitches === 'boolean'
+        ? value.showTargetSwitches
+        : defaults.showTargetSwitches,
+    showNotes:
+      typeof value.showNotes === 'boolean'
+        ? value.showNotes
+        : defaults.showNotes,
+    notes,
+    cellColors,
+  }
+}
+
+function operationShareCardConfigStorageKey(operationId: number) {
+  return `${OPERATION_SHARE_CARD_CONFIG_STORAGE_PREFIX}:v${OPERATION_SHARE_CARD_CONFIG_STORAGE_VERSION}:${operationId}`
+}
+
+export function loadOperationShareCardConfig(
+  operationId: number,
+  storage: Pick<Storage, 'getItem'> = window.localStorage,
+) {
+  try {
+    const raw = storage.getItem(operationShareCardConfigStorageKey(operationId))
+    if (!raw) return createOperationShareCardConfig()
+    const stored = JSON.parse(raw) as unknown
+    if (
+      !isRecord(stored) ||
+      stored.version !== OPERATION_SHARE_CARD_CONFIG_STORAGE_VERSION
+    ) {
+      return createOperationShareCardConfig()
+    }
+    return normalizeOperationShareCardConfig(stored.config)
+  } catch {
+    return createOperationShareCardConfig()
+  }
+}
+
+export function saveOperationShareCardConfig(
+  operationId: number,
+  config: OperationShareCardConfig,
+  storage: Pick<Storage, 'setItem'> = window.localStorage,
+) {
+  try {
+    storage.setItem(
+      operationShareCardConfigStorageKey(operationId),
+      JSON.stringify({
+        version: OPERATION_SHARE_CARD_CONFIG_STORAGE_VERSION,
+        config: normalizeOperationShareCardConfig(config),
+      }),
+    )
+    return true
+  } catch {
+    return false
   }
 }
 
