@@ -1,4 +1,4 @@
-import { Button, Callout, Dialog, Spinner } from '@blueprintjs/core'
+import { Button, Callout, Checkbox, Dialog, Spinner } from '@blueprintjs/core'
 
 import { useAtomValue } from 'jotai'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -9,10 +9,13 @@ import { formatError } from '../../utils/error'
 import { OperationShareCard } from './OperationShareCard'
 import {
   ObjectUrlStore,
+  type OperationShareCellColumn,
+  buildOperationShareCellKey,
   buildOperationShareFilename,
   buildOperationShareModel,
   buildOperationShareUrl,
   calculateSharePixelRatio,
+  createOperationShareCardConfig,
 } from './operationShareModel'
 
 type GenerationStatus = 'idle' | 'generating' | 'ready' | 'error'
@@ -65,6 +68,13 @@ export default function OperationShareDialog({
     [operation, language, maayuanUrl],
   )
   const [cardNode, setCardNode] = useState<HTMLDivElement | null>(null)
+  const [cardConfig, setCardConfig] = useState(() =>
+    createOperationShareCardConfig(),
+  )
+  const [selectedCellKeys, setSelectedCellKeys] = useState<Set<string>>(
+    () => new Set(),
+  )
+  const [cellColor, setCellColor] = useState('#f6d9a8')
   const urlStoreRef = useRef(new ObjectUrlStore())
   const generationRef = useRef(0)
   const generatingRef = useRef(false)
@@ -78,6 +88,81 @@ export default function OperationShareDialog({
   const qrDataUrl =
     qrCode?.targetUrl === model.qrTargetUrl ? qrCode.dataUrl : undefined
   const [error, setError] = useState<string>()
+
+  const editableColumns = useMemo<
+    Array<{ key: OperationShareCellColumn; label: string }>
+  >(
+    () => [
+      ...model.actionSlots.map((slot) => ({
+        key: `slot-${slot}` as OperationShareCellColumn,
+        label: `${slot} 号位`,
+      })),
+      { key: 'others', label: '其他动作' },
+      ...(cardConfig.showNotes
+        ? ([{ key: 'notes', label: '备注' }] as const)
+        : []),
+    ],
+    [cardConfig.showNotes, model.actionSlots],
+  )
+
+  const invalidatePreview = useCallback(() => {
+    generationRef.current += 1
+    generatingRef.current = false
+    urlStoreRef.current.revoke()
+    setBlob(undefined)
+    setPreviewUrl(undefined)
+    setError(undefined)
+    setStatus('idle')
+  }, [])
+
+  const updateOption = (
+    option: 'showTargetSwitches' | 'showNotes',
+    checked: boolean,
+  ) => {
+    invalidatePreview()
+    setCardConfig((current) => ({ ...current, [option]: checked }))
+  }
+
+  const updateRoundNote = (round: number, note: string) => {
+    invalidatePreview()
+    setCardConfig((current) => ({
+      ...current,
+      notes: { ...current.notes, [round]: note },
+    }))
+  }
+
+  const toggleCellSelection = (key: string, checked: boolean) => {
+    setSelectedCellKeys((current) => {
+      const next = new Set(current)
+      if (checked) next.add(key)
+      else next.delete(key)
+      return next
+    })
+  }
+
+  const applyCellColor = () => {
+    if (selectedCellKeys.size === 0) return
+    invalidatePreview()
+    setCardConfig((current) => {
+      const cellColors = { ...current.cellColors }
+      selectedCellKeys.forEach((key) => {
+        cellColors[key] = cellColor
+      })
+      return { ...current, cellColors }
+    })
+  }
+
+  const clearCellColor = () => {
+    if (selectedCellKeys.size === 0) return
+    invalidatePreview()
+    setCardConfig((current) => {
+      const cellColors = { ...current.cellColors }
+      selectedCellKeys.forEach((key) => {
+        delete cellColors[key]
+      })
+      return { ...current, cellColors }
+    })
+  }
 
   const generate = useCallback(async () => {
     if (!cardNode || !qrDataUrl || generatingRef.current) return
@@ -148,10 +233,6 @@ export default function OperationShareDialog({
     }
   }, [])
 
-  useEffect(() => {
-    if (cardNode) void generate()
-  }, [cardNode, generate])
-
   const download = () => {
     if (!blob || !previewUrl) return
     const anchor = document.createElement('a')
@@ -171,7 +252,183 @@ export default function OperationShareDialog({
       title={t.components.viewer.OperationViewer.share_image_dialog_title}
     >
       <div className="max-h-[76vh] overflow-auto bg-slate-100 p-4 md:p-6">
-        {status === 'generating' || status === 'idle' ? (
+        <fieldset
+          className="mb-5 rounded border border-slate-200 bg-white p-4"
+          disabled={status === 'generating'}
+        >
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h3 className="text-base font-semibold text-slate-800">
+                生成前编辑
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                配置展示内容、逐回合备注，并为多个动作单元格批量设置颜色。
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-x-5 gap-y-2">
+              <Checkbox
+                checked={cardConfig.showTargetSwitches}
+                label="显示左滑 / 右滑"
+                onChange={(event) =>
+                  updateOption(
+                    'showTargetSwitches',
+                    event.currentTarget.checked,
+                  )
+                }
+              />
+              <Checkbox
+                checked={cardConfig.showNotes}
+                label="增加备注列"
+                onChange={(event) =>
+                  updateOption('showNotes', event.currentTarget.checked)
+                }
+              />
+            </div>
+          </div>
+
+          {cardConfig.showNotes && model.rounds.length > 0 ? (
+            <div className="mt-4 border-t border-slate-200 pt-4">
+              <h4 className="text-sm font-semibold text-slate-700">回合备注</h4>
+              <div className="mt-2 grid gap-2 md:grid-cols-2">
+                {model.rounds.map((round) => (
+                  <label
+                    key={round.round}
+                    className="flex items-start gap-2 text-sm text-slate-600"
+                  >
+                    <span className="w-16 shrink-0 pt-2 font-medium">
+                      {round.round} 回合
+                    </span>
+                    <textarea
+                      className="min-h-16 flex-1 resize-y rounded border border-slate-300 px-2.5 py-2 text-slate-800 outline-none focus:border-sky-500"
+                      maxLength={160}
+                      onChange={(event) =>
+                        updateRoundNote(round.round, event.currentTarget.value)
+                      }
+                      placeholder="输入本回合备注（可选）"
+                      value={cardConfig.notes[round.round] ?? ''}
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {model.rounds.length > 0 ? (
+            <div className="mt-4 border-t border-slate-200 pt-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-700">
+                    动作单元格配色
+                  </h4>
+                  <p className="mt-1 text-xs text-slate-500">
+                    勾选一个或多个单元格，再应用或清除颜色。
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    aria-label="单元格颜色"
+                    className="h-8 w-10 cursor-pointer rounded border border-slate-300 bg-white p-0.5"
+                    onChange={(event) =>
+                      setCellColor(event.currentTarget.value)
+                    }
+                    type="color"
+                    value={cellColor}
+                  />
+                  <Button
+                    disabled={selectedCellKeys.size === 0}
+                    icon="tint"
+                    onClick={applyCellColor}
+                    small
+                  >
+                    应用颜色
+                  </Button>
+                  <Button
+                    disabled={selectedCellKeys.size === 0}
+                    icon="eraser"
+                    onClick={clearCellColor}
+                    small
+                  >
+                    清除颜色
+                  </Button>
+                  <Button
+                    disabled={selectedCellKeys.size === 0}
+                    minimal
+                    onClick={() => setSelectedCellKeys(new Set())}
+                    small
+                  >
+                    取消选择（{selectedCellKeys.size}）
+                  </Button>
+                </div>
+              </div>
+              <div className="mt-3 max-h-56 overflow-auto rounded border border-slate-200">
+                <table className="w-full border-collapse bg-white text-center text-xs">
+                  <thead className="sticky top-0 bg-slate-100 text-slate-600">
+                    <tr>
+                      <th className="border-b border-r border-slate-200 px-2 py-2">
+                        回合
+                      </th>
+                      {editableColumns.map((column) => (
+                        <th
+                          key={column.key}
+                          className="border-b border-r border-slate-200 px-2 py-2 last:border-r-0"
+                        >
+                          {column.label}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {model.rounds.map((round) => (
+                      <tr key={round.round}>
+                        <th className="border-b border-r border-slate-200 px-2 py-2 font-medium text-slate-600">
+                          {round.round}
+                        </th>
+                        {editableColumns.map((column) => {
+                          const key = buildOperationShareCellKey(
+                            round.round,
+                            column.key,
+                          )
+                          return (
+                            <td
+                              key={column.key}
+                              className="border-b border-r border-slate-200 px-2 py-2 last:border-r-0"
+                              style={{
+                                backgroundColor:
+                                  cardConfig.cellColors[key] ?? undefined,
+                              }}
+                            >
+                              <Checkbox
+                                aria-label={`${round.round} 回合 ${column.label}`}
+                                checked={selectedCellKeys.has(key)}
+                                className="m-0 inline-block"
+                                onChange={(event) =>
+                                  toggleCellSelection(
+                                    key,
+                                    event.currentTarget.checked,
+                                  )
+                                }
+                              />
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : null}
+        </fieldset>
+
+        {status === 'idle' ? (
+          <div className="flex min-h-48 flex-col items-center justify-center gap-2 rounded border border-dashed border-slate-300 bg-white text-slate-500">
+            <span className="text-base font-medium">图片尚未生成</span>
+            <span className="text-sm">
+              完成上方编辑后，点击“生成图片”预览。
+            </span>
+          </div>
+        ) : null}
+        {status === 'generating' ? (
           <div className="flex min-h-64 flex-col items-center justify-center gap-4 text-slate-600">
             <Spinner />
             <span>
@@ -200,11 +457,14 @@ export default function OperationShareDialog({
           {t.components.viewer.OperationViewer.share_image_close}
         </Button>
         <Button
-          disabled={status === 'generating'}
-          icon="refresh"
+          disabled={status === 'generating' || !cardNode || !qrDataUrl}
+          icon={status === 'idle' ? 'media' : 'refresh'}
+          intent={status === 'idle' ? 'primary' : 'none'}
           onClick={() => void generate()}
         >
-          {t.components.viewer.OperationViewer.share_image_regenerate}
+          {status === 'idle'
+            ? '生成图片'
+            : t.components.viewer.OperationViewer.share_image_regenerate}
         </Button>
         <Button
           disabled={status !== 'ready'}
@@ -219,6 +479,7 @@ export default function OperationShareDialog({
         {qrDataUrl ? (
           <OperationShareCard
             cardRef={setCardNode}
+            config={cardConfig}
             model={model}
             qrDataUrl={qrDataUrl}
           />

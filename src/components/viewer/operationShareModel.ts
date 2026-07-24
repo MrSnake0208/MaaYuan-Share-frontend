@@ -34,6 +34,15 @@ export interface OperationShareAction {
   label: string
 }
 
+export type OperationShareCellColumn = `slot-${number}` | 'others' | 'notes'
+
+export interface OperationShareCardConfig {
+  showTargetSwitches: boolean
+  showNotes: boolean
+  notes: Record<number, string>
+  cellColors: Record<string, string>
+}
+
 export interface OperationShareRound {
   round: number
   slots: Record<number, OperationShareAction[]>
@@ -64,8 +73,33 @@ export interface OperationShareModel {
   rounds: OperationShareRound[]
 }
 
+export function createOperationShareCardConfig(): OperationShareCardConfig {
+  return {
+    showTargetSwitches: true,
+    showNotes: false,
+    notes: {},
+    cellColors: {},
+  }
+}
+
+export function buildOperationShareCellKey(
+  round: number,
+  column: OperationShareCellColumn,
+) {
+  return `${round}:${column}`
+}
+
 function isTargetSwitchAction(raw: string) {
   return raw === '额外:左侧目标' || raw === '额外:右侧目标'
+}
+
+export function filterOperationShareActions(
+  actions: OperationShareAction[],
+  showTargetSwitches: boolean,
+) {
+  return showTargetSwitches
+    ? actions
+    : actions.filter((action) => !isTargetSwitchAction(action.raw))
 }
 
 function isHiddenShareAction(raw: string) {

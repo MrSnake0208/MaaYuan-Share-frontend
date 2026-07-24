@@ -4,8 +4,14 @@ import type { CSSProperties, Ref } from 'react'
 
 import type {
   OperationShareAction,
+  OperationShareCardConfig,
   OperationShareModel,
   OperationShareOperator,
+} from './operationShareModel'
+import {
+  buildOperationShareCellKey,
+  createOperationShareCardConfig,
+  filterOperationShareActions,
 } from './operationShareModel'
 
 const palette = {
@@ -29,6 +35,7 @@ const cardStyle: CSSProperties = {
 }
 
 const STAR_LEVELS = [1, 2, 3, 4, 5] as const
+const defaultCardConfig = createOperationShareCardConfig()
 
 function OperatorStarLevel({ value }: { value: number }) {
   return (
@@ -205,10 +212,12 @@ export function OperationShareCard({
   model,
   cardRef,
   qrDataUrl,
+  config = defaultCardConfig,
 }: {
   model: OperationShareModel
   cardRef?: Ref<HTMLDivElement>
   qrDataUrl: string
+  config?: OperationShareCardConfig
 }) {
   const sourceTag =
     model.source.type === 'repost'
@@ -333,6 +342,17 @@ export function OperationShareCard({
               >
                 其他动作
               </th>
+              {config.showNotes ? (
+                <th
+                  className="w-[168px] border-2 px-3 text-lg font-bold"
+                  style={{
+                    borderColor: palette.border,
+                    background: '#e6ded0',
+                  }}
+                >
+                  备注
+                </th>
+              ) : null}
             </tr>
           </thead>
           <tbody>
@@ -357,17 +377,54 @@ export function OperationShareCard({
                       <td
                         key={slot}
                         className="border-2 px-2 py-3 align-middle"
-                        style={{ borderColor: palette.border }}
+                        style={{
+                          borderColor: palette.border,
+                          background:
+                            config.cellColors[
+                              buildOperationShareCellKey(
+                                round.round,
+                                `slot-${slot}`,
+                              )
+                            ] ?? background,
+                        }}
                       >
                         <ActionList actions={round.slots[slot] ?? []} />
                       </td>
                     ))}
                     <td
                       className="border-2 px-2 py-3 align-middle"
-                      style={{ borderColor: palette.border }}
+                      style={{
+                        borderColor: palette.border,
+                        background:
+                          config.cellColors[
+                            buildOperationShareCellKey(round.round, 'others')
+                          ] ?? background,
+                      }}
                     >
-                      <ActionList actions={round.others} />
+                      <ActionList
+                        actions={filterOperationShareActions(
+                          round.others,
+                          config.showTargetSwitches,
+                        )}
+                      />
                     </td>
+                    {config.showNotes ? (
+                      <td
+                        className="whitespace-pre-wrap break-words border-2 px-3 py-3 text-left text-[17px] font-medium leading-6 align-middle"
+                        style={{
+                          borderColor: palette.border,
+                          background:
+                            config.cellColors[
+                              buildOperationShareCellKey(round.round, 'notes')
+                            ] ?? background,
+                          color: config.notes[round.round]
+                            ? palette.ink
+                            : '#a7b0ad',
+                        }}
+                      >
+                        {config.notes[round.round] || '—'}
+                      </td>
+                    ) : null}
                   </tr>
                 )
               })
@@ -375,7 +432,9 @@ export function OperationShareCard({
               <tr style={{ background: '#f4ecdf' }}>
                 <td
                   className="border-2 px-4 py-8 text-base font-medium"
-                  colSpan={model.actionSlots.length + 2}
+                  colSpan={
+                    model.actionSlots.length + (config.showNotes ? 3 : 2)
+                  }
                   style={{ borderColor: palette.border, color: palette.muted }}
                 >
                   此作业未定义动作序列

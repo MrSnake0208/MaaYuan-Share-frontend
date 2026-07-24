@@ -4,10 +4,13 @@ import { CopilotDocV1 } from '../../models/copilot.schema'
 import type { Operation } from '../../models/operation'
 import {
   ObjectUrlStore,
+  buildOperationShareCellKey,
   buildOperationShareFilename,
   buildOperationShareModel,
   buildOperationShareUrl,
   calculateSharePixelRatio,
+  createOperationShareCardConfig,
+  filterOperationShareActions,
 } from './operationShareModel'
 
 function createOperation(): Operation {
@@ -43,8 +46,7 @@ describe('operation share model', () => {
   it('reads star_level from operation content instead of static rarity', () => {
     const operation = createOperation()
     const operator = operation.parsedContent.opers?.[0] as
-      | (CopilotDocV1.Operator & { star_level?: number })
-      | undefined
+      (CopilotDocV1.Operator & { star_level?: number }) | undefined
     if (!operator) throw new Error('测试密探不存在')
     operator.star_level = 4
 
@@ -163,6 +165,32 @@ describe('operation share model', () => {
 })
 
 describe('share image utilities', () => {
+  it('creates independent editable card configurations', () => {
+    const first = createOperationShareCardConfig()
+    const second = createOperationShareCardConfig()
+
+    first.notes[1] = '第一回合备注'
+
+    expect(first).toMatchObject({
+      showTargetSwitches: true,
+      showNotes: false,
+    })
+    expect(second.notes).toEqual({})
+  })
+
+  it('builds stable cell keys and filters target switching actions on demand', () => {
+    const actions = [
+      { raw: '额外:左侧目标', label: '1右滑' },
+      { raw: '额外:开大', label: '2大' },
+    ]
+
+    expect(buildOperationShareCellKey(2, 'slot-3')).toBe('2:slot-3')
+    expect(filterOperationShareActions(actions, false)).toEqual([
+      { raw: '额外:开大', label: '2大' },
+    ])
+    expect(filterOperationShareActions(actions, true)).toBe(actions)
+  })
+
   it('builds the QR code URL from the current origin and operation id', () => {
     expect(buildOperationShareUrl(29533, 'https://share.maayuan.top')).toBe(
       'https://share.maayuan.top/?op=29533',
