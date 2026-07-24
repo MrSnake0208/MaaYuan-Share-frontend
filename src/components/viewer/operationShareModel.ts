@@ -38,6 +38,7 @@ export type OperationShareCellColumn = `slot-${number}` | 'others' | 'notes'
 
 export interface OperationShareCardConfig {
   showTargetSwitches: boolean
+  showOtherActions: boolean
   showNotes: boolean
   notes: Record<number, string>
   cellColors: Record<string, string>
@@ -93,6 +94,7 @@ export interface OperationShareModel {
 export function createOperationShareCardConfig(): OperationShareCardConfig {
   return {
     showTargetSwitches: true,
+    showOtherActions: true,
     showNotes: false,
     notes: {},
     cellColors: {},
@@ -136,6 +138,10 @@ function normalizeOperationShareCardConfig(
       typeof value.showTargetSwitches === 'boolean'
         ? value.showTargetSwitches
         : defaults.showTargetSwitches,
+    showOtherActions:
+      typeof value.showOtherActions === 'boolean'
+        ? value.showOtherActions
+        : defaults.showOtherActions,
     showNotes:
       typeof value.showNotes === 'boolean'
         ? value.showNotes

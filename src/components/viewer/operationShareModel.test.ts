@@ -186,6 +186,7 @@ describe('share image utilities', () => {
 
     expect(first).toMatchObject({
       showTargetSwitches: true,
+      showOtherActions: true,
       showNotes: false,
     })
     expect(second.notes).toEqual({})
@@ -208,6 +209,7 @@ describe('share image utilities', () => {
     const storage = createMemoryStorage()
     const config = createOperationShareCardConfig()
     config.showTargetSwitches = false
+    config.showOtherActions = false
     config.showNotes = true
     config.notes[2] = '第二回合先等待'
     config.cellColors['2:slot-3'] = OPERATION_SHARE_CELL_COLORS[2]
@@ -232,6 +234,7 @@ describe('share image utilities', () => {
         version: 1,
         config: {
           showTargetSwitches: false,
+          showOtherActions: false,
           showNotes: true,
           notes: { 1: 'x'.repeat(200), invalid: 3 },
           cellColors: {
@@ -246,10 +249,30 @@ describe('share image utilities', () => {
 
     expect(loadOperationShareCardConfig(100, storage)).toEqual({
       showTargetSwitches: false,
+      showOtherActions: false,
       showNotes: true,
       notes: { 1: 'x'.repeat(160) },
       cellColors: { '1:others': '#f4d9d1' },
     })
+  })
+
+  it('shows the other actions column for caches created before the option existed', () => {
+    const storage = createMemoryStorage()
+    storage.getItem.mockReturnValueOnce(
+      JSON.stringify({
+        version: 1,
+        config: {
+          showTargetSwitches: false,
+          showNotes: false,
+          notes: {},
+          cellColors: {},
+        },
+      }),
+    )
+
+    expect(loadOperationShareCardConfig(100, storage).showOtherActions).toBe(
+      true,
+    )
   })
 
   it('builds the QR code URL from the current origin and operation id', () => {

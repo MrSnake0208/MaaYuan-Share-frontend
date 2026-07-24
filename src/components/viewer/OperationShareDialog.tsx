@@ -111,12 +111,14 @@ export default function OperationShareDialog({
         key: `slot-${slot}` as OperationShareCellColumn,
         label: `${slot} 号位`,
       })),
-      { key: 'others', label: '其他动作' },
+      ...(cardConfig.showOtherActions
+        ? ([{ key: 'others', label: '其他动作' }] as const)
+        : []),
       ...(cardConfig.showNotes
         ? ([{ key: 'notes', label: '备注' }] as const)
         : []),
     ],
-    [cardConfig.showNotes, model.actionSlots],
+    [cardConfig.showNotes, cardConfig.showOtherActions, model.actionSlots],
   )
 
   const invalidatePreview = useCallback(() => {
@@ -130,10 +132,19 @@ export default function OperationShareDialog({
   }, [])
 
   const updateOption = (
-    option: 'showTargetSwitches' | 'showNotes',
+    option: 'showTargetSwitches' | 'showOtherActions' | 'showNotes',
     checked: boolean,
   ) => {
     invalidatePreview()
+    if (!checked && option !== 'showTargetSwitches') {
+      const hiddenColumn = option === 'showNotes' ? 'notes' : 'others'
+      setSelectedCellKeys(
+        (current) =>
+          new Set(
+            [...current].filter((key) => !key.endsWith(`:${hiddenColumn}`)),
+          ),
+      )
+    }
     setCardConfig((current) => ({ ...current, [option]: checked }))
   }
 
@@ -296,7 +307,15 @@ export default function OperationShareDialog({
             </div>
             <div className="flex flex-wrap gap-x-5 gap-y-2">
               <Checkbox
+                checked={cardConfig.showOtherActions}
+                label="显示其他动作列"
+                onChange={(event) =>
+                  updateOption('showOtherActions', event.currentTarget.checked)
+                }
+              />
+              <Checkbox
                 checked={cardConfig.showTargetSwitches}
+                disabled={!cardConfig.showOtherActions}
                 label="显示左滑 / 右滑"
                 onChange={(event) =>
                   updateOption(

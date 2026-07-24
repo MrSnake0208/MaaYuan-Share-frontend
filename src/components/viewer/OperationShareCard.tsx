@@ -336,12 +336,17 @@ export function OperationShareCard({
                   />
                 </th>
               ))}
-              <th
-                className="w-[118px] border-2 px-3 text-lg font-bold"
-                style={{ borderColor: palette.border, background: '#e6ded0' }}
-              >
-                其他动作
-              </th>
+              {config.showOtherActions ? (
+                <th
+                  className="w-[118px] border-2 px-3 text-lg font-bold"
+                  style={{
+                    borderColor: palette.border,
+                    background: '#e6ded0',
+                  }}
+                >
+                  其他动作
+                </th>
+              ) : null}
               {config.showNotes ? (
                 <th
                   className="w-[168px] border-2 px-3 text-lg font-bold"
@@ -391,23 +396,25 @@ export function OperationShareCard({
                         <ActionList actions={round.slots[slot] ?? []} />
                       </td>
                     ))}
-                    <td
-                      className="border-2 px-2 py-3 align-middle"
-                      style={{
-                        borderColor: palette.border,
-                        background:
-                          config.cellColors[
-                            buildOperationShareCellKey(round.round, 'others')
-                          ] ?? background,
-                      }}
-                    >
-                      <ActionList
-                        actions={filterOperationShareActions(
-                          round.others,
-                          config.showTargetSwitches,
-                        )}
-                      />
-                    </td>
+                    {config.showOtherActions ? (
+                      <td
+                        className="border-2 px-2 py-3 align-middle"
+                        style={{
+                          borderColor: palette.border,
+                          background:
+                            config.cellColors[
+                              buildOperationShareCellKey(round.round, 'others')
+                            ] ?? background,
+                        }}
+                      >
+                        <ActionList
+                          actions={filterOperationShareActions(
+                            round.others,
+                            config.showTargetSwitches,
+                          )}
+                        />
+                      </td>
+                    ) : null}
                     {config.showNotes ? (
                       <td
                         className="whitespace-pre-wrap break-words border-2 px-3 py-3 text-left text-[17px] font-medium leading-6 align-middle"
@@ -433,7 +440,10 @@ export function OperationShareCard({
                 <td
                   className="border-2 px-4 py-8 text-base font-medium"
                   colSpan={
-                    model.actionSlots.length + (config.showNotes ? 3 : 2)
+                    model.actionSlots.length +
+                    1 +
+                    (config.showOtherActions ? 1 : 0) +
+                    (config.showNotes ? 1 : 0)
                   }
                   style={{ borderColor: palette.border, color: palette.muted }}
                 >
