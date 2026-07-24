@@ -40,11 +40,24 @@ export interface OperationShareRound {
   others: OperationShareAction[]
 }
 
+export interface OperationShareSource {
+  type: 'original' | 'repost'
+  strategyAuthor: string
+  sharer?: string
+  platform?: string
+  originalUrl?: string
+}
+
 export interface OperationShareModel {
   title: string
   stage: string
   author: string
   originalAuthor?: string
+  source: OperationShareSource
+  shortCode: string
+  maayuanUrl: string
+  qrTargetUrl: string
+  qrLabel: string
   operators: OperationShareOperator[]
   groups: OperationShareGroup[]
   actionSlots: number[]
@@ -63,6 +76,18 @@ function formatShareActionSummary(raw: string, language: Language) {
   if (raw === '额外:左侧目标') return '右滑'
   if (raw === '额外:右侧目标') return '左滑'
   return formatTokenSummary(raw, language)
+}
+
+function normalizeHttpUrl(raw?: string) {
+  const value = raw?.trim()
+  if (!value) return undefined
+  try {
+    const url = new URL(value)
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return undefined
+    return url.toString()
+  } catch {
+    return undefined
+  }
 }
 
 function mapOperator(
@@ -97,6 +122,7 @@ function mapOperator(
 export function buildOperationShareModel(
   operation: Operation,
   language: Language,
+  maayuanUrl = '?op=' + operation.id,
 ): OperationShareModel {
   const content = operation.parsedContent
   const operators = (content.opers ?? []).map((operator, index) =>
@@ -147,6 +173,26 @@ export function buildOperationShareModel(
       Boolean(actionDisplay.slotAssignments[slot]?.name) ||
       rounds.some((round) => round.slots[slot]?.length),
   )
+  const author = operation.uploader?.trim() || '匿名作者'
+  const isRepost = operation.metadata?.sourceType === 'repost'
+  const originalAuthor = isRepost
+    ? operation.metadata?.repostAuthor?.trim() || undefined
+    : undefined
+  const originalUrl = isRepost
+    ? normalizeHttpUrl(operation.metadata?.repostUrl)
+    : undefined
+  const source: OperationShareSource = isRepost
+    ? {
+        type: 'repost',
+        strategyAuthor: originalAuthor || '原作者未填写',
+        sharer: author,
+        platform: operation.metadata?.repostPlatform?.trim() || undefined,
+        originalUrl,
+      }
+    : {
+        type: 'original',
+        strategyAuthor: author,
+      }
 
   return {
     title: content.doc.title?.trim() || '未命名作业',
@@ -154,11 +200,13 @@ export function buildOperationShareModel(
       operation.preLevel?.name?.trim() ||
       content.stageName?.trim() ||
       '未知关卡',
-    author: operation.uploader?.trim() || '匿名作者',
-    originalAuthor:
-      operation.metadata?.sourceType === 'repost'
-        ? operation.metadata.repostAuthor?.trim() || undefined
-        : undefined,
+    author,
+    originalAuthor,
+    source,
+    shortCode: String(operation.id),
+    maayuanUrl,
+    qrTargetUrl: originalUrl || maayuanUrl,
+    qrLabel: originalUrl ? '扫码查看原贴' : '扫码查看 MaaYuan 作业',
     operators,
     groups,
     actionSlots: actionSlots.length > 0 ? actionSlots : [1, 2, 3, 4, 5],

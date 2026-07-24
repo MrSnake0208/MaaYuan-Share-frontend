@@ -14,12 +14,25 @@ const operators = [
 ] as const
 
 async function render() {
-  const qrDataUrl = await QRCode.toDataURL('https://share.maayuan.top/?op=29533')
+  const maayuanUrl = 'https://share.maayuan.top/?op=29533'
+  const originalUrl = 'https://www.bilibili.com/read/cv29533'
+  const qrDataUrl = await QRCode.toDataURL(originalUrl)
   const model: OperationShareModel = {
     title: '22 期地宫 40 层张郃稳定通关作业',
     stage: '地宫 40 层',
     author: 'MaaYuan 作者',
     originalAuthor: '原作者昵称',
+    source: {
+      type: 'repost',
+      strategyAuthor: '原作者昵称',
+      sharer: 'MaaYuan 作者',
+      platform: '哔哩哔哩',
+      originalUrl,
+    },
+    shortCode: '29533',
+    maayuanUrl,
+    qrTargetUrl: originalUrl,
+    qrLabel: '扫码查看原贴',
     operators: operators.map(([name, avatarId], index) => ({
       slot: index + 1,
       name,

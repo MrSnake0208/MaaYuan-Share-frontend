@@ -56,9 +56,13 @@ export default function OperationShareDialog({
 }) {
   const t = useTranslation()
   const language = useAtomValue(languageAtom)
+  const maayuanUrl = useMemo(
+    () => buildOperationShareUrl(operation.id, window.location.origin),
+    [operation.id],
+  )
   const model = useMemo(
-    () => buildOperationShareModel(operation, language),
-    [operation, language],
+    () => buildOperationShareModel(operation, language, maayuanUrl),
+    [operation, language, maayuanUrl],
   )
   const [cardNode, setCardNode] = useState<HTMLDivElement | null>(null)
   const urlStoreRef = useRef(new ObjectUrlStore())
@@ -68,11 +72,11 @@ export default function OperationShareDialog({
   const [previewUrl, setPreviewUrl] = useState<string>()
   const [blob, setBlob] = useState<Blob>()
   const [qrCode, setQrCode] = useState<{
-    operationId: number
+    targetUrl: string
     dataUrl: string
   }>()
   const qrDataUrl =
-    qrCode?.operationId === operation.id ? qrCode.dataUrl : undefined
+    qrCode?.targetUrl === model.qrTargetUrl ? qrCode.dataUrl : undefined
   const [error, setError] = useState<string>()
 
   const generate = useCallback(async () => {
@@ -113,17 +117,14 @@ export default function OperationShareDialog({
     const createQrCode = async () => {
       try {
         const { toDataURL } = await import('qrcode')
-        const nextQrDataUrl = await toDataURL(
-          buildOperationShareUrl(operation.id, window.location.origin),
-          {
-            color: { dark: '#24312f', light: '#fffdf8' },
-            errorCorrectionLevel: 'M',
-            margin: 2,
-            width: 224,
-          },
-        )
+        const nextQrDataUrl = await toDataURL(model.qrTargetUrl, {
+          color: { dark: '#24312f', light: '#fffdf8' },
+          errorCorrectionLevel: 'M',
+          margin: 2,
+          width: 224,
+        })
         if (active) {
-          setQrCode({ operationId: operation.id, dataUrl: nextQrDataUrl })
+          setQrCode({ targetUrl: model.qrTargetUrl, dataUrl: nextQrDataUrl })
         }
       } catch (reason) {
         if (!active) return
@@ -136,7 +137,7 @@ export default function OperationShareDialog({
     return () => {
       active = false
     }
-  }, [operation.id])
+  }, [model.qrTargetUrl])
 
   useEffect(() => {
     const urlStore = urlStoreRef.current

@@ -210,15 +210,31 @@ export function OperationShareCard({
   cardRef?: Ref<HTMLDivElement>
   qrDataUrl: string
 }) {
+  const sourceTag =
+    model.source.type === 'repost'
+      ? { label: '搬运', background: '#f2dfb9', color: '#795410' }
+      : { label: '原创', background: '#d8e9e4', color: '#155d57' }
+
   return (
     <div ref={cardRef} style={cardStyle}>
-      <header className="flex items-start justify-between gap-10">
+      <header className="flex items-start justify-between gap-8">
         <div className="min-w-0 flex-1">
-          <div
-            className="text-[15px] font-bold uppercase tracking-[0.18em]"
-            style={{ color: palette.brand }}
-          >
-            MaaYuan · 作业分享
+          <div className="flex items-center gap-3">
+            <div
+              className="text-[15px] font-bold uppercase tracking-[0.18em]"
+              style={{ color: palette.brand }}
+            >
+              MaaYuan · 作业分享
+            </div>
+            <span
+              className="inline-flex rounded-sm px-2.5 py-1 text-sm font-bold"
+              style={{
+                background: sourceTag.background,
+                color: sourceTag.color,
+              }}
+            >
+              {sourceTag.label}
+            </span>
           </div>
           <h1
             className="mt-4 break-words text-[44px] font-bold leading-[1.18]"
@@ -227,19 +243,12 @@ export function OperationShareCard({
             {model.title}
           </h1>
         </div>
-        <div className="mt-1 flex shrink-0 items-center gap-3">
-          <img
-            alt="作业链接二维码"
-            className="h-[88px] w-[88px] shrink-0 bg-white object-contain"
-            height={88}
-            src={qrDataUrl}
-            width={88}
-          />
+        <div className="mt-1 flex w-[440px] shrink-0 items-start justify-end gap-4">
           <div
-            className="shrink-0 border-l-4 py-1 pl-3 text-right"
+            className="min-w-0 flex-1 border-l-4 py-1 pl-4 text-right"
             style={{ borderColor: palette.accent }}
           >
-            <div
+            {/* <div
               className="text-sm font-semibold"
               style={{ color: palette.muted }}
             >
@@ -247,15 +256,44 @@ export function OperationShareCard({
             </div>
             <div className="mt-1 max-w-[260px] break-words text-[25px] font-bold leading-tight">
               {model.stage}
+            </div> */}
+            <div
+              className="mt-4 text-sm font-semibold"
+              style={{ color: palette.muted }}
+            >
+              攻略作者
             </div>
-            <div className="mt-3 text-sm" style={{ color: palette.muted }}>
-              作业作者 · {model.author}
+            <div className="mt-1 break-words text-[22px] font-bold leading-tight">
+              {model.source.strategyAuthor}
             </div>
-            {model.originalAuthor ? (
-              <div className="mt-1 text-sm" style={{ color: palette.muted }}>
-                原打法作者 · {model.originalAuthor}
+            {model.source.platform ? (
+              <div
+                className="mt-2 inline-flex whitespace-nowrap rounded-sm border px-2 py-1 text-xs font-semibold"
+                style={{ borderColor: '#9aaba5', color: palette.muted }}
+              >
+                来源平台 · {model.source.platform}
               </div>
             ) : null}
+            {model.source.sharer ? (
+              <div className="mt-2 text-sm" style={{ color: palette.muted }}>
+                本站分享 · {model.source.sharer}
+              </div>
+            ) : null}
+          </div>
+          <div className="w-[104px] shrink-0 text-center">
+            <img
+              alt={model.qrLabel}
+              className="h-[104px] w-[104px] bg-white object-contain"
+              height={104}
+              src={qrDataUrl}
+              width={104}
+            />
+            <div
+              className="mt-2 text-xs font-semibold leading-4"
+              style={{ color: palette.muted }}
+            >
+              {model.qrLabel}
+            </div>
           </div>
         </div>
       </header>
@@ -387,11 +425,24 @@ export function OperationShareCard({
       ) : null}
 
       <footer
-        className="mt-9 flex items-center justify-between border-t pt-5 text-sm"
+        className="mt-9 flex items-end justify-between gap-8 border-t pt-5 text-sm"
         style={{ borderColor: '#b9c4c0', color: palette.muted }}
       >
-        <span>MAAYUAN SHARE</span>
-        <span>让每一步都清晰可见</span>
+        <div className="min-w-0">
+          <div>
+            MaaYuan 神秘代码 ·{' '}
+            <span className="font-bold" style={{ color: palette.ink }}>
+              {model.shortCode}
+            </span>
+          </div>
+          <div className="mt-1 max-w-[760px] break-all text-xs">
+            站内地址 · {model.maayuanUrl}
+          </div>
+        </div>
+        <div className="shrink-0 text-right">
+          <div className="font-semibold">MAAYUAN SHARE</div>
+          <div className="mt-1 text-xs">让每一步都清晰可见</div>
+        </div>
       </footer>
     </div>
   )
