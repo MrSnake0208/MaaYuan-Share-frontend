@@ -50,6 +50,22 @@ export function getOperationShareActionCellBackground(
   )
 }
 
+export function getOperationShareActionLabel(action: OperationShareAction) {
+  const order = action.label.match(/^\d+/)?.[0] ?? ''
+  const starColor = action.raw.match(/^重开:无(.+)星$/)?.[1]
+
+  if (starColor) {
+    return `${order}无${starColor}星重开`
+  }
+
+  const fallenSlot = action.raw.match(/^重开:检测(\d+)号位阵亡$/)?.[1]
+  if (fallenSlot) {
+    return `${fallenSlot}号位阵亡就重开`
+  }
+
+  return action.label
+}
+
 function OperatorStarLevel({ value }: { value: number }) {
   return (
     <div
@@ -205,7 +221,7 @@ function ActionList({ actions }: { actions: OperationShareAction[] }) {
           className="inline-flex rounded-[3px] px-2.5 py-1.5 text-[24px] font-bold leading-tight"
           style={actionStyle(action.raw)}
         >
-          {action.label}
+          {getOperationShareActionLabel(action)}
         </span>
       ))}
     </div>

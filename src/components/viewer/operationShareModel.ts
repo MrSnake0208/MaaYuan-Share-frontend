@@ -233,6 +233,10 @@ function isTargetSwitchAction(raw: string) {
   return raw === '额外:左侧目标' || raw === '额外:右侧目标'
 }
 
+function belongsToOtherShareColumn(raw: string) {
+  return isTargetSwitchAction(raw) || /^重开:检测[1-5]号位阵亡$/.test(raw)
+}
+
 export function filterOperationShareActions(
   actions: OperationShareAction[],
   showTargetSwitches: boolean,
@@ -321,10 +325,10 @@ export function buildOperationShareModel(
       const key = String(slot) as keyof typeof grouped.slotMap
       const slotTokens = grouped.slotMap[key] ?? []
       otherTokens.push(
-        ...slotTokens.filter((token) => isTargetSwitchAction(token.raw)),
+        ...slotTokens.filter((token) => belongsToOtherShareColumn(token.raw)),
       )
       slots[slot] = slotTokens
-        .filter((token) => !isTargetSwitchAction(token.raw))
+        .filter((token) => !belongsToOtherShareColumn(token.raw))
         .map((token) => ({
           raw: token.raw,
           label: `${token.order + 1}${formatShareActionSummary(token.raw, language)}`,

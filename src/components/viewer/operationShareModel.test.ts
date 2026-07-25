@@ -148,6 +148,28 @@ describe('operation share model', () => {
     ])
   })
 
+  it('places death restart actions in the other column', () => {
+    const operation = createOperation()
+    operation.parsedContent.actions = [
+      {
+        type: CopilotDocV1.Type.Output,
+        doc: '第1回合·动作1：检测3号位阵亡 [重开:检测3号位阵亡]',
+      },
+    ]
+
+    const model = buildOperationShareModel(operation, 'cn')
+    const round = model.rounds[0]
+
+    expect(round?.slots[3]).toEqual([])
+    expect(round?.others).toEqual([
+      {
+        raw: '重开:检测3号位阵亡',
+        label: '1检测3号位阵亡',
+      },
+    ])
+    expect(model.actionSlots).toEqual([1])
+  })
+
   it('hides waiting actions from every share image column', () => {
     const operation = createOperation()
     operation.parsedContent.actions = [
