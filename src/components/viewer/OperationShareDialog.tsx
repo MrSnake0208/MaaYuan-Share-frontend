@@ -17,8 +17,10 @@ import {
   buildOperationShareUrl,
   calculateSharePixelRatio,
   createOperationShareCardConfig,
+  getOperationShareCellSelectionState,
   loadOperationShareCardConfig,
   saveOperationShareCardConfig,
+  updateOperationShareCellSelection,
 } from './operationShareModel'
 
 type GenerationStatus = 'idle' | 'generating' | 'ready' | 'error'
@@ -113,6 +115,26 @@ export default function OperationShareDialog({
       })),
     [model.actionSlots],
   )
+  const editableColumnGroups = useMemo(
+    () =>
+      editableColumns.map((column) => ({
+        ...column,
+        cellKeys: model.rounds.map((round) =>
+          buildOperationShareCellKey(round.round, column.key),
+        ),
+      })),
+    [editableColumns, model.rounds],
+  )
+  const editableRoundGroups = useMemo(
+    () =>
+      model.rounds.map((round) => ({
+        round: round.round,
+        cellKeys: editableColumns.map((column) =>
+          buildOperationShareCellKey(round.round, column.key),
+        ),
+      })),
+    [editableColumns, model.rounds],
+  )
 
   const invalidatePreview = useCallback(() => {
     generationRef.current += 1
@@ -147,6 +169,15 @@ export default function OperationShareDialog({
       else next.delete(key)
       return next
     })
+  }
+
+  const toggleCellGroupSelection = (
+    cellKeys: readonly string[],
+    checked: boolean,
+  ) => {
+    setSelectedCellKeys((current) =>
+      updateOperationShareCellSelection(current, cellKeys, checked),
+    )
   }
 
   const applyCellColor = (color: string) => {
@@ -353,7 +384,8 @@ export default function OperationShareDialog({
                     动作单元格配色
                   </h4>
                   <p className="mt-1 text-xs text-slate-500">
-                    勾选一个或多个单元格，点击颜色即可应用并取消选择。
+                    勾选单元格，或通过行号、列名一次选择整行/整列，再点击颜色
+                    应用。
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -400,52 +432,86 @@ export default function OperationShareDialog({
                       <th className="sticky top-0 z-10 border-b border-r border-slate-200 bg-slate-100 px-2 py-2 shadow-[0_1px_0_rgba(148,163,184,0.35)]">
                         回合
                       </th>
-                      {editableColumns.map((column) => (
-                        <th
-                          key={column.key}
-                          className="sticky top-0 z-10 border-b border-r border-slate-200 bg-slate-100 px-2 py-2 shadow-[0_1px_0_rgba(148,163,184,0.35)] last:border-r-0"
-                        >
-                          {column.label}
-                        </th>
-                      ))}
+                      {editableColumnGroups.map((column) => {
+                        const selection = getOperationShareCellSelectionState(
+                          selectedCellKeys,
+                          column.cellKeys,
+                        )
+                        return (
+                          <th
+                            key={column.key}
+                            className="sticky top-0 z-10 border-b border-r border-slate-200 bg-slate-100 px-2 py-2 shadow-[0_1px_0_rgba(148,163,184,0.35)] last:border-r-0"
+                          >
+                            <Checkbox
+                              aria-label={`选择${column.label}整列`}
+                              checked={selection.checked}
+                              className="m-0 inline-flex"
+                              indeterminate={selection.indeterminate}
+                              label={column.label}
+                              onChange={(event) =>
+                                toggleCellGroupSelection(
+                                  column.cellKeys,
+                                  event.currentTarget.checked,
+                                )
+                              }
+                            />
+                          </th>
+                        )
+                      })}
                     </tr>
                   </thead>
                   <tbody>
-                    {model.rounds.map((round) => (
-                      <tr key={round.round}>
-                        <th className="border-b border-r border-slate-200 px-2 py-2 font-medium text-slate-600">
-                          {round.round}
-                        </th>
-                        {editableColumns.map((column) => {
-                          const key = buildOperationShareCellKey(
-                            round.round,
-                            column.key,
-                          )
-                          return (
-                            <td
-                              key={column.key}
-                              className="border-b border-r border-slate-200 px-2 py-2 last:border-r-0"
-                              style={{
-                                backgroundColor:
-                                  cardConfig.cellColors[key] ?? undefined,
-                              }}
-                            >
-                              <Checkbox
-                                aria-label={`${round.round} 回合 ${column.label}`}
-                                checked={selectedCellKeys.has(key)}
-                                className="m-0 inline-block"
-                                onChange={(event) =>
-                                  toggleCellSelection(
-                                    key,
-                                    event.currentTarget.checked,
-                                  )
-                                }
-                              />
-                            </td>
-                          )
-                        })}
-                      </tr>
-                    ))}
+                    {editableRoundGroups.map((round) => {
+                      const selection = getOperationShareCellSelectionState(
+                        selectedCellKeys,
+                        round.cellKeys,
+                      )
+                      return (
+                        <tr key={round.round}>
+                          <th className="border-b border-r border-slate-200 px-2 py-2 font-medium text-slate-600">
+                            <Checkbox
+                              aria-label={`选择第 ${round.round} 回合整行`}
+                              checked={selection.checked}
+                              className="m-0 inline-flex"
+                              indeterminate={selection.indeterminate}
+                              label={`${round.round}`}
+                              onChange={(event) =>
+                                toggleCellGroupSelection(
+                                  round.cellKeys,
+                                  event.currentTarget.checked,
+                                )
+                              }
+                            />
+                          </th>
+                          {editableColumns.map((column, columnIndex) => {
+                            const key = round.cellKeys[columnIndex]
+                            if (!key) return null
+                            return (
+                              <td
+                                key={column.key}
+                                className="border-b border-r border-slate-200 px-2 py-2 last:border-r-0"
+                                style={{
+                                  backgroundColor:
+                                    cardConfig.cellColors[key] ?? undefined,
+                                }}
+                              >
+                                <Checkbox
+                                  aria-label={`${round.round} 回合 ${column.label}`}
+                                  checked={selectedCellKeys.has(key)}
+                                  className="m-0 inline-block"
+                                  onChange={(event) =>
+                                    toggleCellSelection(
+                                      key,
+                                      event.currentTarget.checked,
+                                    )
+                                  }
+                                />
+                              </td>
+                            )
+                          })}
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>

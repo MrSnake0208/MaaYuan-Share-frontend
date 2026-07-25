@@ -12,8 +12,10 @@ import {
   calculateSharePixelRatio,
   createOperationShareCardConfig,
   filterOperationShareActions,
+  getOperationShareCellSelectionState,
   loadOperationShareCardConfig,
   saveOperationShareCardConfig,
+  updateOperationShareCellSelection,
 } from './operationShareModel'
 
 function createOperation(): Operation {
@@ -203,6 +205,38 @@ describe('share image utilities', () => {
       { raw: '额外:开大', label: '2大' },
     ])
     expect(filterOperationShareActions(actions, true)).toBe(actions)
+  })
+
+  it('selects and clears a whole row or column while preserving other cells', () => {
+    const groupKeys = ['1:slot-1', '1:slot-2']
+    const unrelatedKey = '2:slot-1'
+    const selected = updateOperationShareCellSelection(
+      new Set([unrelatedKey]),
+      groupKeys,
+      true,
+    )
+
+    expect([...selected]).toEqual([unrelatedKey, ...groupKeys])
+    expect(getOperationShareCellSelectionState(selected, groupKeys)).toEqual({
+      checked: true,
+      indeterminate: false,
+    })
+
+    const cleared = updateOperationShareCellSelection(
+      selected,
+      groupKeys,
+      false,
+    )
+    expect([...cleared]).toEqual([unrelatedKey])
+  })
+
+  it('reports partially selected rows and columns as indeterminate', () => {
+    expect(
+      getOperationShareCellSelectionState(new Set(['1:slot-1']), [
+        '1:slot-1',
+        '1:slot-2',
+      ]),
+    ).toEqual({ checked: false, indeterminate: true })
   })
 
   it('persists editable card settings per operation', () => {

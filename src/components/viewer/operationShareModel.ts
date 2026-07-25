@@ -201,6 +201,34 @@ export function buildOperationShareCellKey(
   return `${round}:${column}`
 }
 
+export function getOperationShareCellSelectionState(
+  selectedCellKeys: ReadonlySet<string>,
+  cellKeys: readonly string[],
+) {
+  let selectedCount = 0
+  cellKeys.forEach((key) => {
+    if (selectedCellKeys.has(key)) selectedCount += 1
+  })
+
+  return {
+    checked: cellKeys.length > 0 && selectedCount === cellKeys.length,
+    indeterminate: selectedCount > 0 && selectedCount < cellKeys.length,
+  }
+}
+
+export function updateOperationShareCellSelection(
+  selectedCellKeys: ReadonlySet<string>,
+  cellKeys: readonly string[],
+  checked: boolean,
+) {
+  const next = new Set(selectedCellKeys)
+  cellKeys.forEach((key) => {
+    if (checked) next.add(key)
+    else next.delete(key)
+  })
+  return next
+}
+
 function isTargetSwitchAction(raw: string) {
   return raw === '额外:左侧目标' || raw === '额外:右侧目标'
 }
