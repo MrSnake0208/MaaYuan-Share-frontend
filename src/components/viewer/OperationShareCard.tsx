@@ -36,6 +36,19 @@ const cardStyle: CSSProperties = {
 
 const STAR_LEVELS = [1, 2, 3, 4, 5] as const
 const defaultCardConfig = createOperationShareCardConfig()
+const tableHeaderBackground = palette.panel
+const tableBodyBackground = palette.stripe
+
+export function getOperationShareActionCellBackground(
+  cellColors: OperationShareCardConfig['cellColors'],
+  round: number,
+  slot: number,
+) {
+  return (
+    cellColors[buildOperationShareCellKey(round, `slot-${slot}`)] ??
+    tableBodyBackground
+  )
+}
 
 function OperatorStarLevel({ value }: { value: number }) {
   return (
@@ -317,7 +330,10 @@ export function OperationShareCard({
             <tr>
               <th
                 className="w-[110px] border-2 px-3 text-[21px] font-bold"
-                style={{ borderColor: palette.border, background: '#e6ded0' }}
+                style={{
+                  borderColor: palette.border,
+                  background: tableHeaderBackground,
+                }}
               >
                 回合
               </th>
@@ -327,7 +343,7 @@ export function OperationShareCard({
                   className="border-2 p-0 align-top"
                   style={{
                     borderColor: palette.border,
-                    background: palette.panel,
+                    background: tableHeaderBackground,
                   }}
                 >
                   <OperatorColumn
@@ -341,7 +357,7 @@ export function OperationShareCard({
                   className="w-[118px] border-2 px-3 text-lg font-bold"
                   style={{
                     borderColor: palette.border,
-                    background: '#e6ded0',
+                    background: tableHeaderBackground,
                   }}
                 >
                   其他动作
@@ -352,7 +368,7 @@ export function OperationShareCard({
                   className="w-[168px] border-2 px-3 text-lg font-bold"
                   style={{
                     borderColor: palette.border,
-                    background: '#e6ded0',
+                    background: tableHeaderBackground,
                   }}
                 >
                   备注
@@ -362,75 +378,72 @@ export function OperationShareCard({
           </thead>
           <tbody>
             {model.rounds.length > 0 ? (
-              model.rounds.map((round, roundIndex) => {
-                const background =
-                  roundIndex % 2 === 0 ? '#f4ecdf' : palette.stripe
-                return (
-                  <tr key={round.round} style={{ background }}>
-                    <th
-                      className="border-2 px-3 py-3 text-[19px] leading-tight"
-                      style={{ borderColor: palette.border }}
+              model.rounds.map((round) => (
+                <tr
+                  key={round.round}
+                  style={{ background: tableBodyBackground }}
+                >
+                  <th
+                    className="border-2 px-3 py-3 text-[19px] leading-tight"
+                    style={{ borderColor: palette.border }}
+                  >
+                    <span className="block text-[28px] font-bold">
+                      {round.round}
+                    </span>
+                    <span className="mt-1 block text-sm font-semibold">
+                      回合
+                    </span>
+                  </th>
+                  {model.actionSlots.map((slot) => (
+                    <td
+                      key={slot}
+                      className="border-2 px-2 py-3 align-middle"
+                      style={{
+                        borderColor: palette.border,
+                        background: getOperationShareActionCellBackground(
+                          config.cellColors,
+                          round.round,
+                          slot,
+                        ),
+                      }}
                     >
-                      <span className="block text-[28px] font-bold">
-                        {round.round}
-                      </span>
-                      <span className="mt-1 block text-sm font-semibold">
-                        回合
-                      </span>
-                    </th>
-                    {model.actionSlots.map((slot) => (
-                      <td
-                        key={slot}
-                        className="border-2 px-2 py-3 align-middle"
-                        style={{
-                          borderColor: palette.border,
-                          background:
-                            config.cellColors[
-                              buildOperationShareCellKey(
-                                round.round,
-                                `slot-${slot}`,
-                              )
-                            ] ?? background,
-                        }}
-                      >
-                        <ActionList actions={round.slots[slot] ?? []} />
-                      </td>
-                    ))}
-                    {config.showOtherActions ? (
-                      <td
-                        className="border-2 px-2 py-3 align-middle"
-                        style={{
-                          borderColor: palette.border,
-                          background,
-                        }}
-                      >
-                        <ActionList
-                          actions={filterOperationShareActions(
-                            round.others,
-                            config.showTargetSwitches,
-                          )}
-                        />
-                      </td>
-                    ) : null}
-                    {config.showNotes ? (
-                      <td
-                        className="whitespace-pre-wrap break-words border-2 px-3 py-3 text-left text-[17px] font-medium leading-6 align-middle"
-                        style={{
-                          borderColor: palette.border,
-                          background,
-                          color: config.notes[round.round]
-                            ? palette.ink
-                            : '#a7b0ad',
-                        }}
-                      >
-                        {config.notes[round.round] || '—'}
-                      </td>
-                    ) : null}
-                  </tr>
-                )
-              })
+                      <ActionList actions={round.slots[slot] ?? []} />
+                    </td>
+                  ))}
+                  {config.showOtherActions ? (
+                    <td
+                      className="border-2 px-2 py-3 align-middle"
+                      style={{
+                        borderColor: palette.border,
+                        background: tableBodyBackground,
+                      }}
+                    >
+                      <ActionList
+                        actions={filterOperationShareActions(
+                          round.others,
+                          config.showTargetSwitches,
+                        )}
+                      />
+                    </td>
+                  ) : null}
+                  {config.showNotes ? (
+                    <td
+                      className="whitespace-pre-wrap break-words border-2 px-3 py-3 text-left text-[17px] font-medium leading-6 align-middle"
+                      style={{
+                        borderColor: palette.border,
+                        background: tableBodyBackground,
+                        color: config.notes[round.round]
+                          ? palette.ink
+                          : '#a7b0ad',
+                      }}
+                    >
+                      {config.notes[round.round] || '—'}
+                    </td>
+                  ) : null}
+                </tr>
+              ))
             ) : (
-              <tr style={{ background: '#f4ecdf' }}>
+              <tr style={{ background: tableBodyBackground }}>
                 <td
                   className="border-2 px-4 py-8 text-base font-medium"
                   colSpan={
