@@ -12,15 +12,20 @@ import {
   shareCardPalette as palette,
 } from './shareCardComponents'
 
-const DISC_TONES: Record<string, { background: string; color: string }> = {
-  金: { background: '#f6dfaa', color: '#7a4d0b' },
-  紫: { background: '#eadcf4', color: '#6f3b83' },
-  蓝: { background: '#d9e8ef', color: '#315f73' },
-  橙: { background: '#f5d4b6', color: '#9a4d16' },
+const DISC_TONES: Record<string, string> = {
+  金: '#7a4d0b',
+  紫: '#6f3b83',
+  蓝: '#315f73',
+  橙: '#9a4d16',
 }
 
 const rowBackgrounds = ['#f3e3c9', '#ddc09e'] as const
 const DISC_SLOTS = [1, 2, 3] as const
+const DISC_FIELDS = [
+  { field: 'disc', label: '命盘' },
+  { field: 'starStone', label: '主星' },
+  { field: 'assistStar', label: '辅星' },
+] as const
 
 export function alignOperationShareDiscs(discs: OperationShareDisc[]) {
   const discsBySlot = new Map(discs.map((disc) => [disc.slot, disc]))
@@ -28,61 +33,16 @@ export function alignOperationShareDiscs(discs: OperationShareDisc[]) {
 }
 
 function DiscAbbreviation({ disc }: { disc: OperationShareDisc }) {
-  const tone = DISC_TONES[disc.color ?? ''] ?? {
-    background: '#e7d6bd',
-    color: '#5f4a31',
-  }
+  const color = DISC_TONES[disc.color ?? ''] ?? '#5f4a31'
 
   return (
     <span
-      className="inline-flex min-w-[96px] max-w-full items-center justify-center whitespace-nowrap rounded-sm border px-2 py-1 text-[15px] font-bold leading-tight"
-      style={{
-        borderColor: tone.color,
-        background: tone.background,
-        color: tone.color,
-      }}
+      className="break-words text-[17px] font-bold leading-snug"
+      style={{ color }}
     >
       {disc.forbidden ? '禁 · ' : ''}
       {disc.abbreviation}
     </span>
-  )
-}
-
-function DiscSlotLines({
-  discs,
-  field,
-}: {
-  discs: OperationShareDisc[]
-  field: 'disc' | 'starStone' | 'assistStar'
-}) {
-  const alignedDiscs = alignOperationShareDiscs(discs)
-  const slotHeight = field === 'disc' ? 64 : 52
-
-  return (
-    <div
-      className="grid"
-      style={{ gridTemplateRows: `repeat(3, ${slotHeight}px)` }}
-    >
-      {alignedDiscs.map((disc, index) => (
-        <div
-          key={DISC_SLOTS[index]}
-          className="flex min-w-0 items-center justify-center overflow-hidden border-b px-1 text-center last:border-b-0"
-          style={{ borderColor: 'rgba(120, 80, 31, 0.24)' }}
-        >
-          {disc ? (
-            field === 'disc' ? (
-              <DiscAbbreviation disc={disc} />
-            ) : (
-              <span className="whitespace-nowrap text-[16px] font-semibold leading-6">
-                {disc[field] ?? '—'}
-              </span>
-            )
-          ) : (
-            <span style={{ color: '#9a856d' }}>—</span>
-          )}
-        </div>
-      ))}
-    </div>
   )
 }
 
@@ -121,13 +81,6 @@ function OperatorHeader({ operator }: { operator: OperationShareOperator }) {
       <div className="mt-3 break-words text-center text-[20px] font-bold leading-tight">
         {operator.name}
       </div>
-      <div
-        className="mt-1 text-xs font-semibold"
-        style={{ color: palette.muted }}
-      >
-        技能 {operator.skill ?? '—'}
-        {operator.module ? ` · ${operator.module} 模组` : ''}
-      </div>
     </div>
   )
 }
@@ -146,23 +99,83 @@ function AttributeRow({
   operators: OperationShareOperator[]
 }) {
   return (
-    <tr style={{ background }}>
+    <tr style={{ background, height: minHeight }}>
       <th
-        className="w-[108px] border-2 px-3 text-[22px] font-bold"
-        style={{ borderColor: '#78501f', minHeight }}
+        className="w-[108px] border px-3 text-[21px] font-bold"
+        scope="row"
+        style={{ borderColor: '#78501f' }}
       >
         {label}
       </th>
       {operators.map((operator, index) => (
         <td
           key={`${label}-${operator.rawName}-${index}`}
-          className="border-2 px-3 py-4 text-center text-[21px] font-semibold align-middle"
-          style={{ borderColor: '#78501f', minHeight }}
+          className="border px-3 py-4 text-center text-[21px] font-semibold align-middle"
+          style={{ borderColor: '#78501f' }}
         >
           {children(operator)}
         </td>
       ))}
     </tr>
+  )
+}
+
+function DiscRows({ operators }: { operators: OperationShareOperator[] }) {
+  const alignedDiscs = operators.map((operator) =>
+    alignOperationShareDiscs(operator.discs),
+  )
+
+  return (
+    <>
+      {DISC_FIELDS.map(({ field, label }, fieldIndex) => (
+        <tr
+          key={field}
+          style={{
+            background:
+              rowBackgrounds[(fieldIndex + 1) % rowBackgrounds.length],
+            height: 126,
+          }}
+        >
+          <th
+            className="w-[108px] border px-3 text-[20px] font-bold leading-snug"
+            scope="row"
+            style={{ borderColor: '#78501f' }}
+          >
+            {label}
+          </th>
+          {operators.map((operator, operatorIndex) => {
+            return (
+              <td
+                key={`${field}-${operator.rawName}-${operatorIndex}`}
+                className="border px-2 py-3 text-center align-middle"
+                style={{ borderColor: '#78501f' }}
+              >
+                <div className="flex flex-col items-center justify-center gap-1.5">
+                  {alignedDiscs[operatorIndex].map((disc, slotIndex) => (
+                    <div
+                      key={DISC_SLOTS[slotIndex]}
+                      className="flex min-h-[28px] w-full items-center justify-center"
+                    >
+                      {disc ? (
+                        field === 'disc' ? (
+                          <DiscAbbreviation disc={disc} />
+                        ) : (
+                          <span className="break-words text-[15px] leading-5">
+                            {disc[field] ?? '—'}
+                          </span>
+                        )
+                      ) : (
+                        <span style={{ color: '#9a856d' }}>—</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </td>
+            )
+          })}
+        </tr>
+      ))}
+    </>
   )
 }
 
@@ -186,19 +199,21 @@ export function DeployedOperatorsShareCard({
         <ShareSectionTitle>上阵密探属性一览</ShareSectionTitle>
         {model.operators.length > 0 ? (
           <table
-            className="mt-5 w-full table-fixed border-collapse"
+            className="mt-5 w-full table-fixed border-collapse border-2"
             style={{ borderColor: '#78501f', color: '#624015' }}
           >
             <thead>
               <tr style={{ background: '#f0dec1' }}>
                 <th
-                  className="w-[108px] border-2"
+                  aria-label="属性"
+                  className="w-[108px] border"
                   style={{ borderColor: '#78501f' }}
                 />
                 {model.operators.map((operator, index) => (
                   <th
                     key={`${operator.rawName}-${index}`}
-                    className="border-2 p-0 align-bottom"
+                    className="border p-0 align-bottom"
+                    scope="col"
                     style={{ borderColor: '#78501f' }}
                   >
                     <OperatorHeader operator={operator} />
@@ -247,36 +262,7 @@ export function DeployedOperatorsShareCard({
               >
                 {(operator) => <AscensionLevel value={operator.starLevel} />}
               </AttributeRow>
-              <AttributeRow
-                background={rowBackgrounds[1]}
-                label="命盘"
-                minHeight={170}
-                operators={model.operators}
-              >
-                {(operator) => (
-                  <DiscSlotLines discs={operator.discs} field="disc" />
-                )}
-              </AttributeRow>
-              <AttributeRow
-                background={rowBackgrounds[0]}
-                label="主星"
-                minHeight={130}
-                operators={model.operators}
-              >
-                {(operator) => (
-                  <DiscSlotLines discs={operator.discs} field="starStone" />
-                )}
-              </AttributeRow>
-              <AttributeRow
-                background={rowBackgrounds[1]}
-                label="辅星"
-                minHeight={130}
-                operators={model.operators}
-              >
-                {(operator) => (
-                  <DiscSlotLines discs={operator.discs} field="assistStar" />
-                )}
-              </AttributeRow>
+              <DiscRows operators={model.operators} />
             </tbody>
           </table>
         ) : (
