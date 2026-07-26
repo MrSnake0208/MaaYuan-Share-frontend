@@ -58,9 +58,6 @@ function DiscAbbreviation({
           color: '#8f2117',
         }}
       >
-        <span className="text-[13px] font-black leading-none tracking-[0.12em]">
-          绝对不能有
-        </span>
         <span className="break-words text-[17px] font-black leading-snug line-through decoration-2">
           {disc.abbreviation}
         </span>
