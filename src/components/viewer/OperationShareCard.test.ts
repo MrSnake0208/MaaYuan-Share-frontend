@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getOperationShareActionCellBackground,
   getOperationShareActionLabel,
+  getOperationShareActionStyle,
 } from './OperationShareCard'
 import { OPERATION_SHARE_CELL_COLORS } from './operationShareModel'
 
@@ -18,6 +19,10 @@ describe('operation share card styles', () => {
     expect(
       getOperationShareActionCellBackground({ '2:slot-1': color }, 2, 1),
     ).toBe(color)
+  })
+
+  it('uses one text color without a background for every action label', () => {
+    expect(getOperationShareActionStyle()).toEqual({ color: '#293633' })
   })
 
   it('normalizes star restart labels in the generated image', () => {

@@ -191,17 +191,10 @@ function SubstituteOperator({
   )
 }
 
-function actionStyle(raw: string): CSSProperties {
-  if (raw.includes('sp') || raw.includes('大')) {
-    return { background: '#f4d9d1', color: '#8d392c' }
-  }
-  if (raw.includes('下')) {
-    return { background: '#f2dfb9', color: '#795410' }
-  }
-  if (raw.includes('等待')) {
-    return { background: '#dfe4e2', color: '#4d5b57' }
-  }
-  return { background: '#d8e9e4', color: '#155d57' }
+const operationShareActionStyle: CSSProperties = { color: '#293633' }
+
+export function getOperationShareActionStyle(): CSSProperties {
+  return operationShareActionStyle
 }
 
 function ActionList({ actions }: { actions: OperationShareAction[] }) {
@@ -214,12 +207,12 @@ function ActionList({ actions }: { actions: OperationShareAction[] }) {
   }
 
   return (
-    <div className="flex flex-wrap justify-center gap-2">
+    <div className="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-0.5">
       {actions.map((action, index) => (
         <span
           key={`${action.raw}-${index}`}
-          className="inline-flex rounded-[3px] px-2.5 py-1.5 text-[24px] font-bold leading-tight"
-          style={actionStyle(action.raw)}
+          className="text-[22px] font-bold leading-[1.25]"
+          style={operationShareActionStyle}
         >
           {getOperationShareActionLabel(action)}
         </span>
@@ -413,7 +406,7 @@ export function OperationShareCard({
                   {model.actionSlots.map((slot) => (
                     <td
                       key={slot}
-                      className="border-2 px-2 py-3 align-middle"
+                      className="border-2 px-1.5 py-2 align-middle"
                       style={{
                         borderColor: palette.border,
                         background: getOperationShareActionCellBackground(
@@ -428,7 +421,7 @@ export function OperationShareCard({
                   ))}
                   {config.showOtherActions ? (
                     <td
-                      className="border-2 px-2 py-3 align-middle"
+                      className="border-2 px-1.5 py-2 align-middle"
                       style={{
                         borderColor: palette.border,
                         background: tableBodyBackground,
