@@ -207,14 +207,14 @@ function ActionList({ actions }: { actions: OperationShareAction[] }) {
   }
 
   return (
-    <div className="flex flex-wrap items-baseline justify-center gap-x-2 gap-y-0.5">
+    <div
+      className="text-center text-[22px] font-bold leading-[1.25]"
+      style={operationShareActionStyle}
+    >
       {actions.map((action, index) => (
-        <span
-          key={`${action.raw}-${index}`}
-          className="text-[22px] font-bold leading-[1.25]"
-          style={operationShareActionStyle}
-        >
+        <span key={`${action.raw}-${index}`}>
           {getOperationShareActionLabel(action)}
+          <wbr />
         </span>
       ))}
     </div>
