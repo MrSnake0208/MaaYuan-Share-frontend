@@ -1,9 +1,14 @@
 import type { ReactNode, Ref } from 'react'
 
 import type {
+  OperationShareCardConfig,
   OperationShareDisc,
   OperationShareModel,
   OperationShareOperator,
+} from './operationShareModel'
+import {
+  buildOperationShareDiscKey,
+  createOperationShareCardConfig,
 } from './operationShareModel'
 import {
   ShareCardFrame,
@@ -26,22 +31,59 @@ const DISC_FIELDS = [
   { field: 'starStone', label: '主星' },
   { field: 'assistStar', label: '辅星' },
 ] as const
+const defaultCardConfig = createOperationShareCardConfig()
 
 export function alignOperationShareDiscs(discs: OperationShareDisc[]) {
   const discsBySlot = new Map(discs.map((disc) => [disc.slot, disc]))
   return DISC_SLOTS.map((slot) => discsBySlot.get(slot))
 }
 
-function DiscAbbreviation({ disc }: { disc: OperationShareDisc }) {
+function DiscAbbreviation({
+  disc,
+  required,
+}: {
+  disc: OperationShareDisc
+  required: boolean
+}) {
   const color = DISC_TONES[disc.color ?? ''] ?? '#5f4a31'
 
+  if (disc.forbidden) {
+    return (
+      <span
+        aria-label={`绝对不能有命盘：${disc.abbreviation}`}
+        className="inline-flex max-w-full flex-col items-center justify-center gap-1 rounded-md border-2 px-2.5 py-1.5"
+        style={{
+          background: '#fde7e2',
+          borderColor: '#a92f24',
+          color: '#8f2117',
+        }}
+      >
+        <span className="text-[13px] font-black leading-none tracking-[0.12em]">
+          绝对不能有
+        </span>
+        <span className="break-words text-[17px] font-black leading-snug line-through decoration-2">
+          {disc.abbreviation}
+        </span>
+      </span>
+    )
+  }
+
   return (
-    <span
-      className="break-words text-[17px] font-bold leading-snug"
-      style={{ color }}
-    >
-      {disc.forbidden ? '禁 · ' : ''}
-      {disc.abbreviation}
+    <span className="flex flex-wrap items-center justify-center gap-1.5">
+      {required ? (
+        <span
+          className="rounded px-1.5 py-0.5 text-[13px] font-bold leading-none text-white"
+          style={{ background: '#b5442f' }}
+        >
+          必须
+        </span>
+      ) : null}
+      <span
+        className="break-words text-[17px] font-bold leading-snug"
+        style={{ color }}
+      >
+        {disc.abbreviation}
+      </span>
     </span>
   )
 }
@@ -120,7 +162,13 @@ function AttributeRow({
   )
 }
 
-function DiscRows({ operators }: { operators: OperationShareOperator[] }) {
+function DiscRows({
+  config,
+  operators,
+}: {
+  config: OperationShareCardConfig
+  operators: OperationShareOperator[]
+}) {
   const alignedDiscs = operators.map((operator) =>
     alignOperationShareDiscs(operator.discs),
   )
@@ -158,7 +206,18 @@ function DiscRows({ operators }: { operators: OperationShareOperator[] }) {
                     >
                       {disc ? (
                         field === 'disc' ? (
-                          <DiscAbbreviation disc={disc} />
+                          <DiscAbbreviation
+                            disc={disc}
+                            required={
+                              !disc.forbidden &&
+                              config.requiredDiscs[
+                                buildOperationShareDiscKey(
+                                  operator.slot ?? operatorIndex + 1,
+                                  disc.slot,
+                                )
+                              ] === true
+                            }
+                          />
                         ) : (
                           <span className="break-words text-[15px] leading-5">
                             {disc[field] ?? '—'}
@@ -183,10 +242,12 @@ export function DeployedOperatorsShareCard({
   model,
   cardRef,
   qrDataUrl,
+  config = defaultCardConfig,
 }: {
   model: OperationShareModel
   cardRef?: Ref<HTMLDivElement>
   qrDataUrl: string
+  config?: OperationShareCardConfig
 }) {
   return (
     <ShareCardFrame
@@ -262,7 +323,7 @@ export function DeployedOperatorsShareCard({
               >
                 {(operator) => <AscensionLevel value={operator.starLevel} />}
               </AttributeRow>
-              <DiscRows operators={model.operators} />
+              <DiscRows config={config} operators={model.operators} />
             </tbody>
           </table>
         ) : (

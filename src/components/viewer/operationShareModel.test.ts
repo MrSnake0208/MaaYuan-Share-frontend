@@ -7,6 +7,7 @@ import {
   OPERATION_SHARE_CELL_COLORS,
   ObjectUrlStore,
   buildOperationShareCellKey,
+  buildOperationShareDiscKey,
   buildOperationShareFilename,
   buildOperationShareModel,
   buildOperationShareUrl,
@@ -319,6 +320,10 @@ describe('share image utilities', () => {
     expect(filterOperationShareActions(actions, true)).toBe(actions)
   })
 
+  it('builds stable deployed operator disc keys', () => {
+    expect(buildOperationShareDiscKey(2, 3)).toBe('2:3')
+  })
+
   it('selects and clears a whole row or column while preserving other cells', () => {
     const groupKeys = ['1:slot-1', '1:slot-2']
     const unrelatedKey = '2:slot-1'
@@ -359,6 +364,7 @@ describe('share image utilities', () => {
     config.showNotes = true
     config.notes[2] = '第二回合先等待'
     config.cellColors['2:slot-3'] = OPERATION_SHARE_CELL_COLORS[2]
+    config.requiredDiscs['2:1'] = true
 
     expect(saveOperationShareCardConfig(100, config, storage)).toBe(true)
     expect(loadOperationShareCardConfig(100, storage)).toEqual(config)
@@ -390,6 +396,11 @@ describe('share image utilities', () => {
             '3:slot-1': '#D8E9E4',
             '4:slot-2': '#abcdef',
           },
+          requiredDiscs: {
+            '1:1': true,
+            '2:3': false,
+            'bad-key': true,
+          },
         },
       }),
     )
@@ -400,6 +411,7 @@ describe('share image utilities', () => {
       showNotes: true,
       notes: { 1: 'x'.repeat(160) },
       cellColors: { '3:slot-1': '#d8e9e4' },
+      requiredDiscs: { '1:1': true },
     })
   })
 
@@ -417,9 +429,10 @@ describe('share image utilities', () => {
       }),
     )
 
-    expect(loadOperationShareCardConfig(100, storage).showOtherActions).toBe(
-      true,
-    )
+    expect(loadOperationShareCardConfig(100, storage)).toMatchObject({
+      showOtherActions: true,
+      requiredDiscs: {},
+    })
   })
 
   it('builds the QR code URL from the current origin and operation id', () => {

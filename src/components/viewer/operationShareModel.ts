@@ -58,6 +58,7 @@ export interface OperationShareCardConfig {
   showNotes: boolean
   notes: Record<number, string>
   cellColors: Record<string, string>
+  requiredDiscs: Record<string, boolean>
 }
 
 export const OPERATION_SHARE_CELL_COLORS = [
@@ -73,6 +74,7 @@ const OPERATION_SHARE_CARD_CONFIG_STORAGE_VERSION = 1
 const OPERATION_SHARE_CARD_CONFIG_STORAGE_PREFIX =
   'maa-copilot-operation-share-card-config'
 const SHARE_CELL_KEY_PATTERN = /^\d+:slot-\d+$/
+const REQUIRED_DISC_KEY_PATTERN = /^\d+:[1-3]$/
 const OPERATION_SHARE_CELL_COLOR_SET = new Set<string>(
   OPERATION_SHARE_CELL_COLORS,
 )
@@ -116,6 +118,7 @@ export function createOperationShareCardConfig(): OperationShareCardConfig {
     showNotes: false,
     notes: {},
     cellColors: {},
+    requiredDiscs: {},
   }
 }
 
@@ -151,6 +154,15 @@ function normalizeOperationShareCardConfig(
     })
   }
 
+  const requiredDiscs: Record<string, boolean> = {}
+  if (isRecord(value.requiredDiscs)) {
+    Object.entries(value.requiredDiscs).forEach(([key, required]) => {
+      if (REQUIRED_DISC_KEY_PATTERN.test(key) && required === true) {
+        requiredDiscs[key] = true
+      }
+    })
+  }
+
   return {
     showTargetSwitches:
       typeof value.showTargetSwitches === 'boolean'
@@ -166,6 +178,7 @@ function normalizeOperationShareCardConfig(
         : defaults.showNotes,
     notes,
     cellColors,
+    requiredDiscs,
   }
 }
 
@@ -217,6 +230,13 @@ export function buildOperationShareCellKey(
   column: OperationShareCellColumn,
 ) {
   return `${round}:${column}`
+}
+
+export function buildOperationShareDiscKey(
+  operatorSlot: number,
+  discSlot: number,
+) {
+  return `${operatorSlot}:${discSlot}`
 }
 
 export function getOperationShareCellSelectionState(

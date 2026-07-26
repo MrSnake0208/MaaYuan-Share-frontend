@@ -14,6 +14,7 @@ import {
   type OperationShareCardKind,
   type OperationShareCellColumn,
   buildOperationShareCellKey,
+  buildOperationShareDiscKey,
   buildOperationShareFilename,
   buildOperationShareModel,
   buildOperationShareUrl,
@@ -222,6 +223,22 @@ export default function OperationShareDialog({
     setSelectedCellKeys(new Set())
     setCardConfig(defaults)
     saveOperationShareCardConfig(operation.id, defaults)
+  }
+
+  const updateRequiredDisc = (key: string, checked: boolean) => {
+    invalidatePreview()
+    setCardConfig((current) => {
+      const requiredDiscs = { ...current.requiredDiscs }
+      if (checked) requiredDiscs[key] = true
+      else delete requiredDiscs[key]
+      return { ...current, requiredDiscs }
+    })
+  }
+
+  const clearRequiredDiscs = () => {
+    if (Object.keys(cardConfig.requiredDiscs).length === 0) return
+    invalidatePreview()
+    setCardConfig((current) => ({ ...current, requiredDiscs: {} }))
   }
 
   const generate = useCallback(async () => {
@@ -563,14 +580,94 @@ export default function OperationShareDialog({
             ) : null}
           </fieldset>
         ) : (
-          <div className="mb-5 rounded border border-slate-200 bg-white p-4">
-            <h3 className="text-base font-semibold text-slate-800">
-              上阵密探详细配置图
-            </h3>
-            <p className="mt-1 text-sm leading-6 text-slate-500">
-              只展示当前作业的上阵密探，包括培养数值、攻击、生命、命盘、主星和辅星。
-            </p>
-          </div>
+          <fieldset
+            className="mb-5 rounded border border-slate-200 bg-white p-4"
+            disabled={status === 'generating'}
+          >
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-base font-semibold text-slate-800">
+                    生成前编辑
+                  </h3>
+                  <Button
+                    disabled={
+                      Object.keys(cardConfig.requiredDiscs).length === 0
+                    }
+                    icon="reset"
+                    minimal
+                    onClick={clearRequiredDiscs}
+                    small
+                  >
+                    清除必须标记
+                  </Button>
+                </div>
+                <p className="mt-1 text-sm leading-6 text-slate-500">
+                  配置会按当前作业自动缓存；可将关键命盘标记为“必须”，禁用命盘会自动标注为“绝对不能有”。
+                </p>
+              </div>
+            </div>
+
+            {model.operators.some((operator) => operator.discs.length > 0) ? (
+              <div className="mt-4 grid gap-3 border-t border-slate-200 pt-4 md:grid-cols-2">
+                {model.operators.map((operator, operatorIndex) => (
+                  <section
+                    key={`${operator.rawName}-${operatorIndex}`}
+                    className="rounded border border-slate-200 bg-slate-50 p-3"
+                  >
+                    <h4 className="text-sm font-semibold text-slate-700">
+                      {operator.slot ?? operatorIndex + 1} 号位 {'·'}
+                      {operator.name}
+                    </h4>
+                    {operator.discs.length > 0 ? (
+                      <div className="mt-2 grid gap-1.5">
+                        {operator.discs.map((disc) => {
+                          const key = buildOperationShareDiscKey(
+                            operator.slot ?? operatorIndex + 1,
+                            disc.slot,
+                          )
+                          if (disc.forbidden) {
+                            return (
+                              <div
+                                key={key}
+                                className="flex items-center gap-2 rounded border border-red-300 bg-red-50 px-2.5 py-2 text-sm font-semibold text-red-800"
+                              >
+                                <span className="shrink-0 rounded bg-red-700 px-1.5 py-0.5 text-xs font-bold text-white">
+                                  绝对不能有
+                                </span>
+                                <span>
+                                  {disc.slot} 号命盘：{disc.abbreviation}
+                                </span>
+                              </div>
+                            )
+                          }
+                          return (
+                            <Checkbox
+                              key={key}
+                              checked={cardConfig.requiredDiscs[key] === true}
+                              label={`${disc.slot} 号命盘：${disc.abbreviation}`}
+                              onChange={(event) =>
+                                updateRequiredDisc(
+                                  key,
+                                  event.currentTarget.checked,
+                                )
+                              }
+                            />
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-sm text-slate-400">未配置命盘</p>
+                    )}
+                  </section>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-4 border-t border-slate-200 pt-4 text-sm text-slate-400">
+                当前上阵密探未配置命盘。
+              </p>
+            )}
+          </fieldset>
         )}
 
         {status === 'idle' ? (
@@ -640,6 +737,7 @@ export default function OperationShareDialog({
           ) : (
             <DeployedOperatorsShareCard
               cardRef={setCardNode}
+              config={cardConfig}
               model={model}
               qrDataUrl={qrDataUrl}
             />

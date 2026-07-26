@@ -7,6 +7,7 @@ import {
   alignOperationShareDiscs,
 } from './DeployedOperatorsShareCard'
 import type { OperationShareModel } from './operationShareModel'
+import { createOperationShareCardConfig } from './operationShareModel'
 
 const model: OperationShareModel = {
   title: '测试作业',
@@ -101,5 +102,48 @@ describe('deployed operators share card', () => {
     expect(markup).not.toContain('rowspan="3"')
     expect(markup).not.toContain('grid-template-rows')
     expect(markup).not.toContain('不应显示的密探组')
+  })
+
+  it('marks configured discs as required', () => {
+    const config = createOperationShareCardConfig()
+    config.requiredDiscs['1:1'] = true
+
+    const markup = renderToStaticMarkup(
+      createElement(DeployedOperatorsShareCard, {
+        config,
+        model,
+        qrDataUrl: 'data:image/png;base64,qr-code',
+      }),
+    )
+
+    expect(markup).toContain('必须')
+    expect(markup).toContain('技伤大幅')
+  })
+
+  it('renders forbidden discs as an absolute prohibition instead of required', () => {
+    const config = createOperationShareCardConfig()
+    config.requiredDiscs['1:1'] = true
+    const forbiddenModel: OperationShareModel = {
+      ...model,
+      operators: model.operators.map((operator) => ({
+        ...operator,
+        discs: operator.discs.map((disc) => ({
+          ...disc,
+          forbidden: true,
+        })),
+      })),
+    }
+
+    const markup = renderToStaticMarkup(
+      createElement(DeployedOperatorsShareCard, {
+        config,
+        model: forbiddenModel,
+        qrDataUrl: 'data:image/png;base64,qr-code',
+      }),
+    )
+
+    expect(markup).toContain('绝对不能有')
+    expect(markup).toContain('绝对不能有命盘：技伤大幅')
+    expect(markup).not.toContain('>必须<')
   })
 })
