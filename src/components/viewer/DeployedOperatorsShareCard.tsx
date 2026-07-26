@@ -68,22 +68,33 @@ function DiscAbbreviation({
     )
   }
 
-  return (
-    <span className="flex flex-wrap items-center justify-center gap-1.5">
-      {required ? (
-        <span
-          className="rounded px-1.5 py-0.5 text-[13px] font-bold leading-none text-white"
-          style={{ background: '#b5442f' }}
-        >
-          必须
-        </span>
-      ) : null}
+  if (required) {
+    return (
       <span
-        className="break-words text-[17px] font-bold leading-snug"
-        style={{ color }}
+        aria-label={`必须携带命盘：${disc.abbreviation}`}
+        className="inline-flex max-w-full flex-col items-center justify-center gap-1 rounded-md border px-2 py-1.5"
+        style={{
+          background: '#fff2cf',
+          borderColor: '#c88a25',
+          color: '#75450e',
+        }}
       >
-        {disc.abbreviation}
+        <span
+          className="break-words text-[17px] font-black leading-snug"
+          style={{ color }}
+        >
+          {disc.abbreviation}
+        </span>
       </span>
+    )
+  }
+
+  return (
+    <span
+      className="break-words text-[17px] font-bold leading-snug"
+      style={{ color }}
+    >
+      {disc.abbreviation}
     </span>
   )
 }

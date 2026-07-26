@@ -609,18 +609,18 @@ export default function OperationShareDialog({
             </div>
 
             {model.operators.some((operator) => operator.discs.length > 0) ? (
-              <div className="mt-4 grid gap-3 border-t border-slate-200 pt-4 md:grid-cols-2">
+              <div className="mt-4 grid gap-2 border-t border-slate-200 pt-4 sm:grid-cols-2 md:grid-cols-5">
                 {model.operators.map((operator, operatorIndex) => (
                   <section
                     key={`${operator.rawName}-${operatorIndex}`}
-                    className="rounded border border-slate-200 bg-slate-50 p-3"
+                    className="min-w-0 rounded border border-slate-200 bg-slate-50 p-2"
                   >
-                    <h4 className="text-sm font-semibold text-slate-700">
+                    <h4 className="break-words text-xs font-semibold leading-5 text-slate-700">
                       {operator.slot ?? operatorIndex + 1} 号位 {'·'}
                       {operator.name}
                     </h4>
                     {operator.discs.length > 0 ? (
-                      <div className="mt-2 grid gap-1.5">
+                      <div className="mt-1.5 grid gap-1">
                         {operator.discs.map((disc) => {
                           const key = buildOperationShareDiscKey(
                             operator.slot ?? operatorIndex + 1,
@@ -630,7 +630,7 @@ export default function OperationShareDialog({
                             return (
                               <div
                                 key={key}
-                                className="flex items-center gap-2 rounded border border-red-300 bg-red-50 px-2.5 py-2 text-sm font-semibold text-red-800"
+                                className="flex flex-col items-start gap-1 rounded border border-red-300 bg-red-50 px-2 py-1.5 text-xs font-semibold leading-5 text-red-800"
                               >
                                 <span className="shrink-0 rounded bg-red-700 px-1.5 py-0.5 text-xs font-bold text-white">
                                   绝对不能有
@@ -645,6 +645,7 @@ export default function OperationShareDialog({
                             <Checkbox
                               key={key}
                               checked={cardConfig.requiredDiscs[key] === true}
+                              className="m-0 text-xs leading-5"
                               label={`${disc.slot} 号命盘：${disc.abbreviation}`}
                               onChange={(event) =>
                                 updateRequiredDisc(

@@ -116,7 +116,8 @@ describe('deployed operators share card', () => {
       }),
     )
 
-    expect(markup).toContain('必须')
+    expect(markup).toContain('必须携带')
+    expect(markup).toContain('必须携带命盘：技伤大幅')
     expect(markup).toContain('技伤大幅')
   })
 
@@ -144,6 +145,6 @@ describe('deployed operators share card', () => {
 
     expect(markup).toContain('绝对不能有')
     expect(markup).toContain('绝对不能有命盘：技伤大幅')
-    expect(markup).not.toContain('>必须<')
+    expect(markup).not.toContain('必须携带命盘')
   })
 })
