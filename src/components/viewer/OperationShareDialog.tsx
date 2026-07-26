@@ -6,10 +6,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { languageAtom, useTranslation } from '../../i18n/i18n'
 import type { Operation } from '../../models/operation'
 import { formatError } from '../../utils/error'
+import { DeployedOperatorsShareCard } from './DeployedOperatorsShareCard'
 import { OperationShareCard } from './OperationShareCard'
 import {
   OPERATION_SHARE_CELL_COLORS,
   ObjectUrlStore,
+  type OperationShareCardKind,
   type OperationShareCellColumn,
   buildOperationShareCellKey,
   buildOperationShareFilename,
@@ -90,6 +92,7 @@ export default function OperationShareDialog({
   const urlStoreRef = useRef(new ObjectUrlStore())
   const generationRef = useRef(0)
   const generatingRef = useRef(false)
+  const [cardKind, setCardKind] = useState<OperationShareCardKind>('actions')
   const [status, setStatus] = useState<GenerationStatus>('idle')
   const [previewUrl, setPreviewUrl] = useState<string>()
   const [blob, setBlob] = useState<Blob>()
@@ -152,6 +155,13 @@ export default function OperationShareDialog({
   ) => {
     invalidatePreview()
     setCardConfig((current) => ({ ...current, [option]: checked }))
+  }
+
+  const changeCardKind = (nextKind: OperationShareCardKind) => {
+    if (nextKind === cardKind) return
+    invalidatePreview()
+    setSelectedCellKeys(new Set())
+    setCardKind(nextKind)
   }
 
   const updateRoundNote = (round: number, note: string) => {
@@ -287,7 +297,7 @@ export default function OperationShareDialog({
     if (!blob || !previewUrl) return
     const anchor = document.createElement('a')
     anchor.href = previewUrl
-    anchor.download = buildOperationShareFilename(model)
+    anchor.download = buildOperationShareFilename(model, cardKind)
     anchor.click()
   }
 
@@ -302,222 +312,266 @@ export default function OperationShareDialog({
       title={t.components.viewer.OperationViewer.share_image_dialog_title}
     >
       <div className="max-h-[76vh] overflow-auto bg-slate-100 p-4 md:p-6">
-        <fieldset
-          className="mb-5 rounded border border-slate-200 bg-white p-4"
-          disabled={status === 'generating'}
+        <div
+          aria-label="分享图片类型"
+          className="mb-5 grid grid-cols-2 gap-2 rounded border border-slate-200 bg-white p-2"
+          role="tablist"
         >
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-base font-semibold text-slate-800">
-                  生成前编辑
-                </h3>
-                <Button icon="reset" minimal onClick={restoreDefaults} small>
-                  恢复至默认
-                </Button>
-              </div>
-              <p className="mt-1 text-sm text-slate-500">
-                配置会按当前作业自动缓存；可设置展示内容、逐回合备注和单元格颜色。
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-x-5 gap-y-2">
-              <Checkbox
-                checked={cardConfig.showOtherActions}
-                label="显示其他动作列"
-                onChange={(event) =>
-                  updateOption('showOtherActions', event.currentTarget.checked)
-                }
-              />
-              <Checkbox
-                checked={cardConfig.showTargetSwitches}
-                disabled={!cardConfig.showOtherActions}
-                label="显示左滑 / 右滑"
-                onChange={(event) =>
-                  updateOption(
-                    'showTargetSwitches',
-                    event.currentTarget.checked,
-                  )
-                }
-              />
-              <Checkbox
-                checked={cardConfig.showNotes}
-                label="增加备注列"
-                onChange={(event) =>
-                  updateOption('showNotes', event.currentTarget.checked)
-                }
-              />
-            </div>
-          </div>
+          <Button
+            active={cardKind === 'actions'}
+            aria-selected={cardKind === 'actions'}
+            icon="timeline-events"
+            onClick={() => changeCardKind('actions')}
+            role="tab"
+          >
+            动作序列
+          </Button>
+          <Button
+            active={cardKind === 'operators'}
+            aria-selected={cardKind === 'operators'}
+            icon="people"
+            onClick={() => changeCardKind('operators')}
+            role="tab"
+          >
+            上阵密探
+          </Button>
+        </div>
 
-          {cardConfig.showNotes && model.rounds.length > 0 ? (
-            <div className="mt-4 border-t border-slate-200 pt-4">
-              <h4 className="text-sm font-semibold text-slate-700">回合备注</h4>
-              <div className="mt-2 grid gap-2 md:grid-cols-2">
-                {model.rounds.map((round) => (
-                  <label
-                    key={round.round}
-                    className="flex items-start gap-2 text-sm text-slate-600"
-                  >
-                    <span className="w-16 shrink-0 pt-2 font-medium">
-                      {round.round} 回合
-                    </span>
-                    <textarea
-                      className="min-h-16 flex-1 resize-y rounded border border-slate-300 px-2.5 py-2 text-slate-800 outline-none focus:border-sky-500"
-                      maxLength={160}
-                      onChange={(event) =>
-                        updateRoundNote(round.round, event.currentTarget.value)
-                      }
-                      placeholder="输入本回合备注（可选）"
-                      value={cardConfig.notes[round.round] ?? ''}
-                    />
-                  </label>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {model.rounds.length > 0 ? (
-            <div className="mt-4 border-t border-slate-200 pt-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-700">
-                    动作单元格配色
-                  </h4>
-                  <p className="mt-1 text-xs text-slate-500">
-                    勾选单元格，或通过行号、列名一次选择整行/整列，再点击颜色
-                    应用。
-                  </p>
-                </div>
+        {cardKind === 'actions' ? (
+          <fieldset
+            className="mb-5 rounded border border-slate-200 bg-white p-4"
+            disabled={status === 'generating'}
+          >
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <div
-                    aria-label="单元格背景色"
-                    className="flex items-center gap-1.5 rounded border border-slate-200 bg-slate-50 p-1"
-                    role="group"
-                  >
-                    {CELL_COLOR_OPTIONS.map((option) => (
-                      <button
-                        key={option.color}
-                        aria-label={`应用${option.label}`}
-                        className="h-8 w-8 rounded border border-slate-300 transition-transform enabled:hover:scale-105 enabled:focus:outline-none enabled:focus:ring-2 enabled:focus:ring-sky-500 enabled:focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-40"
-                        disabled={selectedCellKeys.size === 0}
-                        onClick={() => applyCellColor(option.color)}
-                        style={{ backgroundColor: option.color }}
-                        title={`应用${option.label}`}
-                        type="button"
-                      />
-                    ))}
-                  </div>
-                  <Button
-                    disabled={selectedCellKeys.size === 0}
-                    icon="eraser"
-                    onClick={clearCellColor}
-                    small
-                  >
-                    清除颜色
-                  </Button>
-                  <Button
-                    disabled={selectedCellKeys.size === 0}
-                    minimal
-                    onClick={() => setSelectedCellKeys(new Set())}
-                    small
-                  >
-                    取消选择（{selectedCellKeys.size}）
+                  <h3 className="text-base font-semibold text-slate-800">
+                    生成前编辑
+                  </h3>
+                  <Button icon="reset" minimal onClick={restoreDefaults} small>
+                    恢复至默认
                   </Button>
                 </div>
+                <p className="mt-1 text-sm text-slate-500">
+                  配置会按当前作业自动缓存；可设置展示内容、逐回合备注和单元格颜色。
+                </p>
               </div>
-              <div className="mt-3 max-h-56 overflow-auto rounded border border-slate-200">
-                <table className="w-full border-collapse bg-white text-center text-xs">
-                  <thead className="text-slate-600">
-                    <tr>
-                      <th className="sticky top-0 z-10 border-b border-r border-slate-200 bg-slate-100 px-2 py-2 shadow-[0_1px_0_rgba(148,163,184,0.35)]">
-                        回合
-                      </th>
-                      {editableColumnGroups.map((column) => {
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                <Checkbox
+                  checked={cardConfig.showOtherActions}
+                  label="显示其他动作列"
+                  onChange={(event) =>
+                    updateOption(
+                      'showOtherActions',
+                      event.currentTarget.checked,
+                    )
+                  }
+                />
+                <Checkbox
+                  checked={cardConfig.showTargetSwitches}
+                  disabled={!cardConfig.showOtherActions}
+                  label="显示左滑 / 右滑"
+                  onChange={(event) =>
+                    updateOption(
+                      'showTargetSwitches',
+                      event.currentTarget.checked,
+                    )
+                  }
+                />
+                <Checkbox
+                  checked={cardConfig.showNotes}
+                  label="增加备注列"
+                  onChange={(event) =>
+                    updateOption('showNotes', event.currentTarget.checked)
+                  }
+                />
+              </div>
+            </div>
+
+            {cardConfig.showNotes && model.rounds.length > 0 ? (
+              <div className="mt-4 border-t border-slate-200 pt-4">
+                <h4 className="text-sm font-semibold text-slate-700">
+                  回合备注
+                </h4>
+                <div className="mt-2 grid gap-2 md:grid-cols-2">
+                  {model.rounds.map((round) => (
+                    <label
+                      key={round.round}
+                      className="flex items-start gap-2 text-sm text-slate-600"
+                    >
+                      <span className="w-16 shrink-0 pt-2 font-medium">
+                        {round.round} 回合
+                      </span>
+                      <textarea
+                        className="min-h-16 flex-1 resize-y rounded border border-slate-300 px-2.5 py-2 text-slate-800 outline-none focus:border-sky-500"
+                        maxLength={160}
+                        onChange={(event) =>
+                          updateRoundNote(
+                            round.round,
+                            event.currentTarget.value,
+                          )
+                        }
+                        placeholder="输入本回合备注（可选）"
+                        value={cardConfig.notes[round.round] ?? ''}
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {model.rounds.length > 0 ? (
+              <div className="mt-4 border-t border-slate-200 pt-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-700">
+                      动作单元格配色
+                    </h4>
+                    <p className="mt-1 text-xs text-slate-500">
+                      勾选单元格，或通过行号、列名一次选择整行/整列，再点击颜色
+                      应用。
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div
+                      aria-label="单元格背景色"
+                      className="flex items-center gap-1.5 rounded border border-slate-200 bg-slate-50 p-1"
+                      role="group"
+                    >
+                      {CELL_COLOR_OPTIONS.map((option) => (
+                        <button
+                          key={option.color}
+                          aria-label={`应用${option.label}`}
+                          className="h-8 w-8 rounded border border-slate-300 transition-transform enabled:hover:scale-105 enabled:focus:outline-none enabled:focus:ring-2 enabled:focus:ring-sky-500 enabled:focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-40"
+                          disabled={selectedCellKeys.size === 0}
+                          onClick={() => applyCellColor(option.color)}
+                          style={{ backgroundColor: option.color }}
+                          title={`应用${option.label}`}
+                          type="button"
+                        />
+                      ))}
+                    </div>
+                    <Button
+                      disabled={selectedCellKeys.size === 0}
+                      icon="eraser"
+                      onClick={clearCellColor}
+                      small
+                    >
+                      清除颜色
+                    </Button>
+                    <Button
+                      disabled={selectedCellKeys.size === 0}
+                      minimal
+                      onClick={() => setSelectedCellKeys(new Set())}
+                      small
+                    >
+                      取消选择（{selectedCellKeys.size}）
+                    </Button>
+                  </div>
+                </div>
+                <div className="mt-3 max-h-56 overflow-auto rounded border border-slate-200">
+                  <table className="w-full border-collapse bg-white text-center text-xs">
+                    <thead className="text-slate-600">
+                      <tr>
+                        <th className="sticky top-0 z-10 border-b border-r border-slate-200 bg-slate-100 px-2 py-2 shadow-[0_1px_0_rgba(148,163,184,0.35)]">
+                          回合
+                        </th>
+                        {editableColumnGroups.map((column) => {
+                          const selection = getOperationShareCellSelectionState(
+                            selectedCellKeys,
+                            column.cellKeys,
+                          )
+                          return (
+                            <th
+                              key={column.key}
+                              className="sticky top-0 z-10 border-b border-r border-slate-200 bg-slate-100 px-2 py-2 shadow-[0_1px_0_rgba(148,163,184,0.35)] last:border-r-0"
+                            >
+                              <Checkbox
+                                aria-label={`选择${column.label}整列`}
+                                checked={selection.checked}
+                                className="m-0 inline-flex"
+                                indeterminate={selection.indeterminate}
+                                label={column.label}
+                                onChange={(event) =>
+                                  toggleCellGroupSelection(
+                                    column.cellKeys,
+                                    event.currentTarget.checked,
+                                  )
+                                }
+                              />
+                            </th>
+                          )
+                        })}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {editableRoundGroups.map((round) => {
                         const selection = getOperationShareCellSelectionState(
                           selectedCellKeys,
-                          column.cellKeys,
+                          round.cellKeys,
                         )
                         return (
-                          <th
-                            key={column.key}
-                            className="sticky top-0 z-10 border-b border-r border-slate-200 bg-slate-100 px-2 py-2 shadow-[0_1px_0_rgba(148,163,184,0.35)] last:border-r-0"
-                          >
-                            <Checkbox
-                              aria-label={`选择${column.label}整列`}
-                              checked={selection.checked}
-                              className="m-0 inline-flex"
-                              indeterminate={selection.indeterminate}
-                              label={column.label}
-                              onChange={(event) =>
-                                toggleCellGroupSelection(
-                                  column.cellKeys,
-                                  event.currentTarget.checked,
-                                )
-                              }
-                            />
-                          </th>
+                          <tr key={round.round}>
+                            <th className="border-b border-r border-slate-200 px-2 py-2 font-medium text-slate-600">
+                              <Checkbox
+                                aria-label={`选择第 ${round.round} 回合整行`}
+                                checked={selection.checked}
+                                className="m-0 inline-flex"
+                                indeterminate={selection.indeterminate}
+                                label={`${round.round}`}
+                                onChange={(event) =>
+                                  toggleCellGroupSelection(
+                                    round.cellKeys,
+                                    event.currentTarget.checked,
+                                  )
+                                }
+                              />
+                            </th>
+                            {editableColumns.map((column, columnIndex) => {
+                              const key = round.cellKeys[columnIndex]
+                              if (!key) return null
+                              return (
+                                <td
+                                  key={column.key}
+                                  className="border-b border-r border-slate-200 px-2 py-2 last:border-r-0"
+                                  style={{
+                                    backgroundColor:
+                                      cardConfig.cellColors[key] ?? undefined,
+                                  }}
+                                >
+                                  <Checkbox
+                                    aria-label={`${round.round} 回合 ${column.label}`}
+                                    checked={selectedCellKeys.has(key)}
+                                    className="m-0 inline-block"
+                                    onChange={(event) =>
+                                      toggleCellSelection(
+                                        key,
+                                        event.currentTarget.checked,
+                                      )
+                                    }
+                                  />
+                                </td>
+                              )
+                            })}
+                          </tr>
                         )
                       })}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {editableRoundGroups.map((round) => {
-                      const selection = getOperationShareCellSelectionState(
-                        selectedCellKeys,
-                        round.cellKeys,
-                      )
-                      return (
-                        <tr key={round.round}>
-                          <th className="border-b border-r border-slate-200 px-2 py-2 font-medium text-slate-600">
-                            <Checkbox
-                              aria-label={`选择第 ${round.round} 回合整行`}
-                              checked={selection.checked}
-                              className="m-0 inline-flex"
-                              indeterminate={selection.indeterminate}
-                              label={`${round.round}`}
-                              onChange={(event) =>
-                                toggleCellGroupSelection(
-                                  round.cellKeys,
-                                  event.currentTarget.checked,
-                                )
-                              }
-                            />
-                          </th>
-                          {editableColumns.map((column, columnIndex) => {
-                            const key = round.cellKeys[columnIndex]
-                            if (!key) return null
-                            return (
-                              <td
-                                key={column.key}
-                                className="border-b border-r border-slate-200 px-2 py-2 last:border-r-0"
-                                style={{
-                                  backgroundColor:
-                                    cardConfig.cellColors[key] ?? undefined,
-                                }}
-                              >
-                                <Checkbox
-                                  aria-label={`${round.round} 回合 ${column.label}`}
-                                  checked={selectedCellKeys.has(key)}
-                                  className="m-0 inline-block"
-                                  onChange={(event) =>
-                                    toggleCellSelection(
-                                      key,
-                                      event.currentTarget.checked,
-                                    )
-                                  }
-                                />
-                              </td>
-                            )
-                          })}
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          ) : null}
-        </fieldset>
+            ) : null}
+          </fieldset>
+        ) : (
+          <div className="mb-5 rounded border border-slate-200 bg-white p-4">
+            <h3 className="text-base font-semibold text-slate-800">
+              上阵密探详细配置图
+            </h3>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              只展示当前作业的上阵密探，包括培养数值、攻击、生命、命盘、主星和辅星。
+            </p>
+          </div>
+        )}
 
         {status === 'idle' ? (
           <div className="flex min-h-48 flex-col items-center justify-center gap-2 rounded border border-dashed border-slate-300 bg-white text-slate-500">
@@ -576,12 +630,20 @@ export default function OperationShareDialog({
       </div>
       <div aria-hidden className="fixed left-[-12000px] top-0">
         {qrDataUrl ? (
-          <OperationShareCard
-            cardRef={setCardNode}
-            config={cardConfig}
-            model={model}
-            qrDataUrl={qrDataUrl}
-          />
+          cardKind === 'actions' ? (
+            <OperationShareCard
+              cardRef={setCardNode}
+              config={cardConfig}
+              model={model}
+              qrDataUrl={qrDataUrl}
+            />
+          ) : (
+            <DeployedOperatorsShareCard
+              cardRef={setCardNode}
+              model={model}
+              qrDataUrl={qrDataUrl}
+            />
+          )
         ) : null}
       </div>
     </Dialog>

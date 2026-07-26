@@ -20,8 +20,24 @@ export interface OperationShareOperator {
   rawName: string
   avatarId?: string
   starLevel?: number
+  attack?: number
+  hp?: number
   skill?: number
+  elite: number
+  level: number
+  skillLevel: number
+  potentiality: number
   module?: string
+  discs: OperationShareDisc[]
+}
+
+export interface OperationShareDisc {
+  slot: number
+  abbreviation: string
+  color?: string
+  forbidden: boolean
+  starStone?: string
+  assistStar?: string
 }
 
 export interface OperationShareGroup {
@@ -90,6 +106,8 @@ export interface OperationShareModel {
   actionSlots: number[]
   rounds: OperationShareRound[]
 }
+
+export type OperationShareCardKind = 'actions' | 'operators'
 
 export function createOperationShareCardConfig(): OperationShareCardConfig {
   return {
@@ -268,6 +286,71 @@ function normalizeHttpUrl(raw?: string) {
   }
 }
 
+interface OperationDiscSlot {
+  index: number
+  disc: number
+  starStone?: string
+  assistStar?: string
+}
+
+function readOperationDiscSlots(
+  operator: CopilotDocV1.Operator,
+): OperationDiscSlot[] {
+  const legacy = operator as CopilotDocV1.Operator & {
+    discsSelected?: unknown
+    discStarStones?: unknown
+    discAssistStars?: unknown
+  }
+  const selected = Array.isArray(legacy.discsSelected)
+    ? legacy.discsSelected
+    : []
+  const starStones = Array.isArray(legacy.discStarStones)
+    ? legacy.discStarStones
+    : []
+  const assistStars = Array.isArray(legacy.discAssistStars)
+    ? legacy.discAssistStars
+    : []
+  if (selected.length > 0 || starStones.length > 0 || assistStars.length > 0) {
+    return [0, 1, 2].map((index) => ({
+      index,
+      disc: Number(selected[index]) || 0,
+      starStone:
+        typeof starStones[index] === 'string' ? starStones[index] : undefined,
+      assistStar:
+        typeof assistStars[index] === 'string' ? assistStars[index] : undefined,
+    }))
+  }
+
+  const extensions = (
+    operator as unknown as {
+      extensions?: { discs?: { slots?: unknown } }
+    }
+  ).extensions
+  const extensionSlots = extensions?.discs?.slots
+  if (!Array.isArray(extensionSlots)) return []
+
+  return extensionSlots
+    .filter(
+      (slot): slot is Record<string, unknown> =>
+        isRecord(slot) && typeof slot.index === 'number',
+    )
+    .map((slot) => ({
+      index: Number(slot.index),
+      disc: Number(slot.disc) || 0,
+      starStone:
+        typeof slot.starStone === 'string' ? slot.starStone : undefined,
+      assistStar:
+        typeof slot.assistStar === 'string' ? slot.assistStar : undefined,
+    }))
+    .sort((left, right) => left.index - right.index)
+    .slice(0, 3)
+}
+
+function optionalLabel(value?: string) {
+  const normalized = value?.trim()
+  return normalized || undefined
+}
+
 function mapOperator(
   operator: CopilotDocV1.Operator,
   language: Language,
@@ -283,6 +366,24 @@ function mapOperator(
     requirements.module === CopilotDocV1.Module.Default
       ? undefined
       : getModuleName(requirements.module)
+  const discList = info?.discs ?? []
+  const discs = readOperationDiscSlots(operator).flatMap((slot) => {
+    const starStone = optionalLabel(slot.starStone)
+    const assistStar = optionalLabel(slot.assistStar)
+    const selectedDisc = discList[Math.abs(slot.disc) - 1]
+    if (!selectedDisc && !starStone && !assistStar) return []
+
+    return [
+      {
+        slot: slot.index + 1,
+        abbreviation: selectedDisc?.abbreviation ?? '未选择命盘',
+        color: selectedDisc?.color,
+        forbidden: slot.disc < 0,
+        starStone,
+        assistStar,
+      },
+    ]
+  })
 
   return {
     slot,
@@ -292,8 +393,15 @@ function mapOperator(
     starLevel: stats.hasStar
       ? Math.min(5, Math.max(0, stats.starLevel))
       : undefined,
+    attack: stats.hasAttack ? Math.max(0, stats.attack) : undefined,
+    hp: stats.hasHp ? Math.max(0, stats.hp) : undefined,
     skill: operator.skill,
+    elite: requirements.elite,
+    level: requirements.level,
+    skillLevel: requirements.skillLevel,
+    potentiality: requirements.potentiality,
     module,
+    discs,
   }
 }
 
@@ -406,10 +514,12 @@ function sanitizeFilePart(value: string, fallback: string) {
 
 export function buildOperationShareFilename(
   model: Pick<OperationShareModel, 'stage' | 'title'>,
+  kind: OperationShareCardKind = 'actions',
 ) {
   const stage = sanitizeFilePart(model.stage, '未知关卡')
   const title = sanitizeFilePart(model.title, '未命名作业')
-  return `${stage}-${title}.png`
+  const suffix = kind === 'operators' ? '-上阵密探' : ''
+  return `${stage}-${title}${suffix}.png`
 }
 
 export function buildOperationShareUrl(operationId: number, origin: string) {

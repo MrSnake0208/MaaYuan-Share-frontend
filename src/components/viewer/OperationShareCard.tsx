@@ -1,5 +1,3 @@
-import { Icon } from '@blueprintjs/core'
-
 import type { CSSProperties, Ref } from 'react'
 
 import type {
@@ -13,28 +11,14 @@ import {
   createOperationShareCardConfig,
   filterOperationShareActions,
 } from './operationShareModel'
+import {
+  ShareCardFrame,
+  ShareOperatorAvatar,
+  ShareOperatorStarLevel,
+  ShareSectionTitle,
+  shareCardPalette as palette,
+} from './shareCardComponents'
 
-const palette = {
-  accent: '#b85f3f',
-  brand: '#176b64',
-  border: '#49645c',
-  ink: '#24312f',
-  muted: '#63716d',
-  paper: '#f6f3eb',
-  panel: '#fffdf8',
-  stripe: '#ebe1d2',
-}
-
-const cardStyle: CSSProperties = {
-  width: 1080,
-  boxSizing: 'border-box',
-  background: palette.paper,
-  color: palette.ink,
-  padding: '52px 52px 40px',
-  fontFamily: 'Inter, "PingFang SC", "Microsoft YaHei", sans-serif',
-}
-
-const STAR_LEVELS = [1, 2, 3, 4, 5] as const
 const defaultCardConfig = createOperationShareCardConfig()
 const tableHeaderBackground = palette.panel
 const tableBodyBackground = palette.stripe
@@ -66,41 +50,6 @@ export function getOperationShareActionLabel(action: OperationShareAction) {
   return action.label
 }
 
-function OperatorStarLevel({ value }: { value: number }) {
-  return (
-    <div
-      aria-label={`${value} 星`}
-      className="mt-1 flex items-center justify-center gap-1 select-none"
-    >
-      {STAR_LEVELS.map((level) => (
-        <Icon
-          key={level}
-          aria-hidden
-          className={`h-4 w-4 ${
-            level <= value
-              ? 'text-yellow-500 opacity-100'
-              : 'text-gray-500 opacity-40'
-          }`}
-          icon="star"
-          iconSize={16}
-        />
-      ))}
-    </div>
-  )
-}
-
-function operatorAvatar(operator: OperationShareOperator) {
-  return operator.avatarId
-    ? `/assets/operator-avatars/webp96/${operator.avatarId}.webp`
-    : '/assets/operator-avatars/404.webp'
-}
-
-function applyAvatarFallback(image: HTMLImageElement) {
-  if (image.dataset.fallbackApplied === 'true') return
-  image.dataset.fallbackApplied = 'true'
-  image.src = '/assets/operator-avatars/404.webp'
-}
-
 function OperatorColumn({
   operator,
   slot,
@@ -130,14 +79,10 @@ function OperatorColumn({
   return (
     <div className="flex min-h-[238px] flex-col items-center px-2 pb-4 pt-5 text-center">
       <div className="relative">
-        <img
-          alt={operator.name}
+        <ShareOperatorAvatar
           className="h-[118px] w-[118px] border-[3px] border-white bg-white object-cover shadow-sm"
-          height={118}
-          loading="eager"
-          onError={(event) => applyAvatarFallback(event.currentTarget)}
-          src={operatorAvatar(operator)}
-          width={118}
+          operator={operator}
+          size={118}
         />
         <span
           className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-sm font-bold text-white"
@@ -155,7 +100,7 @@ function OperatorColumn({
       >
         {operator.skill ? <div>技能 {operator.skill}</div> : null}
         {operator.starLevel !== undefined ? (
-          <OperatorStarLevel value={operator.starLevel} />
+          <ShareOperatorStarLevel value={operator.starLevel} />
         ) : null}
         {operator.module ? <div>{operator.module}模组</div> : null}
       </div>
@@ -170,14 +115,10 @@ function SubstituteOperator({
 }) {
   return (
     <div className="flex w-[148px] items-center gap-3">
-      <img
-        alt={operator.name}
+      <ShareOperatorAvatar
         className="h-14 w-14 shrink-0 border-2 border-white bg-white object-cover shadow-sm"
-        height={56}
-        loading="eager"
-        onError={(event) => applyAvatarFallback(event.currentTarget)}
-        src={operatorAvatar(operator)}
-        width={56}
+        operator={operator}
+        size={56}
       />
       <div className="min-w-0 text-left">
         <div className="break-words text-base font-bold leading-tight">
@@ -221,15 +162,6 @@ function ActionList({ actions }: { actions: OperationShareAction[] }) {
   )
 }
 
-function SectionTitle({ children }: { children: string }) {
-  return (
-    <div className="flex items-center gap-4">
-      <h2 className="shrink-0 text-[22px] font-bold">{children}</h2>
-      <div className="h-px flex-1" style={{ background: '#b9c4c0' }} />
-    </div>
-  )
-}
-
 export function OperationShareCard({
   model,
   cardRef,
@@ -241,96 +173,15 @@ export function OperationShareCard({
   qrDataUrl: string
   config?: OperationShareCardConfig
 }) {
-  const sourceTag =
-    model.source.type === 'repost'
-      ? { label: '搬运', background: '#f2dfb9', color: '#795410' }
-      : { label: '原创', background: '#d8e9e4', color: '#155d57' }
-
   return (
-    <div ref={cardRef} style={cardStyle}>
-      <header className="flex items-start justify-between gap-8">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-3">
-            <div
-              className="text-[15px] font-bold uppercase tracking-[0.18em]"
-              style={{ color: palette.brand }}
-            >
-              MaaYuan · 作业分享
-            </div>
-            <span
-              className="inline-flex rounded-sm px-2.5 py-1 text-sm font-bold"
-              style={{
-                background: sourceTag.background,
-                color: sourceTag.color,
-              }}
-            >
-              {sourceTag.label}
-            </span>
-          </div>
-          <h1
-            className="mt-4 break-words text-[44px] font-bold leading-[1.18]"
-            style={{ color: '#172522' }}
-          >
-            {model.title}
-          </h1>
-        </div>
-        <div className="mt-1 flex w-[440px] shrink-0 items-start justify-end gap-4">
-          <div
-            className="min-w-0 flex-1 border-l-4 py-1 pl-4 text-right"
-            style={{ borderColor: palette.accent }}
-          >
-            {/* <div
-              className="text-sm font-semibold"
-              style={{ color: palette.muted }}
-            >
-              关卡
-            </div>
-            <div className="mt-1 max-w-[260px] break-words text-[25px] font-bold leading-tight">
-              {model.stage}
-            </div> */}
-            <div
-              className="mt-4 text-sm font-semibold"
-              style={{ color: palette.muted }}
-            >
-              攻略作者
-            </div>
-            <div className="mt-1 break-words text-[22px] font-bold leading-tight">
-              {model.source.strategyAuthor}
-            </div>
-            {model.source.platform ? (
-              <div
-                className="mt-2 inline-flex whitespace-nowrap rounded-sm border px-2 py-1 text-xs font-semibold"
-                style={{ borderColor: '#9aaba5', color: palette.muted }}
-              >
-                来源平台 · {model.source.platform}
-              </div>
-            ) : null}
-            {model.source.sharer ? (
-              <div className="mt-2 text-sm" style={{ color: palette.muted }}>
-                本站分享 · {model.source.sharer}
-              </div>
-            ) : null}
-          </div>
-          <div className="w-[104px] shrink-0 text-center">
-            <img
-              alt={model.qrLabel}
-              className="h-[104px] w-[104px] bg-white object-contain"
-              height={104}
-              src={qrDataUrl}
-              width={104}
-            />
-            <div
-              className="mt-2 text-xs font-semibold leading-4"
-              style={{ color: palette.muted }}
-            >
-              {model.qrLabel}
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <ShareCardFrame
+      cardRef={cardRef}
+      eyebrow="MaaYuan · 作业分享"
+      model={model}
+      qrDataUrl={qrDataUrl}
+    >
       <section className="mt-10">
-        <SectionTitle>作战编排</SectionTitle>
+        <ShareSectionTitle>作战编排</ShareSectionTitle>
         <table
           className="mt-5 w-full table-fixed border-collapse text-center"
           style={{ borderColor: palette.border }}
@@ -473,7 +324,7 @@ export function OperationShareCard({
 
       {model.groups.length > 0 ? (
         <section className="mt-9">
-          <SectionTitle>可替换密探</SectionTitle>
+          <ShareSectionTitle>可替换密探</ShareSectionTitle>
           <div className="mt-4 border-y" style={{ borderColor: '#b9c4c0' }}>
             {model.groups.map((group, index) => (
               <div
@@ -508,27 +359,6 @@ export function OperationShareCard({
           </div>
         </section>
       ) : null}
-
-      <footer
-        className="mt-9 flex items-end justify-between gap-8 border-t pt-5 text-sm"
-        style={{ borderColor: '#b9c4c0', color: palette.muted }}
-      >
-        <div className="min-w-0">
-          <div>
-            MaaYuan 神秘代码 ·{' '}
-            <span className="font-bold" style={{ color: palette.ink }}>
-              {model.shortCode}
-            </span>
-          </div>
-          <div className="mt-1 max-w-[760px] break-all text-xs">
-            站内地址 · {model.maayuanUrl}
-          </div>
-        </div>
-        <div className="shrink-0 text-right">
-          <div className="font-semibold">MAAYUAN SHARE</div>
-          <div className="mt-1 text-xs">让每一步都清晰可见</div>
-        </div>
-      </footer>
-    </div>
+    </ShareCardFrame>
   )
 }

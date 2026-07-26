@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { CopilotDocV1 } from '../../models/copilot.schema'
 import type { Operation } from '../../models/operation'
+import { OPERATORS } from '../../models/operator'
 import {
   OPERATION_SHARE_CELL_COLORS,
   ObjectUrlStore,
@@ -58,6 +59,95 @@ describe('operation share model', () => {
     const model = buildOperationShareModel(operation, 'cn')
 
     expect(model.operators[0].starLevel).toBe(4)
+  })
+
+  it('maps deployed operator requirements, stats, discs, and stones', () => {
+    const info = OPERATORS.find((operator) => operator.discs.length >= 2)
+    if (!info) throw new Error('缺少带命盘的测试密探')
+    const operation = createOperation()
+    operation.parsedContent.opers = [
+      {
+        name: info.name,
+        skill: 2,
+        requirements: {
+          elite: 1,
+          level: 50,
+          skillLevel: 8,
+          potentiality: 4,
+          module: CopilotDocV1.Module.A,
+        },
+        discsSelected: [1, -2, 0],
+        discStarStones: ['主星一', '主星二', ''],
+        discAssistStars: ['辅星一', '辅星二', ''],
+        extensions: {
+          stats: {
+            starLevel: 5,
+            attack: 4321,
+            hp: 9876,
+          },
+        },
+      } as unknown as CopilotDocV1.Operator,
+    ]
+
+    const operator = buildOperationShareModel(operation, 'cn').operators[0]
+
+    expect(operator).toMatchObject({
+      skill: 2,
+      elite: 1,
+      level: 50,
+      skillLevel: 8,
+      potentiality: 4,
+      starLevel: 5,
+      attack: 4321,
+      hp: 9876,
+      discs: [
+        {
+          slot: 1,
+          abbreviation: info.discs[0].abbreviation,
+          forbidden: false,
+          starStone: '主星一',
+          assistStar: '辅星一',
+        },
+        {
+          slot: 2,
+          abbreviation: info.discs[1].abbreviation,
+          forbidden: true,
+          starStone: '主星二',
+          assistStar: '辅星二',
+        },
+      ],
+    })
+  })
+
+  it('falls back to extension disc slots when legacy arrays are absent', () => {
+    const info = OPERATORS.find((operator) => operator.discs.length > 0)
+    if (!info) throw new Error('缺少带命盘的测试密探')
+    const operation = createOperation()
+    operation.parsedContent.opers = [
+      {
+        name: info.name,
+        extensions: {
+          discs: {
+            slots: [
+              {
+                index: 0,
+                disc: 1,
+                starStone: '扩展主星',
+                assistStar: '扩展辅星',
+              },
+            ],
+          },
+        },
+      } as unknown as CopilotDocV1.Operator,
+    ]
+
+    expect(
+      buildOperationShareModel(operation, 'cn').operators[0].discs[0],
+    ).toMatchObject({
+      abbreviation: info.discs[0].abbreviation,
+      starStone: '扩展主星',
+      assistStar: '扩展辅星',
+    })
   })
 
   it('includes the original author only for reposted operations', () => {
@@ -342,6 +432,15 @@ describe('share image utilities', () => {
     expect(
       buildOperationShareFilename({ stage: '1/2', title: '攻略:<>"' }),
     ).toBe('1-2-攻略----.png')
+  })
+
+  it('adds a deployed operator suffix to operator share image filenames', () => {
+    expect(
+      buildOperationShareFilename(
+        { stage: '测试关卡', title: '测试作业' },
+        'operators',
+      ),
+    ).toBe('测试关卡-测试作业-上阵密探.png')
   })
 
   it('keeps generated canvas height within the configured limit', () => {

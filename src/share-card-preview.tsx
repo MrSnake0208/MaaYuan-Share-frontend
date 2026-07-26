@@ -40,10 +40,17 @@ async function render() {
       avatarId,
       starLevel: index + 1,
       skill: 2,
+      elite: 2,
+      level: 60,
+      skillLevel: 10,
+      potentiality: 1,
+      discs: [],
     })),
     groups: [],
     actionSlots: [1, 2, 3, 4, 5],
-    rounds: [{ round: 1, slots: { 1: [{ raw: '1普', label: '1A' }] }, others: [] }],
+    rounds: [
+      { round: 1, slots: { 1: [{ raw: '1普', label: '1A' }] }, others: [] },
+    ],
   }
   document.body.style.cssText = 'padding:40px;background:#dfe4e2'
   ReactDOM.createRoot(document.getElementById('root')!).render(
