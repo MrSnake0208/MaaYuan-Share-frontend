@@ -9,9 +9,10 @@ import {
 import { OPERATION_SHARE_CELL_COLORS } from './operationShareModel'
 
 describe('operation share card styles', () => {
-  it('uses one neutral background for uncolored action cells', () => {
-    expect(getOperationShareActionCellBackground({}, 1, 1)).toBe('#ebe1d2')
-    expect(getOperationShareActionCellBackground({}, 2, 1)).toBe('#ebe1d2')
+  it('alternates the deployed-operator palette for uncolored action cells', () => {
+    expect(getOperationShareActionCellBackground({}, 1, 1)).toBe('#f3e3c9')
+    expect(getOperationShareActionCellBackground({}, 2, 1)).toBe('#ddc09e')
+    expect(getOperationShareActionCellBackground({}, 3, 1)).toBe('#f3e3c9')
   })
 
   it('uses the configured semantic color instead of the neutral background', () => {
@@ -23,7 +24,7 @@ describe('operation share card styles', () => {
   })
 
   it('uses one text color without a background for every action label', () => {
-    expect(getOperationShareActionStyle()).toEqual({ color: '#293633' })
+    expect(getOperationShareActionStyle()).toEqual({ color: '#624015' })
   })
 
   it('normalizes star restart labels in the generated image', () => {

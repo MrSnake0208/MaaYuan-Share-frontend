@@ -21,8 +21,15 @@ import {
 } from './shareCardComponents'
 
 const defaultCardConfig = createOperationShareCardConfig()
-const tableHeaderBackground = palette.panel
-const tableBodyBackground = palette.stripe
+const tableBorderColor = '#78501f'
+const tableHeaderBackground = '#f0dec1'
+const tableBodyBackgrounds = ['#f3e3c9', '#ddc09e'] as const
+const operationShareTextColor = '#624015'
+const operationShareMutedTextColor = '#9a856d'
+
+function getOperationShareRoundBackground(round: number) {
+  return tableBodyBackgrounds[(round - 1) % tableBodyBackgrounds.length]
+}
 
 export function getOperationShareActionCellBackground(
   cellColors: OperationShareCardConfig['cellColors'],
@@ -31,7 +38,7 @@ export function getOperationShareActionCellBackground(
 ) {
   return (
     cellColors[buildOperationShareCellKey(round, `slot-${slot}`)] ??
-    tableBodyBackground
+    getOperationShareRoundBackground(round)
   )
 }
 
@@ -90,13 +97,16 @@ function OperatorColumn({
       <div className="flex min-h-[238px] flex-col items-center justify-center px-2 text-center">
         <div
           className="flex h-[118px] w-[118px] items-center justify-center border-2 border-dashed text-lg font-semibold"
-          style={{ borderColor: '#9aaba5', color: palette.muted }}
+          style={{
+            borderColor: '#9aaba5',
+            color: operationShareMutedTextColor,
+          }}
         >
           {slot} 号位
         </div>
         <div
           className="mt-4 text-base font-semibold"
-          style={{ color: palette.muted }}
+          style={{ color: operationShareMutedTextColor }}
         >
           未配置密探
         </div>
@@ -124,7 +134,7 @@ function OperatorColumn({
       </div>
       <div
         className="mt-2 min-h-10 text-[13px] font-medium leading-5"
-        style={{ color: palette.muted }}
+        style={{ color: operationShareMutedTextColor }}
       >
         {operator.skill ? <div>技能 {operator.skill}</div> : null}
         {operator.starLevel !== undefined ? (
@@ -160,7 +170,9 @@ function SubstituteOperator({
   )
 }
 
-const operationShareActionStyle: CSSProperties = { color: '#293633' }
+const operationShareActionStyle: CSSProperties = {
+  color: operationShareTextColor,
+}
 
 export function getOperationShareActionStyle(): CSSProperties {
   return operationShareActionStyle
@@ -175,7 +187,7 @@ function ActionList({
 }) {
   if (actions.length === 0) {
     return (
-      <span className="text-lg" style={{ color: '#a7b0ad' }}>
+      <span className="text-lg" style={{ color: operationShareMutedTextColor }}>
         —
       </span>
     )
@@ -221,14 +233,17 @@ export function OperationShareCard({
         <ShareSectionTitle>作战编排</ShareSectionTitle>
         <table
           className="mt-5 w-full table-fixed border-collapse text-center"
-          style={{ borderColor: palette.border }}
+          style={{
+            borderColor: tableBorderColor,
+            color: operationShareTextColor,
+          }}
         >
           <thead>
             <tr>
               <th
                 className="w-[110px] border-2 px-3 text-[21px] font-bold"
                 style={{
-                  borderColor: palette.border,
+                  borderColor: tableBorderColor,
                   background: tableHeaderBackground,
                 }}
               >
@@ -239,7 +254,7 @@ export function OperationShareCard({
                   key={slot}
                   className="border-2 p-0 align-top"
                   style={{
-                    borderColor: palette.border,
+                    borderColor: tableBorderColor,
                     background: tableHeaderBackground,
                   }}
                 >
@@ -253,7 +268,7 @@ export function OperationShareCard({
                 <th
                   className="w-[118px] border-2 px-3 text-lg font-bold"
                   style={{
-                    borderColor: palette.border,
+                    borderColor: tableBorderColor,
                     background: tableHeaderBackground,
                   }}
                 >
@@ -264,7 +279,7 @@ export function OperationShareCard({
                 <th
                   className="w-[168px] border-2 px-3 text-lg font-bold"
                   style={{
-                    borderColor: palette.border,
+                    borderColor: tableBorderColor,
                     background: tableHeaderBackground,
                   }}
                 >
@@ -278,15 +293,15 @@ export function OperationShareCard({
               model.rounds.map((round) => {
                 const { otherActions, displayOrderByActionOrder } =
                   getOperationShareRoundDisplay(round, config)
+                const rowBackground = getOperationShareRoundBackground(
+                  round.round,
+                )
 
                 return (
-                  <tr
-                    key={round.round}
-                    style={{ background: tableBodyBackground }}
-                  >
+                  <tr key={round.round} style={{ background: rowBackground }}>
                     <th
                       className="border-2 px-3 py-3 text-[19px] leading-tight"
-                      style={{ borderColor: palette.border }}
+                      style={{ borderColor: tableBorderColor }}
                     >
                       <span className="block text-[28px] font-bold">
                         {round.round}
@@ -300,7 +315,7 @@ export function OperationShareCard({
                         key={slot}
                         className="border-2 px-1.5 py-2 align-middle"
                         style={{
-                          borderColor: palette.border,
+                          borderColor: tableBorderColor,
                           background: getOperationShareActionCellBackground(
                             config.cellColors,
                             round.round,
@@ -318,8 +333,8 @@ export function OperationShareCard({
                       <td
                         className="border-2 px-1.5 py-2 align-middle"
                         style={{
-                          borderColor: palette.border,
-                          background: tableBodyBackground,
+                          borderColor: tableBorderColor,
+                          background: rowBackground,
                         }}
                       >
                         <ActionList
@@ -332,11 +347,11 @@ export function OperationShareCard({
                       <td
                         className="whitespace-pre-wrap break-words border-2 px-3 py-3 text-left text-[17px] font-medium leading-6 align-middle"
                         style={{
-                          borderColor: palette.border,
-                          background: tableBodyBackground,
+                          borderColor: tableBorderColor,
+                          background: rowBackground,
                           color: config.notes[round.round]
-                            ? palette.ink
-                            : '#a7b0ad',
+                            ? operationShareTextColor
+                            : operationShareMutedTextColor,
                         }}
                       >
                         {config.notes[round.round] || '—'}
@@ -346,7 +361,7 @@ export function OperationShareCard({
                 )
               })
             ) : (
-              <tr style={{ background: tableBodyBackground }}>
+              <tr style={{ background: tableBodyBackgrounds[0] }}>
                 <td
                   className="border-2 px-4 py-8 text-base font-medium"
                   colSpan={
@@ -355,7 +370,10 @@ export function OperationShareCard({
                     (config.showOtherActions ? 1 : 0) +
                     (config.showNotes ? 1 : 0)
                   }
-                  style={{ borderColor: palette.border, color: palette.muted }}
+                  style={{
+                    borderColor: tableBorderColor,
+                    color: operationShareMutedTextColor,
+                  }}
                 >
                   此作业未定义动作序列
                 </td>
