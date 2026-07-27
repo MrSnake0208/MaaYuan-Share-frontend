@@ -4,6 +4,7 @@ import {
   getOperationShareActionCellBackground,
   getOperationShareActionLabel,
   getOperationShareActionStyle,
+  getOperationShareOperatorStarLabel,
   getOperationShareRoundDisplay,
 } from './OperationShareCard'
 import { OPERATION_SHARE_CELL_COLORS } from './operationShareModel'
@@ -25,6 +26,11 @@ describe('operation share card styles', () => {
 
   it('uses one text color without a background for every action label', () => {
     expect(getOperationShareActionStyle()).toEqual({ color: '#624015' })
+  })
+
+  it('uses the operator star level for the avatar badge', () => {
+    expect(getOperationShareOperatorStarLabel({ starLevel: 4 })).toBe('4 星')
+    expect(getOperationShareOperatorStarLabel({})).toBeUndefined()
   })
 
   it('normalizes star restart labels in the generated image', () => {

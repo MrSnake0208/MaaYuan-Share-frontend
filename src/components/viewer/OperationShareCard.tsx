@@ -1,3 +1,5 @@
+import { Icon } from '@blueprintjs/core'
+
 import type { CSSProperties, Ref } from 'react'
 
 import type {
@@ -15,7 +17,6 @@ import {
 import {
   ShareCardFrame,
   ShareOperatorAvatar,
-  ShareOperatorStarLevel,
   ShareSectionTitle,
   shareCardPalette as palette,
 } from './shareCardComponents'
@@ -85,6 +86,14 @@ export function getOperationShareRoundDisplay(
   }
 }
 
+export function getOperationShareOperatorStarLabel(
+  operator: Pick<OperationShareOperator, 'starLevel'>,
+) {
+  return operator.starLevel === undefined
+    ? undefined
+    : `${operator.starLevel} 星`
+}
+
 function OperatorColumn({
   operator,
   slot,
@@ -122,12 +131,16 @@ function OperatorColumn({
           operator={operator}
           size={118}
         />
-        <span
-          className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-sm font-bold text-white"
-          style={{ background: palette.brand }}
-        >
-          {slot}
-        </span>
+        {operator.starLevel !== undefined ? (
+          <span
+            aria-label={getOperationShareOperatorStarLabel(operator)}
+            className="absolute -right-2 -top-2 flex h-8 min-w-10 items-center justify-center gap-1 rounded-sm border-2 border-white px-1.5 text-sm font-bold text-white"
+            style={{ background: '#e96913' }}
+          >
+            <Icon aria-hidden icon="star" iconSize={14} />
+            <span>{operator.starLevel}</span>
+          </span>
+        ) : null}
       </div>
       <div className="mt-3 text-[21px] font-bold leading-tight">
         {operator.name}
@@ -137,9 +150,6 @@ function OperatorColumn({
         style={{ color: operationShareMutedTextColor }}
       >
         {operator.skill ? <div>技能 {operator.skill}</div> : null}
-        {operator.starLevel !== undefined ? (
-          <ShareOperatorStarLevel value={operator.starLevel} />
-        ) : null}
         {operator.module ? <div>{operator.module}模组</div> : null}
       </div>
     </div>
