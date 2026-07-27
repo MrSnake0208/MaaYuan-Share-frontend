@@ -49,7 +49,11 @@ async function render() {
     groups: [],
     actionSlots: [1, 2, 3, 4, 5],
     rounds: [
-      { round: 1, slots: { 1: [{ raw: '1普', label: '1A' }] }, others: [] },
+      {
+        round: 1,
+        slots: { 1: [{ raw: '1普', order: 1, label: 'A' }] },
+        others: [],
+      },
     ],
   }
   document.body.style.cssText = 'padding:40px;background:#dfe4e2'

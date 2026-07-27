@@ -5,6 +5,7 @@ import type {
   OperationShareCardConfig,
   OperationShareModel,
   OperationShareOperator,
+  OperationShareRound,
 } from './operationShareModel'
 import {
   buildOperationShareCellKey,
@@ -34,12 +35,14 @@ export function getOperationShareActionCellBackground(
   )
 }
 
-export function getOperationShareActionLabel(action: OperationShareAction) {
-  const order = action.label.match(/^\d+/)?.[0] ?? ''
+export function getOperationShareActionLabel(
+  action: OperationShareAction,
+  displayOrder = action.order,
+) {
   const starColor = action.raw.match(/^重开:无(.+)星$/)?.[1]
 
   if (starColor) {
-    return `${order}无${starColor}星重开`
+    return `${displayOrder}无${starColor}星重开`
   }
 
   const fallenSlot = action.raw.match(/^重开:检测(\d+)号位阵亡$/)?.[1]
@@ -47,7 +50,32 @@ export function getOperationShareActionLabel(action: OperationShareAction) {
     return `${fallenSlot}号位阵亡就重开`
   }
 
-  return action.label
+  return `${displayOrder}${action.label}`
+}
+
+export function getOperationShareRoundDisplay(
+  round: OperationShareRound,
+  config: Pick<
+    OperationShareCardConfig,
+    'showOtherActions' | 'showTargetSwitches'
+  >,
+) {
+  const otherActions = config.showOtherActions
+    ? filterOperationShareActions(round.others, config.showTargetSwitches)
+    : []
+  const visibleActions = [...otherActions]
+
+  Object.values(round.slots).forEach((actions) => {
+    visibleActions.push(...actions)
+  })
+  visibleActions.sort((left, right) => left.order - right.order)
+
+  return {
+    otherActions,
+    displayOrderByActionOrder: new Map(
+      visibleActions.map((action, index) => [action.order, index + 1]),
+    ),
+  }
 }
 
 function OperatorColumn({
@@ -138,7 +166,13 @@ export function getOperationShareActionStyle(): CSSProperties {
   return operationShareActionStyle
 }
 
-function ActionList({ actions }: { actions: OperationShareAction[] }) {
+function ActionList({
+  actions,
+  displayOrderByActionOrder,
+}: {
+  actions: OperationShareAction[]
+  displayOrderByActionOrder: ReadonlyMap<number, number>
+}) {
   if (actions.length === 0) {
     return (
       <span className="text-lg" style={{ color: '#a7b0ad' }}>
@@ -154,7 +188,10 @@ function ActionList({ actions }: { actions: OperationShareAction[] }) {
     >
       {actions.map((action, index) => (
         <span key={`${action.raw}-${index}`}>
-          {getOperationShareActionLabel(action)}
+          {getOperationShareActionLabel(
+            action,
+            displayOrderByActionOrder.get(action.order),
+          )}
           <wbr />
         </span>
       ))}
@@ -238,70 +275,76 @@ export function OperationShareCard({
           </thead>
           <tbody>
             {model.rounds.length > 0 ? (
-              model.rounds.map((round) => (
-                <tr
-                  key={round.round}
-                  style={{ background: tableBodyBackground }}
-                >
-                  <th
-                    className="border-2 px-3 py-3 text-[19px] leading-tight"
-                    style={{ borderColor: palette.border }}
+              model.rounds.map((round) => {
+                const { otherActions, displayOrderByActionOrder } =
+                  getOperationShareRoundDisplay(round, config)
+
+                return (
+                  <tr
+                    key={round.round}
+                    style={{ background: tableBodyBackground }}
                   >
-                    <span className="block text-[28px] font-bold">
-                      {round.round}
-                    </span>
-                    <span className="mt-1 block text-sm font-semibold">
-                      回合
-                    </span>
-                  </th>
-                  {model.actionSlots.map((slot) => (
-                    <td
-                      key={slot}
-                      className="border-2 px-1.5 py-2 align-middle"
-                      style={{
-                        borderColor: palette.border,
-                        background: getOperationShareActionCellBackground(
-                          config.cellColors,
-                          round.round,
-                          slot,
-                        ),
-                      }}
+                    <th
+                      className="border-2 px-3 py-3 text-[19px] leading-tight"
+                      style={{ borderColor: palette.border }}
                     >
-                      <ActionList actions={round.slots[slot] ?? []} />
-                    </td>
-                  ))}
-                  {config.showOtherActions ? (
-                    <td
-                      className="border-2 px-1.5 py-2 align-middle"
-                      style={{
-                        borderColor: palette.border,
-                        background: tableBodyBackground,
-                      }}
-                    >
-                      <ActionList
-                        actions={filterOperationShareActions(
-                          round.others,
-                          config.showTargetSwitches,
-                        )}
-                      />
-                    </td>
-                  ) : null}
-                  {config.showNotes ? (
-                    <td
-                      className="whitespace-pre-wrap break-words border-2 px-3 py-3 text-left text-[17px] font-medium leading-6 align-middle"
-                      style={{
-                        borderColor: palette.border,
-                        background: tableBodyBackground,
-                        color: config.notes[round.round]
-                          ? palette.ink
-                          : '#a7b0ad',
-                      }}
-                    >
-                      {config.notes[round.round] || '—'}
-                    </td>
-                  ) : null}
-                </tr>
-              ))
+                      <span className="block text-[28px] font-bold">
+                        {round.round}
+                      </span>
+                      <span className="mt-1 block text-sm font-semibold">
+                        回合
+                      </span>
+                    </th>
+                    {model.actionSlots.map((slot) => (
+                      <td
+                        key={slot}
+                        className="border-2 px-1.5 py-2 align-middle"
+                        style={{
+                          borderColor: palette.border,
+                          background: getOperationShareActionCellBackground(
+                            config.cellColors,
+                            round.round,
+                            slot,
+                          ),
+                        }}
+                      >
+                        <ActionList
+                          actions={round.slots[slot] ?? []}
+                          displayOrderByActionOrder={displayOrderByActionOrder}
+                        />
+                      </td>
+                    ))}
+                    {config.showOtherActions ? (
+                      <td
+                        className="border-2 px-1.5 py-2 align-middle"
+                        style={{
+                          borderColor: palette.border,
+                          background: tableBodyBackground,
+                        }}
+                      >
+                        <ActionList
+                          actions={otherActions}
+                          displayOrderByActionOrder={displayOrderByActionOrder}
+                        />
+                      </td>
+                    ) : null}
+                    {config.showNotes ? (
+                      <td
+                        className="whitespace-pre-wrap break-words border-2 px-3 py-3 text-left text-[17px] font-medium leading-6 align-middle"
+                        style={{
+                          borderColor: palette.border,
+                          background: tableBodyBackground,
+                          color: config.notes[round.round]
+                            ? palette.ink
+                            : '#a7b0ad',
+                        }}
+                      >
+                        {config.notes[round.round] || '—'}
+                      </td>
+                    ) : null}
+                  </tr>
+                )
+              })
             ) : (
               <tr style={{ background: tableBodyBackground }}>
                 <td

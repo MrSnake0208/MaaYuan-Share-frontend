@@ -204,9 +204,9 @@ describe('operation share model', () => {
 
     const model = buildOperationShareModel(operation, 'cn')
 
-    expect(model.rounds[0]?.slots[1]?.map((action) => action.label)).toEqual([
-      '1A',
-      '2↑',
+    expect(model.rounds[0]?.slots[1]).toEqual([
+      { raw: '1普', order: 1, label: 'A' },
+      { raw: '1大', order: 2, label: '↑' },
     ])
   })
 
@@ -232,10 +232,10 @@ describe('operation share model', () => {
 
     const round = buildOperationShareModel(operation, 'cn').rounds[0]
 
-    expect(round?.slots[1]?.map((action) => action.label)).toEqual(['2A'])
-    expect(round?.others.map((action) => action.label)).toEqual([
-      '1右滑',
-      '3左滑',
+    expect(round?.slots[1]).toEqual([{ raw: '1普', order: 2, label: 'A' }])
+    expect(round?.others).toEqual([
+      { raw: '额外:左侧目标', order: 1, label: '右滑' },
+      { raw: '额外:右侧目标', order: 3, label: '左滑' },
     ])
   })
 
@@ -255,7 +255,8 @@ describe('operation share model', () => {
     expect(round?.others).toEqual([
       {
         raw: '重开:检测3号位阵亡',
-        label: '1检测3号位阵亡',
+        order: 1,
+        label: '检测3号位阵亡',
       },
     ])
     expect(model.actionSlots).toEqual([1])
@@ -277,7 +278,7 @@ describe('operation share model', () => {
 
     const round = buildOperationShareModel(operation, 'cn').rounds[0]
 
-    expect(round?.slots[1]?.map((action) => action.label)).toEqual(['2A'])
+    expect(round?.slots[1]).toEqual([{ raw: '1普', order: 2, label: 'A' }])
     expect(round?.others).toEqual([])
   })
 })
@@ -309,13 +310,13 @@ describe('share image utilities', () => {
 
   it('builds stable cell keys and filters target switching actions on demand', () => {
     const actions = [
-      { raw: '额外:左侧目标', label: '1右滑' },
-      { raw: '额外:开大', label: '2大' },
+      { raw: '额外:左侧目标', order: 1, label: '右滑' },
+      { raw: '额外:开大', order: 2, label: '大' },
     ]
 
     expect(buildOperationShareCellKey(2, 'slot-3')).toBe('2:slot-3')
     expect(filterOperationShareActions(actions, false)).toEqual([
-      { raw: '额外:开大', label: '2大' },
+      { raw: '额外:开大', order: 2, label: '大' },
     ])
     expect(filterOperationShareActions(actions, true)).toBe(actions)
   })

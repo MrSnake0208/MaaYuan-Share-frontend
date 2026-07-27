@@ -47,6 +47,7 @@ export interface OperationShareGroup {
 
 export interface OperationShareAction {
   raw: string
+  order: number
   label: string
 }
 
@@ -459,7 +460,8 @@ export function buildOperationShareModel(
         .filter((token) => !belongsToOtherShareColumn(token.raw))
         .map((token) => ({
           raw: token.raw,
-          label: `${token.order + 1}${formatShareActionSummary(token.raw, language)}`,
+          order: token.order + 1,
+          label: formatShareActionSummary(token.raw, language),
         }))
     }
     return {
@@ -469,7 +471,8 @@ export function buildOperationShareModel(
         .sort((left, right) => left.order - right.order)
         .map((token) => ({
           raw: token.raw,
-          label: `${token.order + 1}${formatShareActionSummary(token.raw, language)}`,
+          order: token.order + 1,
+          label: formatShareActionSummary(token.raw, language),
         })),
     }
   })
