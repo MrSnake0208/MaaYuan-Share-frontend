@@ -1,8 +1,5 @@
-import type {
-  AssistStarName,
-  MainStarName,
-  StarPresetValues,
-} from '../../../data/operator-star-stone-presets'
+import type { StarPresetValues } from '../../../data/operator-star-stone-presets'
+import type { AssistStarName, MainStarName } from '../../../data/star-stones'
 import type { EditorOperator } from '../types'
 
 export interface DiscSlot {

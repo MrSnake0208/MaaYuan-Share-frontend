@@ -4,11 +4,16 @@ import clsx from 'clsx'
 import { FC, memo } from 'react'
 
 import {
-  AssistStarName,
-  MainStarName,
   OPERATOR_STAR_STONE_PRESETS,
   OperatorStarPreset,
 } from '../../../data/operator-star-stone-presets'
+import {
+  AssistStarName,
+  MainStarName,
+  StarStoneOperatorProfile,
+  getAssistStarAvailability,
+  getMainStarAvailability,
+} from '../../../data/star-stones'
 import { Select } from '../../Select'
 import { EditorOperator, useEdit } from '../editor-state'
 import {
@@ -20,6 +25,7 @@ import {
 interface OperatorStarStonePresetSelectProps {
   operator: EditorOperator
   operatorId: string
+  operatorProfile: StarStoneOperatorProfile
   onChange?: (operator: EditorOperator) => void
 }
 
@@ -27,6 +33,7 @@ interface PresetControlProps<T extends string> {
   emptyLabel: string
   currentValues: string[]
   presets: OperatorStarPreset<T>[]
+  getDisabledReason: (preset: OperatorStarPreset<T>) => string | undefined
   onSelect: (preset: OperatorStarPreset<T>) => void
 }
 
@@ -34,9 +41,13 @@ function PresetControl<T extends string>({
   emptyLabel,
   currentValues,
   presets,
+  getDisabledReason,
   onSelect,
 }: PresetControlProps<T>) {
-  const matchedPreset = presets.find((preset) =>
+  const availablePresets = presets.filter(
+    (preset) => !getDisabledReason(preset),
+  )
+  const matchedPreset = availablePresets.find((preset) =>
     currentValues.every(
       (value, index) => value === (preset.values[index] ?? ''),
     ),
@@ -52,13 +63,13 @@ function PresetControl<T extends string>({
     <Select
       className="flex-1 min-w-0"
       filterable={false}
-      items={presets}
+      items={availablePresets}
       itemRenderer={(preset, { handleClick, handleFocus, modifiers }) => (
         <MenuItem
           roleStructure="listoption"
           key={preset.id}
           className={clsx(
-            'min-w-36 !rounded-none text-sm font-serif text-slate-700 dark:text-slate-200',
+            'min-w-44 !rounded-none text-sm font-serif text-slate-700 dark:text-slate-200',
             modifiers.active && Classes.ACTIVE,
           )}
           text={preset.label}
@@ -68,7 +79,11 @@ function PresetControl<T extends string>({
           selected={matchedPreset?.id === preset.id}
         />
       )}
-      onItemSelect={onSelect}
+      onItemSelect={(preset) => {
+        if (!getDisabledReason(preset)) {
+          onSelect(preset)
+        }
+      }}
       popoverProps={{
         placement: 'top',
         popoverClassName:
@@ -88,7 +103,7 @@ function PresetControl<T extends string>({
 }
 
 export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProps> =
-  memo(({ operator, operatorId, onChange }) => {
+  memo(({ operator, operatorId, operatorProfile, onChange }) => {
     const edit = useEdit()
     const presetSet = OPERATOR_STAR_STONE_PRESETS[operatorId]
     const mainStarPresets = presetSet?.mainStarPresets ?? []
@@ -102,8 +117,37 @@ export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProp
     const mainStarValues = slots.map((slot) => slot.starStone ?? '')
     const assistStarValues = slots.map((slot) => slot.assistStar ?? '')
 
+    const getMainPresetDisabledReason = (
+      preset: OperatorStarPreset<MainStarName>,
+    ) => {
+      for (const star of preset.values) {
+        if (!star) continue
+        const availability = getMainStarAvailability(star, operatorProfile)
+        if (!availability.available) {
+          return `${star}：${availability.reason}`
+        }
+      }
+      return undefined
+    }
+
+    const getAssistPresetDisabledReason = (
+      preset: OperatorStarPreset<AssistStarName>,
+    ) => {
+      for (const star of preset.values) {
+        if (!star) continue
+        const availability = getAssistStarAvailability(star, operatorProfile)
+        if (!availability.available) {
+          return `${star}：${availability.reason}`
+        }
+      }
+      return undefined
+    }
+
     const applyMainPreset = (preset: OperatorStarPreset<MainStarName>) => {
       edit(() => {
+        if (getMainPresetDisabledReason(preset)) {
+          return { action: 'skip', desc: 'skip' }
+        }
         onChange?.(applyMainStarPreset(operator, preset.values))
         return {
           action: 'apply-operator-main-star-preset',
@@ -114,6 +158,9 @@ export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProp
 
     const applyAssistPreset = (preset: OperatorStarPreset<AssistStarName>) => {
       edit(() => {
+        if (getAssistPresetDisabledReason(preset)) {
+          return { action: 'skip', desc: 'skip' }
+        }
         onChange?.(applyAssistStarPreset(operator, preset.values))
         return {
           action: 'apply-operator-assist-star-preset',
@@ -129,6 +176,7 @@ export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProp
             emptyLabel="主星预设"
             currentValues={mainStarValues}
             presets={mainStarPresets}
+            getDisabledReason={getMainPresetDisabledReason}
             onSelect={applyMainPreset}
           />
         ) : null}
@@ -137,6 +185,7 @@ export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProp
             emptyLabel="辅星预设"
             currentValues={assistStarValues}
             presets={assistStarPresets}
+            getDisabledReason={getAssistPresetDisabledReason}
             onSelect={applyAssistPreset}
           />
         ) : null}

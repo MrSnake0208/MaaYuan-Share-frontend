@@ -7,9 +7,14 @@ import { clamp } from 'lodash-es'
 import { FC, memo, useMemo, useState } from 'react'
 
 import {
+  ASSIST_STAR_DESCRIPTIONS,
   ASSIST_STAR_OPTIONS,
+  AssistStarName,
   MAIN_STAR_OPTIONS,
-} from '../../../data/operator-star-stone-presets'
+  MainStarName,
+  getAssistStarAvailability,
+  getMainStarAvailability,
+} from '../../../data/star-stones'
 import { i18n, useTranslation } from '../../../i18n/i18n'
 import { CopilotDocV1 } from '../../../models/copilot.schema'
 import {
@@ -124,6 +129,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
       ],
       [discList],
     )
+    const discSlots = getDiscSlots(operator)
 
     const discColorClasses = (color?: string) => {
       switch (color) {
@@ -339,12 +345,13 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
               <OperatorStarStonePresetSelect
                 operator={operator}
                 operatorId={info.id}
+                operatorProfile={info}
                 onChange={onChange}
               />
               {/* 如果有命盘定义，则以命盘集合驱动 skill 选择；否则回退为原来的 1/2/3 技能选择 */}
               {discList.length > 0
                 ? [0, 1, 2].map((slot) => {
-                    const slots = getDiscSlots(operator)
+                    const slots = discSlots
                     const idx1 = slots[slot]?.disc ?? 0
                     const selectedIsForbidden = idx1 < 0
                     const selectedDiscIndex1 =
@@ -353,6 +360,27 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                       selectedDiscIndex1 > 0
                         ? discList[selectedDiscIndex1 - 1]
                         : undefined
+                    const selectableMainStarOptions = MAIN_STAR_OPTIONS.filter(
+                      (item) =>
+                        getMainStarAvailability(item, info).available &&
+                        (item === '任意' ||
+                          !discSlots.some(
+                            (candidate) =>
+                              candidate.index !== slot &&
+                              candidate.starStone === item,
+                          )),
+                    )
+                    const selectableAssistStarOptions =
+                      ASSIST_STAR_OPTIONS.filter(
+                        (item) =>
+                          getAssistStarAvailability(item, info).available &&
+                          (item === '任意' ||
+                            !discSlots.some(
+                              (candidate) =>
+                                candidate.index !== slot &&
+                                candidate.assistStar === item,
+                            )),
+                      )
                     return (
                       <li
                         key={'disc-slot-' + slot}
@@ -507,28 +535,40 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                         <Select
                           className=""
                           filterable={false}
-                          items={MAIN_STAR_OPTIONS}
+                          items={selectableMainStarOptions}
                           itemRenderer={(
-                            item: string,
+                            item: MainStarName,
                             { handleClick, handleFocus, modifiers },
                           ) => (
                             <MenuItem
                               roleStructure="listoption"
                               key={item}
                               className={clsx(
-                                'min-w-20 !rounded-none text-sm font-serif text-slate-700 dark:text-slate-200',
+                                'min-w-44 !rounded-none text-sm font-serif text-slate-700 dark:text-slate-200',
                                 modifiers.active && Classes.ACTIVE,
                               )}
                               text={item}
                               title={item}
                               onClick={handleClick}
                               onFocus={handleFocus}
-                              selected={
-                                getDiscSlots(operator)[slot]?.starStone === item
-                              }
+                              selected={discSlots[slot]?.starStone === item}
                             />
                           )}
-                          onItemSelect={(item: string) => {
+                          onItemSelect={(item: MainStarName) => {
+                            const availability = getMainStarAvailability(
+                              item,
+                              info,
+                            )
+                            const selectedElsewhere =
+                              item !== '任意' &&
+                              discSlots.some(
+                                (candidate) =>
+                                  candidate.index !== slot &&
+                                  candidate.starStone === item,
+                              )
+                            if (!availability.available || selectedElsewhere) {
+                              return
+                            }
                             edit(() => {
                               const next = setDiscSlot(operator, slot, {
                                 starStone: item,
@@ -550,13 +590,10 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                           <Button
                             small
                             minimal
-                            title={
-                              getDiscSlots(operator)[slot]?.starStone ||
-                              '选择星石'
-                            }
+                            title={discSlots[slot]?.starStone || '选择星石'}
                             className="w-[4ch] whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600"
                           >
-                            {getDiscSlots(operator)[slot]?.starStone || '星石'}
+                            {discSlots[slot]?.starStone || '星石'}
                           </Button>
                         </Select>
 
@@ -564,29 +601,44 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                         <Select
                           className=""
                           filterable={false}
-                          items={ASSIST_STAR_OPTIONS}
+                          items={selectableAssistStarOptions}
                           itemRenderer={(
-                            item: string,
+                            item: AssistStarName,
                             { handleClick, handleFocus, modifiers },
-                          ) => (
-                            <MenuItem
-                              roleStructure="listoption"
-                              key={item}
-                              className={clsx(
-                                'min-w-20 !rounded-none text-sm font-serif text-slate-700 dark:text-slate-200',
-                                modifiers.active && Classes.ACTIVE,
-                              )}
-                              text={item}
-                              title={item}
-                              onClick={handleClick}
-                              onFocus={handleFocus}
-                              selected={
-                                getDiscSlots(operator)[slot]?.assistStar ===
-                                item
-                              }
-                            />
-                          )}
-                          onItemSelect={(item: string) => {
+                          ) => {
+                            const description = ASSIST_STAR_DESCRIPTIONS[item]
+                            return (
+                              <MenuItem
+                                roleStructure="listoption"
+                                key={item}
+                                className={clsx(
+                                  'min-w-56 !rounded-none text-sm font-serif text-slate-700 dark:text-slate-200',
+                                  modifiers.active && Classes.ACTIVE,
+                                )}
+                                text={item}
+                                title={`${item} · ${description}`}
+                                labelElement={description}
+                                onClick={handleClick}
+                                onFocus={handleFocus}
+                                selected={discSlots[slot]?.assistStar === item}
+                              />
+                            )
+                          }}
+                          onItemSelect={(item: AssistStarName) => {
+                            const availability = getAssistStarAvailability(
+                              item,
+                              info,
+                            )
+                            const selectedElsewhere =
+                              item !== '任意' &&
+                              discSlots.some(
+                                (candidate) =>
+                                  candidate.index !== slot &&
+                                  candidate.assistStar === item,
+                              )
+                            if (!availability.available || selectedElsewhere) {
+                              return
+                            }
                             edit(() => {
                               const next = setDiscSlot(operator, slot, {
                                 assistStar: item,
@@ -608,13 +660,10 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                           <Button
                             small
                             minimal
-                            title={
-                              getDiscSlots(operator)[slot]?.assistStar ||
-                              '选择辅星'
-                            }
+                            title={discSlots[slot]?.assistStar || '选择辅星'}
                             className="w-[4ch] whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600"
                           >
-                            {getDiscSlots(operator)[slot]?.assistStar || '辅星'}
+                            {discSlots[slot]?.assistStar || '辅星'}
                           </Button>
                         </Select>
                       </li>
