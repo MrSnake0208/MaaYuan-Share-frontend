@@ -16,11 +16,7 @@ import {
 } from '../../../data/star-stones'
 import { Select } from '../../Select'
 import { EditorOperator, useEdit } from '../editor-state'
-import {
-  applyAssistStarPreset,
-  applyMainStarPreset,
-  getDiscSlots,
-} from './operatorDiscModel'
+import { applyAssistStarPreset, applyMainStarPreset } from './operatorDiscModel'
 
 interface OperatorStarStonePresetSelectProps {
   operator: EditorOperator
@@ -30,16 +26,14 @@ interface OperatorStarStonePresetSelectProps {
 }
 
 interface PresetControlProps<T extends string> {
-  emptyLabel: string
-  currentValues: string[]
+  label: string
   presets: OperatorStarPreset<T>[]
   getDisabledReason: (preset: OperatorStarPreset<T>) => string | undefined
   onSelect: (preset: OperatorStarPreset<T>) => void
 }
 
 function PresetControl<T extends string>({
-  emptyLabel,
-  currentValues,
+  label,
   presets,
   getDisabledReason,
   onSelect,
@@ -47,17 +41,6 @@ function PresetControl<T extends string>({
   const availablePresets = presets.filter(
     (preset) => !getDisabledReason(preset),
   )
-  const matchedPreset = availablePresets.find((preset) =>
-    currentValues.every(
-      (value, index) => value === (preset.values[index] ?? ''),
-    ),
-  )
-  const hasCustomValues = currentValues.some(Boolean)
-  const buttonText = matchedPreset
-    ? `${emptyLabel.replace('预设', '')}：${matchedPreset.label}`
-    : hasCustomValues
-      ? `${emptyLabel.replace('预设', '')}：自定义`
-      : emptyLabel
 
   return (
     <Select
@@ -76,7 +59,6 @@ function PresetControl<T extends string>({
           title={preset.description ?? preset.label}
           onClick={handleClick}
           onFocus={handleFocus}
-          selected={matchedPreset?.id === preset.id}
         />
       )}
       onItemSelect={(preset) => {
@@ -93,10 +75,10 @@ function PresetControl<T extends string>({
       <Button
         small
         minimal
-        title={buttonText}
+        title={label}
         className="!w-full min-w-0 !px-1 !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600"
       >
-        <span className="block min-w-0 truncate">{buttonText}</span>
+        <span className="block min-w-0 truncate">{label}</span>
       </Button>
     </Select>
   )
@@ -112,10 +94,6 @@ export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProp
     if (mainStarPresets.length === 0 && assistStarPresets.length === 0) {
       return null
     }
-
-    const slots = getDiscSlots(operator)
-    const mainStarValues = slots.map((slot) => slot.starStone ?? '')
-    const assistStarValues = slots.map((slot) => slot.assistStar ?? '')
 
     const getMainPresetDisabledReason = (
       preset: OperatorStarPreset<MainStarName>,
@@ -173,8 +151,7 @@ export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProp
       <li className="h-8 flex items-center gap-1 ml-1">
         {mainStarPresets.length > 0 ? (
           <PresetControl
-            emptyLabel="主星预设"
-            currentValues={mainStarValues}
+            label="主星预设"
             presets={mainStarPresets}
             getDisabledReason={getMainPresetDisabledReason}
             onSelect={applyMainPreset}
@@ -182,8 +159,7 @@ export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProp
         ) : null}
         {assistStarPresets.length > 0 ? (
           <PresetControl
-            emptyLabel="辅星预设"
-            currentValues={assistStarValues}
+            label="辅星预设"
             presets={assistStarPresets}
             getDisabledReason={getAssistPresetDisabledReason}
             onSelect={applyAssistPreset}
