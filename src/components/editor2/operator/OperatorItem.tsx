@@ -6,6 +6,10 @@ import { useSetAtom } from 'jotai'
 import { clamp } from 'lodash-es'
 import { FC, memo, useMemo, useState } from 'react'
 
+import {
+  ASSIST_STAR_OPTIONS,
+  MAIN_STAR_OPTIONS,
+} from '../../../data/operator-star-stone-presets'
 import { i18n, useTranslation } from '../../../i18n/i18n'
 import { CopilotDocV1 } from '../../../models/copilot.schema'
 import {
@@ -24,14 +28,8 @@ import { SortableItemProps } from '../../dnd'
 import { NumericInput2 } from '../../editor/NumericInput2'
 import { EditorOperator, useEdit } from '../editor-state'
 import { editorFavOperatorsAtom } from '../reconciliation'
-
-// —— 属性拓展（extensions）统一读写 ——
-type DiscSlot = {
-  index: number
-  disc: number
-  starStone?: string
-  assistStar?: string
-}
+import { OperatorStarStonePresetSelect } from './OperatorStarStonePresetSelect'
+import { getDiscSlots, setDiscSlot } from './operatorDiscModel'
 
 const EMPTY_DISC_OPTION = {
   abbreviation: '任意（未选择）',
@@ -39,99 +37,6 @@ const EMPTY_DISC_OPTION = {
   desp: '未选择命盘',
   idx: -1,
 } as const
-
-function getDiscSlots(operator: EditorOperator): DiscSlot[] {
-  // 原方案优先：使用并行数组（camelCase）
-  const ds = operator.discsSelected ?? []
-  const ss = (operator as any).discStarStones ?? []
-  const as = (operator as any).discAssistStars ?? []
-  const hasLegacy = ds.length > 0 || ss.length > 0 || as.length > 0
-  if (hasLegacy) {
-    return [0, 1, 2].map((i) => ({
-      index: i,
-      disc: ds[i] ?? 0,
-      starStone: ss[i] ?? '',
-      assistStar: as[i] ?? '',
-    }))
-  }
-  // 兼容回退：若没有并行数组，则读取 extensions（如存在）
-  const slots = operator.extensions?.discs?.slots as DiscSlot[] | undefined
-  if (slots && slots.length > 0) {
-    const norm = [...slots]
-      .filter((s) => s && typeof s.index === 'number')
-      .map((s, i) => ({
-        index: s.index ?? i,
-        disc: s.disc ?? 0,
-        starStone: s.starStone ?? '',
-        assistStar: s.assistStar ?? '',
-      }))
-    while (norm.length < 3)
-      norm.push({ index: norm.length, disc: 0, starStone: '', assistStar: '' })
-    return norm.sort((a, b) => a.index - b.index).slice(0, 3)
-  }
-  return [0, 1, 2].map((i) => ({
-    index: i,
-    disc: 0,
-    starStone: '',
-    assistStar: '',
-  }))
-}
-
-function syncLegacyArraysFromSlots(slots: DiscSlot[]) {
-  const discsSelected = [0, 0, 0]
-  const discStarStones = ['', '', '']
-  const discAssistStars = ['', '', '']
-  for (const s of slots) {
-    if (s.index >= 0 && s.index < 3) {
-      discsSelected[s.index] = s.disc ?? 0
-      discStarStones[s.index] = s.starStone ?? ''
-      discAssistStars[s.index] = s.assistStar ?? ''
-    }
-  }
-  return { discsSelected, discStarStones, discAssistStars }
-}
-
-function setDiscSlot(
-  operator: EditorOperator,
-  slotIndex: number,
-  updates: Partial<Pick<DiscSlot, 'disc' | 'starStone' | 'assistStar'>>,
-): EditorOperator {
-  const prev = getDiscSlots(operator)
-  const nextSlots = prev.map((s) =>
-    s.index === slotIndex ? { ...s, ...updates } : { ...s },
-  )
-
-  // 去重：如果选择了某个具体命盘（>0），清除其它槽位的相同选择
-  const chosen = nextSlots[slotIndex]?.disc
-  if (typeof chosen === 'number' && chosen > 0) {
-    for (let i = 0; i < nextSlots.length; i++) {
-      if (i !== slotIndex && nextSlots[i].disc === chosen) {
-        nextSlots[i] = { ...nextSlots[i], disc: 0 }
-      }
-    }
-  }
-
-  const { discsSelected, discStarStones, discAssistStars } =
-    syncLegacyArraysFromSlots(nextSlots)
-
-  const next: EditorOperator = {
-    ...operator,
-    // 按原方案落盘：并行数组为主
-    discsSelected,
-    discStarStones,
-    discAssistStars,
-    // 若已有其他 extensions 字段（如 stats），保留但不写 discs
-    ...(operator.extensions
-      ? {
-          extensions: {
-            ...operator.extensions,
-            discs: operator.extensions.discs,
-          },
-        }
-      : {}),
-  }
-  return next
-}
 
 function getStats(
   operator: EditorOperator,
@@ -431,6 +336,11 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                   </div>
                 </li>
               )}
+              <OperatorStarStonePresetSelect
+                operator={operator}
+                operatorId={info.id}
+                onChange={onChange}
+              />
               {/* 如果有命盘定义，则以命盘集合驱动 skill 选择；否则回退为原来的 1/2/3 技能选择 */}
               {discList.length > 0
                 ? [0, 1, 2].map((slot) => {
@@ -597,23 +507,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                         <Select
                           className=""
                           filterable={false}
-                          items={[
-                            '任意',
-                            '天府',
-                            '天相',
-                            '巨门',
-                            '太阳',
-                            '廉贞',
-                            '太阴',
-                            '紫微',
-                            '七杀',
-                            '天机',
-                            '武曲',
-                            '破军',
-                            '天同',
-                            '天梁',
-                            '贪狼',
-                          ]}
+                          items={MAIN_STAR_OPTIONS}
                           itemRenderer={(
                             item: string,
                             { handleClick, handleFocus, modifiers },
@@ -670,33 +564,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                         <Select
                           className=""
                           filterable={false}
-                          items={[
-                            '任意',
-                            '红鸾',
-                            '阴煞',
-                            '天魁',
-                            '八座',
-                            '陀螺',
-                            '地劫',
-                            '解神',
-                            '禄存',
-                            '文曲',
-                            '天钺',
-                            '火星',
-                            '文昌',
-                            '天巫',
-                            '左辅',
-                            '铃星',
-                            '恩光',
-                            '三台',
-                            '擎羊',
-                            '天贵',
-                            '天姚',
-                            '天马',
-                            '天刑',
-                            '右弼',
-                            '地空',
-                          ]}
+                          items={ASSIST_STAR_OPTIONS}
                           itemRenderer={(
                             item: string,
                             { handleClick, handleFocus, modifiers },

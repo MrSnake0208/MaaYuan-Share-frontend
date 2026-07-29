@@ -1,0 +1,85 @@
+import { describe, expect, it } from 'vitest'
+
+import type { EditorOperator } from '../types'
+import {
+  applyAssistStarPreset,
+  applyMainStarPreset,
+  getDiscSlots,
+  setDiscSlot,
+} from './operatorDiscModel'
+
+const createOperator = (): EditorOperator => ({
+  id: 'operator-1',
+  name: '测试密探',
+  discsSelected: [1, 2, 3],
+  discStarStones: ['天府', '天相', '巨门'],
+  discAssistStars: ['红鸾', '阴煞', '天魁'],
+  extensions: {
+    version: 1,
+    stats: { starLevel: 5, attack: 100, hp: 200 },
+  },
+})
+
+describe('operatorDiscModel', () => {
+  it('applies a main-star preset without changing discs or assist stars', () => {
+    const operator = applyMainStarPreset(createOperator(), [
+      '太阳',
+      '廉贞',
+      '太阴',
+    ])
+
+    expect(operator.discsSelected).toEqual([1, 2, 3])
+    expect(operator.discStarStones).toEqual(['太阳', '廉贞', '太阴'])
+    expect(operator.discAssistStars).toEqual(['红鸾', '阴煞', '天魁'])
+    expect(operator.extensions?.stats).toEqual({
+      starLevel: 5,
+      attack: 100,
+      hp: 200,
+    })
+  })
+
+  it('applies an assist-star preset without changing discs or main stars', () => {
+    const operator = applyAssistStarPreset(createOperator(), ['文昌'])
+
+    expect(operator.discsSelected).toEqual([1, 2, 3])
+    expect(operator.discStarStones).toEqual(['天府', '天相', '巨门'])
+    expect(operator.discAssistStars).toEqual(['文昌', '', ''])
+  })
+
+  it('moves a duplicate star selection to the edited slot', () => {
+    const operator = setDiscSlot(createOperator(), 2, {
+      starStone: '天府',
+      assistStar: '红鸾',
+    })
+
+    expect(operator.discStarStones).toEqual(['', '天相', '天府'])
+    expect(operator.discAssistStars).toEqual(['', '阴煞', '红鸾'])
+  })
+
+  it('keeps existing slot behavior when changing a duplicate disc', () => {
+    const operator = setDiscSlot(createOperator(), 1, { disc: 1 })
+
+    expect(operator.discsSelected).toEqual([0, 1, 3])
+    expect(operator.discStarStones).toEqual(['天府', '天相', '巨门'])
+    expect(operator.discAssistStars).toEqual(['红鸾', '阴煞', '天魁'])
+  })
+
+  it('falls back to extension slots when parallel arrays are absent', () => {
+    const slots = getDiscSlots({
+      id: 'operator-2',
+      name: '测试密探',
+      extensions: {
+        version: 1,
+        discs: {
+          slots: [{ index: 0, disc: 2, starStone: '天机', assistStar: '文曲' }],
+        },
+      },
+    })
+
+    expect(slots).toEqual([
+      { index: 0, disc: 2, starStone: '天机', assistStar: '文曲' },
+      { index: 1, disc: 0, starStone: '', assistStar: '' },
+      { index: 2, disc: 0, starStone: '', assistStar: '' },
+    ])
+  })
+})
