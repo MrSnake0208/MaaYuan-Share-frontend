@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   DeployedOperatorsShareCard,
-  alignOperationShareDiscs,
+  orderOperationShareDiscs,
 } from './DeployedOperatorsShareCard'
 import type { OperationShareModel } from './operationShareModel'
 import { createOperationShareCardConfig } from './operationShareModel'
@@ -59,18 +59,65 @@ const model: OperationShareModel = {
 }
 
 describe('deployed operators share card', () => {
-  it('keeps configured discs in their original fixed slots', () => {
-    const secondSlotDisc = {
+  it('orders required discs before forbidden and unmarked discs', () => {
+    const unmarkedDisc = model.operators[0].discs[0]
+    const forbiddenDisc = {
       slot: 2,
-      abbreviation: '第二槽命盘',
+      abbreviation: '禁止命盘',
+      forbidden: true,
+    }
+    const requiredDisc = {
+      slot: 3,
+      abbreviation: '必选命盘',
       forbidden: false,
     }
 
-    expect(alignOperationShareDiscs([secondSlotDisc])).toEqual([
+    expect(
+      orderOperationShareDiscs(
+        [unmarkedDisc, forbiddenDisc, requiredDisc],
+        new Set([3]),
+      ),
+    ).toEqual([requiredDisc, forbiddenDisc, unmarkedDisc])
+    expect(orderOperationShareDiscs([forbiddenDisc])).toEqual([
+      forbiddenDisc,
       undefined,
-      secondSlotDisc,
       undefined,
     ])
+  })
+
+  it('renders discs in required, forbidden, then unmarked order', () => {
+    const config = createOperationShareCardConfig()
+    config.requiredDiscs['1:3'] = true
+    const orderedModel: OperationShareModel = {
+      ...model,
+      operators: model.operators.map((operator) => ({
+        ...operator,
+        discs: [
+          ...operator.discs,
+          {
+            slot: 2,
+            abbreviation: '禁止命盘',
+            forbidden: true,
+          },
+          {
+            slot: 3,
+            abbreviation: '必选命盘',
+            forbidden: false,
+          },
+        ],
+      })),
+    }
+
+    const markup = renderToStaticMarkup(
+      createElement(DeployedOperatorsShareCard, {
+        config,
+        model: orderedModel,
+        qrDataUrl: 'data:image/png;base64,qr-code',
+      }),
+    )
+
+    expect(markup.indexOf('必选命盘')).toBeLessThan(markup.indexOf('禁止命盘'))
+    expect(markup.indexOf('禁止命盘')).toBeLessThan(markup.indexOf('技伤大幅'))
   })
 
   it('renders only deployed operators with stats, discs, and stones', () => {

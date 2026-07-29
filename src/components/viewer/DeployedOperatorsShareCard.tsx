@@ -31,11 +31,34 @@ const DISC_FIELDS = [
   { field: 'starStone', label: '主星' },
   { field: 'assistStar', label: '辅星' },
 ] as const
+const emptyRequiredDiscSlots: ReadonlySet<number> = new Set()
 const defaultCardConfig = createOperationShareCardConfig()
 
-export function alignOperationShareDiscs(discs: OperationShareDisc[]) {
+function getDiscDisplayPriority(
+  disc: OperationShareDisc,
+  requiredDiscSlots: ReadonlySet<number>,
+) {
+  if (disc.forbidden) return 1
+  if (requiredDiscSlots.has(disc.slot)) return 0
+  return 2
+}
+
+export function orderOperationShareDiscs(
+  discs: OperationShareDisc[],
+  requiredDiscSlots: ReadonlySet<number> = emptyRequiredDiscSlots,
+) {
   const discsBySlot = new Map(discs.map((disc) => [disc.slot, disc]))
-  return DISC_SLOTS.map((slot) => discsBySlot.get(slot))
+  const orderedDiscs = DISC_SLOTS.flatMap((slot) => {
+    const disc = discsBySlot.get(slot)
+    return disc ? [disc] : []
+  }).sort(
+    (left, right) =>
+      getDiscDisplayPriority(left, requiredDiscSlots) -
+        getDiscDisplayPriority(right, requiredDiscSlots) ||
+      left.slot - right.slot,
+  )
+
+  return DISC_SLOTS.map((_, index) => orderedDiscs[index])
 }
 
 function DiscAbbreviation({
@@ -177,9 +200,21 @@ function DiscRows({
   config: OperationShareCardConfig
   operators: OperationShareOperator[]
 }) {
-  const alignedDiscs = operators.map((operator) =>
-    alignOperationShareDiscs(operator.discs),
-  )
+  const orderedDiscs = operators.map((operator, operatorIndex) => {
+    const operatorSlot = operator.slot ?? operatorIndex + 1
+    const requiredDiscSlots = new Set(
+      operator.discs
+        .filter(
+          (disc) =>
+            config.requiredDiscs[
+              buildOperationShareDiscKey(operatorSlot, disc.slot)
+            ] === true,
+        )
+        .map((disc) => disc.slot),
+    )
+
+    return orderOperationShareDiscs(operator.discs, requiredDiscSlots)
+  })
 
   return (
     <>
@@ -207,7 +242,7 @@ function DiscRows({
                 style={{ borderColor: '#78501f' }}
               >
                 <div className="flex flex-col items-center justify-center gap-1.5">
-                  {alignedDiscs[operatorIndex].map((disc, slotIndex) => (
+                  {orderedDiscs[operatorIndex].map((disc, slotIndex) => (
                     <div
                       key={DISC_SLOTS[slotIndex]}
                       className="flex min-h-[28px] w-full items-center justify-center"
