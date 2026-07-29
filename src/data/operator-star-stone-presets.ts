@@ -1,7 +1,7 @@
 import type { OperatorInfo } from '../models/operator'
 import type { AssistStarName, MainStarName } from './star-stones'
 
-export type StarPresetValues<T extends string> = readonly [T, T?, T?]
+export type StarPresetValues<T extends string> = readonly [T?, T?, T?]
 
 export interface OperatorStarPreset<T extends string> {
   id: string

@@ -1011,6 +1011,76 @@
           "zh_tw": "當前等級未解鎖該技能"
         }
       },
+      "OperatorStarStonePresetSelect": {
+        "main_star_presets": {
+          "cn": "主星预设",
+          "zh_tw": "主星預設"
+        },
+        "assist_star_presets": {
+          "cn": "辅星预设",
+          "zh_tw": "輔星預設"
+        },
+        "main_star": {
+          "cn": "主星",
+          "zh_tw": "主星"
+        },
+        "assist_star": {
+          "cn": "辅星",
+          "zh_tw": "輔星"
+        },
+        "manage": {
+          "cn": "管理星石预设",
+          "zh_tw": "管理星石預設"
+        },
+        "save_current_main": {
+          "cn": "保存当前主星",
+          "zh_tw": "保存當前主星"
+        },
+        "save_current_assist": {
+          "cn": "保存当前辅星",
+          "zh_tw": "保存當前輔星"
+        },
+        "my_presets": {
+          "cn": "我的预设",
+          "zh_tw": "我的預設"
+        },
+        "create_title": {
+          "cn": "保存星石预设",
+          "zh_tw": "保存星石預設"
+        },
+        "rename_title": {
+          "cn": "重命名星石预设",
+          "zh_tw": "重新命名星石預設"
+        },
+        "preset_name": {
+          "cn": "预设名称",
+          "zh_tw": "預設名稱"
+        },
+        "save": {
+          "cn": "保存",
+          "zh_tw": "保存"
+        },
+        "rename": {
+          "cn": "重命名",
+          "zh_tw": "重新命名"
+        },
+        "delete_confirm": {
+          "cn": "确定删除预设“{{name}}”吗？",
+          "zh_tw": "確定刪除預設「{{name}}」嗎？"
+        },
+        "create_success": {
+          "cn": "星石预设已保存",
+          "zh_tw": "星石預設已保存"
+        },
+        "rename_success": {
+          "cn": "星石预设已重命名",
+          "zh_tw": "星石預設已重新命名"
+        },
+        "delete_success": {
+          "cn": "星石预设已删除",
+          "zh_tw": "星石預設已刪除"
+        }
+      },
       "OperatorSelect": {
         "search_operator": {
           "cn": "搜索密探",

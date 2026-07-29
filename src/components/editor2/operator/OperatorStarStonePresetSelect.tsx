@@ -1,7 +1,29 @@
-import { Button, Classes, MenuItem } from '@blueprintjs/core'
+import {
+  Alert,
+  Button,
+  Classes,
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  FormGroup,
+  InputGroup,
+  Menu,
+  MenuDivider,
+  MenuItem,
+} from '@blueprintjs/core'
+import { Popover2 } from '@blueprintjs/popover2'
 
+import {
+  createOperatorStarStonePreset,
+  deleteOperatorStarStonePreset,
+  updateOperatorStarStonePreset,
+  useOperatorStarStonePresets,
+  useRefreshOperatorStarStonePresets,
+} from 'apis/operator-star-stone-preset'
 import clsx from 'clsx'
-import { FC, memo } from 'react'
+import { useAtomValue } from 'jotai'
+import { StarStonePresetKind } from 'maa-copilot-client'
+import { FC, FormEvent, memo, useState } from 'react'
 
 import {
   OPERATOR_STAR_STONE_PRESETS,
@@ -14,9 +36,18 @@ import {
   getAssistStarAvailability,
   getMainStarAvailability,
 } from '../../../data/star-stones'
+import { useTranslation } from '../../../i18n/i18n'
+import { authAtom } from '../../../store/auth'
+import { formatError } from '../../../utils/error'
 import { Select } from '../../Select'
+import { AppToaster } from '../../Toaster'
 import { EditorOperator, useEdit } from '../editor-state'
-import { applyAssistStarPreset, applyMainStarPreset } from './operatorDiscModel'
+import {
+  applyAssistStarPreset,
+  applyMainStarPreset,
+  getDiscSlots,
+} from './operatorDiscModel'
+import { getUserOperatorStarStonePresetSet } from './operatorStarStonePresetModel'
 
 interface OperatorStarStonePresetSelectProps {
   operator: EditorOperator
@@ -32,6 +63,23 @@ interface PresetControlProps<T extends string> {
   onSelect: (preset: OperatorStarPreset<T>) => void
 }
 
+interface ManagedPreset {
+  serverId: string
+  label: string
+  kind: StarStonePresetKind
+}
+
+type PresetDialogState =
+  | {
+      mode: 'create'
+      kind: StarStonePresetKind
+      values: (string | null)[]
+    }
+  | {
+      mode: 'rename'
+      preset: ManagedPreset
+    }
+
 function PresetControl<T extends string>({
   label,
   presets,
@@ -42,6 +90,8 @@ function PresetControl<T extends string>({
     (preset) => !getDisabledReason(preset),
   )
 
+  if (availablePresets.length === 0) return null
+
   return (
     <Select
       className="flex-1 min-w-0"
@@ -51,6 +101,7 @@ function PresetControl<T extends string>({
         <MenuItem
           roleStructure="listoption"
           key={preset.id}
+          icon={'serverId' in preset ? 'user' : undefined}
           className={clsx(
             'min-w-44 !rounded-none text-sm font-serif text-slate-700 dark:text-slate-200',
             modifiers.active && Classes.ACTIVE,
@@ -86,12 +137,57 @@ function PresetControl<T extends string>({
 
 export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProps> =
   memo(({ operator, operatorId, operatorProfile, onChange }) => {
+    const t = useTranslation()
     const edit = useEdit()
-    const presetSet = OPERATOR_STAR_STONE_PRESETS[operatorId]
-    const mainStarPresets = presetSet?.mainStarPresets ?? []
-    const assistStarPresets = presetSet?.assistStarPresets ?? []
+    const auth = useAtomValue(authAtom)
+    const {
+      data: remotePresets,
+      error,
+      isLoading,
+    } = useOperatorStarStonePresets()
+    const refreshPresets = useRefreshOperatorStarStonePresets()
+    const [dialogState, setDialogState] = useState<PresetDialogState>()
+    const [presetName, setPresetName] = useState('')
+    const [submitting, setSubmitting] = useState(false)
+    const [deletingPreset, setDeletingPreset] = useState<ManagedPreset>()
 
-    if (mainStarPresets.length === 0 && assistStarPresets.length === 0) {
+    const builtinPresetSet = OPERATOR_STAR_STONE_PRESETS[operatorId]
+    const userPresetSet = getUserOperatorStarStonePresetSet(
+      remotePresets ?? undefined,
+      operatorId,
+    )
+    const mainStarPresets = [
+      ...(builtinPresetSet?.mainStarPresets ?? []),
+      ...userPresetSet.mainStarPresets,
+    ]
+    const assistStarPresets = [
+      ...(builtinPresetSet?.assistStarPresets ?? []),
+      ...userPresetSet.assistStarPresets,
+    ]
+    const managedPresets: ManagedPreset[] = [
+      ...userPresetSet.mainStarPresets.map((preset) => ({
+        serverId: preset.serverId,
+        label: preset.label,
+        kind: StarStonePresetKind.Main,
+      })),
+      ...userPresetSet.assistStarPresets.map((preset) => ({
+        serverId: preset.serverId,
+        label: preset.label,
+        kind: StarStonePresetKind.Assist,
+      })),
+    ]
+
+    const discSlots = getDiscSlots(operator)
+    const mainValues = discSlots.map((slot) => slot.starStone || null)
+    const assistValues = discSlots.map((slot) => slot.assistStar || null)
+    const canSaveMain = mainValues.some(Boolean)
+    const canSaveAssist = assistValues.some(Boolean)
+
+    if (
+      mainStarPresets.length === 0 &&
+      assistStarPresets.length === 0 &&
+      !auth.userId
+    ) {
       return null
     }
 
@@ -147,25 +243,256 @@ export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProp
       })
     }
 
+    const openCreateDialog = (
+      kind: StarStonePresetKind,
+      values: (string | null)[],
+    ) => {
+      setPresetName(values.filter(Boolean).join('·'))
+      setDialogState({ mode: 'create', kind, values })
+    }
+
+    const openRenameDialog = (preset: ManagedPreset) => {
+      setPresetName(preset.label)
+      setDialogState({ mode: 'rename', preset })
+    }
+
+    const closeDialog = () => {
+      if (!submitting) setDialogState(undefined)
+    }
+
+    const submitPreset = async (event: FormEvent) => {
+      event.preventDefault()
+      const label = presetName.trim()
+      if (!dialogState || !label || submitting) return
+
+      setSubmitting(true)
+      try {
+        if (dialogState.mode === 'create') {
+          await createOperatorStarStonePreset({
+            operatorId,
+            kind: dialogState.kind,
+            label,
+            values: dialogState.values,
+          })
+          AppToaster.show({
+            intent: 'success',
+            message:
+              t.components.editor2.OperatorStarStonePresetSelect.create_success,
+          })
+        } else {
+          await updateOperatorStarStonePreset({
+            id: dialogState.preset.serverId,
+            label,
+          })
+          AppToaster.show({
+            intent: 'success',
+            message:
+              t.components.editor2.OperatorStarStonePresetSelect.rename_success,
+          })
+        }
+        refreshPresets()
+        setDialogState(undefined)
+      } catch (submitError) {
+        AppToaster.show({
+          intent: 'danger',
+          message: formatError(submitError),
+        })
+      } finally {
+        setSubmitting(false)
+      }
+    }
+
+    const confirmDeletePreset = async () => {
+      if (!deletingPreset || submitting) return
+      setSubmitting(true)
+      try {
+        await deleteOperatorStarStonePreset(deletingPreset.serverId)
+        refreshPresets()
+        setDeletingPreset(undefined)
+        AppToaster.show({
+          intent: 'success',
+          message:
+            t.components.editor2.OperatorStarStonePresetSelect.delete_success,
+        })
+      } catch (deleteError) {
+        AppToaster.show({
+          intent: 'danger',
+          message: formatError(deleteError),
+        })
+      } finally {
+        setSubmitting(false)
+      }
+    }
+
+    const kindLabel = (kind: StarStonePresetKind) =>
+      kind === StarStonePresetKind.Main
+        ? t.components.editor2.OperatorStarStonePresetSelect.main_star
+        : t.components.editor2.OperatorStarStonePresetSelect.assist_star
+
+    const renderManagedPreset = (preset: ManagedPreset) => (
+      <MenuItem
+        key={preset.serverId}
+        icon="user"
+        text={preset.label}
+        label={kindLabel(preset.kind)}
+      >
+        <MenuItem
+          icon="edit"
+          text={t.components.editor2.OperatorStarStonePresetSelect.rename}
+          onClick={() => openRenameDialog(preset)}
+        />
+        <MenuItem
+          icon="trash"
+          intent="danger"
+          text={t.common.delete}
+          onClick={() => setDeletingPreset(preset)}
+        />
+      </MenuItem>
+    )
+
     return (
-      <li className="h-8 flex items-center gap-1 ml-1">
-        {mainStarPresets.length > 0 ? (
+      <>
+        <li className="h-8 flex items-center gap-1 ml-1">
           <PresetControl
-            label="主星预设"
+            label={
+              t.components.editor2.OperatorStarStonePresetSelect
+                .main_star_presets
+            }
             presets={mainStarPresets}
             getDisabledReason={getMainPresetDisabledReason}
             onSelect={applyMainPreset}
           />
-        ) : null}
-        {assistStarPresets.length > 0 ? (
           <PresetControl
-            label="辅星预设"
+            label={
+              t.components.editor2.OperatorStarStonePresetSelect
+                .assist_star_presets
+            }
             presets={assistStarPresets}
             getDisabledReason={getAssistPresetDisabledReason}
             onSelect={applyAssistPreset}
           />
-        ) : null}
-      </li>
+          {auth.userId ? (
+            <Popover2
+              placement="top-end"
+              usePortal
+              content={
+                <Menu className="min-w-48">
+                  <MenuItem
+                    icon="floppy-disk"
+                    disabled={!canSaveMain}
+                    text={
+                      t.components.editor2.OperatorStarStonePresetSelect
+                        .save_current_main
+                    }
+                    onClick={() =>
+                      openCreateDialog(StarStonePresetKind.Main, mainValues)
+                    }
+                  />
+                  <MenuItem
+                    icon="floppy-disk"
+                    disabled={!canSaveAssist}
+                    text={
+                      t.components.editor2.OperatorStarStonePresetSelect
+                        .save_current_assist
+                    }
+                    onClick={() =>
+                      openCreateDialog(StarStonePresetKind.Assist, assistValues)
+                    }
+                  />
+                  {managedPresets.length > 0 ? (
+                    <>
+                      <MenuDivider
+                        title={
+                          t.components.editor2.OperatorStarStonePresetSelect
+                            .my_presets
+                        }
+                      />
+                      {managedPresets.map(renderManagedPreset)}
+                    </>
+                  ) : null}
+                </Menu>
+              }
+            >
+              <Button
+                small
+                minimal
+                icon="cog"
+                loading={isLoading}
+                intent={error ? 'danger' : 'none'}
+                title={
+                  error
+                    ? formatError(error)
+                    : t.components.editor2.OperatorStarStonePresetSelect.manage
+                }
+                className="!w-8 !h-8 !min-w-8 !p-0 !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600"
+              />
+            </Popover2>
+          ) : null}
+        </li>
+
+        <Dialog
+          isOpen={!!dialogState}
+          icon={dialogState?.mode === 'rename' ? 'edit' : 'floppy-disk'}
+          title={
+            dialogState?.mode === 'rename'
+              ? t.components.editor2.OperatorStarStonePresetSelect.rename_title
+              : t.components.editor2.OperatorStarStonePresetSelect.create_title
+          }
+          onClose={closeDialog}
+        >
+          <form onSubmit={submitPreset}>
+            <DialogBody>
+              <FormGroup
+                label={
+                  t.components.editor2.OperatorStarStonePresetSelect.preset_name
+                }
+                labelFor="operator-star-stone-preset-name"
+              >
+                <InputGroup
+                  id="operator-star-stone-preset-name"
+                  maxLength={32}
+                  value={presetName}
+                  onChange={(event) => setPresetName(event.target.value)}
+                />
+              </FormGroup>
+            </DialogBody>
+            <DialogFooter
+              actions={
+                <>
+                  <Button disabled={submitting} onClick={closeDialog}>
+                    {t.common.cancel}
+                  </Button>
+                  <Button
+                    type="submit"
+                    intent="primary"
+                    loading={submitting}
+                    disabled={!presetName.trim()}
+                  >
+                    {t.components.editor2.OperatorStarStonePresetSelect.save}
+                  </Button>
+                </>
+              }
+            />
+          </form>
+        </Dialog>
+
+        <Alert
+          isOpen={!!deletingPreset}
+          icon="trash"
+          intent="danger"
+          loading={submitting}
+          cancelButtonText={t.common.cancel}
+          confirmButtonText={t.common.delete}
+          onCancel={() => setDeletingPreset(undefined)}
+          onConfirm={confirmDeletePreset}
+        >
+          <p>
+            {t.components.editor2.OperatorStarStonePresetSelect.delete_confirm({
+              name: deletingPreset?.label ?? '',
+            })}
+          </p>
+        </Alert>
+      </>
     )
   })
 OperatorStarStonePresetSelect.displayName = 'OperatorStarStonePresetSelect'

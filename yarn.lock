@@ -4600,9 +4600,9 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
-"maa-copilot-client@https://github.com/MaaAssistantArknights/maa-copilot-client-ts.git#0.1.0-SNAPSHOT.824.f8ad839":
-  version "0.1.0-SNAPSHOT.824.f8ad839"
-  resolved "https://github.com/MaaAssistantArknights/maa-copilot-client-ts.git#02c72f9a306c097e3307b8120a35b8e72aff167e"
+"maa-copilot-client@https://github.com/MrSnake0208/zoot-plus-client-ts.git#main":
+  version "0.1.0"
+  resolved "https://github.com/MrSnake0208/zoot-plus-client-ts.git#76ac0ed2507f11a22c95a6fc2416e66519ebc4c8"
 
 magic-string@^0.30.12:
   version "0.30.21"

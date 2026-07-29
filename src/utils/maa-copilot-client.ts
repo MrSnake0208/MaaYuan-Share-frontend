@@ -7,6 +7,7 @@ import {
   CopilotSetApi,
   CopilotUserApi,
   JSONApiResponse,
+  OperatorStarStonePresetApi as GeneratedOperatorStarStonePresetApi,
   querystring,
 } from "maa-copilot-client";
 import { SetRequired } from "type-fest";
@@ -101,6 +102,13 @@ export class LevelApi<
 > extends (ArkLevelControllerApi as WithOptions<ArkLevelControllerApi>)<T> {
   constructor(options?: ValidateOptions<T>) {
     super(createConfiguration(options as T));
+  }
+}
+export class OperatorStarStonePresetApi<
+  T extends ApiOptions,
+> extends (GeneratedOperatorStarStonePresetApi as WithOptions<GeneratedOperatorStarStonePresetApi>)<T> {
+  constructor(options?: ValidateOptions<T>) {
+    super(createConfiguration(options as T))
   }
 }
 
