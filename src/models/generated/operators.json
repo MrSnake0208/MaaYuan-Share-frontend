@@ -10004,7 +10004,80 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "pojun",
-      "discs": []
+      "discs": [
+        {
+          "ot_name": "普攻伤害中幅增加",
+          "abbreviation": "普攻中幅",
+          "color": "紫",
+          "desp": "普攻的伤害系数增加10%"
+        },
+        {
+          "ot_name": "群猫搦鼠",
+          "abbreviation": "群猫搦鼠",
+          "color": "金",
+          "desp": "若我方有且仅有水、阴属性的密探，则战斗开始时，我方全体获得3点能量，强刃增伤提升50，印记伤害增伤提升30"
+        },
+        {
+          "ot_name": "严重过敏",
+          "abbreviation": "严重过敏",
+          "color": "金",
+          "desp": "技能附加的【过敏】持续回合+1，记录的普攻伤害提升25%"
+        },
+        {
+          "ot_name": "受胙",
+          "abbreviation": "受胙",
+          "color": "金",
+          "desp": "我方密探触发<强刃>时，恢复1点能量"
+        },
+        {
+          "ot_name": "初始能量+1",
+          "abbreviation": "初始+1",
+          "color": "紫",
+          "desp": "初始能量+1"
+        },
+        {
+          "ot_name": "攻击力大幅提升",
+          "abbreviation": "攻击大幅",
+          "color": "金",
+          "desp": "攻击力提升12%"
+        },
+        {
+          "ot_name": "防御减伤提升",
+          "abbreviation": "防御减伤",
+          "color": "蓝",
+          "desp": "防御时额外使自身防御系数提升10"
+        },
+        {
+          "ot_name": "攻击力小幅提升",
+          "abbreviation": "攻击小幅",
+          "color": "蓝",
+          "desp": "攻击力提升3%"
+        },
+        {
+          "ot_name": "生命低时攻击提升",
+          "abbreviation": "血低攻高",
+          "color": "蓝",
+          "desp": "生命值低于50%时，自身攻击力提升10%"
+        },
+        {
+          "ot_name": "攻击力中幅提升",
+          "abbreviation": "攻击中幅",
+          "color": "紫",
+          "desp": "攻击力提升8%"
+        },
+        {
+          "ot_name": "普攻伤害小幅增加",
+          "abbreviation": "普攻小幅",
+          "color": "蓝",
+          "desp": "普攻的伤害系数增加5%"
+        },
+        {
+          "ot_name": "黄粱",
+          "abbreviation": "黄粱",
+          "color": "金",
+          "desp": "技能效果变更为：对当前目标造成500%攻击力的普攻伤害，并使自身下次普攻伤害必定触发<强刃>"
+        }
+      ]
     },
     {
       "id": "char_125_zhaoyun",
