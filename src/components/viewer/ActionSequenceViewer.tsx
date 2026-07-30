@@ -2,7 +2,7 @@ import { Button, ButtonGroup, Card, NonIdealState, Tag } from "@blueprintjs/core
 
 import clsx from "clsx";
 import { useAtomValue } from "jotai";
-import { FC, useMemo, useState } from "react";
+import { FC, type ReactNode, useMemo, useState } from "react";
 
 import { languageAtom, useTranslation } from "../../i18n/i18n";
 import type { Language } from "../../i18n/i18n";
@@ -21,6 +21,7 @@ import { simingActionsToRoundActions } from "../editor2/siming-export";
 
 interface ActionSequenceViewerProps {
   operation: Operation;
+  shareImage?: ReactNode;
 }
 
 type EditorAction = import("../editor2/editor-state").EditorAction;
@@ -39,7 +40,7 @@ export interface DisplayToken {
   order: number;
 }
 
-type ViewMode = "flow" | "table";
+type ViewMode = "flow" | "table" | "share";
 
 const BASIC_ACTION_SUMMARY_MAP: Record<BasicActionSymbol, string> = {
   普: "A",
@@ -48,7 +49,10 @@ const BASIC_ACTION_SUMMARY_MAP: Record<BasicActionSymbol, string> = {
   sp: "圈",
 };
 
-export const ActionSequenceViewer: FC<ActionSequenceViewerProps> = ({ operation }) => {
+export const ActionSequenceViewer: FC<ActionSequenceViewerProps> = ({
+  operation,
+  shareImage,
+}) => {
   const t = useTranslation();
   const language = useAtomValue(languageAtom);
 
@@ -322,10 +326,26 @@ export const ActionSequenceViewer: FC<ActionSequenceViewerProps> = ({ operation 
                 {option.label}
               </Button>
             ))}
+            {shareImage ? (
+              <Button
+                icon="media"
+                active={viewMode === "share"}
+                intent={viewMode === "share" ? "primary" : "none"}
+                onClick={() => setViewMode("share")}
+              >
+                分享图
+              </Button>
+            ) : null}
           </ButtonGroup>
         </div>
       </div>
-      {viewMode === "table" ? renderTableView() : rounds.map((round) => renderFlowRound(round))}
+      {viewMode === "share" && shareImage ? (
+        shareImage
+      ) : viewMode === "table" ? (
+        renderTableView()
+      ) : (
+        rounds.map((round) => renderFlowRound(round))
+      )}
     </div>
   );
 };

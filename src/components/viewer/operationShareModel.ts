@@ -232,6 +232,27 @@ export function getOperationShareRemoteConfigByKind(
   return byKind
 }
 
+export function getRenderableOperationShareConfigs(
+  configs: readonly OperationShareRemoteConfig[],
+) {
+  const byKind = getOperationShareRemoteConfigByKind(configs)
+  return (Object.keys(OPERATION_SHARE_CARD_KEYS) as OperationShareCardKind[])
+    .filter(
+      (kind) =>
+        byKind[kind]?.schemaVersion ===
+        OPERATION_SHARE_CARD_CONFIG_SCHEMA_VERSION,
+    )
+    .reduce<Partial<Record<OperationShareCardKind, OperationShareCardConfig>>>(
+      (renderable, kind) => {
+        renderable[kind] = normalizeOperationShareCardConfig(
+          byKind[kind]?.payload,
+        )
+        return renderable
+      },
+      {},
+    )
+}
+
 export function mergeOperationShareRemoteConfigs(
   configs: readonly OperationShareRemoteConfig[],
 ) {

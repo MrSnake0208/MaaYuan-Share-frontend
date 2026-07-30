@@ -71,6 +71,11 @@ import { OperatorAvatar } from "../OperatorAvatar";
 import { ReLinkRenderer } from "../ReLink";
 import { UserName } from "../UserName";
 import { ActionSequenceViewer } from "./ActionSequenceViewer";
+import {
+  AuthorOperationShareImage,
+  AuthorOperationShareImages,
+  useAuthorOperationShareImage,
+} from "./AuthorOperationShareImages";
 import { CommentArea } from "./comment/CommentArea";
 
 const OperationShareDialog = lazy(() => import("./OperationShareDialog"));
@@ -354,17 +359,19 @@ export const OperationViewer: ComponentType<{
           </>
         }
       >
-        <ErrorBoundary
-          fallback={
-            <NonIdealState
-              icon="issue"
-              title={t.components.viewer.OperationViewer.render_error}
-              description={t.components.viewer.OperationViewer.render_problem}
-            />
-          }
-        >
-          <OperationViewerInner levels={levels} operation={operation} handleRating={handleRating} />
-        </ErrorBoundary>
+        <AuthorOperationShareImages operation={operation}>
+          <ErrorBoundary
+            fallback={
+              <NonIdealState
+                icon="issue"
+                title={t.components.viewer.OperationViewer.render_error}
+                description={t.components.viewer.OperationViewer.render_problem}
+              />
+            }
+          >
+            <OperationViewerInner levels={levels} operation={operation} handleRating={handleRating} />
+          </ErrorBoundary>
+        </AuthorOperationShareImages>
 	        </DrawerLayout>
 	        {shareDialogOpen ? (
 	          <Suspense fallback={null}>
@@ -801,6 +808,11 @@ function OperationViewerInnerDetails({ operation }: { operation: Operation }) {
   const t = useTranslation();
   const [showOperators, setShowOperators] = useState(true);
   const [showActions, setShowActions] = useState(false);
+  const [operatorView, setOperatorView] = useState<"native" | "share">(
+    "native",
+  );
+  const operatorShareImageUrl = useAuthorOperationShareImage("operators");
+  const actionShareImageUrl = useAuthorOperationShareImage("actions");
   // 眼睛开关：控制是否显示星石/辅星，默认关闭（不显示）
   const [showExtras, setShowExtras] = useState(false);
 
@@ -830,52 +842,88 @@ function OperationViewerInnerDetails({ operation }: { operation: Operation }) {
             </p>
           </Callout>
         </details>
-        {/* 星石/辅星显示开关：默认闭眼（隐藏），点击切换 */}
-        <Icon
-          icon={showExtras ? "eye-open" : "eye-off"}
-          size={14}
-          className="ml-2 mb-1 opacity-60 cursor-pointer hover:opacity-90 align-middle"
-          onClick={() => setShowExtras((v) => !v)}
-          title={showExtras ? "隐藏星石/辅星" : "显示星石/辅星"}
-        />
+        {operatorShareImageUrl ? (
+          <ButtonGroup minimal className="ml-2">
+            <Button
+              icon="people"
+              active={operatorView === "native"}
+              intent={operatorView === "native" ? "primary" : "none"}
+              onClick={() => setOperatorView("native")}
+            >
+              原有视图
+            </Button>
+            <Button
+              icon="media"
+              active={operatorView === "share"}
+              intent={operatorView === "share" ? "primary" : "none"}
+              onClick={() => setOperatorView("share")}
+            >
+              分享图
+            </Button>
+          </ButtonGroup>
+        ) : null}
+        {operatorView === "native" ? (
+          <Icon
+            icon={showExtras ? "eye-open" : "eye-off"}
+            size={14}
+            className="ml-2 mb-1 opacity-60 cursor-pointer hover:opacity-90 align-middle"
+            onClick={() => setShowExtras((v) => !v)}
+            title={showExtras ? "隐藏星石/辅星" : "显示星石/辅星"}
+          />
+        ) : null}
       </div>
       <Collapse isOpen={showOperators}>
-        <div className="mt-2 flex flex-wrap gap-8">
-          {!operation.parsedContent.opers?.length && !operation.parsedContent.groups?.length && (
-            <NonIdealState
-              className="my-2"
-              title={t.components.viewer.OperationViewer.no_operators}
-              description={t.components.viewer.OperationViewer.no_operators_added}
-              icon="slash"
-              layout="horizontal"
-            />
-          )}
-          {operation.parsedContent.opers?.map((operator) => (
-            <OperatorCard key={operator.name} operator={operator} showExtras={showExtras} />
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-4 mt-4">
-          {operation.parsedContent.groups?.map((group) => (
-            <Card
-              elevation={Elevation.ONE}
-              className="!p-2 flex flex-col items-center"
-              key={group.name}
-            >
-              <H6 className="mb-3 text-gray-800">{group.name}</H6>
-              <div className="flex flex-wrap px-2 gap-8">
-                {group.opers?.filter(Boolean).map((operator) => (
-                  <OperatorCard key={operator.name} operator={operator} showExtras={showExtras} />
-                ))}
-
-                {group.opers?.filter(Boolean).length === 0 && (
-                  <span className="text-zinc-500">
-                    {t.components.viewer.OperationViewer.no_operator}
-                  </span>
+        {operatorView === "share" && operatorShareImageUrl ? (
+          <AuthorOperationShareImage kind="operators" />
+        ) : (
+          <>
+            <div className="mt-2 flex flex-wrap gap-8">
+              {!operation.parsedContent.opers?.length &&
+                !operation.parsedContent.groups?.length && (
+                  <NonIdealState
+                    className="my-2"
+                    title={t.components.viewer.OperationViewer.no_operators}
+                    description={t.components.viewer.OperationViewer.no_operators_added}
+                    icon="slash"
+                    layout="horizontal"
+                  />
                 )}
-              </div>
-            </Card>
-          ))}
-        </div>
+              {operation.parsedContent.opers?.map((operator) => (
+                <OperatorCard
+                  key={operator.name}
+                  operator={operator}
+                  showExtras={showExtras}
+                />
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-4 mt-4">
+              {operation.parsedContent.groups?.map((group) => (
+                <Card
+                  elevation={Elevation.ONE}
+                  className="!p-2 flex flex-col items-center"
+                  key={group.name}
+                >
+                  <H6 className="mb-3 text-gray-800">{group.name}</H6>
+                  <div className="flex flex-wrap px-2 gap-8">
+                    {group.opers?.filter(Boolean).map((operator) => (
+                      <OperatorCard
+                        key={operator.name}
+                        operator={operator}
+                        showExtras={showExtras}
+                      />
+                    ))}
+
+                    {group.opers?.filter(Boolean).length === 0 && (
+                      <span className="text-zinc-500">
+                        {t.components.viewer.OperationViewer.no_operator}
+                      </span>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
       </Collapse>
 
       <H4
@@ -889,7 +937,14 @@ function OperationViewerInnerDetails({ operation }: { operation: Operation }) {
         />
       </H4>
       <Collapse isOpen={showActions}>
-        <ActionSequenceViewer operation={operation} />
+        <ActionSequenceViewer
+          operation={operation}
+          shareImage={
+            actionShareImageUrl ? (
+              <AuthorOperationShareImage kind="actions" />
+            ) : undefined
+          }
+        />
       </Collapse>
     </div>
   );

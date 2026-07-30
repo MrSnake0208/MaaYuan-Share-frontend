@@ -18,6 +18,7 @@ import {
   createOperationShareCardConfig,
   filterOperationShareActions,
   getOperationShareCellSelectionState,
+  getRenderableOperationShareConfigs,
   loadOperationShareCardConfig,
   mergeOperationShareRemoteConfigs,
   resolveOperationShareCardConfig,
@@ -285,6 +286,64 @@ describe('operation share model', () => {
 
     expect(round?.slots[1]).toEqual([{ raw: '1普', order: 2, label: 'A' }])
     expect(round?.others).toEqual([])
+  })
+})
+
+describe('renderable operation share configs', () => {
+  it('returns only supported author configs under their matching card kind', () => {
+    expect(
+      getRenderableOperationShareConfigs([
+        {
+          cardKey: 'actions',
+          schemaVersion: 1,
+          revision: 2,
+          payload: { showNotes: true, notes: { 1: '作者备注' } },
+        },
+        {
+          cardKey: 'deployed-operators',
+          schemaVersion: 2,
+          revision: 1,
+          payload: { requiredDiscs: { '1:1': true } },
+        },
+        {
+          cardKey: 'unknown-card',
+          schemaVersion: 1,
+          revision: 1,
+          payload: {},
+        },
+      ]),
+    ).toEqual({
+      actions: {
+        ...createOperationShareCardConfig(),
+        showNotes: true,
+        notes: { 1: '作者备注' },
+      },
+    })
+  })
+
+  it('keeps action and deployed-operator author configs independent', () => {
+    expect(
+      getRenderableOperationShareConfigs([
+        {
+          cardKey: 'actions',
+          schemaVersion: 1,
+          revision: 1,
+          payload: { showOtherActions: false },
+        },
+        {
+          cardKey: 'deployed-operators',
+          schemaVersion: 1,
+          revision: 1,
+          payload: { requiredDiscs: { '2:3': true } },
+        },
+      ]),
+    ).toMatchObject({
+      actions: { showOtherActions: false, requiredDiscs: {} },
+      operators: {
+        showOtherActions: true,
+        requiredDiscs: { '2:3': true },
+      },
+    })
   })
 })
 

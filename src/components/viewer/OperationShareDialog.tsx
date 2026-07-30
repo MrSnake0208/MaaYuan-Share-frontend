@@ -14,6 +14,10 @@ import { AppToaster } from '../Toaster'
 import { DeployedOperatorsShareCard } from './DeployedOperatorsShareCard'
 import { OperationShareCard } from './OperationShareCard'
 import {
+  createOperationShareQrDataUrl,
+  renderOperationShareCardBlob,
+} from './operationShareImage'
+import {
   OPERATION_SHARE_CARD_CONFIG_SCHEMA_VERSION,
   OPERATION_SHARE_CARD_KEYS,
   OPERATION_SHARE_CELL_COLORS,
@@ -27,7 +31,6 @@ import {
   buildOperationShareFilename,
   buildOperationShareModel,
   buildOperationShareUrl,
-  calculateSharePixelRatio,
   createOperationShareCardConfig,
   getOperationShareCellSelectionState,
   getOperationShareRemoteConfigByKind,
@@ -41,7 +44,6 @@ import {
 
 type GenerationStatus = 'idle' | 'generating' | 'ready' | 'error'
 
-const RESOURCE_TIMEOUT_MS = 5000
 const CELL_COLOR_OPTIONS = [
   { color: OPERATION_SHARE_CELL_COLORS[0], label: '暖米色' },
   { color: OPERATION_SHARE_CELL_COLORS[1], label: '浅金色' },
@@ -50,34 +52,6 @@ const CELL_COLOR_OPTIONS = [
   { color: OPERATION_SHARE_CELL_COLORS[4], label: '柔粉色' },
   { color: OPERATION_SHARE_CELL_COLORS[5], label: '浅灰色' },
 ] as const
-
-function delay(ms: number) {
-  return new Promise<void>((resolve) => window.setTimeout(resolve, ms))
-}
-
-async function waitForCardResources(node: HTMLElement) {
-  const fontsReady = document.fonts?.ready ?? Promise.resolve()
-  const imagesReady = Promise.all(
-    Array.from(node.querySelectorAll('img')).map(async (image) => {
-      if (!image.complete) {
-        await new Promise<void>((resolve) => {
-          image.addEventListener('load', () => resolve(), { once: true })
-          image.addEventListener('error', () => resolve(), { once: true })
-        })
-      }
-      try {
-        await image.decode()
-      } catch {
-        // Failed images retain the local placeholder source and do not block export.
-      }
-    }),
-  )
-
-  await Promise.race([
-    Promise.all([fontsReady, imagesReady]),
-    delay(RESOURCE_TIMEOUT_MS),
-  ])
-}
 
 export default function OperationShareDialog({
   operation,
@@ -327,16 +301,7 @@ export default function OperationShareDialog({
     setStatus('generating')
     setError(undefined)
     try {
-      await waitForCardResources(cardNode)
-      const { toBlob } = await import('html-to-image')
-      const nextBlob = await toBlob(cardNode, {
-        backgroundColor: '#f6f3eb',
-        cacheBust: true,
-        pixelRatio: calculateSharePixelRatio(cardNode.scrollHeight),
-        skipFonts: true,
-        width: 1080,
-      })
-      if (!nextBlob) throw new Error('图片转换未返回有效内容')
+      const nextBlob = await renderOperationShareCardBlob(cardNode)
       if (generation !== generationRef.current) return
 
       const nextUrl = urlStoreRef.current.replace(nextBlob)
@@ -356,13 +321,9 @@ export default function OperationShareDialog({
     let active = true
     const createQrCode = async () => {
       try {
-        const { toDataURL } = await import('qrcode')
-        const nextQrDataUrl = await toDataURL(model.qrTargetUrl, {
-          color: { dark: '#24312f', light: '#fffdf8' },
-          errorCorrectionLevel: 'M',
-          margin: 2,
-          width: 224,
-        })
+        const nextQrDataUrl = await createOperationShareQrDataUrl(
+          model.qrTargetUrl,
+        )
         if (active) {
           setQrCode({ targetUrl: model.qrTargetUrl, dataUrl: nextQrDataUrl })
         }
