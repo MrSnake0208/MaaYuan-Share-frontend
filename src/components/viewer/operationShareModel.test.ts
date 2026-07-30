@@ -4,8 +4,11 @@ import { CopilotDocV1 } from '../../models/copilot.schema'
 import type { Operation } from '../../models/operation'
 import { OPERATORS } from '../../models/operator'
 import {
+  OPERATION_SHARE_CARD_CONFIG_SCHEMA_VERSION,
+  OPERATION_SHARE_CARD_KEYS,
   OPERATION_SHARE_CELL_COLORS,
   ObjectUrlStore,
+  buildOperationShareCardConfigPayload,
   buildOperationShareCellKey,
   buildOperationShareDiscKey,
   buildOperationShareFilename,
@@ -16,6 +19,8 @@ import {
   filterOperationShareActions,
   getOperationShareCellSelectionState,
   loadOperationShareCardConfig,
+  mergeOperationShareRemoteConfigs,
+  resolveOperationShareCardConfig,
   saveOperationShareCardConfig,
   updateOperationShareCellSelection,
 } from './operationShareModel'
@@ -372,6 +377,79 @@ describe('share image utilities', () => {
     expect(loadOperationShareCardConfig(101, storage)).toEqual(
       createOperationShareCardConfig(),
     )
+  })
+
+  it('splits action and deployed operator payloads by card kind', () => {
+    const config = createOperationShareCardConfig()
+    config.showNotes = true
+    config.notes[2] = '等待技能结束'
+    config.cellColors['2:slot-1'] = OPERATION_SHARE_CELL_COLORS[1]
+    config.requiredDiscs['1:3'] = true
+
+    expect(buildOperationShareCardConfigPayload('actions', config)).toEqual({
+      showTargetSwitches: true,
+      showOtherActions: true,
+      showNotes: true,
+      notes: { 2: '等待技能结束' },
+      cellColors: { '2:slot-1': OPERATION_SHARE_CELL_COLORS[1] },
+    })
+    expect(buildOperationShareCardConfigPayload('operators', config)).toEqual({
+      requiredDiscs: { '1:3': true },
+    })
+  })
+
+  it('merges independently versioned remote card payloads', () => {
+    expect(
+      mergeOperationShareRemoteConfigs([
+        {
+          cardKey: OPERATION_SHARE_CARD_KEYS.actions,
+          schemaVersion: OPERATION_SHARE_CARD_CONFIG_SCHEMA_VERSION,
+          revision: 2,
+          payload: { showNotes: true, notes: { 1: '作者备注' } },
+        },
+        {
+          cardKey: OPERATION_SHARE_CARD_KEYS.operators,
+          schemaVersion: OPERATION_SHARE_CARD_CONFIG_SCHEMA_VERSION,
+          revision: 4,
+          payload: { requiredDiscs: { '2:1': true } },
+        },
+      ]),
+    ).toEqual({
+      showTargetSwitches: true,
+      showOtherActions: true,
+      showNotes: true,
+      notes: { 1: '作者备注' },
+      cellColors: {},
+      requiredDiscs: { '2:1': true },
+    })
+  })
+
+  it('ignores unsupported remote versions and preserves local overrides per card kind', () => {
+    const author = mergeOperationShareRemoteConfigs([
+      {
+        cardKey: OPERATION_SHARE_CARD_KEYS.actions,
+        schemaVersion: OPERATION_SHARE_CARD_CONFIG_SCHEMA_VERSION + 1,
+        revision: 2,
+        payload: { showNotes: true, notes: { 1: '未来版本' } },
+      },
+      {
+        cardKey: OPERATION_SHARE_CARD_KEYS.operators,
+        schemaVersion: OPERATION_SHARE_CARD_CONFIG_SCHEMA_VERSION,
+        revision: 1,
+        payload: { requiredDiscs: { '1:1': true } },
+      },
+    ])
+    const local = createOperationShareCardConfig()
+    local.showOtherActions = false
+
+    expect(resolveOperationShareCardConfig(local, author)).toEqual({
+      showTargetSwitches: true,
+      showOtherActions: false,
+      showNotes: false,
+      notes: {},
+      cellColors: {},
+      requiredDiscs: { '1:1': true },
+    })
   })
 
   it('falls back safely when cached settings are invalid', () => {

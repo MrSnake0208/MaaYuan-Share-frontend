@@ -3,16 +3,25 @@ import { Button, Callout, Checkbox, Dialog, Spinner } from '@blueprintjs/core'
 import { useAtomValue } from 'jotai'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import {
+  getOperationShareImageConfigs,
+  updateOperationShareImageConfig,
+} from '../../apis/operation-share-image-config'
 import { languageAtom, useTranslation } from '../../i18n/i18n'
 import type { Operation } from '../../models/operation'
 import { formatError } from '../../utils/error'
+import { AppToaster } from '../Toaster'
 import { DeployedOperatorsShareCard } from './DeployedOperatorsShareCard'
 import { OperationShareCard } from './OperationShareCard'
 import {
+  OPERATION_SHARE_CARD_CONFIG_SCHEMA_VERSION,
+  OPERATION_SHARE_CARD_KEYS,
   OPERATION_SHARE_CELL_COLORS,
   ObjectUrlStore,
+  type OperationShareCardConfig,
   type OperationShareCardKind,
   type OperationShareCellColumn,
+  buildOperationShareCardConfigPayload,
   buildOperationShareCellKey,
   buildOperationShareDiscKey,
   buildOperationShareFilename,
@@ -21,7 +30,11 @@ import {
   calculateSharePixelRatio,
   createOperationShareCardConfig,
   getOperationShareCellSelectionState,
-  loadOperationShareCardConfig,
+  getOperationShareRemoteConfigByKind,
+  mergeOperationShareRemoteConfigs,
+  readOperationShareCardConfig,
+  replaceOperationShareCardConfigKind,
+  resolveOperationShareCardConfig,
   saveOperationShareCardConfig,
   updateOperationShareCellSelection,
 } from './operationShareModel'
@@ -68,9 +81,11 @@ async function waitForCardResources(node: HTMLElement) {
 
 export default function OperationShareDialog({
   operation,
+  canManageAuthorConfig,
   onClose,
 }: {
   operation: Operation
+  canManageAuthorConfig: boolean
   onClose: () => void
 }) {
   const t = useTranslation()
@@ -84,9 +99,22 @@ export default function OperationShareDialog({
     [operation, language, maayuanUrl],
   )
   const [cardNode, setCardNode] = useState<HTMLDivElement | null>(null)
-  const [cardConfig, setCardConfig] = useState(() =>
-    loadOperationShareCardConfig(operation.id),
+  const localConfigRef = useRef(readOperationShareCardConfig(operation.id))
+  const [cardConfig, setCardConfig] = useState(
+    () => localConfigRef.current ?? createOperationShareCardConfig(),
   )
+  const shouldPersistCardConfigRef = useRef(false)
+  const [authorCardConfig, setAuthorCardConfig] = useState(() =>
+    createOperationShareCardConfig(),
+  )
+  const [remoteConfigsByKind, setRemoteConfigsByKind] = useState(() =>
+    getOperationShareRemoteConfigByKind([]),
+  )
+  const [authorConfigStatus, setAuthorConfigStatus] = useState<
+    'loading' | 'ready' | 'error'
+  >('loading')
+  const [authorConfigError, setAuthorConfigError] = useState<string>()
+  const [savingCardKind, setSavingCardKind] = useState<OperationShareCardKind>()
   const [selectedCellKeys, setSelectedCellKeys] = useState<Set<string>>(
     () => new Set(),
   )
@@ -105,9 +133,52 @@ export default function OperationShareDialog({
     qrCode?.targetUrl === model.qrTargetUrl ? qrCode.dataUrl : undefined
   const [error, setError] = useState<string>()
 
+  const updateCardConfig = useCallback(
+    (
+      updater: (current: OperationShareCardConfig) => OperationShareCardConfig,
+    ) => {
+      shouldPersistCardConfigRef.current = true
+      setCardConfig(updater)
+    },
+    [],
+  )
+
   useEffect(() => {
+    if (!shouldPersistCardConfigRef.current) return
+    shouldPersistCardConfigRef.current = false
     saveOperationShareCardConfig(operation.id, cardConfig)
   }, [cardConfig, operation.id])
+
+  useEffect(() => {
+    let active = true
+    const localConfig = readOperationShareCardConfig(operation.id)
+    localConfigRef.current = localConfig
+    shouldPersistCardConfigRef.current = false
+    setCardConfig(localConfig ?? createOperationShareCardConfig())
+    setAuthorConfigStatus('loading')
+    setAuthorConfigError(undefined)
+
+    void getOperationShareImageConfigs(operation.id)
+      .then((configs) => {
+        if (!active) return
+        const authorConfig = mergeOperationShareRemoteConfigs(configs)
+        setAuthorCardConfig(authorConfig)
+        setRemoteConfigsByKind(getOperationShareRemoteConfigByKind(configs))
+        setCardConfig(
+          resolveOperationShareCardConfig(localConfig, authorConfig),
+        )
+        setAuthorConfigStatus('ready')
+      })
+      .catch((reason) => {
+        if (!active) return
+        setAuthorConfigStatus('error')
+        setAuthorConfigError(formatError(reason))
+      })
+
+    return () => {
+      active = false
+    }
+  }, [operation.id])
 
   const editableColumns = useMemo<
     Array<{ key: OperationShareCellColumn; label: string }>
@@ -155,7 +226,7 @@ export default function OperationShareDialog({
     checked: boolean,
   ) => {
     invalidatePreview()
-    setCardConfig((current) => ({ ...current, [option]: checked }))
+    updateCardConfig((current) => ({ ...current, [option]: checked }))
   }
 
   const changeCardKind = (nextKind: OperationShareCardKind) => {
@@ -167,7 +238,7 @@ export default function OperationShareDialog({
 
   const updateRoundNote = (round: number, note: string) => {
     invalidatePreview()
-    setCardConfig((current) => ({
+    updateCardConfig((current) => ({
       ...current,
       notes: { ...current.notes, [round]: note },
     }))
@@ -194,7 +265,7 @@ export default function OperationShareDialog({
   const applyCellColor = (color: string) => {
     if (selectedCellKeys.size === 0) return
     invalidatePreview()
-    setCardConfig((current) => {
+    updateCardConfig((current) => {
       const cellColors = { ...current.cellColors }
       selectedCellKeys.forEach((key) => {
         cellColors[key] = color
@@ -207,7 +278,7 @@ export default function OperationShareDialog({
   const clearCellColor = () => {
     if (selectedCellKeys.size === 0) return
     invalidatePreview()
-    setCardConfig((current) => {
+    updateCardConfig((current) => {
       const cellColors = { ...current.cellColors }
       selectedCellKeys.forEach((key) => {
         delete cellColors[key]
@@ -221,13 +292,20 @@ export default function OperationShareDialog({
     const defaults = createOperationShareCardConfig()
     invalidatePreview()
     setSelectedCellKeys(new Set())
-    setCardConfig(defaults)
-    saveOperationShareCardConfig(operation.id, defaults)
+    updateCardConfig(() => defaults)
+  }
+
+  const restoreAuthorConfig = () => {
+    invalidatePreview()
+    setSelectedCellKeys(new Set())
+    updateCardConfig((current) =>
+      replaceOperationShareCardConfigKind(cardKind, current, authorCardConfig),
+    )
   }
 
   const updateRequiredDisc = (key: string, checked: boolean) => {
     invalidatePreview()
-    setCardConfig((current) => {
+    updateCardConfig((current) => {
       const requiredDiscs = { ...current.requiredDiscs }
       if (checked) requiredDiscs[key] = true
       else delete requiredDiscs[key]
@@ -238,7 +316,7 @@ export default function OperationShareDialog({
   const clearRequiredDiscs = () => {
     if (Object.keys(cardConfig.requiredDiscs).length === 0) return
     invalidatePreview()
-    setCardConfig((current) => ({ ...current, requiredDiscs: {} }))
+    updateCardConfig((current) => ({ ...current, requiredDiscs: {} }))
   }
 
   const generate = useCallback(async () => {
@@ -318,6 +396,47 @@ export default function OperationShareDialog({
     anchor.click()
   }
 
+  const currentRemoteConfig = remoteConfigsByKind[cardKind]
+  const hasUnsupportedRemoteConfig =
+    currentRemoteConfig !== undefined &&
+    currentRemoteConfig.schemaVersion >
+      OPERATION_SHARE_CARD_CONFIG_SCHEMA_VERSION
+
+  const saveAuthorConfig = async () => {
+    if (!canManageAuthorConfig || hasUnsupportedRemoteConfig) return
+
+    setSavingCardKind(cardKind)
+    try {
+      const saved = await updateOperationShareImageConfig(
+        operation.id,
+        OPERATION_SHARE_CARD_KEYS[cardKind],
+        {
+          schemaVersion: OPERATION_SHARE_CARD_CONFIG_SCHEMA_VERSION,
+          expectedRevision: currentRemoteConfig?.revision ?? 0,
+          payload: buildOperationShareCardConfigPayload(cardKind, cardConfig),
+        },
+      )
+      setRemoteConfigsByKind((current) => ({
+        ...current,
+        [cardKind]: saved,
+      }))
+      setAuthorCardConfig((current) =>
+        replaceOperationShareCardConfigKind(cardKind, current, cardConfig),
+      )
+      AppToaster.show({
+        intent: 'success',
+        message: '作者分享图配置已保存',
+      })
+    } catch (reason) {
+      AppToaster.show({
+        intent: 'danger',
+        message: `作者分享图配置保存失败：${formatError(reason)}`,
+      })
+    } finally {
+      setSavingCardKind(undefined)
+    }
+  }
+
   return (
     <Dialog
       canEscapeKeyClose
@@ -354,10 +473,23 @@ export default function OperationShareDialog({
           </Button>
         </div>
 
+        {authorConfigStatus === 'error' ? (
+          <Callout className="mb-5" intent="warning" title="作者配置加载失败">
+            {authorConfigError}
+          </Callout>
+        ) : null}
+        {hasUnsupportedRemoteConfig ? (
+          <Callout className="mb-5" intent="warning" title="作者配置版本较新">
+            当前页面版本无法编辑这份作者配置，请刷新或升级后重试。
+          </Callout>
+        ) : null}
+
         {cardKind === 'actions' ? (
           <fieldset
             className="mb-5 rounded border border-slate-200 bg-white p-4"
-            disabled={status === 'generating'}
+            disabled={
+              status === 'generating' || authorConfigStatus === 'loading'
+            }
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -367,6 +499,17 @@ export default function OperationShareDialog({
                   </h3>
                   <Button icon="reset" minimal onClick={restoreDefaults} small>
                     恢复至默认
+                  </Button>
+                  <Button
+                    disabled={
+                      !currentRemoteConfig || hasUnsupportedRemoteConfig
+                    }
+                    icon="cloud-download"
+                    minimal
+                    onClick={restoreAuthorConfig}
+                    small
+                  >
+                    恢复作者配置
                   </Button>
                 </div>
                 <p className="mt-1 text-sm text-slate-500">
@@ -582,7 +725,9 @@ export default function OperationShareDialog({
         ) : (
           <fieldset
             className="mb-5 rounded border border-slate-200 bg-white p-4"
-            disabled={status === 'generating'}
+            disabled={
+              status === 'generating' || authorConfigStatus === 'loading'
+            }
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -600,6 +745,17 @@ export default function OperationShareDialog({
                     small
                   >
                     清除必须标记
+                  </Button>
+                  <Button
+                    disabled={
+                      !currentRemoteConfig || hasUnsupportedRemoteConfig
+                    }
+                    icon="cloud-download"
+                    minimal
+                    onClick={restoreAuthorConfig}
+                    small
+                  >
+                    恢复作者配置
                   </Button>
                 </div>
                 <p className="mt-1 text-sm leading-6 text-slate-500">
@@ -707,6 +863,21 @@ export default function OperationShareDialog({
         <Button onClick={onClose}>
           {t.components.viewer.OperationViewer.share_image_close}
         </Button>
+        {canManageAuthorConfig ? (
+          <Button
+            disabled={
+              authorConfigStatus === 'loading' ||
+              status === 'generating' ||
+              savingCardKind !== undefined ||
+              hasUnsupportedRemoteConfig
+            }
+            icon="floppy-disk"
+            loading={savingCardKind === cardKind}
+            onClick={() => void saveAuthorConfig()}
+          >
+            保存作者配置
+          </Button>
+        ) : null}
         <Button
           disabled={status === 'generating' || !cardNode || !qrDataUrl}
           icon={status === 'idle' ? 'media' : 'refresh'}

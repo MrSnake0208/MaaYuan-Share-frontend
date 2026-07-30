@@ -4602,7 +4602,7 @@ lru-cache@^5.1.1:
 
 "maa-copilot-client@https://github.com/MrSnake0208/zoot-plus-client-ts.git#main":
   version "0.1.0"
-  resolved "https://github.com/MrSnake0208/zoot-plus-client-ts.git#76ac0ed2507f11a22c95a6fc2416e66519ebc4c8"
+  resolved "https://github.com/MrSnake0208/zoot-plus-client-ts.git#c24a3db86e703ade710b1116dcd82e9c0d3473f2"
 
 magic-string@^0.30.12:
   version "0.30.21"

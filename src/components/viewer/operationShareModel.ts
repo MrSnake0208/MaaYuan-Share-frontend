@@ -112,6 +112,20 @@ export interface OperationShareModel {
 
 export type OperationShareCardKind = 'actions' | 'operators'
 
+export const OPERATION_SHARE_CARD_CONFIG_SCHEMA_VERSION = 1
+export const OPERATION_SHARE_CARD_KEYS: Record<OperationShareCardKind, string> =
+  {
+    actions: 'actions',
+    operators: 'deployed-operators',
+  }
+
+export interface OperationShareRemoteConfig {
+  cardKey: string
+  schemaVersion: number
+  revision: number
+  payload: unknown
+}
+
 export function createOperationShareCardConfig(): OperationShareCardConfig {
   return {
     showTargetSwitches: true,
@@ -127,7 +141,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-function normalizeOperationShareCardConfig(
+export function normalizeOperationShareCardConfig(
   value: unknown,
 ): OperationShareCardConfig {
   const defaults = createOperationShareCardConfig()
@@ -183,6 +197,106 @@ function normalizeOperationShareCardConfig(
   }
 }
 
+export function buildOperationShareCardConfigPayload(
+  kind: OperationShareCardKind,
+  config: OperationShareCardConfig,
+): Record<string, unknown> {
+  const normalized = normalizeOperationShareCardConfig(config)
+  if (kind === 'operators') {
+    return { requiredDiscs: normalized.requiredDiscs }
+  }
+
+  return {
+    showTargetSwitches: normalized.showTargetSwitches,
+    showOtherActions: normalized.showOtherActions,
+    showNotes: normalized.showNotes,
+    notes: normalized.notes,
+    cellColors: normalized.cellColors,
+  }
+}
+
+export function getOperationShareRemoteConfigByKind(
+  configs: readonly OperationShareRemoteConfig[],
+) {
+  const byKind: Partial<
+    Record<OperationShareCardKind, OperationShareRemoteConfig>
+  > = {}
+  configs.forEach((config) => {
+    const kind = (
+      Object.keys(OPERATION_SHARE_CARD_KEYS) as OperationShareCardKind[]
+    ).find(
+      (candidate) => OPERATION_SHARE_CARD_KEYS[candidate] === config.cardKey,
+    )
+    if (kind) byKind[kind] = config
+  })
+  return byKind
+}
+
+export function mergeOperationShareRemoteConfigs(
+  configs: readonly OperationShareRemoteConfig[],
+) {
+  const defaults = createOperationShareCardConfig()
+  const byKind = getOperationShareRemoteConfigByKind(configs)
+  const actions = byKind.actions
+  const operators = byKind.operators
+  const actionConfig =
+    actions?.schemaVersion === OPERATION_SHARE_CARD_CONFIG_SCHEMA_VERSION
+      ? normalizeOperationShareCardConfig(actions.payload)
+      : defaults
+  const operatorConfig =
+    operators?.schemaVersion === OPERATION_SHARE_CARD_CONFIG_SCHEMA_VERSION
+      ? normalizeOperationShareCardConfig(operators.payload)
+      : defaults
+
+  return {
+    ...actionConfig,
+    requiredDiscs: operatorConfig.requiredDiscs,
+  }
+}
+
+export function resolveOperationShareCardConfig(
+  localConfig: OperationShareCardConfig | undefined,
+  authorConfig: OperationShareCardConfig,
+) {
+  if (!localConfig) return authorConfig
+
+  const local = normalizeOperationShareCardConfig(localConfig)
+  const defaults = createOperationShareCardConfig()
+  const hasLocalActionOverrides =
+    local.showTargetSwitches !== defaults.showTargetSwitches ||
+    local.showOtherActions !== defaults.showOtherActions ||
+    local.showNotes !== defaults.showNotes ||
+    Object.keys(local.notes).length > 0 ||
+    Object.keys(local.cellColors).length > 0
+  const hasLocalOperatorOverrides = Object.keys(local.requiredDiscs).length > 0
+
+  return {
+    ...(hasLocalActionOverrides ? local : authorConfig),
+    requiredDiscs: hasLocalOperatorOverrides
+      ? local.requiredDiscs
+      : authorConfig.requiredDiscs,
+  }
+}
+
+export function replaceOperationShareCardConfigKind(
+  kind: OperationShareCardKind,
+  current: OperationShareCardConfig,
+  replacement: OperationShareCardConfig,
+) {
+  if (kind === 'operators') {
+    return { ...current, requiredDiscs: replacement.requiredDiscs }
+  }
+
+  return {
+    ...current,
+    showTargetSwitches: replacement.showTargetSwitches,
+    showOtherActions: replacement.showOtherActions,
+    showNotes: replacement.showNotes,
+    notes: replacement.notes,
+    cellColors: replacement.cellColors,
+  }
+}
+
 function operationShareCardConfigStorageKey(operationId: number) {
   return `${OPERATION_SHARE_CARD_CONFIG_STORAGE_PREFIX}:v${OPERATION_SHARE_CARD_CONFIG_STORAGE_VERSION}:${operationId}`
 }
@@ -191,19 +305,29 @@ export function loadOperationShareCardConfig(
   operationId: number,
   storage: Pick<Storage, 'getItem'> = window.localStorage,
 ) {
+  return (
+    readOperationShareCardConfig(operationId, storage) ??
+    createOperationShareCardConfig()
+  )
+}
+
+export function readOperationShareCardConfig(
+  operationId: number,
+  storage: Pick<Storage, 'getItem'> = window.localStorage,
+) {
   try {
     const raw = storage.getItem(operationShareCardConfigStorageKey(operationId))
-    if (!raw) return createOperationShareCardConfig()
+    if (!raw) return undefined
     const stored = JSON.parse(raw) as unknown
     if (
       !isRecord(stored) ||
       stored.version !== OPERATION_SHARE_CARD_CONFIG_STORAGE_VERSION
     ) {
-      return createOperationShareCardConfig()
+      return undefined
     }
     return normalizeOperationShareCardConfig(stored.config)
   } catch {
-    return createOperationShareCardConfig()
+    return undefined
   }
 }
 

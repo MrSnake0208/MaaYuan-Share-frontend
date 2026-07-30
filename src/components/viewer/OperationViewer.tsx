@@ -369,6 +369,9 @@ export const OperationViewer: ComponentType<{
 	        {shareDialogOpen ? (
 	          <Suspense fallback={null}>
 	            <OperationShareDialog
+	              canManageAuthorConfig={
+	                operation.uploaderId === auth.userId || isAdmin(auth)
+	              }
 	              operation={operation}
 	              onClose={() => setShareDialogOpen(false)}
 	            />

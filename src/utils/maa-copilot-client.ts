@@ -4,6 +4,7 @@ import {
   CommentAreaApi,
   Configuration,
   CopilotControllerApi,
+  CopilotShareImageConfigApi as GeneratedCopilotShareImageConfigApi,
   CopilotSetApi,
   CopilotUserApi,
   JSONApiResponse,
@@ -88,6 +89,13 @@ export class OperationApi<
 > extends (CopilotControllerApi as WithOptions<CopilotControllerApi>)<T> {
   constructor(options?: ValidateOptions<T>) {
     super(createConfiguration(options as T));
+  }
+}
+export class OperationShareImageConfigApi<
+  T extends ApiOptions,
+> extends (GeneratedCopilotShareImageConfigApi as WithOptions<GeneratedCopilotShareImageConfigApi>)<T> {
+  constructor(options?: ValidateOptions<T>) {
+    super(createConfiguration(options as T))
   }
 }
 export class OperationSetApi<
