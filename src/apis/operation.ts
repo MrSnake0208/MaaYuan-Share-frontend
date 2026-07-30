@@ -5,6 +5,8 @@ import {
   CopilotInfoFromJSON,
   CopilotInfoStatusEnum,
   QueriesCopilotRequest,
+  UpdateCopilotRequest,
+  UploadCopilotOperationRequest,
 } from "maa-copilot-client";
 import useSWR, { SWRConfiguration } from "swr";
 import useSWRInfinite from "swr/infinite";
@@ -327,10 +329,14 @@ function buildCopilotCUDRequest({
   status: CopilotInfoStatusEnum;
   metadata?: OperationMetadataPayload;
 }): CopilotCUDRequestWithMetadata {
+  const payload: CopilotCUDRequestWithMetadata = {
+    type: "PRTS",
+    ...rest,
+  };
   if (!metadata) {
-    return rest as CopilotCUDRequestWithMetadata;
+    return payload;
   }
-  return { ...rest, metadata };
+  return { ...payload, metadata };
 }
 
 function prepareRequestBody(payload: CopilotCUDRequestWithMetadata) {
@@ -411,8 +417,8 @@ export async function createOperation(req: {
   const api = new OperationApi();
   const response = await api.uploadCopilotRaw(
     {
-      copilotCUDRequest: payload,
-    },
+      uploadCopilotRequest: payload,
+    } satisfies UploadCopilotOperationRequest,
     async ({ init }) => {
       const bodyObject = prepareRequestBody(payload);
       return {
@@ -434,8 +440,8 @@ export async function updateOperation(req: {
   const api = new OperationApi();
   const response = await api.updateCopilotRaw(
     {
-      copilotCUDRequest: payload,
-    },
+      uploadCopilotRequest: payload,
+    } satisfies UpdateCopilotRequest,
     async ({ init }) => {
       const bodyObject = prepareRequestBody(payload);
       return {
@@ -449,11 +455,7 @@ export async function updateOperation(req: {
 
 export async function deleteOperation(req: { id: number }) {
   await new OperationApi().deleteCopilot({
-    copilotCUDRequest: {
-      content: "",
-      status: CopilotInfoStatusEnum.Public,
-      ...req,
-    },
+    copilotDeleteRequest: req,
   });
 }
 
