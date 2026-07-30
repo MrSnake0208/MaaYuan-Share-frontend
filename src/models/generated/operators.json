@@ -10088,7 +10088,80 @@
       "rarity": 5,
       "prof": "风",
       "subProf": "pojun",
-      "discs": []
+      "discs": [
+        {
+          "ot_name": "初始能量+1",
+          "abbreviation": "初始+1",
+          "color": "紫",
+          "desp": "初始能量+1"
+        },
+        {
+          "ot_name": "最大生命中幅提升",
+          "abbreviation": "生命中幅",
+          "color": "紫",
+          "desp": "最大生命提升8%"
+        },
+        {
+          "ot_name": "七进七出",
+          "abbreviation": "七进七出",
+          "color": "金",
+          "desp": "自身为风时，<将星耀>的普攻额外执行概率提升至100%"
+        },
+        {
+          "ot_name": "防御时恢复生命",
+          "abbreviation": "防御回血",
+          "color": "紫",
+          "desp": "防御时，恢复10%最大生命值的生命"
+        },
+        {
+          "ot_name": "英风慑敌",
+          "abbreviation": "英风慑敌",
+          "color": "金",
+          "desp": "自身为风时，则自身技能消耗能量-1"
+        },
+        {
+          "ot_name": "匹马单枪",
+          "abbreviation": "匹马单枪",
+          "color": "金",
+          "desp": "自身为火时，<将星耀>新增：自身记录持续期间我方密探损失生命和护盾量，持续时间结束时，使我方全体恢复等同于损失量10%的生命，这个效果不算治疗"
+        },
+        {
+          "ot_name": "攻击力小幅提升",
+          "abbreviation": "攻击小幅",
+          "color": "蓝",
+          "desp": "攻击力提升3%"
+        },
+        {
+          "ot_name": "火随风起",
+          "abbreviation": "火随风起",
+          "color": "金",
+          "desp": "将自身切换为火形态，更换自身技能效果，切换为火属性。自身最大生命提升50%，攻击力降低50%"
+        },
+        {
+          "ot_name": "生命低时攻击提升",
+          "abbreviation": "血低攻高",
+          "color": "蓝",
+          "desp": "生命值低于50%时，自身攻击力提升10%"
+        },
+        {
+          "ot_name": "攻击力中幅提升",
+          "abbreviation": "攻击中幅",
+          "color": "紫",
+          "desp": "攻击力提升8%"
+        },
+        {
+          "ot_name": "最大生命小幅提升",
+          "abbreviation": "生命小幅",
+          "color": "蓝",
+          "desp": "最大生命提升3%"
+        },
+        {
+          "ot_name": "为汉爪土",
+          "abbreviation": "为汉爪土",
+          "color": "金",
+          "desp": "若我方仅有风、火属性密探。我方全体攻击力提升50%，最大生命提升50%"
+        }
+      ]
     }
   ],
   "PROFESSIONS": [
