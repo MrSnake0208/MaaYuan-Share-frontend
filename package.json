@@ -19,6 +19,7 @@
     "scripts:update-operators": "esno scripts/update-operators.ts",
     "scripts:update-operator-avatars": "esno scripts/update-operator-avatars.ts",
     "scripts:update-prof-icons": "yarn install && esno scripts/update-prof-icons.ts",
+    "avatars:convert": "node tools/convert-operator-avatars.mjs",
     "scripts:verify-editor-import": "esno scripts/verify-editorv2-import.ts"
   },
   "dependencies": {

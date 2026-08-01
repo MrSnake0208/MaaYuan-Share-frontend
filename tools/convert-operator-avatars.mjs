@@ -13,15 +13,19 @@ const outputDirs = ["webp32", "webp96"];
 const defaultQuality = 80;
 let operators = [];
 
-function toWslPath(input) {
+function resolveSourcePath(input) {
   const normalized = input.replace(/^"(.*)"$/, "$1");
-  const match = normalized.match(/^([A-Za-z]):[\\/](.*)$/);
+  const windowsPath = normalized.match(/^([A-Za-z]):[\\/](.*)$/);
 
-  if (!match) {
-    return normalized;
+  if (process.platform === "linux" && windowsPath) {
+    return path.posix.join(
+      "/mnt",
+      windowsPath[1].toLowerCase(),
+      windowsPath[2].replaceAll("\\", "/"),
+    );
   }
 
-  return path.posix.join("/mnt", match[1].toLowerCase(), match[2].replaceAll("\\", "/"));
+  return path.resolve(normalized);
 }
 
 function getOperatorNameFromFile(filePath) {
@@ -54,7 +58,7 @@ function getQuality() {
 }
 
 async function convertOne(input, quality) {
-  const sourcePath = toWslPath(input);
+  const sourcePath = resolveSourcePath(input);
   const operator = findOperator(sourcePath);
 
   if (!operator) {
