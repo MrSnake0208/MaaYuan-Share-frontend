@@ -536,6 +536,16 @@ body.theme-maayuan .bp4-tag {
   color: var(--maayuan-text-strong);
 }
 
+body.theme-maayuan .editor-preset-tag-active.bp4-tag.bp4-intent-primary.bp4-interactive:hover {
+  background-color: #c9b691;
+  color: var(--maayuan-text-strong);
+}
+
+body.theme-maayuan .editor-preset-tag-active.bp4-tag.bp4-intent-primary.bp4-interactive:active {
+  background-color: #bca47a;
+  color: var(--maayuan-text-strong);
+}
+
 body.theme-maayuan .operation-card-tags .bp4-tag {
   color: #fff !important;
 }

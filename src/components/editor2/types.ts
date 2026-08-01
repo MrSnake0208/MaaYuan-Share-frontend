@@ -30,6 +30,10 @@ export type EditorOperationBase = Simplify<
      */
     levelRecognitionName?: string;
     /**
+     * OCR 识别目标的点击偏移量：[x, y, w, h]
+     */
+    recTargetOffset?: [number, number, number, number];
+    /**
      * 活动关卡自定义的难度描述，优先用于导出司命配置
      */
     activityDifficultyOverride?: string;

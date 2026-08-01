@@ -9,6 +9,7 @@ import {
   DEFAULT_SIMING_ULTIMATE_DELAY,
   SimingActionDelays,
 } from "./siming/constants";
+import { normalizeRecTargetOffset } from "./siming/recTargetOffset";
 import { EditorOperation } from "./types";
 import { CopilotOperationLoose } from "./validation/schema";
 
@@ -1020,6 +1021,12 @@ export async function toSimingOperationRemote(
     [editorActivityDifficultyOverride, baseActivityDifficultyOverride]
       .map((value) => (typeof value === "string" ? value.trim() : ""))
       .find((value) => value.length > 0) ?? "";
+  const normalizedRecTargetOffset = normalizeRecTargetOffset(
+    (editorOperation as any).recTargetOffset ??
+      (editorOperation as any).rec_target_offset ??
+      (baseOperation as any).rec_target_offset ??
+      (baseOperation as any).recTargetOffset,
+  );
   const fallbackActivityRecognitionName =
     normalizedLevelRecognition ||
     (opts?.level?.catTwo?.trim() ?? "") ||
@@ -1038,6 +1045,7 @@ export async function toSimingOperationRemote(
     level_type: "",
     // 按新规则：识别名同样使用 catTwo（若无则保留为空，稍后可能被兜底逻辑覆盖）
     level_recognition_name: normalizedLevelRecognition || opts?.level?.catTwo || "",
+    rec_target_offset: normalizedRecTargetOffset,
     difficulty: "",
     // 洞窟时由下方逻辑设置为 catThree
     cave_type: "",

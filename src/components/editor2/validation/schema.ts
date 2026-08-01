@@ -19,6 +19,9 @@ const version = z.number().optional();
 const stage_name = z.string().optional();
 const difficulty = z.enum(OpDifficulty).optional();
 const level_recognition_name = z.string().optional();
+const rec_target_offset = z
+  .tuple([z.number().int(), z.number().int(), z.number().int(), z.number().int()])
+  .optional();
 const activity_difficulty_override = z.string().optional();
 const minimum_required = z
   .string()
@@ -251,6 +254,7 @@ export const operationLooseSchema = z.object({
   difficulty,
   minimum_required,
   level_recognition_name,
+  rec_target_offset,
   activity_difficulty_override,
   level_meta,
   doc: doc.default({}),
@@ -267,6 +271,8 @@ const KNOWN_OPERATION_KEYS = new Set([
   "difficulty",
   "level_recognition_name",
   "levelRecognitionName",
+  "rec_target_offset",
+  "recTargetOffset",
   "activity_difficulty_override",
   "activityDifficultyOverride",
   "minimum_required",
@@ -336,6 +342,10 @@ function normalizeOperationLooseInput(raw: unknown): unknown {
     normalized["level_recognition_name"] = normalized["levelRecognitionName"];
     delete normalized["levelRecognitionName"];
   }
+  if ("recTargetOffset" in normalized) {
+    normalized["rec_target_offset"] = normalized["recTargetOffset"];
+    delete normalized["recTargetOffset"];
+  }
   if ("activityDifficultyOverride" in normalized) {
     normalized["activity_difficulty_override"] = normalized["activityDifficultyOverride"];
     delete normalized["activityDifficultyOverride"];
@@ -391,6 +401,7 @@ export const operationSchema = z
     difficulty,
     minimum_required,
     level_recognition_name,
+    rec_target_offset,
     activity_difficulty_override,
     level_meta,
     doc: docStrict,
@@ -431,6 +442,9 @@ type Labeled<T> = T extends Primitive
 export function getLabel(path: PropertyKey[]) {
   const labels: Labeled<CopilotOperation> = {
     ...i18n.components.editor2.label.operation,
+    level_recognition_name: i18n.components.editor2.LevelSelect.activity_level_recognition_label,
+    rec_target_offset: i18n.components.editor2.LevelSelect.rec_target_offset_label,
+    activity_difficulty_override: i18n.components.editor2.LevelSelect.activity_difficulty_label,
     level_meta: i18n.components.editor.OperationEditor.stage,
     opers: i18n.components.editor2.label.opers,
     groups: {
@@ -453,6 +467,9 @@ export function getLabel(path: PropertyKey[]) {
   const parts = path.filter(isString);
   if (parts[0] === "level_recognition_name") {
     return i18n.components.editor2.LevelSelect.activity_level_recognition_label;
+  }
+  if (parts[0] === "rec_target_offset") {
+    return i18n.components.editor2.LevelSelect.rec_target_offset_label;
   }
   if (parts[0] === "metadata") {
     const key = parts[1];

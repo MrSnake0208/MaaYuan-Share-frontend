@@ -658,6 +658,18 @@
           "cn": "用于生成“抄作业找到关卡”节点的 OCR 匹配文本",
           "zh_tw": "用於生成「抄作業找到關卡」節點的 OCR 匹配文本"
         },
+        "rec_target_offset_label": {
+          "cn": "点击偏移量",
+          "zh_tw": "點擊偏移量"
+        },
+        "rec_target_offset_helper": {
+          "cn": "依次为 x、y、w、h，可输入负数",
+          "zh_tw": "依次為 x、y、w、h，可輸入負數"
+        },
+        "rec_target_offset_preset_label": {
+          "cn": "预设",
+          "zh_tw": "預設"
+        },
         "activity_difficulty_label": {
           "cn": "关卡难度",
           "zh_tw": "關卡難度"

@@ -6,6 +6,7 @@ import { useTranslation } from "../../../i18n/i18n";
 import { AppToaster } from "../../Toaster";
 import { roundActionsToEditorActions } from "../action/roundMapping";
 import { toEditorOperation, toMaaOperation } from "../reconciliation";
+import { normalizeRecTargetOffset } from "../siming/recTargetOffset";
 import { parseOperationLoose } from "../validation/schema";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -28,6 +29,31 @@ const isRoundActionsRecord = (value: unknown): value is Record<string, string[][
           tokens.length > 0 &&
           tokens.every((token) => typeof token === "string"),
       ),
+  );
+};
+
+const isSimingActionsRecord = (
+  value: unknown,
+): value is Record<string, Record<string, unknown>> => {
+  if (!isRecord(value)) {
+    return false;
+  }
+  const entries = Object.entries(value);
+  if (entries.length === 0) {
+    return false;
+  }
+  const hasRoundNode = entries.some(([key]) => /^(检测回合\d+|回合\d+行动\d+)$/.test(key));
+  return (
+    hasRoundNode &&
+    entries.some(
+      ([, entry]) =>
+        isRecord(entry) &&
+        ("next" in entry ||
+          "action" in entry ||
+          "recognition" in entry ||
+          "expected" in entry ||
+          "text_doc" in entry),
+    )
   );
 };
 
@@ -60,7 +86,10 @@ const importViaSimingBackend = async (params: { file: File; baseUrl: string }) =
     throw new Error(`Siming导入接口失败: ${resp.status} ${text}`);
   }
 
-  const data: { actions?: Record<string, unknown> } = await resp.json();
+  const data: {
+    actions?: Record<string, unknown>;
+    config_info?: Record<string, unknown>;
+  } = await resp.json();
   if (!data?.actions || typeof data.actions !== "object") {
     throw new Error("Siming导入接口返回空内容");
   }
@@ -68,9 +97,36 @@ const importViaSimingBackend = async (params: { file: File; baseUrl: string }) =
   const editorActions = roundActionsToEditorActions(
     data.actions as unknown as Record<string, string[][]>,
   );
+  const configInfo = isRecord(data.config_info) ? data.config_info : {};
+  const levelName =
+    typeof configInfo.level_name === "string" && configInfo.level_name.trim()
+      ? configInfo.level_name.trim()
+      : file.name;
+  const levelType = typeof configInfo.level_type === "string" ? configInfo.level_type.trim() : "";
+  const levelRecognitionName =
+    typeof configInfo.level_recognition_name === "string" ? configInfo.level_recognition_name : "";
+  const activityDifficultyOverride =
+    typeof configInfo.difficulty === "string" ? configInfo.difficulty : "";
+  const recTargetOffset = normalizeRecTargetOffset(configInfo.rec_target_offset);
+  const catOne = (() => {
+    if (levelType === "活动" || levelType === "活动有分级") return "活动";
+    if (levelType === "洞窟") return "洞窟";
+    if (levelType === "主线" || levelType === "白鹄" || levelType === "兰台") return levelType;
+    if (levelType === "其他" && levelRecognitionName.trim()) return "地宫";
+    return levelType;
+  })();
   const editorOperation = {
     minimumRequired: "v4.0.0",
     doc: { title: file.name },
+    stageName: levelName,
+    levelMeta: {
+      stageId: levelName,
+      catOne,
+      catTwo: levelName,
+    },
+    levelRecognitionName,
+    activityDifficultyOverride,
+    recTargetOffset,
     opers: [],
     groups: [],
     actions: editorActions,
@@ -117,6 +173,22 @@ export const FileImporter: FC<{ onImport: (content: string) => void }> = ({ onIm
         throw new Error(`JSON 解析失败: ${(error as Error).message || "Unknown error"}`);
       }
 
+      const isSimingSource = isRoundActionsRecord(parsed) || isSimingActionsRecord(parsed);
+      let simingImportError: unknown;
+      if (isSimingSource) {
+        const baseUrl =
+          (import.meta as any).env?.VITE_SIMING_BASE_URL ||
+          (typeof process !== "undefined" && (process as any).env?.VITE_SIMING_BASE_URL) ||
+          "http://127.0.0.1:49481";
+        try {
+          const content = await importViaSimingBackend({ file, baseUrl });
+          onImport(content);
+          return;
+        } catch (error) {
+          simingImportError = error;
+        }
+      }
+
       const maaContent = tryParseMaaOperation({
         raw: parsed,
         fileName: file.name,
@@ -126,18 +198,13 @@ export const FileImporter: FC<{ onImport: (content: string) => void }> = ({ onIm
         return;
       }
 
-      if (!isRoundActionsRecord(parsed)) {
-        throw new Error("无法识别的导入文件结构");
+      if (simingImportError) {
+        throw simingImportError;
       }
 
-      // 使用与 siming-export.ts 一致的方式解析 baseUrl
-      const baseUrl =
-        (import.meta as any).env?.VITE_SIMING_BASE_URL ||
-        (typeof process !== "undefined" && (process as any).env?.VITE_SIMING_BASE_URL) ||
-        "http://127.0.0.1:49481";
-
-      const content = await importViaSimingBackend({ file, baseUrl });
-      onImport(content);
+      if (!isSimingSource) {
+        throw new Error("无法识别的导入文件结构");
+      }
     } catch (error) {
       console.warn("Failed to import file in editor2:", error);
       AppToaster.show({

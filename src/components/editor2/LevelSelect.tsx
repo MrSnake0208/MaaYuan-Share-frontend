@@ -1,4 +1,4 @@
-import { Classes, InputGroup, MenuItem } from "@blueprintjs/core";
+import { Classes, InputGroup, MenuItem, Tag } from "@blueprintjs/core";
 import { getCreateNewItem } from "@blueprintjs/select";
 
 import clsx from "clsx";
@@ -18,6 +18,12 @@ import { Level, OpDifficulty } from "../../models/operation";
 import { formatError } from "../../utils/error";
 import { useDebouncedQuery } from "../../utils/useDebouncedQuery";
 import { Suggest } from "../Suggest";
+import { NumericInput2 } from "../editor/NumericInput2";
+import {
+  DEFAULT_REC_TARGET_OFFSET,
+  REC_TARGET_OFFSET_PRESETS,
+  RecTargetOffset,
+} from "./siming/recTargetOffset";
 
 interface LevelSelectProps {
   className?: string;
@@ -38,6 +44,8 @@ interface LevelSelectProps {
   rightExtra?: ReactNode;
   activityLevelRecognitionName?: string;
   onActivityLevelRecognitionNameChange?: (value: string) => void;
+  recTargetOffset?: RecTargetOffset;
+  onRecTargetOffsetChange?: (value: RecTargetOffset) => void;
   activityDifficultyOverride?: string;
   onActivityDifficultyOverrideChange?: (value: string) => void;
 }
@@ -55,6 +63,8 @@ export const LevelSelect: FC<LevelSelectProps> = ({
   rightExtra,
   activityLevelRecognitionName,
   onActivityLevelRecognitionNameChange,
+  recTargetOffset,
+  onRecTargetOffsetChange,
   activityDifficultyOverride,
   onActivityDifficultyOverrideChange,
   ...inputProps
@@ -513,18 +523,79 @@ export const LevelSelect: FC<LevelSelectProps> = ({
             )}
 
             {onActivityLevelRecognitionNameChange && (
-              <div className="mt-2 flex flex-col gap-1">
-                <span className="text-xs font-medium text-slate-500">
-                  {t.components.editor2.LevelSelect.activity_level_recognition_label}
-                </span>
-                <InputGroup
-                  large
-                  placeholder={
-                    t.components.editor2.LevelSelect.activity_level_recognition_placeholder
-                  }
-                  value={activityLevelRecognitionName ?? ""}
-                  onChange={(e) => onActivityLevelRecognitionNameChange?.(e.target.value)}
-                />
+              <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-6">
+                <div className="flex w-full flex-col gap-1 sm:w-3/5">
+                  <span className="text-xs font-medium text-slate-500">
+                    {t.components.editor2.LevelSelect.activity_level_recognition_label}
+                  </span>
+                  <InputGroup
+                    large
+                    placeholder={
+                      t.components.editor2.LevelSelect.activity_level_recognition_placeholder
+                    }
+                    value={activityLevelRecognitionName ?? ""}
+                    onChange={(e) => onActivityLevelRecognitionNameChange?.(e.target.value)}
+                  />
+                </div>
+
+                {onRecTargetOffsetChange && (
+                  <div className="flex w-full min-w-0 flex-col gap-1 sm:w-2/5">
+                    <span className="text-xs font-medium text-slate-500">
+                      {t.components.editor2.LevelSelect.rec_target_offset_label}
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {(["x", "y", "w", "h"] as const).map((axis, index) => (
+                        <label key={axis} className="flex flex-none items-center gap-1">
+                          <span className="w-4 text-xs text-slate-500">{axis}</span>
+                          <NumericInput2
+                            containerClassName="flex-none"
+                            inputClassName="!rounded-r-md !border-r !text-center"
+                            style={{ width: "3.5rem" }}
+                            intOnly
+                            value={(recTargetOffset ?? DEFAULT_REC_TARGET_OFFSET)[index]}
+                            onValueChange={(nextValue) => {
+                              const nextOffset: RecTargetOffset = [
+                                ...(recTargetOffset ?? DEFAULT_REC_TARGET_OFFSET),
+                              ];
+                              nextOffset[index] = Math.trunc(nextValue);
+                              onRecTargetOffsetChange(nextOffset);
+                            }}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                    <span className="text-xs text-slate-500">
+                      {t.components.editor2.LevelSelect.rec_target_offset_helper}
+                    </span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-slate-500">
+                        {t.components.editor2.LevelSelect.rec_target_offset_preset_label}
+                      </span>
+                      {REC_TARGET_OFFSET_PRESETS.map((preset) => {
+                        const current = recTargetOffset ?? DEFAULT_REC_TARGET_OFFSET;
+                        const active = preset.value.every(
+                          (value, index) => value === current[index],
+                        );
+                        return (
+                          <Tag
+                            key={preset.label}
+                            className={clsx(
+                              "editor-preset-tag",
+                              active && "editor-preset-tag-active",
+                            )}
+                            interactive
+                            minimal={!active}
+                            intent={active ? "primary" : "none"}
+                            onClick={() => onRecTargetOffsetChange([...preset.value])}
+                          >
+                            {preset.label}
+                            <span className="ml-1 opacity-70">[{preset.value.join(", ")}]</span>
+                          </Tag>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </>

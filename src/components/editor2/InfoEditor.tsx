@@ -18,6 +18,7 @@ import { Paths } from "type-fest";
 import { i18n, useTranslation } from "../../i18n/i18n";
 import { Level, OpDifficulty, Operation } from "../../models/operation";
 import { OperatorAvatar } from "../OperatorAvatar";
+import { TagsFilter } from "../TagsFilter";
 import { NumericInput2 } from "../editor/NumericInput2";
 import { LevelSelect } from "./LevelSelect";
 import { editorAtoms, useEdit } from "./editor-state";
@@ -25,7 +26,6 @@ import { OperatorSidebarInInfo } from "./operator/OperatorSidebarInInfo";
 import { DEFAULT_SIMING_ACTION_DELAYS } from "./siming/constants";
 import { EditorSourceType } from "./types";
 import { CopilotOperation, getLabeledPath } from "./validation/schema";
-import { TagsFilter } from "../TagsFilter";
 
 interface InfoEditorProps {
   className?: string;
@@ -211,7 +211,9 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
       if ((info.stageName ?? "").trim().length) {
         window.localStorage.setItem(key, value);
       }
-    } catch {}
+    } catch {
+      // localStorage may be unavailable in private browsing or embedded environments.
+    }
   }, [info.levelMeta?.catThree, info.stageName]);
 
   // 当切换关卡时，尝试恢复之前编辑过的 catThree
@@ -228,7 +230,9 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
           catThreeEditedRef.current = true;
         }
       }
-    } catch {}
+    } catch {
+      // localStorage may be unavailable in private browsing or embedded environments.
+    }
   }, [info.stageName, setInfo]);
 
   return (
@@ -250,6 +254,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
           difficulty={info.difficulty ?? OpDifficulty.UNKNOWN}
           value={info.stageName}
           activityLevelRecognitionName={info.levelRecognitionName ?? ""}
+          recTargetOffset={info.recTargetOffset}
           activityDifficultyOverride={info.activityDifficultyOverride ?? ""}
           fallbackLevel={fallbackLevel}
           defaultCategory={defaultCategory}
@@ -315,6 +320,18 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
                 action: "set-activity-recognition",
                 desc: i18n.actions.editor2.set_level,
                 squashBy: "",
+              };
+            });
+          }}
+          onRecTargetOffsetChange={(nextValue) => {
+            edit(() => {
+              setInfo((prev) => {
+                prev.recTargetOffset = [...nextValue];
+              });
+              return {
+                action: "set-rec-target-offset",
+                desc: i18n.actions.editor2.set_level,
+                squashBy: "rec-target-offset",
               };
             });
           }}
@@ -635,6 +652,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
             {t.components.editor2.InfoEditor.siming_preset_label}
           </span>
           <Tag
+            className={clsx("editor-preset-tag", currentIsFast && "editor-preset-tag-active")}
             interactive
             minimal={!currentIsFast}
             intent={currentIsFast ? "primary" : "none"}
@@ -644,6 +662,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
             <span className="ml-1 opacity-70">(2000/4000/2000)</span>
           </Tag>
           <Tag
+            className={clsx("editor-preset-tag", currentIsNormal && "editor-preset-tag-active")}
             interactive
             minimal={!currentIsNormal}
             intent={currentIsNormal ? "primary" : "none"}
@@ -653,6 +672,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
             <span className="ml-1 opacity-70">(3000/5000/3000)</span>
           </Tag>
           <Tag
+            className={clsx("editor-preset-tag", currentIsSlow && "editor-preset-tag-active")}
             interactive
             minimal={!currentIsSlow}
             intent={currentIsSlow ? "primary" : "none"}

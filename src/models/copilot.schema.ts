@@ -23,6 +23,10 @@ export namespace CopilotDocV1 {
      */
     levelRecognitionName?: string;
     /**
+     * OCR 识别目标的点击偏移量：[x, y, w, h]
+     */
+    recTargetOffset?: [number, number, number, number];
+    /**
      * 活动关卡自定义难度描述，优先用于导出 Siming 配置
      */
     activityDifficultyOverride?: string;
