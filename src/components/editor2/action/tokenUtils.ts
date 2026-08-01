@@ -49,9 +49,11 @@ export function extractSlotFromToken(rawToken: string): SlotKey | null {
   }
 
   if (token.startsWith("重开:检测")) {
-    const downMatch = token.match(/重开:检测([1-5])号位阵亡/);
-    if (downMatch) {
-      return downMatch[1] as SlotKey;
+    const detectionMatch = token.match(
+      /^重开:检测([1-5])号位(?:阵亡|退场|鹦鹉|龙气)$/,
+    );
+    if (detectionMatch) {
+      return detectionMatch[1] as SlotKey;
     }
   }
 

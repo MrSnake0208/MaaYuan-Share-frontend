@@ -228,7 +228,18 @@ const EXTRA_ACTION_TEMPLATES: Record<string, SimingActionConfig> = {
 const ORANGE_RESTART_LABEL = "重开:无橙星";
 const PURPLE_RESTART_LABEL = "重开:无紫星";
 const BLUE_RESTART_LABEL = "重开:无蓝星";
-const DOWN_RESTART_PREFIX = "重开:检测";
+
+type RestartDetectionSuffix = "阵亡" | "退场" | "鹦鹉" | "龙气";
+
+const RESTART_DETECTION_META: Record<
+  RestartDetectionSuffix,
+  { customAction: string; textSuffix: string }
+> = {
+  阵亡: { customAction: "DownRestart", textSuffix: "阵亡检测" },
+  退场: { customAction: "RetreatRestart", textSuffix: "退场检测" },
+  鹦鹉: { customAction: "BirdRestart", textSuffix: "鹦鹉检测" },
+  龙气: { customAction: "DragonRestart", textSuffix: "龙气检测" },
+};
 
 const ORANGE_DETECTION_TEMPLATE: SimingActionConfig = {
   recognition: "ColorMatch",
@@ -351,11 +362,23 @@ function createCustomDelayNode(delays: SimingActionDelays): SimingActionConfig {
   };
 }
 
-function parseDownRestartPosition(token: string): number {
-  const trimmed = token.replace(DOWN_RESTART_PREFIX, "").replace("号位阵亡", "").trim();
-  const digit = trimmed.charAt(0);
-  const position = Number.parseInt(digit, 10);
-  return Number.isFinite(position) && position >= 1 ? position : 1;
+function parseRestartDetectionToken(token: string): {
+  position: number;
+  customAction: string;
+  textDoc: string;
+} | null {
+  const match = token.match(/^重开:检测([1-5])号位(阵亡|退场|鹦鹉|龙气)$/);
+  if (!match) {
+    return null;
+  }
+  const position = Number(match[1]);
+  const suffix = match[2] as RestartDetectionSuffix;
+  const meta = RESTART_DETECTION_META[suffix];
+  return {
+    position,
+    customAction: meta.customAction,
+    textDoc: `${position}号位${meta.textSuffix}`,
+  };
 }
 
 function buildRoundNodes(
@@ -397,7 +420,7 @@ function buildRoundNodes(
         roundsWithBlueRestart.add(roundKey);
         return false;
       }
-      if (token.startsWith(DOWN_RESTART_PREFIX)) {
+      if (parseRestartDetectionToken(token)) {
         return true;
       }
       return !token.startsWith("重开:");
@@ -438,7 +461,7 @@ function buildRoundNodes(
       if (token === ORANGE_RESTART_LABEL) {
         return false;
       }
-      if (token.startsWith(DOWN_RESTART_PREFIX)) {
+      if (parseRestartDetectionToken(token)) {
         return true;
       }
       return !token.startsWith("重开:");
@@ -493,7 +516,7 @@ function buildRoundNodes(
         ensureNext(result, detectionKey, RESTART_FULL_TARGET);
       } else if (firstToken === RESTART_MANUAL_LABEL) {
         ensureNext(result, detectionKey, RESTART_NODE_KEY);
-      } else if (firstToken.startsWith(DOWN_RESTART_PREFIX)) {
+      } else if (parseRestartDetectionToken(firstToken)) {
         ensureNext(result, detectionKey, `回合${roundKey}行动1`);
       } else {
         ensureNext(result, detectionKey, RESTART_NODE_KEY);
@@ -552,13 +575,14 @@ function buildRoundNodes(
         return;
       }
 
-      if (token.startsWith(DOWN_RESTART_PREFIX)) {
-        const position = parseDownRestartPosition(token);
+      const restartDetection = parseRestartDetectionToken(token);
+      if (restartDetection) {
+        const { position, customAction, textDoc } = restartDetection;
         const actionKey = `回合${roundKey}行动${actualActionIndex}`;
         const downConfig = ensureNextArray({
-          text_doc: `${position}号位阵亡检测`,
+          text_doc: textDoc,
           action: "Custom",
-          custom_action: "DownRestart",
+          custom_action: customAction,
           custom_action_param: {
             node: actionKey,
             position,
@@ -834,16 +858,21 @@ function inferSimingToken(action: CopilotDocV1.SimingAction): string | undefined
   if (text === "关卡内互动") {
     return "额外:关卡内互动";
   }
-  if (text && text.endsWith("号位阵亡检测")) {
-    const digit = text.charAt(0);
-    return `重开:检测${digit}号位阵亡`;
+  if (text) {
+    const detectionMatch = text.match(/^([1-5])号位(阵亡|退场|鹦鹉|龙气)检测$/);
+    if (detectionMatch) {
+      return `重开:检测${detectionMatch[1]}号位${detectionMatch[2]}`;
+    }
   }
-  if (action.customAction === "DownRestart") {
+  const customActionSuffix = Object.entries(RESTART_DETECTION_META).find(
+    ([, meta]) => meta.customAction === action.customAction,
+  )?.[0] as RestartDetectionSuffix | undefined;
+  if (customActionSuffix) {
     const positionParam = (action.customActionParam as { position?: unknown } | undefined)
       ?.position;
     const position = Number(positionParam);
-    const safePosition = Number.isFinite(position) && position >= 1 ? position : 1;
-    return `重开:检测${safePosition}号位阵亡`;
+    const safePosition = Number.isFinite(position) && position >= 1 && position <= 5 ? position : 1;
+    return `重开:检测${safePosition}号位${customActionSuffix}`;
   }
   if (text) {
     return text;
@@ -913,6 +942,49 @@ function normalizeSimingActionFormat(actions: SimingActionMap): SimingActionMap 
     result[key] = normalized;
   }
   return result;
+}
+
+function patchRestartDetectionActions(
+  actions: SimingActionMap,
+  roundActions: RoundActionsInput,
+): SimingActionMap {
+  // 兼容尚未识别新检测 token、仍统一生成 DownRestart 的旧版远程生成器。
+  for (const [roundKey, entries] of Object.entries(roundActions)) {
+    let actionIndex = 1;
+    for (const entry of entries) {
+      const token = entry?.[0]?.trim();
+      if (!token) {
+        continue;
+      }
+
+      const detection = parseRestartDetectionToken(token);
+      if (detection) {
+        const actionKey = `回合${roundKey}行动${actionIndex}`;
+        const config = actions[actionKey];
+        if (config) {
+          const existingParams =
+            config.custom_action_param && typeof config.custom_action_param === "object"
+              ? (config.custom_action_param as Record<string, unknown>)
+              : {};
+          config.text_doc = detection.textDoc;
+          config.action = "Custom";
+          config.custom_action = detection.customAction;
+          config.custom_action_param = {
+            ...existingParams,
+            node: actionKey,
+            position: detection.position,
+          };
+        }
+        actionIndex += 1;
+        continue;
+      }
+
+      if (!token.startsWith("重开:")) {
+        actionIndex += 1;
+      }
+    }
+  }
+  return actions;
 }
 
 // Remote generator: delegate Siming JSON building to MaaYuan-SiMing backend
@@ -1101,7 +1173,10 @@ export async function toSimingOperationRemote(
 
   let actions: SimingActionMap;
   try {
-    actions = JSON.parse(data.content);
+    actions = patchRestartDetectionActions(
+      normalizeSimingActionFormat(JSON.parse(data.content)),
+      roundActions,
+    );
   } catch (e) {
     throw new Error("解析Siming生成结果失败: " + (e as Error).message);
   }
@@ -1114,6 +1189,6 @@ export async function toSimingOperationRemote(
 
   return {
     ...(rest as Omit<CopilotOperationLoose, "actions">),
-    actions: normalizeSimingActionFormat(actions),
+    actions,
   };
 }

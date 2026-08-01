@@ -45,7 +45,16 @@ interface RoundFormState {
   extraSlot: string;
   extraAction: BasicActionSymbol;
   waitMs: string;
-  restartType: "full" | "manual" | "orange" | "purple" | "blue" | "down";
+  restartType:
+    | "full"
+    | "manual"
+    | "orange"
+    | "purple"
+    | "blue"
+    | "down"
+    | "retreat"
+    | "dragon"
+    | "bird";
   restartSlot: string;
 }
 
@@ -78,7 +87,16 @@ const RESTART_TYPES = [
   { value: "purple", label: "无紫星重开" },
   { value: "blue", label: "无蓝星重开" },
   { value: "down", label: "阵亡检测重开" },
+  { value: "retreat", label: "退场检测重开" },
+  { value: "dragon", label: "不足2龙气重开" },
+  { value: "bird", label: "未被复制重开" },
 ] as const;
+const SLOT_RESTART_TYPES: ReadonlySet<RoundFormState["restartType"]> = new Set([
+  "down",
+  "retreat",
+  "dragon",
+  "bird",
+]);
 const DEFAULT_WAIT_MS = 1000;
 
 const ROUND_LIMIT = 50;
@@ -687,6 +705,21 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
           token = "重开:检测" + slot + "号位阵亡";
           break;
         }
+        case "retreat": {
+          const slot = form.restartSlot || "1";
+          token = "重开:检测" + slot + "号位退场";
+          break;
+        }
+        case "dragon": {
+          const slot = form.restartSlot || "1";
+          token = "重开:检测" + slot + "号位龙气";
+          break;
+        }
+        case "bird": {
+          const slot = form.restartSlot || "1";
+          token = "重开:检测" + slot + "号位鹦鹉";
+          break;
+        }
         default:
           token = "重开:全灭";
           break;
@@ -1024,7 +1057,7 @@ export const ActionEditor: FC<ActionEditorProps> = ({ className }) => {
               </option>
             ))}
           </HTMLSelect>
-          {form.restartType === "down" && (
+          {SLOT_RESTART_TYPES.has(form.restartType) && (
             <HTMLSelect
               value={form.restartSlot}
               onChange={(e) =>

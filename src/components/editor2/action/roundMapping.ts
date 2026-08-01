@@ -29,6 +29,9 @@ type ParsedTokenKind =
   | "restartPurple"
   | "restartBlue"
   | "restartDown"
+  | "restartRetreat"
+  | "restartDragon"
+  | "restartBird"
   | "extraLvbu"
   | "extraAuto"
   | "extraSp"
@@ -178,9 +181,19 @@ function parseToken(token: string): {
     if (type === "无蓝星") {
       return { kind: "restartBlue" };
     }
-    const downMatch = token.match(/重开:检测(\d)号位阵亡/);
-    if (downMatch) {
-      return { kind: "restartDown", slot: Number(downMatch[1]) };
+    const detectionMatch = token.match(/^重开:检测([1-5])号位(阵亡|退场|鹦鹉|龙气)$/);
+    if (detectionMatch) {
+      const slot = Number(detectionMatch[1]);
+      switch (detectionMatch[2]) {
+        case "退场":
+          return { kind: "restartRetreat", slot };
+        case "鹦鹉":
+          return { kind: "restartBird", slot };
+        case "龙气":
+          return { kind: "restartDragon", slot };
+        default:
+          return { kind: "restartDown", slot };
+      }
     }
   }
   return { kind: "unknown" };
@@ -271,6 +284,38 @@ function mapParsedAction(action: ParsedRoundAction, options?: MappingOptions): E
       return createAction({
         type: CopilotDocV1.Type.Output,
         doc: formatDoc(docPrefix, `检测槽位${position}阵亡`, `重开:检测${position}号位阵亡`),
+        intermediatePostDelay: postDelay,
+      });
+    }
+    case "restartRetreat": {
+      const position = action.slot ?? slot;
+      return createAction({
+        type: CopilotDocV1.Type.Output,
+        doc: formatDoc(docPrefix, `检测槽位${position}退场`, `重开:检测${position}号位退场`),
+        intermediatePostDelay: postDelay,
+      });
+    }
+    case "restartDragon": {
+      const position = action.slot ?? slot;
+      return createAction({
+        type: CopilotDocV1.Type.Output,
+        doc: formatDoc(
+          docPrefix,
+          `检测槽位${position}龙气`,
+          `重开:检测${position}号位龙气`,
+        ),
+        intermediatePostDelay: postDelay,
+      });
+    }
+    case "restartBird": {
+      const position = action.slot ?? slot;
+      return createAction({
+        type: CopilotDocV1.Type.Output,
+        doc: formatDoc(
+          docPrefix,
+          `检测槽位${position}鹦鹉`,
+          `重开:检测${position}号位鹦鹉`,
+        ),
         intermediatePostDelay: postDelay,
       });
     }
@@ -423,9 +468,10 @@ function guessTokenFromAction(action: EditorAction): string {
       return "重开:全灭";
     case CopilotDocV1.Type.Output:
       if (action.doc?.includes("检测槽位")) {
-        const downMatch = action.doc.match(/检测槽位(\d)阵亡/);
-        const position = downMatch ? Number(downMatch[1]) : slot;
-        return "重开:检测" + position + "号位阵亡";
+        const detectionMatch = action.doc.match(/检测槽位([1-5])(阵亡|退场|鹦鹉|龙气)/);
+        if (detectionMatch) {
+          return `重开:检测${detectionMatch[1]}号位${detectionMatch[2]}`;
+        }
       }
       if (action.doc?.includes("吕布")) {
         return "额外:吕布";
