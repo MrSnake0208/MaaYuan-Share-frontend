@@ -663,8 +663,8 @@
           "zh_tw": "點擊偏移量"
         },
         "rec_target_offset_helper": {
-          "cn": "依次为 x、y、w、h，可输入负数",
-          "zh_tw": "依次為 x、y、w、h，可輸入負數"
+          "cn": "依次为 x坐标变化、y坐标变化、宽度变化、高度变化，可输入负数",
+          "zh_tw": "依次為 x座標變化、y座標變化、寬度變化、高度變化，可輸入負數"
         },
         "rec_target_offset_preset_label": {
           "cn": "预设",

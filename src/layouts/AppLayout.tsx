@@ -74,9 +74,9 @@ export const AppLayout: FCC = ({ children }) => {
                 </div>
                 <p className="text-sm text-gray-700 dark:text-gray-300 flex-1 leading-relaxed">
                   <span className="font-medium text-gray-900 dark:text-gray-100">
-                    系统更新通知：
+                    2026年8月2日 系统更新通知：
                   </span>
-                  现已支持影战-点击工具箱的操作，请添加【额外动作-关卡内互动】。
+                  以下新增功能需使用 MaaYuan v2.2.0-beta.1 及以上版本 <br />1. X号位 【退场重开】 / 【未被复制重开】（庞统鹦鹉） / 【不足2龙气重开】（诸葛亮）<br />2. 自定义【点击偏移量】：如需赌泰山府重开，请在填写关卡OCR 识别关键字（如 三 / 七 / 十）后，直接点击右侧的 “（点击偏移量）预设” -“泰山府（关卡名偏右）”或“泰山府（关卡名偏左）”
                 </p>
               </div>
             </div>

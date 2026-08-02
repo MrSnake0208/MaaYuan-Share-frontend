@@ -7,7 +7,8 @@ export const REC_TARGET_OFFSET_PRESETS: ReadonlyArray<{
   value: RecTargetOffset;
 }> = [
   { label: "默认", value: DEFAULT_REC_TARGET_OFFSET },
-  { label: "泰山府", value: [-80, 0, 0, 0] },
+  { label: "泰山府(关卡名靠右)", value: [-80, 0, 0, 0] },
+  { label: "泰山府(关卡名靠左)", value: [80, 0, 0, 0] },
 ];
 
 export function normalizeRecTargetOffset(value: unknown): RecTargetOffset {
