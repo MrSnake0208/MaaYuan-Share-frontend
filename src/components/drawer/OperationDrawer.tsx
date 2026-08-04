@@ -11,6 +11,10 @@ import {
   readOperationIdsAtom,
   toggleReadOperationAtom,
 } from 'store/readOperations'
+import {
+  sunkOperationIdsAtom,
+  toggleSunkOperationAtom,
+} from 'store/sunkOperations'
 
 const ReadOperationButton = ({ operationId }: { operationId: number }) => {
   const t = useTranslation()
@@ -33,6 +37,35 @@ const ReadOperationButton = ({ operationId }: { operationId: number }) => {
     />
   )
 }
+
+const SunkOperationButton = ({ operationId }: { operationId: number }) => {
+  const t = useTranslation()
+  const sunkOperationIds = useAtomValue(sunkOperationIdsAtom)
+  const toggleSunkOperation = useSetAtom(toggleSunkOperationAtom)
+  const isSunk = sunkOperationIds.includes(operationId)
+
+  return (
+    <Button
+      active={isSunk}
+      icon="sort-desc"
+      intent={isSunk ? 'warning' : 'none'}
+      text={t.components.drawer.OperationDrawer.sink}
+      aria-label={
+        isSunk
+          ? t.components.drawer.OperationDrawer.restore_order
+          : t.components.drawer.OperationDrawer.sink_to_bottom
+      }
+      onClick={() => toggleSunkOperation(operationId)}
+    />
+  )
+}
+
+const OperationStatusButtons = ({ operationId }: { operationId: number }) => (
+  <>
+    <ReadOperationButton operationId={operationId} />
+    <SunkOperationButton operationId={operationId} />
+  </>
+)
 
 export function OperationDrawer() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -87,7 +120,7 @@ export function OperationDrawer() {
             <OperationViewer
               operationId={operationId}
               onCloseDrawer={closeOperation}
-              headerActions={<ReadOperationButton operationId={operationId} />}
+              headerActions={<OperationStatusButtons operationId={operationId} />}
             />
           )}
         </Drawer>
@@ -105,7 +138,7 @@ export function OperationDrawer() {
         <OperationViewer
           operationId={operationId}
           onCloseDrawer={closeOperation}
-          headerActions={<ReadOperationButton operationId={operationId} />}
+          headerActions={<OperationStatusButtons operationId={operationId} />}
         />
       )}
     </Drawer>

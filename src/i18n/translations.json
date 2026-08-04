@@ -1407,6 +1407,18 @@
         "mark_unread": {
           "cn": "标记为未读",
           "zh_tw": "標記為未讀"
+        },
+        "sink": {
+          "cn": "沉底",
+          "zh_tw": "沉底"
+        },
+        "sink_to_bottom": {
+          "cn": "将作业沉底",
+          "zh_tw": "將作業沉底"
+        },
+        "restore_order": {
+          "cn": "取消沉底",
+          "zh_tw": "取消沉底"
         }
       }
     },

@@ -3,7 +3,7 @@ import { IconNames } from "@blueprintjs/icons";
 
 import { UseOperationsParams, useRefreshOperations } from "apis/operation";
 import clsx from "clsx";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { debounce } from "lodash-es";
 import { MaaUserInfo } from "maa-copilot-client";
 import { ComponentType, useMemo, useState } from "react";
@@ -12,6 +12,7 @@ import { CardTitle } from "components/CardTitle";
 import { OperationList } from "components/OperationList";
 import { OperationSetList } from "components/OperationSetList";
 import { neoLayoutAtom } from "store/pref";
+import { sunkOperationIdsAtom } from "store/sunkOperations";
 
 import { useTranslation } from "../i18n/i18n";
 // 使用悬浮式按钮选择器
@@ -34,6 +35,7 @@ export const Operations: ComponentType = withSuspensable(() => {
   const { operatorFilter, setOperatorFilter } = useOperatorFilter();
   const [selectedUser, setSelectedUser] = useState<MaaUserInfo>();
   const [neoLayout, setNeoLayout] = useAtom(neoLayoutAtom);
+  const sunkOperationIds = useAtomValue(sunkOperationIdsAtom);
   const [tab, setTab] = useState<"operation" | "operationSet">("operation");
   const [multiselect, setMultiselect] = useState(false);
   // 独立保存已选中的具体关卡，用于按钮展示与弹层回显
@@ -256,6 +258,7 @@ export const Operations: ComponentType = withSuspensable(() => {
             tags={tags}
             multiselect={multiselect}
             showReadStatus
+            sunkOperationIds={sunkOperationIds}
             operator={operatorFilter.enabled ? operatorFilter : undefined}
             // 按热度排序时列表前几页的变化不会太频繁，可以不刷新第一页，节省点流量
             revalidateFirstPage={queryParams.orderBy !== "hot"}

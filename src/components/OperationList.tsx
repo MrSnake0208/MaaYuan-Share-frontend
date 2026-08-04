@@ -6,6 +6,7 @@ import { useAtomValue } from "jotai";
 import { ComponentType, ReactNode, useEffect, useState } from "react";
 
 import { neoLayoutAtom } from "store/pref";
+import { moveSunkOperationsToBottom } from "store/sunkOperations";
 
 import { useTranslation } from "../i18n/i18n";
 import { Operation } from "../models/operation";
@@ -16,6 +17,7 @@ import { AddToOperationSetButton } from "./operation-set/AddToOperationSet";
 interface OperationListProps extends UseOperationsParams {
   multiselect?: boolean;
   showReadStatus?: boolean;
+  sunkOperationIds?: number[];
   onUpdate?: (params: { total: number }) => void;
   /**
    * 扩展：在多选模式下渲染额外的批量操作按钮（如批量删除）。
@@ -36,6 +38,7 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
   ({
     multiselect,
     showReadStatus,
+    sunkOperationIds,
     onUpdate,
     renderMultiSelectActions,
     sourceTypeFilter,
@@ -85,6 +88,11 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
       return normalized.every((t) => itemTags.includes(t));
     });
 
+    const orderedOperations = moveSunkOperationsToBottom(
+      displayedOperations,
+      sunkOperationIds ?? [],
+    );
+
     const items: ReactNode = neoLayout ? (
       <ul
         className="grid gap-4 items-stretch"
@@ -92,7 +100,7 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
           gridTemplateColumns: "repeat(auto-fill, minmax(20rem, 1fr)",
         }}
       >
-        {displayedOperations.map((operation) => (
+        {orderedOperations.map((operation) => (
           <NeoOperationCard
             operation={operation}
             key={operation.id}
@@ -105,7 +113,7 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
       </ul>
     ) : (
       <ul>
-        {displayedOperations.map((operation) => (
+        {orderedOperations.map((operation) => (
           <OperationCard
             operation={operation}
             key={operation.id}
