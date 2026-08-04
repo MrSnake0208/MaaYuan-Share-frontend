@@ -46,6 +46,36 @@ describe('operation mutations', () => {
     )
   })
 
+  it('keeps an original source URL in the upload request body', async () => {
+    await createOperation({
+      content: '{"doc":{"title":"test"}}',
+      status: CopilotInfoStatusEnum.Public,
+      metadata: {
+        sourceType: 'original',
+        repostUrl: 'https://space.bilibili.com/123',
+        tags: ['如鸢'],
+      },
+    })
+
+    const transformRequest =
+      operationApiMocks.uploadCopilotRaw.mock.calls[0]?.[1]
+    expect(transformRequest).toBeTypeOf('function')
+
+    const request = await transformRequest({ init: {} })
+    expect(request.body).toEqual({
+      content: '{"doc":{"title":"test"}}',
+      status: CopilotInfoStatusEnum.Public,
+      type: 'PRTS',
+      metadata: {
+        sourceType: 'original',
+        repostAuthor: undefined,
+        repostPlatform: undefined,
+        repostUrl: 'https://space.bilibili.com/123',
+        tags: ['如鸢'],
+      },
+    })
+  })
+
   it('wraps an updated operation in uploadCopilotRequest', async () => {
     await updateOperation({
       id: 123,

@@ -9,13 +9,12 @@ import { OperationEditor } from "components/editor2/Editor";
 
 import { useLevels } from "../apis/level";
 import { createOperation, getOperation, updateOperation, useOperation } from "../apis/operation";
-import type { OperationMetadataPayload } from "../apis/operation";
 import { withSuspensable } from "../components/Suspensable";
 import { AppToaster } from "../components/Toaster";
 import { defaultEditorState, editorAtoms, historyAtom } from "../components/editor2/editor-state";
-import type { EditorMetadata } from "../components/editor2/types";
 import { toEditorOperation } from "../components/editor2/reconciliation";
 import { toSimingOperationRemote } from "../components/editor2/siming-export";
+import type { EditorMetadata } from "../components/editor2/types";
 import { parseOperationLoose } from "../components/editor2/validation/schema";
 import { editorValidationAtom } from "../components/editor2/validation/validation";
 import { i18n, useTranslation } from "../i18n/i18n";
@@ -24,6 +23,10 @@ import { findLevelByStageName } from "../models/level";
 import { Level } from "../models/operation";
 import { parseShortCode } from "../models/shortCode";
 import { stripOperationExportFields } from "../services/operation";
+import {
+  buildOperationMetadataPayload,
+  validateEditorMetadata,
+} from "../services/operationMetadata";
 import { formatError } from "../utils/error";
 import { wrapErrorMessage } from "../utils/wrapErrorMessage";
 
@@ -111,31 +114,24 @@ export const EditorPage = withSuspensable(() => {
 
   const validateMetadata = useCallback(
     (metadata: EditorMetadata) => {
-      const missingFields: string[] = [];
-
-      // 标签必填：清洗后需至少 1 项
-      const cleanedTags = Array.isArray(metadata.tags)
-        ? Array.from(
-            new Set(metadata.tags.map((s) => (s ?? "").trim()).filter((s) => s.length > 0)),
-          )
-        : [];
-      if (cleanedTags.length === 0) {
-        missingFields.push(t.components.editor2.InfoEditor.tags);
+      const validation = validateEditorMetadata(metadata);
+      if (validation.ok) {
+        return { ok: true as const };
+      }
+      if (validation.reason === "invalid-url") {
+        return {
+          ok: false as const,
+          message: t.pages.editor.validation.metadata_invalid_url,
+        };
       }
 
-      // 搬运稿额外必填字段校验
-      if (metadata.sourceType === "repost") {
-        if (!metadata.repostAuthor?.trim()) {
-          missingFields.push(t.components.editor2.InfoEditor.repost_author);
-        }
-        if (!metadata.repostPlatform?.trim()) {
-          missingFields.push(t.components.editor2.InfoEditor.repost_platform);
-        }
-        if (!metadata.repostUrl?.trim()) {
-          missingFields.push(t.components.editor2.InfoEditor.repost_link);
-        }
-      }
-
+      const labels = {
+        tags: t.components.editor2.InfoEditor.tags,
+        repostAuthor: t.components.editor2.InfoEditor.repost_author,
+        repostPlatform: t.components.editor2.InfoEditor.repost_platform,
+        repostUrl: t.components.editor2.InfoEditor.repost_link,
+      };
+      const missingFields = validation.fields.map((field) => labels[field]);
       if (missingFields.length > 0) {
         return {
           ok: false as const,
@@ -145,50 +141,10 @@ export const EditorPage = withSuspensable(() => {
         };
       }
 
-      // 当为搬运稿时校验链接格式
-      if (metadata.sourceType === "repost" && metadata.repostUrl?.trim()) {
-        try {
-          // eslint-disable-next-line no-new
-          new URL(metadata.repostUrl!.trim());
-        } catch {
-          return {
-            ok: false as const,
-            message: t.pages.editor.validation.metadata_invalid_url,
-          };
-        }
-      }
       return { ok: true as const };
     },
     [t],
   );
-
-  const buildMetadataPayload = useCallback((metadata: EditorMetadata): OperationMetadataPayload => {
-    const tidy = (value?: string) => {
-      const normalized = value?.trim();
-      return normalized && normalized.length > 0 ? normalized : undefined;
-    };
-    const sourceType = metadata.sourceType ?? "original";
-    const normalizedSourceType: "original" | "repost" =
-      sourceType === "repost" ? "repost" : "original";
-    const base = {
-      sourceType: normalizedSourceType,
-      // 去重并清洗标签
-      tags: Array.isArray(metadata.tags)
-        ? Array.from(
-            new Set(metadata.tags.map((s) => (s ?? "").trim()).filter((s) => s.length > 0)),
-          )
-        : undefined,
-    };
-    if (sourceType !== "repost") {
-      return base;
-    }
-    return {
-      ...base,
-      repostAuthor: tidy(metadata.repostAuthor),
-      repostPlatform: tidy(metadata.repostPlatform),
-      repostUrl: tidy(metadata.repostUrl),
-    };
-  }, []);
 
   // 统一遵循 Hooks 规则：避免条件调用，保证调用顺序一致
   // devtools 在非开发环境通常不会生效，但保持调用安全无副作用
@@ -354,7 +310,7 @@ export const EditorPage = withSuspensable(() => {
           });
           return false;
         }
-        const metadataPayload = buildMetadataPayload(editorMetadata);
+        const metadataPayload = buildOperationMetadataPayload(editorMetadata);
         // 解析所选关卡，便于洞窟时设置 cave_type
         const selectedLevel = levels
           ? findLevelByStageName(
@@ -470,7 +426,7 @@ export const EditorPage = withSuspensable(() => {
         );
         return true;
       },
-      [buildMetadataPayload, id, levels, navigate, validateMetadata],
+      [id, levels, navigate, validateMetadata],
     ),
   );
 

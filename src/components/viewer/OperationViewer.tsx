@@ -721,8 +721,8 @@ export function OperationViewerInner({
             </UserName>
           </FactItem>
 
-          {/* 作业来源（仅当为“搬运”时显示） */}
-          {operation.metadata?.sourceType === "repost" && (
+          {/* 搬运信息或原创作者填写的来源链接 */}
+          {(operation.metadata?.sourceType === "repost" || operation.metadata?.repostUrl) && (
             <FactItem
               relaxed
               className="items-start"
@@ -731,22 +731,29 @@ export function OperationViewerInner({
             >
               <div className="flex flex-col gap-1 text-gray-800 dark:text-slate-100">
                 <div className="flex items-center gap-2">
-                  <Tag minimal intent="warning">
-                    {t.components.editor2.InfoEditor.source_repost}
+                  <Tag
+                    minimal
+                    intent={operation.metadata?.sourceType === "repost" ? "warning" : "success"}
+                  >
+                    {operation.metadata?.sourceType === "repost"
+                      ? t.components.editor2.InfoEditor.source_repost
+                      : t.components.editor2.InfoEditor.source_original}
                   </Tag>
                 </div>
-                {operation.metadata?.repostAuthor && (
-                  <div className="text-sm">
-                    {t.components.editor2.InfoEditor.repost_author}:{" "}
-                    {operation.metadata.repostAuthor}
-                  </div>
-                )}
-                {operation.metadata?.repostPlatform && (
-                  <div className="text-sm">
-                    {t.components.editor2.InfoEditor.repost_platform}:{" "}
-                    {operation.metadata.repostPlatform}
-                  </div>
-                )}
+                {operation.metadata?.sourceType === "repost" &&
+                  operation.metadata?.repostAuthor && (
+                    <div className="text-sm">
+                      {t.components.editor2.InfoEditor.repost_author}:{" "}
+                      {operation.metadata.repostAuthor}
+                    </div>
+                  )}
+                {operation.metadata?.sourceType === "repost" &&
+                  operation.metadata?.repostPlatform && (
+                    <div className="text-sm">
+                      {t.components.editor2.InfoEditor.repost_platform}:{" "}
+                      {operation.metadata.repostPlatform}
+                    </div>
+                  )}
                 {operation.metadata?.repostUrl && (
                   <div className="text-sm break-all">
                     {t.components.editor2.InfoEditor.repost_link}:

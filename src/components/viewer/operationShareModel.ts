@@ -632,9 +632,7 @@ export function buildOperationShareModel(
   const originalAuthor = isRepost
     ? operation.metadata?.repostAuthor?.trim() || undefined
     : undefined
-  const originalUrl = isRepost
-    ? normalizeHttpUrl(operation.metadata?.repostUrl)
-    : undefined
+  const originalUrl = normalizeHttpUrl(operation.metadata?.repostUrl)
   const source: OperationShareSource = isRepost
     ? {
         type: 'repost',
@@ -646,6 +644,7 @@ export function buildOperationShareModel(
     : {
         type: 'original',
         strategyAuthor: author,
+        originalUrl,
       }
 
   return {
@@ -660,7 +659,11 @@ export function buildOperationShareModel(
     shortCode: String(operation.id),
     maayuanUrl,
     qrTargetUrl: originalUrl || maayuanUrl,
-    qrLabel: originalUrl ? '扫码查看原贴' : '扫码查看 MaaYuan 作业',
+    qrLabel: originalUrl
+      ? isRepost
+        ? '扫码查看原贴'
+        : '扫码访问作者平台'
+      : '扫码查看 MaaYuan 作业',
     operators,
     groups,
     actionSlots: actionSlots.length > 0 ? actionSlots : [1, 2, 3, 4, 5],

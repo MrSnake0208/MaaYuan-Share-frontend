@@ -174,6 +174,23 @@ describe('operation share model', () => {
     ).toBeUndefined()
   })
 
+  it('uses an original operation source URL as the share QR target', () => {
+    const operation = createOperation()
+    operation.metadata = {
+      sourceType: 'original',
+      repostUrl: 'https://space.bilibili.com/123',
+    }
+
+    expect(buildOperationShareModel(operation, 'cn')).toMatchObject({
+      source: {
+        type: 'original',
+        originalUrl: 'https://space.bilibili.com/123',
+      },
+      qrTargetUrl: 'https://space.bilibili.com/123',
+      qrLabel: '扫码访问作者平台',
+    })
+  })
+
   it('uses stable fallbacks for incomplete legacy operations', () => {
     const operation = createOperation()
     operation.uploader = ''
