@@ -426,10 +426,60 @@ const getSlideOperations = (
   return new Array(counterDistance).fill("左侧目标");
 };
 
+// 预处理：给无编号单元格自动补序号
+// 单字符直接编号；多字符整体加一个序号，交给后续多动作展开
+// "↑"→"1↑"、"防"→"1防"、"↑↑"→"1↑↑"、"↓↓↓"→"2↓↓↓"
+// 颜色模式（useColor=true）保留颜色 token，非颜色模式剥掉 xlsx 库的脏前缀 a/A
+const preprocessRow = (row: string[], config: AutoFightConfig): string[] => {
+  const usedNumbers = new Set<number>();
+  for (const cell of row) {
+    const m = /\d+/.exec(cell);
+    if (m) usedNumbers.add(Number(m[0]));
+  }
+  const nextNum = () => {
+    let n = 1;
+    while (usedNumbers.has(n)) n++;
+    usedNumbers.add(n);
+    return n;
+  };
+  return row.map((cell) => {
+    if (!cell || !cell.trim()) return cell;
+    if (/\d/.test(cell)) return cell; // 已有编号
+    // 单字符：直接编号
+    if (cell.length === 1) {
+      if (actionMap[cell] && actionMap[cell] !== "未知") return `${nextNum()}${cell}`;
+      return cell;
+    }
+    // 多字符无编号
+    let prefix = "";
+    let rest = cell;
+    if (config.useColor) {
+      // 颜色模式：首字符是颜色 token，保留它
+      prefix = rest[0];
+      rest = rest.slice(1);
+    } else {
+      // 非颜色模式：提取不在 actionMap 中的前缀，再去掉 xlsx 脏前缀 a/A
+      while (rest.length > 1 && !actionMap[rest[0]]) {
+        prefix += rest[0];
+        rest = rest.slice(1);
+      }
+      if ((rest[0] === "a" || rest[0] === "A") && rest.length > 1) {
+        rest = rest.slice(1);
+      }
+    }
+    // 剩余全是合法动作符号 → 整体加序号
+    if (rest.length > 0 && Array.from(rest).every((c) => actionMap[c] && actionMap[c] !== "未知")) {
+      return `${prefix}${nextNum()}${rest}`;
+    }
+    return cell;
+  });
+};
+
 const parseActionsForRow = (row: string[], config: AutoFightConfig): ActionOrder => {
   const actionOrder: ActionOrder = {};
+  const processed = preprocessRow(row, config);
 
-  row.forEach((seq, idx) => {
+  processed.forEach((seq, idx) => {
     if (typeof seq !== "string" || seq.trim() === "") {
       return;
     }
@@ -439,30 +489,66 @@ const parseActionsForRow = (row: string[], config: AutoFightConfig): ActionOrder
       .replace(/技能/g, "大")
       .replace(/防御/g, "防");
 
+    const columnIndex = COLUMNS[idx] ?? String(idx + 1);
     const matches = Array.from(normalized.matchAll(ACTION_REGEX));
+
     matches.forEach((match) => {
-      let operations = match[1];
-      if (config.useColor && config.colorList.length > 0) {
-        const expectedColor = matches[0]?.[1]?.[0];
-        if (!operations || !config.colorList.includes(operations[0] ?? "")) {
-          operations = (expectedColor ?? "") + operations;
+        let operations = match[1];
+        if (config.useColor && config.colorList.length > 0) {
+          const expectedColor = matches[0]?.[1]?.[0];
+          if (!operations || !config.colorList.includes(operations[0] ?? "")) {
+            operations = (expectedColor ?? "") + operations;
+          }
         }
-      }
-      const number = Number(match[2]);
-      const symbol = match[3];
-      const actionType = actionMap[symbol] ?? "未知";
-      if (actionType === "未知") {
-        console.warn("未知的动作符号", symbol);
-        return;
-      }
-      const columnIndex = COLUMNS[idx] ?? String(idx + 1);
-      actionOrder[number] = {
-        action: `${operations}${columnIndex}${actionType}`,
-      };
-    });
+        const number = Number(match[2]);
+        const symbol = match[3];
+        const actionType = actionMap[symbol] ?? "未知";
+        if (actionType === "未知") {
+          console.warn("未知的动作符号", symbol);
+          return;
+        }
+
+        // 找下一个可用序号（如 "4A" 在 "2↓↓↓" 之后序号被占 → 自动顺延）
+        let order = number;
+        while (actionOrder[order]) order++;
+        actionOrder[order] = {
+          action: `${operations}${columnIndex}${actionType}`,
+        };
+
+        // 单元格内后续动作：同位置连动（如 "2↓↓↓" → 2号位连续3次↓）
+        const matchEnd = (match.index ?? 0) + match[0].length;
+        const remaining = normalized.slice(matchEnd);
+        if (remaining.length > 0) {
+          const allValid = Array.from(remaining).every(
+            (c) => actionMap[c] && actionMap[c] !== "未知",
+          );
+          if (allValid) {
+            for (const c of remaining) {
+              order++;
+              // 挤开占位：占据此位置的条目及后续全部后移一位
+              if (actionOrder[order]) {
+                const keys = Object.keys(actionOrder).map(Number).sort((a, b) => b - a);
+                for (const k of keys) {
+                  if (k >= order) {
+                    actionOrder[k + 1] = actionOrder[k];
+                    delete actionOrder[k];
+                  }
+                }
+              }
+              actionOrder[order] = {
+                action: `${operations}${columnIndex}${actionMap[c]}`,
+              };
+            }
+          }
+        }
+      });
   });
 
-  return actionOrder;
+  // 整体重排序号，保证连续且按序号顺序执行
+  const sorted = Object.entries(actionOrder).sort(([a], [b]) => Number(a) - Number(b));
+  const renumbered: ActionOrder = {};
+  sorted.forEach(([, action], i) => { renumbered[i + 1] = action; });
+  return renumbered;
 };
 
 const setOperationAction = (
