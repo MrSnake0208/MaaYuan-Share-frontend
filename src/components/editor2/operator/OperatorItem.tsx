@@ -35,6 +35,13 @@ import { EditorOperator, useEdit } from '../editor-state'
 import { editorFavOperatorsAtom } from '../reconciliation'
 import { OperatorStarStonePresetSelect } from './OperatorStarStonePresetSelect'
 import { getDiscSlots, setDiscSlot } from './operatorDiscModel'
+import {
+  getMaxEliteForLevel,
+  OPERATOR_ELITE_MAX,
+  OPERATOR_ELITE_MIN,
+  OPERATOR_LEVEL_MAX,
+  OPERATOR_LEVEL_MIN,
+} from './operatorRequirementModel'
 
 const EMPTY_DISC_OPTION = {
   abbreviation: '任意（未选择）',
@@ -334,6 +341,109 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                           return {
                             action: 'set-operator-attack',
                             desc: '设置密探攻击',
+                            squashBy: operator.id,
+                          }
+                        })
+                      }}
+                    />
+                  </div>
+                </li>
+              )}
+              {controlsEnabled && (
+                <li className="flex flex-col gap-1">
+                  <div className="flex items-center">
+                    <span className="text-xs opacity-80 w-12 ml-2">等级</span>
+                    <NumericInput2
+                      intOnly
+                      min={OPERATOR_LEVEL_MIN}
+                      max={OPERATOR_LEVEL_MAX}
+                      buttonPosition="none"
+                      title="密探等级"
+                      value={clamp(
+                        requirements.level ?? OPERATOR_LEVEL_MIN,
+                        OPERATOR_LEVEL_MIN,
+                        OPERATOR_LEVEL_MAX,
+                      )}
+                      containerClassName="flex-1 min-w-0"
+                      inputClassName="h-6 !w-24 !px-2 !leading-8 text-center font-bold text-base !rounded-md !border-2"
+                      onValueChange={(_, valueStr) => {
+                        edit(() => {
+                          const value = Number(valueStr)
+                          if (!Number.isFinite(value))
+                            return { action: 'skip', desc: 'skip' }
+                          const level = clamp(
+                            Math.round(value),
+                            OPERATOR_LEVEL_MIN,
+                            OPERATOR_LEVEL_MAX,
+                          )
+                          const elite = Math.min(
+                            requirements.elite ?? OPERATOR_ELITE_MIN,
+                            getMaxEliteForLevel(level),
+                          )
+                          const next: EditorOperator = {
+                            ...operator,
+                            requirements: {
+                              ...operator.requirements,
+                              level,
+                              elite,
+                            },
+                          }
+                          onChange?.(next)
+                          return {
+                            action: 'set-operator-level',
+                            desc: '设置密探等级',
+                            squashBy: operator.id,
+                          }
+                        })
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center ml-2">
+                    <span className="text-xs opacity-80 w-12">修为</span>
+                    <NumericInput2
+                      intOnly
+                      min={OPERATOR_ELITE_MIN}
+                      max={Math.min(
+                        OPERATOR_ELITE_MAX,
+                        getMaxEliteForLevel(
+                          requirements.level ?? OPERATOR_LEVEL_MIN,
+                        ),
+                      )}
+                      buttonPosition="none"
+                      title="密探修为"
+                      value={clamp(
+                        requirements.elite ?? OPERATOR_ELITE_MIN,
+                        OPERATOR_ELITE_MIN,
+                        getMaxEliteForLevel(
+                          requirements.level ?? OPERATOR_LEVEL_MIN,
+                        ),
+                      )}
+                      containerClassName="flex-1 min-w-0"
+                      inputClassName="h-6 !w-24 !px-2 !leading-8 text-center font-bold text-base !rounded-md !border-2"
+                      onValueChange={(_, valueStr) => {
+                        edit(() => {
+                          const value = Number(valueStr)
+                          if (!Number.isFinite(value))
+                            return { action: 'skip', desc: 'skip' }
+                          const maxElite = getMaxEliteForLevel(
+                            requirements.level ?? OPERATOR_LEVEL_MIN,
+                          )
+                          const elite = clamp(
+                            Math.round(value),
+                            OPERATOR_ELITE_MIN,
+                            maxElite,
+                          )
+                          const next: EditorOperator = {
+                            ...operator,
+                            requirements: {
+                              ...operator.requirements,
+                              elite,
+                            },
+                          }
+                          onChange?.(next)
+                          return {
+                            action: 'set-operator-elite',
+                            desc: '设置密探修为',
                             squashBy: operator.id,
                           }
                         })
@@ -675,7 +785,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                     const skillNumber = index + 1
                     const selected = operator.skill === skillNumber
                     const maxSkillLevel =
-                      (requirements.elite ?? 0) === 2 ? 10 : 7
+                      (requirements.elite ?? 0) >= 2 ? 10 : 7
                     const skillLevel = selected
                       ? (requirements.skillLevel ??
                         getDefaultRequirements(info?.rarity).skillLevel)

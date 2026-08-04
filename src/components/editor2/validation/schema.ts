@@ -7,6 +7,12 @@ import * as z from "zod";
 import { i18n } from "../../../i18n/i18n";
 import { CopilotDocV1 } from "../../../models/copilot.schema";
 import { OpDifficulty } from "../../../models/operation";
+import {
+  getMaxEliteForLevel,
+  OPERATOR_ELITE_MAX,
+  OPERATOR_LEVEL_MAX,
+  OPERATOR_LEVEL_MIN,
+} from "../operator/operatorRequirementModel";
 import cn from "./error-map-cn";
 
 export type ZodIssue = z.core.$ZodIssue;
@@ -61,13 +67,27 @@ const docStrict = doc
     details: doc.details || doc.title,
   }));
 
-const operator_requirements = z.looseObject({
-  elite: z.number().int().min(0).max(2).optional(),
-  level: z.number().int().min(0).optional(),
-  skill_level: z.number().int().min(0).max(10).optional(),
-  module: z.number().int().optional(),
-  potentiality: z.number().int().min(0).max(6).optional(),
-});
+const operator_requirements = z
+  .looseObject({
+    elite: z.number().int().min(0).max(OPERATOR_ELITE_MAX).optional(),
+    level: z.number().int().min(OPERATOR_LEVEL_MIN).max(OPERATOR_LEVEL_MAX).optional(),
+    skill_level: z.number().int().min(0).max(10).optional(),
+    module: z.number().int().optional(),
+    potentiality: z.number().int().min(0).max(6).optional(),
+  })
+  .superRefine((requirements, ctx) => {
+    if (
+      requirements.level !== undefined &&
+      requirements.elite !== undefined &&
+      requirements.elite > getMaxEliteForLevel(requirements.level)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["elite"],
+        message: `修为不能超过当前等级上限（${getMaxEliteForLevel(requirements.level)}）`,
+      });
+    }
+  });
 
 const operator = z.looseObject({
   name: z.string().min(1),

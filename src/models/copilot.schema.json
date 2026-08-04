@@ -100,7 +100,7 @@
           "description": "0 - Used on actions (Default); 1 - Used when ready (e.g. Thorns: Destreza, Myrtle: Support Beta); 2 - Used when ready, only once (e.g. Mountain: Sweeping Stance); 3 - Auto-decision (not implemented); 0 for auto skills;",
           "minimum": 0,
           "maximum": 3,
-          "default": 0
+          "default": 1
         },
         "requirements": {
           "$ref": "#/definitions/operator_requirements"
@@ -116,15 +116,15 @@
           "type": "integer",
           "description": "Elite requirement, optional, 0 by default",
           "minimum": 0,
-          "maximum": 2,
+          "maximum": 17,
           "default": 0
         },
         "level": {
           "type": "integer",
           "description": "Level requirement, optional, 0 by default",
-          "minimum": 0,
-          "maximum": 90,
-          "default": 0
+          "minimum": 1,
+          "maximum": 100,
+          "default": 1
         },
         "skill_level": {
           "type": "integer",
