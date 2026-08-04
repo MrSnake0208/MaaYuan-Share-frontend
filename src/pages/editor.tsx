@@ -15,6 +15,7 @@ import { defaultEditorState, editorAtoms, historyAtom } from "../components/edit
 import { toEditorOperation } from "../components/editor2/reconciliation";
 import { toSimingOperationRemote } from "../components/editor2/siming-export";
 import type { EditorMetadata } from "../components/editor2/types";
+import { validateOriginalOperatorRequirements } from "../components/editor2/validation/editorSourceValidation";
 import { parseOperationLoose } from "../components/editor2/validation/schema";
 import { editorValidationAtom } from "../components/editor2/validation/validation";
 import { i18n, useTranslation } from "../i18n/i18n";
@@ -302,6 +303,31 @@ export const EditorPage = withSuspensable(() => {
         const baseOperation = result.data;
         const editorOperation = get(editorAtoms.operation);
         const editorMetadata = get(editorAtoms.metadata);
+        const operatorRequirementIssues = validateOriginalOperatorRequirements(
+          editorMetadata,
+          editorOperation,
+        );
+        if (operatorRequirementIssues.length > 0) {
+          const fieldLabels = {
+            starLevel: "星级",
+            disc: "命盘",
+            starStone: "星石",
+          };
+          AppToaster.show({
+            message: i18n.pages.editor.validation.original_operator_missing({
+              fields: operatorRequirementIssues
+                .map(
+                  (issue) =>
+                    `${issue.operatorName}：${issue.fields
+                      .map((field) => fieldLabels[field])
+                      .join("、")}`,
+                )
+                .join("；"),
+            }),
+            intent: "danger",
+          });
+          return false;
+        }
         const metadataValidation = validateMetadata(editorMetadata);
         if (!metadataValidation.ok) {
           AppToaster.show({

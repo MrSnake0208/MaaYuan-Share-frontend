@@ -64,6 +64,42 @@ describe('operatorDiscModel', () => {
     expect(operator.discAssistStars).toEqual(['红鸾', '阴煞', '天魁'])
   })
 
+  it('distinguishes an explicitly selected any disc from an empty slot', () => {
+    const selectedAny = setDiscSlot(createOperator(), 0, {
+      disc: 0,
+      discConfirmed: true,
+    })
+
+    expect(getDiscSlots(selectedAny)[0]).toMatchObject({
+      disc: 0,
+      discConfirmed: true,
+    })
+    expect(selectedAny.discsSelected?.[0]).toBe(0)
+
+    const cleared = setDiscSlot(selectedAny, 0, {
+      disc: 0,
+      discConfirmed: false,
+    })
+    expect(getDiscSlots(cleared)[0]).toMatchObject({
+      disc: 0,
+      discConfirmed: false,
+    })
+  })
+
+  it('restores an exported any disc when the slot already has a star stone', () => {
+    expect(
+      getDiscSlots({
+        id: 'operator-2',
+        name: '测试密探',
+        discsSelected: [0, 0, 0],
+        discStarStones: ['任意', '', ''],
+      })[0],
+    ).toMatchObject({
+      disc: 0,
+      discConfirmed: true,
+    })
+  })
+
   it('falls back to extension slots when parallel arrays are absent', () => {
     const slots = getDiscSlots({
       id: 'operator-2',
@@ -77,9 +113,27 @@ describe('operatorDiscModel', () => {
     })
 
     expect(slots).toEqual([
-      { index: 0, disc: 2, starStone: '天机', assistStar: '文曲' },
-      { index: 1, disc: 0, starStone: '', assistStar: '' },
-      { index: 2, disc: 0, starStone: '', assistStar: '' },
+      {
+        index: 0,
+        disc: 2,
+        discConfirmed: true,
+        starStone: '天机',
+        assistStar: '文曲',
+      },
+      {
+        index: 1,
+        disc: 0,
+        discConfirmed: false,
+        starStone: '',
+        assistStar: '',
+      },
+      {
+        index: 2,
+        disc: 0,
+        discConfirmed: false,
+        starStone: '',
+        assistStar: '',
+      },
     ])
   })
 })

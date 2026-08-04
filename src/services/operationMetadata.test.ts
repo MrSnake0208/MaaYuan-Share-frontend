@@ -33,19 +33,19 @@ describe('operation metadata', () => {
     })
   })
 
-  it('keeps repost attribution fields and trims their values', () => {
+  it('keeps repost platform ID, platform and link and trims their values', () => {
     expect(
       buildOperationMetadataPayload(
         createMetadata({
           sourceType: 'repost',
-          repostAuthor: ' 原作者 ',
+          repostAuthor: ' platform-id ',
           repostPlatform: ' B站 ',
           repostUrl: ' https://www.bilibili.com/video/BV1 ',
         }),
       ),
     ).toMatchObject({
       sourceType: 'repost',
-      repostAuthor: '原作者',
+      repostAuthor: 'platform-id',
       repostPlatform: 'B站',
       repostUrl: 'https://www.bilibili.com/video/BV1',
     })
@@ -71,7 +71,7 @@ describe('operation metadata', () => {
     ).toEqual({ ok: true })
   })
 
-  it('still requires all attribution fields for reposts', () => {
+  it('requires the platform ID, platform and platform link for reposts', () => {
     expect(
       validateEditorMetadata(createMetadata({ sourceType: 'repost' })),
     ).toEqual({

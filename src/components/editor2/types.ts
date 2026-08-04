@@ -48,8 +48,10 @@ export interface EditorOperatorExtensionsV1 {
     slots: Array<{
       // 0-based 槽位索引
       index: number;
-      // 与旧字段 discsSelected 语义一致：-1=任意，0=未选，>0=第 (value) 个命盘（1 基）
+      // 与旧字段 discsSelected 语义一致：0=协议层任意/未选，绝对值为命盘序号，负值表示禁用
       disc: number;
+      // 仅编辑器使用：区分明确选择“任意”(disc=0) 与尚未选择
+      discConfirmed?: boolean;
       // 星石/辅星名称，可空
       starStone?: string;
       assistStar?: string;

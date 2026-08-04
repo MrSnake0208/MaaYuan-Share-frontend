@@ -5,6 +5,7 @@ import type { EditorOperator } from '../types'
 export interface DiscSlot {
   index: number
   disc: number
+  discConfirmed?: boolean
   starStone?: string
   assistStar?: string
 }
@@ -17,23 +18,32 @@ export function getDiscSlots(operator: EditorOperator): DiscSlot[] {
   const assistStars = operator.discAssistStars ?? []
   const hasParallelArrays =
     discsSelected.length > 0 || starStones.length > 0 || assistStars.length > 0
+  const extensionSlots = operator.extensions?.discs?.slots
 
   if (hasParallelArrays) {
-    return Array.from({ length: DISC_SLOT_COUNT }, (_, index) => ({
-      index,
-      disc: discsSelected[index] ?? 0,
-      starStone: starStones[index] ?? '',
-      assistStar: assistStars[index] ?? '',
-    }))
+    return Array.from({ length: DISC_SLOT_COUNT }, (_, index) => {
+      const disc = discsSelected[index] ?? 0
+      const starStone = starStones[index] ?? ''
+      const extensionSlot = extensionSlots?.find((slot) => slot.index === index)
+      return {
+        index,
+        disc,
+        discConfirmed:
+          extensionSlot?.discConfirmed ??
+          (disc === 0 && Boolean(starStone.trim())),
+        starStone,
+        assistStar: assistStars[index] ?? '',
+      }
+    })
   }
 
-  const extensionSlots = operator.extensions?.discs?.slots
   if (extensionSlots?.length) {
     const normalized = extensionSlots
       .filter((slot) => slot && typeof slot.index === 'number')
       .map((slot, index) => ({
         index: slot.index ?? index,
         disc: slot.disc ?? 0,
+        discConfirmed: slot.discConfirmed ?? (slot.disc ?? 0) !== 0,
         starStone: slot.starStone ?? '',
         assistStar: slot.assistStar ?? '',
       }))
@@ -44,6 +54,7 @@ export function getDiscSlots(operator: EditorOperator): DiscSlot[] {
       normalized.push({
         index: normalized.length,
         disc: 0,
+        discConfirmed: false,
         starStone: '',
         assistStar: '',
       })
@@ -54,6 +65,7 @@ export function getDiscSlots(operator: EditorOperator): DiscSlot[] {
   return Array.from({ length: DISC_SLOT_COUNT }, (_, index) => ({
     index,
     disc: 0,
+    discConfirmed: false,
     starStone: '',
     assistStar: '',
   }))
@@ -80,25 +92,44 @@ function withDiscSlots(
     discsSelected,
     discStarStones,
     discAssistStars,
-    ...(operator.extensions
-      ? {
-          extensions: {
-            ...operator.extensions,
-            discs: operator.extensions.discs,
-          },
-        }
-      : {}),
+    extensions: {
+      version: 1,
+      ...(operator.extensions ?? {}),
+      discs: {
+        slots: slots.map((slot) => ({
+          index: slot.index,
+          disc: slot.disc,
+          discConfirmed: slot.discConfirmed ?? false,
+          starStone: slot.starStone,
+          assistStar: slot.assistStar,
+        })),
+      },
+    },
   }
 }
 
 export function setDiscSlot(
   operator: EditorOperator,
   slotIndex: number,
-  updates: Partial<Pick<DiscSlot, 'disc' | 'starStone' | 'assistStar'>>,
+  updates: Partial<
+    Pick<DiscSlot, 'disc' | 'discConfirmed' | 'starStone' | 'assistStar'>
+  >,
 ): EditorOperator {
-  const nextSlots = getDiscSlots(operator).map((slot) =>
-    slot.index === slotIndex ? { ...slot, ...updates } : { ...slot },
-  )
+  const nextSlots = getDiscSlots(operator).map((slot) => {
+    if (slot.index !== slotIndex) {
+      return { ...slot }
+    }
+    return {
+      ...slot,
+      ...updates,
+      ...(updates.disc !== undefined
+        ? {
+            discConfirmed:
+              updates.disc === 0 ? (updates.discConfirmed ?? false) : true,
+          }
+        : {}),
+    }
+  })
 
   const chosen = nextSlots.find((slot) => slot.index === slotIndex)?.disc
   if (typeof chosen === 'number' && chosen > 0) {
@@ -107,7 +138,11 @@ export function setDiscSlot(
         nextSlots[index].index !== slotIndex &&
         nextSlots[index].disc === chosen
       ) {
-        nextSlots[index] = { ...nextSlots[index], disc: 0 }
+        nextSlots[index] = {
+          ...nextSlots[index],
+          disc: 0,
+          discConfirmed: false,
+        }
       }
     }
   }

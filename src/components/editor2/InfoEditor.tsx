@@ -545,6 +545,12 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
           </Radio>
         </RadioGroup>
 
+        <p className="mt-2 text-xs text-slate-500">
+          {isRepost
+            ? t.components.editor2.InfoEditor.repost_required_hint
+            : t.components.editor2.InfoEditor.original_required_hint}
+        </p>
+
         <div className="mt-3 grid gap-3 md:grid-cols-3">
           {isRepost && (
             <>

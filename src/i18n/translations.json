@@ -584,13 +584,21 @@
           "cn": "搬运",
           "zh_tw": "搬運"
         },
+        "original_required_hint": {
+          "cn": "原创作业中，每名密探的星级、命盘和星石为必填项；平台链接选填。",
+          "zh_tw": "原創作業中，每名密探的星級、命盤和星石為必填項；平台連結選填。"
+        },
+        "repost_required_hint": {
+          "cn": "搬运作业中，平台ID、原发布平台和平台链接为必填项。",
+          "zh_tw": "搬運作業中，平台ID、原發布平台和平台連結為必填項。"
+        },
         "repost_author": {
-          "cn": "原作者名",
-          "zh_tw": "原作者名"
+          "cn": "平台ID",
+          "zh_tw": "平台ID"
         },
         "repost_author_placeholder": {
-          "cn": "请填写原作者昵称",
-          "zh_tw": "請填寫原作者暱稱"
+          "cn": "请填写原作者的平台ID",
+          "zh_tw": "請填寫原作者的平台ID"
         },
         "repost_platform": {
           "cn": "原发布平台",
@@ -601,8 +609,8 @@
           "zh_tw": "如：小紅書、微博、B站"
         },
         "repost_link": {
-          "cn": "来源链接",
-          "zh_tw": "來源連結"
+          "cn": "平台链接",
+          "zh_tw": "平台連結"
         },
         "repost_link_placeholder": {
           "cn": "请填写原帖或个人平台链接",
@@ -4354,6 +4362,10 @@
         "metadata_missing": {
           "cn": "请完整填写信息：{{fields}}",
           "zh_tw": "請完整填寫資訊：{{fields}}"
+        },
+        "original_operator_missing": {
+          "cn": "原创作业请完整填写：{{fields}}",
+          "zh_tw": "原創作業請完整填寫：{{fields}}"
         },
         "metadata_invalid_url": {
           "cn": "原链接格式不正确，请确认后再试",

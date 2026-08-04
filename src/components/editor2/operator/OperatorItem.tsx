@@ -36,18 +36,27 @@ import { editorFavOperatorsAtom } from '../reconciliation'
 import { OperatorStarStonePresetSelect } from './OperatorStarStonePresetSelect'
 import { getDiscSlots, setDiscSlot } from './operatorDiscModel'
 import {
-  getMaxEliteForLevel,
   OPERATOR_ELITE_MAX,
   OPERATOR_ELITE_MIN,
   OPERATOR_LEVEL_MAX,
   OPERATOR_LEVEL_MIN,
+  getMaxEliteForLevel,
 } from './operatorRequirementModel'
 
 const EMPTY_DISC_OPTION = {
-  abbreviation: '任意（未选择）',
+  abbreviation: '未选择',
   color: undefined,
   desp: '未选择命盘',
+  idx: -2,
+  kind: 'empty',
+} as const
+
+const ANY_DISC_OPTION = {
+  abbreviation: '任意',
+  color: undefined,
+  desp: '任意命盘',
   idx: -1,
+  kind: 'any',
 } as const
 
 function getStats(
@@ -132,7 +141,12 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
     const discOptions = useMemo(
       () => [
         EMPTY_DISC_OPTION,
-        ...discList.map((disc, idx) => ({ ...disc, idx })),
+        ANY_DISC_OPTION,
+        ...discList.map((disc, idx) => ({
+          ...disc,
+          idx,
+          kind: 'disc' as const,
+        })),
       ],
       [discList],
     )
@@ -463,6 +477,8 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                 ? [0, 1, 2].map((slot) => {
                     const slots = discSlots
                     const idx1 = slots[slot]?.disc ?? 0
+                    const selectedIsAny =
+                      idx1 === 0 && Boolean(slots[slot]?.discConfirmed)
                     const selectedIsForbidden = idx1 < 0
                     const selectedDiscIndex1 =
                       idx1 > 0 ? idx1 : selectedIsForbidden ? -idx1 : 0
@@ -504,7 +520,11 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                             { handleClick, handleFocus, modifiers },
                           ) => {
                             const isSelected =
-                              item.idx + 1 === selectedDiscIndex1
+                              item.kind === 'empty'
+                                ? selectedDiscIndex1 === 0 && !selectedIsAny
+                                : item.kind === 'any'
+                                  ? selectedIsAny
+                                  : item.idx + 1 === selectedDiscIndex1
                             return (
                               <MenuItem
                                 roleStructure="listoption"
@@ -535,15 +555,16 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                           }}
                           onItemSelect={(item) => {
                             edit(() => {
-                              const discIndex1 = (item as any).idx + 1
+                              const discIndex1 = item.idx + 1
                               const chosen =
-                                discIndex1 === 0
-                                  ? 0
-                                  : selectedIsForbidden
+                                item.kind === 'disc'
+                                  ? selectedIsForbidden
                                     ? -discIndex1
                                     : discIndex1
+                                  : 0
                               const next = setDiscSlot(operator, slot, {
                                 disc: chosen,
+                                discConfirmed: item.kind !== 'empty',
                               })
                               onChange?.(next)
                               return {
@@ -567,13 +588,15 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                                 ? selectedIsForbidden
                                   ? `不能有：${selectedItem.desp}`
                                   : selectedItem.desp
-                                : `选择命盘${slot + 1}`
+                                : selectedIsAny
+                                  ? '任意命盘'
+                                  : `选择命盘${slot + 1}`
                             }
                             className={clsx(
                               'w-[7ch] whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current relative',
-                              selectedItem
+                              selectedItem || selectedIsAny
                                 ? clsx(
-                                    discColorClasses(selectedItem.color),
+                                    discColorClasses(selectedItem?.color),
                                     selectedIsForbidden &&
                                       '!border-red-600 dark:!border-red-400',
                                   )
@@ -589,7 +612,9 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                             >
                               {selectedItem
                                 ? selectedItem.abbreviation
-                                : `命盘${slot + 1}`}
+                                : selectedIsAny
+                                  ? '任意'
+                                  : `命盘${slot + 1}`}
                             </span>
                             {selectedItem && selectedIsForbidden ? (
                               <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
