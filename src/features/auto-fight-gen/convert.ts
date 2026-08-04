@@ -649,9 +649,10 @@ export const convertXlsxToAutoFightJson = (
       }
 
       const actionKey = `回合${round}行动${actionIndex}`;
+      const rawDoc = action.action.slice(-2);
       graph[actionKey] = {
         ...cloneDeep(actionTemplate),
-        text_doc: action.action.slice(-2),
+        text_doc: rawDoc.endsWith("O") ? rawDoc.slice(0, -1) + "sp" : rawDoc,
       };
 
       if (currentActionKey && graph[currentActionKey]) {

@@ -105,7 +105,7 @@ function parseToken(token: string): {
   slot?: number;
   payload?: number | string;
 } {
-  const mainMatch = token.match(/^(\d)([普大下sp])$/);
+  const mainMatch = token.match(/^(\d)([普大下]|sp)$/);
   if (mainMatch) {
     const slot = Number(mainMatch[1]);
     const symbol = mainMatch[2];
@@ -155,7 +155,7 @@ function parseToken(token: string): {
       return { kind: "extraInteraction" };
     }
 
-    const againMatch = modifier?.match(/^(\d)([普大下sp])$/);
+    const againMatch = modifier?.match(/^(\d)([普大下]|sp)$/);
     if (againMatch) {
       const slot = Number(againMatch[1]);
       const symbol = againMatch[2];

@@ -51,6 +51,7 @@ export const actionMap: Record<string, string> = {
   普: "普",
   O: "O",
   M: "O",
+  圈: "O",
 };
 
 export const operationMap: Record<string, string> = {
@@ -93,7 +94,7 @@ export const fightActionTemplates: Record<string, FightAction> = {
   },
   "1号位O": {
     action: "Click",
-    target: [68, 1103, 31, 33],
+    target: [76, 1114, 17, 18],
     post_delay: 5000,
   },
   切换敌人: {
@@ -123,7 +124,7 @@ export const fightActionTemplates: Record<string, FightAction> = {
   },
   "2号位O": {
     action: "Click",
-    target: [209, 1105, 30, 27],
+    target: [214, 1116, 23, 13],
     post_delay: 5000,
   },
   "3号位上拉": {
@@ -147,7 +148,7 @@ export const fightActionTemplates: Record<string, FightAction> = {
   },
   "3号位O": {
     action: "Click",
-    target: [345, 1102, 34, 35],
+    target: [355, 1118, 17, 10],
     post_delay: 5000,
   },
   "4号位上拉": {
@@ -171,7 +172,7 @@ export const fightActionTemplates: Record<string, FightAction> = {
   },
   "4号位O": {
     action: "Click",
-    target: [488, 1102, 33, 37],
+    target: [498, 1115, 13, 16],
     post_delay: 5000,
   },
   "5号位上拉": {
@@ -195,7 +196,7 @@ export const fightActionTemplates: Record<string, FightAction> = {
   },
   "5号位O": {
     action: "Click",
-    target: [628, 1101, 33, 37],
+    target: [634, 1118, 16, 11],
     post_delay: 5000,
   },
 };
