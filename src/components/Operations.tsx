@@ -255,6 +255,7 @@ export const Operations: ComponentType = withSuspensable(() => {
             {...queryParams}
             tags={tags}
             multiselect={multiselect}
+            showReadStatus
             operator={operatorFilter.enabled ? operatorFilter : undefined}
             // 按热度排序时列表前几页的变化不会太频繁，可以不刷新第一页，节省点流量
             revalidateFirstPage={queryParams.orderBy !== "hot"}

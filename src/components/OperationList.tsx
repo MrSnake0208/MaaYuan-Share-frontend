@@ -15,6 +15,7 @@ import { AddToOperationSetButton } from "./operation-set/AddToOperationSet";
 
 interface OperationListProps extends UseOperationsParams {
   multiselect?: boolean;
+  showReadStatus?: boolean;
   onUpdate?: (params: { total: number }) => void;
   /**
    * 扩展：在多选模式下渲染额外的批量操作按钮（如批量删除）。
@@ -32,7 +33,14 @@ interface OperationListProps extends UseOperationsParams {
 }
 
 export const OperationList: ComponentType<OperationListProps> = withSuspensable(
-  ({ multiselect, onUpdate, renderMultiSelectActions, sourceTypeFilter, ...params }) => {
+  ({
+    multiselect,
+    showReadStatus,
+    onUpdate,
+    renderMultiSelectActions,
+    sourceTypeFilter,
+    ...params
+  }) => {
     const t = useTranslation();
     const neoLayout = useAtomValue(neoLayoutAtom);
 
@@ -88,6 +96,7 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
           <NeoOperationCard
             operation={operation}
             key={operation.id}
+            showReadStatus={showReadStatus}
             selectable={multiselect}
             selected={selectedOperations?.some((op) => op.id === operation.id)}
             onSelect={onSelect}
@@ -97,7 +106,11 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
     ) : (
       <ul>
         {displayedOperations.map((operation) => (
-          <OperationCard operation={operation} key={operation.id} />
+          <OperationCard
+            operation={operation}
+            key={operation.id}
+            showReadStatus={showReadStatus}
+          />
         ))}
       </ul>
     );

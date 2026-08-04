@@ -9,6 +9,7 @@ import { copyShortCode, handleLazyDownloadJSON } from "services/operation";
 import { RelativeTime } from "components/RelativeTime";
 import { AddToOperationSetButton } from "components/operation-set/AddToOperationSet";
 import { OpDifficulty, Operation } from "models/operation";
+import { readOperationIdsAtom } from "store/readOperations";
 
 import { useLevels } from "../apis/level";
 import { languageAtom, useTranslation } from "../i18n/i18n";
@@ -22,15 +23,28 @@ import { UserName } from "./UserName";
 import { EDifficulty } from "./entity/EDifficulty";
 import { EDifficultyLevel, NeoELevel } from "./entity/ELevel";
 
+const ReadOperationTag = ({ operationId }: { operationId: number }) => {
+  const t = useTranslation();
+  const readOperationIds = useAtomValue(readOperationIdsAtom);
+
+  return readOperationIds.includes(operationId) ? (
+    <Tag minimal intent="success" className="ml-2 shrink-0 font-normal">
+      {t.components.OperationCard.read}
+    </Tag>
+  ) : null;
+};
+
 export const NeoOperationCard = ({
   operation,
   selected,
   selectable,
+  showReadStatus,
   onSelect,
 }: {
   operation: Operation;
   selectable?: boolean;
   selected?: boolean;
+  showReadStatus?: boolean;
   onSelect?: (operation: Operation, selected: boolean) => void;
 }) => {
   const t = useTranslation();
@@ -92,6 +106,7 @@ export const NeoOperationCard = ({
                     {t.components.OperationCard.private}
                   </Tag>
                 )}
+                {showReadStatus && <ReadOperationTag operationId={operation.id} />}
               </H4>
             </Tooltip2>
 
@@ -219,7 +234,13 @@ export const NeoOperationCard = ({
   );
 };
 
-export const OperationCard = ({ operation }: { operation: Operation }) => {
+export const OperationCard = ({
+  operation,
+  showReadStatus,
+}: {
+  operation: Operation;
+  showReadStatus?: boolean;
+}) => {
   const t = useTranslation();
   const { data: levels } = useLevels();
   const itemTags: string[] = Array.isArray(operation.metadata?.tags)
@@ -276,6 +297,7 @@ export const OperationCard = ({ operation }: { operation: Operation }) => {
                         {t.components.OperationCard.private}
                       </Tag>
                     )}
+                    {showReadStatus && <ReadOperationTag operationId={operation.id} />}
                   </H4>
                 </div>
                 <H5 className="flex items-center text-slate-900 -mt-3">

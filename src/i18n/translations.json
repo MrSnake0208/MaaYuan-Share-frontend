@@ -1394,6 +1394,20 @@
           "cn": "公告",
           "zh_tw": "公告"
         }
+      },
+      "OperationDrawer": {
+        "read": {
+          "cn": "已读",
+          "zh_tw": "已讀"
+        },
+        "mark_read": {
+          "cn": "标记为已读",
+          "zh_tw": "標記為已讀"
+        },
+        "mark_unread": {
+          "cn": "标记为未读",
+          "zh_tw": "標記為未讀"
+        }
       }
     },
     "editor": {
@@ -3539,6 +3553,10 @@
       "private": {
         "cn": "私有",
         "zh_tw": "私有"
+      },
+      "read": {
+        "cn": "已读",
+        "zh_tw": "已讀"
       },
       "operators_and_groups": {
         "cn": "密探/密探组",

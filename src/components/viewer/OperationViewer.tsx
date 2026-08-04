@@ -33,6 +33,7 @@ import {
   FC,
   KeyboardEventHandler,
   MouseEventHandler,
+  ReactNode,
   Suspense,
   lazy,
   useEffect,
@@ -215,8 +216,9 @@ const ManageMenu: FC<{
 export const OperationViewer: ComponentType<{
   operationId: Operation["id"];
   onCloseDrawer: () => void;
+  headerActions?: ReactNode;
 }> = withSuspensable(
-  function OperationViewer({ operationId, onCloseDrawer }) {
+  function OperationViewer({ operationId, onCloseDrawer, headerActions }) {
     const t = useTranslation();
     const navigate = useNavigate();
     const {
@@ -300,6 +302,7 @@ export const OperationViewer: ComponentType<{
 	            </div>
 
 	            <div className="ml-auto flex flex-wrap items-center justify-end gap-2 md:gap-4">
+	              {headerActions}
 	              {(operation.uploaderId === auth.userId || isAdmin(auth)) && (
 	                // 使用 Portal 渲染，避免被头部容器裁剪/遮挡；提升层级与全局样式一致
 	                <Popover2
