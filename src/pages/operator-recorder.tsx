@@ -10,6 +10,7 @@ import { useAtomValue } from 'jotai'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { AccountAuthDialog } from '../components/AccountManager'
+import { OperatorBoxPresetManager } from '../components/OperatorBoxPresetManager'
 import { SheetProvider } from '../components/editor/operator/sheet/SheetProvider'
 import { OperatorFilterProvider } from '../components/editor/operator/sheet/sheetOperator/SheetOperatorFilterProvider'
 import { OperatorItem } from '../components/editor2/operator/OperatorItem'
@@ -115,6 +116,15 @@ export const OperatorRecorderPage = () => {
     )
   }, [])
 
+  const applyBoxPreset = useCallback(
+    (operatorKeys: string[]) => {
+      setOperators(
+        operatorKeys.map((name) => applyConfig(createOperator({ name }))),
+      )
+    },
+    [applyConfig],
+  )
+
   return (
     <main className="mx-auto w-full max-w-screen-lg px-4 py-8 md:px-8">
       <AccountAuthDialog
@@ -162,15 +172,20 @@ export const OperatorRecorderPage = () => {
           <Spinner />
         </div>
       ) : (
-        <SheetProvider
-          submitOperator={selectOperator}
-          submitGroup={() => false}
-          existedOperators={operators}
-          existedGroups={[]}
-          removeOperator={removeOperators}
-          removeGroup={() => {}}
-        >
-          <OperatorFilterProvider>
+        <>
+          <OperatorBoxPresetManager
+            operators={operators}
+            onApply={applyBoxPreset}
+          />
+          <SheetProvider
+            submitOperator={selectOperator}
+            submitGroup={() => false}
+            existedOperators={operators}
+            existedGroups={[]}
+            removeOperator={removeOperators}
+            removeGroup={() => {}}
+          >
+            <OperatorFilterProvider>
             <div className="mt-5 flex min-h-0 flex-col overflow-hidden border border-gray-200 bg-white/80 dark:border-gray-700 dark:bg-slate-900/80">
               <section
                 className="h-[min(52vh,34rem)] min-h-[22rem] overflow-hidden"
@@ -212,8 +227,9 @@ export const OperatorRecorderPage = () => {
                 )}
               </section>
             </div>
-          </OperatorFilterProvider>
-        </SheetProvider>
+            </OperatorFilterProvider>
+          </SheetProvider>
+        </>
       )}
     </main>
   )

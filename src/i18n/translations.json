@@ -3805,6 +3805,14 @@
       "remember_selection": {
         "cn": "记住选择",
         "zh_tw": "記住選擇"
+      },
+      "box_presets": {
+        "cn": "阵容预设",
+        "zh_tw": "陣容預設"
+      },
+      "apply_box_preset": {
+        "cn": "应用阵容预设",
+        "zh_tw": "套用陣容預設"
       }
     },
     "OperatorSelect": {
@@ -4373,6 +4381,38 @@
       "load_failed": {
         "cn": "密探记录加载失败：{{error}}",
         "zh_tw": "密探記錄載入失敗：{{error}}"
+      },
+      "select_preset": {
+        "cn": "选择阵容预设",
+        "zh_tw": "選擇陣容預設"
+      },
+      "save_as_preset": {
+        "cn": "另存为预设",
+        "zh_tw": "另存為預設"
+      },
+      "save_changes": {
+        "cn": "保存更改",
+        "zh_tw": "儲存變更"
+      },
+      "rename_preset": {
+        "cn": "重命名预设",
+        "zh_tw": "重新命名預設"
+      },
+      "delete_preset": {
+        "cn": "删除预设",
+        "zh_tw": "刪除預設"
+      },
+      "delete_preset_confirm": {
+        "cn": "确定删除这个阵容预设吗？",
+        "zh_tw": "確定刪除這個陣容預設嗎？"
+      },
+      "preset_name": {
+        "cn": "预设名称",
+        "zh_tw": "預設名稱"
+      },
+      "preset_load_failed": {
+        "cn": "阵容预设加载失败：{{error}}",
+        "zh_tw": "陣容預設載入失敗：{{error}}"
       }
     },
     "profile": {

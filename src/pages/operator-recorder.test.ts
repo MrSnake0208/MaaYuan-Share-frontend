@@ -20,6 +20,18 @@ const mocks = vi.hoisted(() => ({
   scheduleSave: vi.fn(),
 }))
 
+vi.mock('../apis/operator-box-preset', () => ({
+  createOperatorBoxPreset: vi.fn(),
+  deleteOperatorBoxPreset: vi.fn(),
+  updateOperatorBoxPreset: vi.fn(),
+  useOperatorBoxPresets: () => ({
+    data: [],
+    error: undefined,
+    isLoading: false,
+    mutate: vi.fn(),
+  }),
+}))
+
 vi.mock('jotai', () => ({
   useAtomValue: () => mocks.auth,
 }))
@@ -103,13 +115,29 @@ vi.mock('../i18n/i18n', () => ({
   useTranslation: () => ({
     components: {
       AccountManager: { login_register: '登录 / 注册' },
+      Confirm: { cancel: '取消', confirm: '确认' },
+    },
+    common: {
+      cancel: '取消',
+      confirm: '确认',
+      delete: '删除',
+      loading: '加载中',
     },
     pages: {
       operator_recorder: {
+        delete_preset: '删除预设',
+        delete_preset_confirm: '确定删除这个阵容预设吗？',
         load_failed: ({ error }: { error: string }) =>
           `密探记录加载失败：${error}`,
         login_required: '登录后可编辑并同步密探记录',
         no_operator: '尚未选择密探',
+        preset_load_failed: ({ error }: { error: string }) =>
+          `阵容预设加载失败：${error}`,
+        preset_name: '预设名称',
+        rename_preset: '重命名预设',
+        save_as_preset: '另存为预设',
+        save_changes: '保存更改',
+        select_preset: '选择阵容预设',
         subtitle: '密探记录器',
         title: '绣衣楼编辑器',
       },

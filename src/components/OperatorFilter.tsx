@@ -1,4 +1,4 @@
-import { Button, Checkbox, Dialog, DialogBody, DialogFooter, H6, Tag } from "@blueprintjs/core";
+import { Button, Checkbox, Dialog, DialogBody, DialogFooter, H6, HTMLSelect, Tag } from "@blueprintjs/core";
 
 import clsx from "clsx";
 import { getDefaultStore, useAtom, useAtomValue } from "jotai";
@@ -6,6 +6,8 @@ import { compact } from "lodash-es";
 import { FC, useEffect, useMemo, useState } from "react";
 
 import { languageAtom, useTranslation } from "../i18n/i18n";
+import { useOperatorBoxPresets } from "../apis/operator-box-preset";
+import { applyOperatorBoxPresetToFilter } from "../models/operator-box-preset";
 import { OPERATORS } from "../models/operator";
 import {
   DEFAULT_OPERATOR_FILTER,
@@ -43,6 +45,7 @@ export const OperatorFilter: FC<OperatorFilterProps> = ({ className, filter, onC
   const [savedFilter, setSavedFilter] = useAtom(operatorFilterAtom);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingFilter, setEditingFilter] = useState<typeof savedFilter>(filter);
+  const { data: boxPresets = [], isLoading: boxPresetsLoading } = useOperatorBoxPresets();
 
   useEffect(() => {
     // 对话框关闭时还原
@@ -150,6 +153,37 @@ export const OperatorFilter: FC<OperatorFilterProps> = ({ className, filter, onC
         title={t.components.OperatorFilter.select_operators}
       >
         <DialogBody>
+          {boxPresetsLoading || boxPresets.length > 0 ? (
+            <div className="mb-6 border-b border-gray-200 pb-5 dark:border-gray-700">
+              <H6 className="mb-3">{t.components.OperatorFilter.box_presets}</H6>
+              <HTMLSelect
+                fill
+                disabled={boxPresetsLoading}
+                value=""
+                onChange={(event) => {
+                  const preset = boxPresets.find(
+                    (candidate) => candidate.id === event.currentTarget.value,
+                  );
+                  if (preset) {
+                    setEditingFilter((current) =>
+                      applyOperatorBoxPresetToFilter(current, preset),
+                    );
+                  }
+                }}
+              >
+                <option value="">
+                  {boxPresetsLoading
+                    ? t.common.loading
+                    : t.components.OperatorFilter.apply_box_preset}
+                </option>
+                {boxPresets.map((preset) => (
+                  <option key={preset.id} value={preset.id}>
+                    {preset.label}
+                  </option>
+                ))}
+              </HTMLSelect>
+            </div>
+          ) : null}
           <H6 className="mb-4">{t.components.OperatorFilter.included_operators}</H6>
           <OperatorSelect
             operators={editingFilter.included}
