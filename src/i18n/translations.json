@@ -4291,6 +4291,28 @@
         "zh_tw": "廣告"
       }
     },
+    "operator_recorder": {
+      "title": {
+        "cn": "绣衣楼编辑器",
+        "zh_tw": "繡衣樓編輯器"
+      },
+      "subtitle": {
+        "cn": "密探记录器",
+        "zh_tw": "密探記錄器"
+      },
+      "no_operator": {
+        "cn": "尚未选择密探",
+        "zh_tw": "尚未選擇密探"
+      },
+      "login_required": {
+        "cn": "登录后可编辑并同步密探记录",
+        "zh_tw": "登入後可編輯並同步密探記錄"
+      },
+      "load_failed": {
+        "cn": "密探记录加载失败：{{error}}",
+        "zh_tw": "密探記錄載入失敗：{{error}}"
+      }
+    },
     "profile": {
       "invalid_id": {
         "cn": "ID 无效",
@@ -4508,6 +4530,10 @@
     "editor": {
       "cn": "编辑器v2",
       "zh_tw": "編輯器v2"
+    },
+    "operator_recorder": {
+      "cn": "绣衣楼编辑器",
+      "zh_tw": "繡衣樓編輯器"
     },
     "about": {
       "cn": "关于",

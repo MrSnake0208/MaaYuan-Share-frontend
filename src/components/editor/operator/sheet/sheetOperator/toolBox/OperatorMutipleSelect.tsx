@@ -8,9 +8,13 @@ import { useTranslation } from "../../../../../../i18n/i18n";
 import { useSheet } from "../../SheetProvider";
 import { useOperatorFilterProvider } from "../SheetOperatorFilterProvider";
 
-export interface OperatorMutipleSelectProp {}
+export interface OperatorMutipleSelectProp {
+  maxSelected?: number;
+}
 
-export const OperatorMutipleSelect: FC<OperatorMutipleSelectProp> = () => {
+export const OperatorMutipleSelect: FC<OperatorMutipleSelectProp> = ({
+  maxSelected = MAX_ACTIVE_OPERATORS,
+}) => {
   const t = useTranslation();
   const {
     operatorFiltered: { data: operatorFilteredData },
@@ -24,14 +28,14 @@ export const OperatorMutipleSelect: FC<OperatorMutipleSelectProp> = () => {
         existedOperatorsNames.includes(name),
       ),
       selectAllDisabled:
-        MAX_ACTIVE_OPERATORS - existedOperators.length <= 0 ||
+        maxSelected - existedOperators.length <= 0 ||
         operatorFilteredData.every(({ name }) => existedOperatorsNames.includes(name)),
       existedOperatorsNames,
     };
-  }, [existedOperators, operatorFilteredData]);
+  }, [existedOperators, maxSelected, operatorFilteredData]);
 
   const selectAll = () => {
-    let remainingSlots = MAX_ACTIVE_OPERATORS - existedOperators.length;
+    let remainingSlots = maxSelected - existedOperators.length;
     operatorFilteredData.forEach((item) => {
       const isExisting = existedOperatorsNames.includes(item.name);
       if (!isExisting && remainingSlots <= 0) {

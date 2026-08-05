@@ -16,9 +16,11 @@ import { SheetOperatorItem } from "../../../editor/operator/sheet/sheetOperator/
 import { ShowMore } from "../../../editor/operator/sheet/sheetOperator/ShowMore";
 import { ProfClassification } from "./ProfClassification";
 
-interface SheetListProps {}
+interface SheetListProps {
+  maxSelectedOperators?: number;
+}
 
-export const SheetList: FC<SheetListProps> = () => {
+export const SheetList: FC<SheetListProps> = ({ maxSelectedOperators }) => {
   const operatorScrollRef = useRef<HTMLDivElement>(null);
 
   const toTop = useCallback(
@@ -79,7 +81,7 @@ export const SheetList: FC<SheetListProps> = () => {
           >
             <Button minimal icon="filter-list" />
           </Popover2>
-          <OperatorMutipleSelect />
+          <OperatorMutipleSelect maxSelected={maxSelectedOperators} />
           <OperatorBackToTop {...{ toTop }} />
         </div>
       </div>

@@ -22,7 +22,7 @@ const SAVE_DELAY_MS = 500
 
 export function useOperatorTrainingConfigSync() {
   const auth = useAtomValue(authAtom)
-  const { data, isLoading, mutate } = useOperatorTrainingConfigs()
+  const { data, error, isLoading, mutate } = useOperatorTrainingConfigs()
   const timersRef = useRef(
     new Map<string, ReturnType<typeof setTimeout>>(),
   )
@@ -137,6 +137,7 @@ export function useOperatorTrainingConfigSync() {
 
   return {
     applyConfig,
+    error,
     isLoading: Boolean(auth.userId && isLoading),
     scheduleSave,
   }
