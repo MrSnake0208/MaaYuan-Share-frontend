@@ -426,10 +426,19 @@ const getSlideOperations = (
   return new Array(counterDistance).fill("左侧目标");
 };
 
+// --- 预处理辅助 ---
+
+// xlsx 库可能给每格多读一个脏前缀字符（通常是 a 或 A），非颜色模式下需要剥掉
+const isDirtyPrefix = (ch: string) => ch === "a" || ch === "A";
+
+// 剩余部分是否全是合法动作符号（可整体加序号）
+const isAllActionSymbols = (s: string) =>
+  s.length > 0 && Array.from(s).every((c) => actionMap[c] && actionMap[c] !== "未知");
+
 // 预处理：给无编号单元格自动补序号
 // 单字符直接编号；多字符整体加一个序号，交给后续多动作展开
 // "↑"→"1↑"、"防"→"1防"、"↑↑"→"1↑↑"、"↓↓↓"→"2↓↓↓"
-// 颜色模式（useColor=true）保留颜色 token，非颜色模式剥掉 xlsx 库的脏前缀 a/A
+// 颜色模式保留首字符（颜色 token），非颜色模式剥掉脏前缀 a/A 和未知前缀
 const preprocessRow = (row: string[], config: AutoFightConfig): string[] => {
   const usedNumbers = new Set<number>();
   for (const cell of row) {
@@ -442,6 +451,22 @@ const preprocessRow = (row: string[], config: AutoFightConfig): string[] => {
     usedNumbers.add(n);
     return n;
   };
+
+  const stripPrefix = (cell: string): { prefix: string; rest: string } => {
+    if (config.useColor) {
+      // 颜色模式：首字符是颜色 token，原样保留
+      return { prefix: cell[0], rest: cell.slice(1) };
+    }
+    // 非颜色模式：跳过不在 actionMap 中的前缀字符 和 xlsx 脏前缀 a/A
+    let i = 0;
+    while (i < cell.length && (!actionMap[cell[i]] || isDirtyPrefix(cell[i]))) {
+      // 脏前缀只在后面还有内容时才剥（单独的 a/A 是合法普攻动作）
+      if (isDirtyPrefix(cell[i]) && i + 1 >= cell.length) break;
+      i++;
+    }
+    return { prefix: "", rest: cell.slice(i) };
+  };
+
   return row.map((cell) => {
     if (!cell || !cell.trim()) return cell;
     if (/\d/.test(cell)) return cell; // 已有编号
@@ -450,25 +475,9 @@ const preprocessRow = (row: string[], config: AutoFightConfig): string[] => {
       if (actionMap[cell] && actionMap[cell] !== "未知") return `${nextNum()}${cell}`;
       return cell;
     }
-    // 多字符无编号
-    let prefix = "";
-    let rest = cell;
-    if (config.useColor) {
-      // 颜色模式：首字符是颜色 token，保留它
-      prefix = rest[0];
-      rest = rest.slice(1);
-    } else {
-      // 非颜色模式：提取不在 actionMap 中的前缀，再去掉 xlsx 脏前缀 a/A
-      while (rest.length > 1 && !actionMap[rest[0]]) {
-        prefix += rest[0];
-        rest = rest.slice(1);
-      }
-      if ((rest[0] === "a" || rest[0] === "A") && rest.length > 1) {
-        rest = rest.slice(1);
-      }
-    }
-    // 剩余全是合法动作符号 → 整体加序号
-    if (rest.length > 0 && Array.from(rest).every((c) => actionMap[c] && actionMap[c] !== "未知")) {
+    // 多字符无编号：剥前缀后整体加序号
+    const { prefix, rest } = stripPrefix(cell);
+    if (isAllActionSymbols(rest)) {
       return `${prefix}${nextNum()}${rest}`;
     }
     return cell;
@@ -476,6 +485,17 @@ const preprocessRow = (row: string[], config: AutoFightConfig): string[] => {
 };
 
 const parseActionsForRow = (row: string[], config: AutoFightConfig): ActionOrder => {
+  // 在 actionOrder 指定序号插入，已有条目及后续全部后移
+  const insertWithShift = (order: number, entry: ActionOrder[number]) => {
+    if (actionOrder[order]) {
+      const keys = Object.keys(actionOrder).map(Number).sort((a, b) => b - a);
+      for (const k of keys) {
+        if (k >= order) { actionOrder[k + 1] = actionOrder[k]; delete actionOrder[k]; }
+      }
+    }
+    actionOrder[order] = entry;
+  };
+
   const actionOrder: ActionOrder = {};
   const processed = preprocessRow(row, config);
 
@@ -516,29 +536,16 @@ const parseActionsForRow = (row: string[], config: AutoFightConfig): ActionOrder
         };
 
         // 单元格内后续动作：同位置连动（如 "2↓↓↓" → 2号位连续3次↓）
+        // 注意：若 remaining 含数字（如 "1↓2↑" 的后续 "2↑"），allValid 会因数字
+        // 不在 actionMap 而自然为 false，从而跳过展开——这正是期望行为
         const matchEnd = (match.index ?? 0) + match[0].length;
         const remaining = normalized.slice(matchEnd);
-        if (remaining.length > 0) {
-          const allValid = Array.from(remaining).every(
-            (c) => actionMap[c] && actionMap[c] !== "未知",
-          );
-          if (allValid) {
-            for (const c of remaining) {
-              order++;
-              // 挤开占位：占据此位置的条目及后续全部后移一位
-              if (actionOrder[order]) {
-                const keys = Object.keys(actionOrder).map(Number).sort((a, b) => b - a);
-                for (const k of keys) {
-                  if (k >= order) {
-                    actionOrder[k + 1] = actionOrder[k];
-                    delete actionOrder[k];
-                  }
-                }
-              }
-              actionOrder[order] = {
-                action: `${operations}${columnIndex}${actionMap[c]}`,
-              };
-            }
+        if (remaining.length > 0 && isAllActionSymbols(remaining)) {
+          for (const c of remaining) {
+            order++;
+            insertWithShift(order, {
+              action: `${operations}${columnIndex}${actionMap[c]}`,
+            });
           }
         }
       });
