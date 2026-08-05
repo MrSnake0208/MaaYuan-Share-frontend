@@ -20,8 +20,8 @@ export type SheetContextValue = {
   existedGroups: SheetProviderProp["existedGroups"];
   removeOperator: SheetProviderProp["removeOperator"];
   removeGroup: SheetProviderProp["removeGroup"];
-  submitOperatorInSheet: (value: Operator) => void;
-  submitGroupInSheet: (value: Group) => void;
+  submitOperatorInSheet: (value: Operator) => boolean;
+  submitGroupInSheet: (value: Group) => boolean;
 };
 
 const SheetContext = createContext<SheetContextValue>({} as SheetContextValue);

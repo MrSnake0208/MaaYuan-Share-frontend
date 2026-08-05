@@ -24,14 +24,16 @@ export function useOperatorBoxTrainingConfigs(boxId?: string) {
     auth.userId && boxId
       ? getOperatorBoxTrainingConfigCacheKey(auth.userId, boxId)
       : null,
-    async () => {
-      const response = await new OperatorBoxTrainingConfigApi({
-        requireData: true,
-      }).listOperatorBoxTrainingConfigs({ boxId: boxId! })
-      return response.data
-    },
+    () => loadOperatorBoxTrainingConfigs(boxId!),
     { revalidateOnFocus: false },
   )
+}
+
+export async function loadOperatorBoxTrainingConfigs(boxId: string) {
+  const response = await new OperatorBoxTrainingConfigApi({
+    requireData: true,
+  }).listOperatorBoxTrainingConfigs({ boxId })
+  return response.data
 }
 
 export async function saveOperatorBoxTrainingConfig(

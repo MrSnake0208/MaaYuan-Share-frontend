@@ -100,7 +100,7 @@ export const OperatorSheet = () => {
       removeGroup={() => {}}
     >
       <OperatorFilterProvider>
-        <SheetList />
+        <SheetList enableBoxPresetSelect />
       </OperatorFilterProvider>
     </SheetProvider>
   );

@@ -16,8 +16,11 @@ import { useOperatorTrainingConfigSync } from './useOperatorTrainingConfigSync'
 
 const mocks = vi.hoisted(() => ({
   auth: { userId: 'user-1' } as { userId?: string },
-  mutateCache: vi.fn(async () => undefined),
-  save: vi.fn(async ({ boxId, config }) => ({
+  mutateCache: vi.fn(async (_key: readonly string[]) => undefined),
+  save: vi.fn(async ({ boxId, config }: {
+    boxId: string
+    config: { operatorId: string }
+  }) => ({
     ...config,
     boxId,
     updateTime: new Date(),
