@@ -426,10 +426,80 @@ const getSlideOperations = (
   return new Array(counterDistance).fill("左侧目标");
 };
 
-const parseActionsForRow = (row: string[], config: AutoFightConfig): ActionOrder => {
-  const actionOrder: ActionOrder = {};
+// --- 预处理辅助 ---
 
-  row.forEach((seq, idx) => {
+// xlsx 库可能给每格多读一个脏前缀字符（通常是 a 或 A），非颜色模式下需要剥掉
+const isDirtyPrefix = (ch: string) => ch === "a" || ch === "A";
+
+// 剩余部分是否全是合法动作符号（可整体加序号）
+const isAllActionSymbols = (s: string) =>
+  s.length > 0 && Array.from(s).every((c) => actionMap[c] && actionMap[c] !== "未知");
+
+// 预处理：给无编号单元格自动补序号
+// 单字符直接编号；多字符整体加一个序号，交给后续多动作展开
+// "↑"→"1↑"、"防"→"1防"、"↑↑"→"1↑↑"、"↓↓↓"→"2↓↓↓"
+// 颜色模式保留首字符（颜色 token），非颜色模式剥掉脏前缀 a/A 和未知前缀
+const preprocessRow = (row: string[], config: AutoFightConfig): string[] => {
+  const usedNumbers = new Set<number>();
+  for (const cell of row) {
+    const m = /\d+/.exec(cell);
+    if (m) usedNumbers.add(Number(m[0]));
+  }
+  const nextNum = () => {
+    let n = 1;
+    while (usedNumbers.has(n)) n++;
+    usedNumbers.add(n);
+    return n;
+  };
+
+  const stripPrefix = (cell: string): { prefix: string; rest: string } => {
+    if (config.useColor) {
+      // 颜色模式：首字符是颜色 token，原样保留
+      return { prefix: cell[0], rest: cell.slice(1) };
+    }
+    // 非颜色模式：跳过不在 actionMap 中的前缀字符 和 xlsx 脏前缀 a/A
+    let i = 0;
+    while (i < cell.length && (!actionMap[cell[i]] || isDirtyPrefix(cell[i]))) {
+      // 脏前缀只在后面还有内容时才剥（单独的 a/A 是合法普攻动作）
+      if (isDirtyPrefix(cell[i]) && i + 1 >= cell.length) break;
+      i++;
+    }
+    return { prefix: "", rest: cell.slice(i) };
+  };
+
+  return row.map((cell) => {
+    if (!cell || !cell.trim()) return cell;
+    if (/\d/.test(cell)) return cell; // 已有编号
+    // 单字符：直接编号
+    if (cell.length === 1) {
+      if (actionMap[cell] && actionMap[cell] !== "未知") return `${nextNum()}${cell}`;
+      return cell;
+    }
+    // 多字符无编号：剥前缀后整体加序号
+    const { prefix, rest } = stripPrefix(cell);
+    if (isAllActionSymbols(rest)) {
+      return `${prefix}${nextNum()}${rest}`;
+    }
+    return cell;
+  });
+};
+
+const parseActionsForRow = (row: string[], config: AutoFightConfig): ActionOrder => {
+  // 在 actionOrder 指定序号插入，已有条目及后续全部后移
+  const insertWithShift = (order: number, entry: ActionOrder[number]) => {
+    if (actionOrder[order]) {
+      const keys = Object.keys(actionOrder).map(Number).sort((a, b) => b - a);
+      for (const k of keys) {
+        if (k >= order) { actionOrder[k + 1] = actionOrder[k]; delete actionOrder[k]; }
+      }
+    }
+    actionOrder[order] = entry;
+  };
+
+  const actionOrder: ActionOrder = {};
+  const processed = preprocessRow(row, config);
+
+  processed.forEach((seq, idx) => {
     if (typeof seq !== "string" || seq.trim() === "") {
       return;
     }
@@ -439,30 +509,53 @@ const parseActionsForRow = (row: string[], config: AutoFightConfig): ActionOrder
       .replace(/技能/g, "大")
       .replace(/防御/g, "防");
 
+    const columnIndex = COLUMNS[idx] ?? String(idx + 1);
     const matches = Array.from(normalized.matchAll(ACTION_REGEX));
+
     matches.forEach((match) => {
-      let operations = match[1];
-      if (config.useColor && config.colorList.length > 0) {
-        const expectedColor = matches[0]?.[1]?.[0];
-        if (!operations || !config.colorList.includes(operations[0] ?? "")) {
-          operations = (expectedColor ?? "") + operations;
+        let operations = match[1];
+        if (config.useColor && config.colorList.length > 0) {
+          const expectedColor = matches[0]?.[1]?.[0];
+          if (!operations || !config.colorList.includes(operations[0] ?? "")) {
+            operations = (expectedColor ?? "") + operations;
+          }
         }
-      }
-      const number = Number(match[2]);
-      const symbol = match[3];
-      const actionType = actionMap[symbol] ?? "未知";
-      if (actionType === "未知") {
-        console.warn("未知的动作符号", symbol);
-        return;
-      }
-      const columnIndex = COLUMNS[idx] ?? String(idx + 1);
-      actionOrder[number] = {
-        action: `${operations}${columnIndex}${actionType}`,
-      };
-    });
+        const number = Number(match[2]);
+        const symbol = match[3];
+        const actionType = actionMap[symbol] ?? "未知";
+        if (actionType === "未知") {
+          console.warn("未知的动作符号", symbol);
+          return;
+        }
+
+        // 找下一个可用序号（如 "4A" 在 "2↓↓↓" 之后序号被占 → 自动顺延）
+        let order = number;
+        while (actionOrder[order]) order++;
+        actionOrder[order] = {
+          action: `${operations}${columnIndex}${actionType}`,
+        };
+
+        // 单元格内后续动作：同位置连动（如 "2↓↓↓" → 2号位连续3次↓）
+        // 注意：若 remaining 含数字（如 "1↓2↑" 的后续 "2↑"），allValid 会因数字
+        // 不在 actionMap 而自然为 false，从而跳过展开——这正是期望行为
+        const matchEnd = (match.index ?? 0) + match[0].length;
+        const remaining = normalized.slice(matchEnd);
+        if (remaining.length > 0 && isAllActionSymbols(remaining)) {
+          for (const c of remaining) {
+            order++;
+            insertWithShift(order, {
+              action: `${operations}${columnIndex}${actionMap[c]}`,
+            });
+          }
+        }
+      });
   });
 
-  return actionOrder;
+  // 整体重排序号，保证连续且按序号顺序执行
+  const sorted = Object.entries(actionOrder).sort(([a], [b]) => Number(a) - Number(b));
+  const renumbered: ActionOrder = {};
+  sorted.forEach(([, action], i) => { renumbered[i + 1] = action; });
+  return renumbered;
 };
 
 const setOperationAction = (
@@ -649,9 +742,10 @@ export const convertXlsxToAutoFightJson = (
       }
 
       const actionKey = `回合${round}行动${actionIndex}`;
+      const rawDoc = action.action.slice(-2);
       graph[actionKey] = {
         ...cloneDeep(actionTemplate),
-        text_doc: action.action.slice(-2),
+        text_doc: rawDoc.endsWith("O") ? rawDoc.slice(0, -1) + "sp" : rawDoc,
       };
 
       if (currentActionKey && graph[currentActionKey]) {

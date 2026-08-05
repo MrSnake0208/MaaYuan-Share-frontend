@@ -28,8 +28,6 @@ export const XlsxImporter: FC<{ onImport: (content: string) => void }> = ({ onIm
 
     try {
       const buffer = await file.arrayBuffer();
-      // 先检测 Excel 中的颜色（包含色块），若发现则进入颜色映射流程
-      // 读取默认颜色（import.defaultColor）作为无色/白色的等价映射
       const defaultColorHex = ((): string => {
         try {
           const v = localStorage.getItem("import.defaultColor");
@@ -39,6 +37,10 @@ export const XlsxImporter: FC<{ onImport: (content: string) => void }> = ({ onIm
         }
       })();
 
+      // 先转换（buffer 干净，不受后续 detectXlsxPalette 的 xlsx 全局状态污染）
+      const json = convertXlsxToAutoFightJson(buffer, { defaultColorHex });
+
+      // 再检测颜色（可能污染 xlsx 全局状态，但转换已完成，不影响无颜色场景）
       const pal = detectXlsxPalette(buffer, {
         colorType: "fill",
         defaultColorHex,
@@ -52,8 +54,6 @@ export const XlsxImporter: FC<{ onImport: (content: string) => void }> = ({ onIm
         return;
       }
 
-      // 未发现颜色时，按旧流程直接转换
-      const json = convertXlsxToAutoFightJson(buffer, { defaultColorHex });
       const jsonWithTitle = updateOperationDocTitle(json, file.name);
       onImport(jsonWithTitle);
       AppToaster.show({
@@ -90,7 +90,7 @@ export const XlsxImporter: FC<{ onImport: (content: string) => void }> = ({ onIm
         }
       })();
 
-      const json = convertXlsxToAutoFightJson(pendingBuffer, {
+      const json = convertXlsxToAutoFightJson(pendingBuffer.slice(0), {
         useColor: true,
         colorType: "fill",
         colorList: tokens,

@@ -294,7 +294,7 @@ function cloneConfig(config: SimingActionConfig | undefined): SimingActionConfig
 }
 
 function templateKeyFromToken(token: string): string | undefined {
-  const match = token.match(/^(\d)([普大下sp])$/);
+  const match = token.match(/^(\d)([普大下]|sp)$/);
   if (!match) {
     return undefined;
   }
@@ -830,7 +830,7 @@ export function simingActionsToRoundActions(
 
 function inferSimingToken(action: CopilotDocV1.SimingAction): string | undefined {
   const text = action.textDoc?.trim();
-  if (text && /^\\d[普大下sp]$/.test(text)) {
+  if (text && /^\d([普大下]|sp)$/.test(text)) {
     return text;
   }
   if (text && text.startsWith("再动")) {
