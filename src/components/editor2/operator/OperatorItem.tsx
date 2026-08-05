@@ -33,6 +33,7 @@ import { SortableItemProps } from '../../dnd'
 import { NumericInput2 } from '../../editor/NumericInput2'
 import { EditorOperator, useEdit } from '../editor-state'
 import { editorFavOperatorsAtom } from '../reconciliation'
+import { OperatorDiscPresetSelect } from './OperatorDiscPresetSelect'
 import { OperatorStarStonePresetSelect } from './OperatorStarStonePresetSelect'
 import { getDiscSlots, setDiscSlot } from './operatorDiscModel'
 import {
@@ -467,6 +468,12 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                 </li>
               )}
               <OperatorStarStonePresetSelect
+                operator={operator}
+                operatorId={info.id}
+                operatorProfile={info}
+                onChange={onChange}
+              />
+              <OperatorDiscPresetSelect
                 operator={operator}
                 operatorId={info.id}
                 operatorProfile={info}

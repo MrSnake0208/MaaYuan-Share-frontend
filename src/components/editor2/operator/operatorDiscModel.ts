@@ -1,6 +1,10 @@
 import type { StarPresetValues } from '../../../data/operator-star-stone-presets'
 import type { AssistStarName, MainStarName } from '../../../data/star-stones'
 import type { EditorOperator } from '../types'
+import type {
+  DiscPresetConfirmed,
+  DiscPresetSelected,
+} from './operatorDiscPresetModel'
 
 export interface DiscSlot {
   index: number
@@ -192,6 +196,19 @@ export function applyAssistStarPreset(
   const nextSlots = getDiscSlots(operator).map((slot) => ({
     ...slot,
     assistStar: values[slot.index] ?? '',
+  }))
+  return withDiscSlots(operator, nextSlots)
+}
+
+export function applyDiscPreset(
+  operator: EditorOperator,
+  selected: DiscPresetSelected,
+  confirmed: DiscPresetConfirmed,
+): EditorOperator {
+  const nextSlots = getDiscSlots(operator).map((slot) => ({
+    ...slot,
+    disc: selected[slot.index] ?? 0,
+    discConfirmed: confirmed[slot.index] ?? false,
   }))
   return withDiscSlots(operator, nextSlots)
 }

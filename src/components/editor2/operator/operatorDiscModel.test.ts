@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import type { EditorOperator } from '../types'
 import {
   applyAssistStarPreset,
+  applyDiscPreset,
   applyMainStarPreset,
   getDiscSlots,
   setDiscSlot,
@@ -44,6 +45,23 @@ describe('operatorDiscModel', () => {
     expect(operator.discsSelected).toEqual([1, 2, 3])
     expect(operator.discStarStones).toEqual(['天府', '天相', '巨门'])
     expect(operator.discAssistStars).toEqual(['文昌', '', ''])
+  })
+
+  it('applies a disc preset without changing main or assist stars', () => {
+    const operator = applyDiscPreset(
+      createOperator(),
+      [4, 0, -2],
+      [true, true, true],
+    )
+
+    expect(operator.discsSelected).toEqual([4, 0, -2])
+    expect(operator.discStarStones).toEqual(['天府', '天相', '巨门'])
+    expect(operator.discAssistStars).toEqual(['红鸾', '阴煞', '天魁'])
+    expect(getDiscSlots(operator).map((slot) => slot.discConfirmed)).toEqual([
+      true,
+      true,
+      true,
+    ])
   })
 
   it('moves a duplicate star selection to the edited slot', () => {
