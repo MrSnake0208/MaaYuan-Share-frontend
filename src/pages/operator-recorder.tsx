@@ -7,7 +7,7 @@ import {
 } from '@blueprintjs/core'
 
 import { useAtomValue } from 'jotai'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { AccountAuthDialog } from '../components/AccountManager'
 import { SheetProvider } from '../components/editor/operator/sheet/SheetProvider'
@@ -20,6 +20,10 @@ import type { EditorOperator } from '../components/editor2/types'
 import { useTranslation } from '../i18n/i18n'
 import { authAtom } from '../store/auth'
 import { formatError } from '../utils/error'
+import {
+  loadOperatorRecorderSelection,
+  saveOperatorRecorderSelection,
+} from './operator-recorder-storage'
 
 export const OperatorRecorderPage = () => {
   const t = useTranslation()
@@ -28,10 +32,46 @@ export const OperatorRecorderPage = () => {
     useOperatorTrainingConfigSync()
   const [authDialogOpen, setAuthDialogOpen] = useState(false)
   const [operators, setOperators] = useState<EditorOperator[]>([])
+  const [restoredUserId, setRestoredUserId] = useState<string>()
+  const persistedSelectionRef = useRef<{
+    userId: string
+    fingerprint: string
+  }>()
 
   useEffect(() => {
-    setOperators([])
-  }, [auth.userId])
+    const userId = auth.userId
+    if (!userId) {
+      setOperators([])
+      setRestoredUserId(undefined)
+      persistedSelectionRef.current = undefined
+      return
+    }
+    if (isLoading || error || restoredUserId === userId) return
+
+    const operatorNames = loadOperatorRecorderSelection(userId)
+    setOperators(
+      operatorNames.map((name) => applyConfig(createOperator({ name }))),
+    )
+    setRestoredUserId(userId)
+    persistedSelectionRef.current = undefined
+  }, [applyConfig, auth.userId, error, isLoading, restoredUserId])
+
+  useEffect(() => {
+    const userId = auth.userId
+    if (!userId || restoredUserId !== userId) return
+
+    const operatorNames = operators.map((operator) => operator.name)
+    const fingerprint = JSON.stringify(operatorNames)
+    if (
+      persistedSelectionRef.current?.userId === userId &&
+      persistedSelectionRef.current.fingerprint === fingerprint
+    ) {
+      return
+    }
+
+    saveOperatorRecorderSelection(userId, operatorNames)
+    persistedSelectionRef.current = { userId, fingerprint }
+  }, [auth.userId, operators, restoredUserId])
 
   const selectOperator = useCallback(
     (selected: { name: string }) => {
@@ -155,6 +195,7 @@ export const OperatorRecorderPage = () => {
                         }}
                       >
                         <OperatorItem
+                          centerControls
                           operator={operator}
                           onChange={updateOperator}
                           onRemove={() => removeOperatorById(operator.id)}

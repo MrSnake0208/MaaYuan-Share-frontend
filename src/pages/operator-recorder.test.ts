@@ -12,6 +12,7 @@ import {
 } from 'vitest'
 
 import { OperatorRecorderPage } from './operator-recorder'
+import { getOperatorRecorderStorageKey } from './operator-recorder-storage'
 
 const mocks = vi.hoisted(() => ({
   applyConfig: vi.fn(),
@@ -144,6 +145,7 @@ describe('OperatorRecorderPage', () => {
     mocks.auth = {}
     mocks.applyConfig.mockImplementation((operator) => operator)
     mocks.scheduleSave.mockReset()
+    localStorage.clear()
     container = document.createElement('div')
     document.body.append(container)
     root = createRoot(container)
@@ -186,5 +188,47 @@ describe('OperatorRecorderPage', () => {
         (item) => item.textContent,
       ),
     ).toEqual(['测试密探甲', '测试密探乙'])
+
+    expect(
+      JSON.parse(
+        localStorage.getItem(getOperatorRecorderStorageKey('user-1')) ?? '',
+      ),
+    ).toEqual({
+      version: 1,
+      operatorNames: ['测试密探甲', '测试密探乙'],
+    })
+  })
+
+  it('restores locally selected operators for the current account', async () => {
+    localStorage.setItem(
+      getOperatorRecorderStorageKey('user-1'),
+      JSON.stringify({
+        version: 1,
+        operatorNames: ['测试密探甲', '测试密探乙', '测试密探甲'],
+      }),
+    )
+    mocks.auth = { userId: 'user-1' }
+
+    await act(async () => root.render(createElement(OperatorRecorderPage)))
+
+    expect(mocks.applyConfig).toHaveBeenCalledTimes(2)
+    expect(
+      Array.from(container.querySelectorAll('[data-testid="operator-item"]')).map(
+        (item) => item.textContent,
+      ),
+    ).toEqual(['测试密探甲', '测试密探乙'])
+  })
+
+  it('ignores invalid local selections', async () => {
+    localStorage.setItem(
+      getOperatorRecorderStorageKey('user-1'),
+      JSON.stringify({ version: 0, operatorNames: ['测试密探甲'] }),
+    )
+    mocks.auth = { userId: 'user-1' }
+
+    await act(async () => root.render(createElement(OperatorRecorderPage)))
+
+    expect(mocks.applyConfig).not.toHaveBeenCalled()
+    expect(container.querySelector('[data-testid="operator-item"]')).toBeNull()
   })
 })

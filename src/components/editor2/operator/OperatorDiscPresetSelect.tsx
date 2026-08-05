@@ -59,12 +59,30 @@ type PresetDialogState =
 
 interface PresetControlProps {
   label: string
+  emptyLabel: string
   presets: UserOperatorDiscPreset[]
   onSelect: (preset: UserOperatorDiscPreset) => void
 }
 
-function PresetControl({ label, presets, onSelect }: PresetControlProps) {
-  if (presets.length === 0) return null
+function PresetControl({
+  label,
+  emptyLabel,
+  presets,
+  onSelect,
+}: PresetControlProps) {
+  if (presets.length === 0) {
+    return (
+      <Button
+        small
+        minimal
+        disabled
+        title={emptyLabel}
+        className="flex-1 min-w-0 !px-1 !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600"
+      >
+        <span className="block min-w-0 truncate">{emptyLabel}</span>
+      </Button>
+    )
+  }
 
   return (
     <Select
@@ -133,8 +151,6 @@ export const OperatorDiscPresetSelect: FC<OperatorDiscPresetSelectProps> = memo(
       Boolean(slot.discConfirmed),
     ) as unknown as DiscPresetConfirmed
     const canSave = confirmed.some(Boolean)
-
-    if (!auth.userId && presets.length === 0) return null
 
     const createDefaultName = () =>
       selected
@@ -244,11 +260,15 @@ export const OperatorDiscPresetSelect: FC<OperatorDiscPresetSelectProps> = memo(
         <li className="h-8 flex items-center gap-1 ml-1">
           <PresetControl
             label={t.components.editor2.OperatorDiscPresetSelect.disc_presets}
+            emptyLabel={
+              t.components.editor2.OperatorDiscPresetSelect.no_presets
+            }
             presets={presets}
             onSelect={applyPreset}
           />
           {auth.userId ? (
             <Popover2
+              className="ml-auto"
               placement="top-end"
               usePortal
               content={

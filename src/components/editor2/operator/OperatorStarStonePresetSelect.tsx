@@ -58,6 +58,7 @@ interface OperatorStarStonePresetSelectProps {
 
 interface PresetControlProps<T extends string> {
   label: string
+  emptyLabel: string
   presets: OperatorStarPreset<T>[]
   getDisabledReason: (preset: OperatorStarPreset<T>) => string | undefined
   onSelect: (preset: OperatorStarPreset<T>) => void
@@ -82,6 +83,7 @@ type PresetDialogState =
 
 function PresetControl<T extends string>({
   label,
+  emptyLabel,
   presets,
   getDisabledReason,
   onSelect,
@@ -90,7 +92,19 @@ function PresetControl<T extends string>({
     (preset) => !getDisabledReason(preset),
   )
 
-  if (availablePresets.length === 0) return null
+  if (availablePresets.length === 0) {
+    return (
+      <Button
+        small
+        minimal
+        disabled
+        title={emptyLabel}
+        className="flex-1 min-w-0 !px-1 !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600"
+      >
+        <span className="block min-w-0 truncate">{emptyLabel}</span>
+      </Button>
+    )
+  }
 
   return (
     <Select
@@ -182,14 +196,6 @@ export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProp
     const assistValues = discSlots.map((slot) => slot.assistStar || null)
     const canSaveMain = mainValues.some(Boolean)
     const canSaveAssist = assistValues.some(Boolean)
-
-    if (
-      mainStarPresets.length === 0 &&
-      assistStarPresets.length === 0 &&
-      !auth.userId
-    ) {
-      return null
-    }
 
     const getMainPresetDisabledReason = (
       preset: OperatorStarPreset<MainStarName>,
@@ -358,6 +364,9 @@ export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProp
               t.components.editor2.OperatorStarStonePresetSelect
                 .main_star_presets
             }
+            emptyLabel={
+              t.components.editor2.OperatorStarStonePresetSelect.no_presets
+            }
             presets={mainStarPresets}
             getDisabledReason={getMainPresetDisabledReason}
             onSelect={applyMainPreset}
@@ -367,12 +376,16 @@ export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProp
               t.components.editor2.OperatorStarStonePresetSelect
                 .assist_star_presets
             }
+            emptyLabel={
+              t.components.editor2.OperatorStarStonePresetSelect.no_presets
+            }
             presets={assistStarPresets}
             getDisabledReason={getAssistPresetDisabledReason}
             onSelect={applyAssistPreset}
           />
           {auth.userId ? (
             <Popover2
+              className="ml-auto"
               placement="top-end"
               usePortal
               content={

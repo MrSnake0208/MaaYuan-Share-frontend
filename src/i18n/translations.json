@@ -1032,6 +1032,10 @@
         }
       },
       "OperatorStarStonePresetSelect": {
+        "no_presets": {
+          "cn": "暂无预设",
+          "zh_tw": "暫無預設"
+        },
         "main_star_presets": {
           "cn": "主星预设",
           "zh_tw": "主星預設"
@@ -1102,6 +1106,10 @@
         }
       },
       "OperatorDiscPresetSelect": {
+        "no_presets": {
+          "cn": "暂无预设",
+          "zh_tw": "暫無預設"
+        },
         "disc_presets": {
           "cn": "命盘预设",
           "zh_tw": "命盤預設"

@@ -111,6 +111,7 @@ function setStats(
 interface OperatorItemProps extends Partial<SortableItemProps> {
   operator: EditorOperator
   onOverlay?: boolean
+  centerControls?: boolean
   onChange?: (operator: EditorOperator) => void
   onRemove?: () => void
 }
@@ -121,6 +122,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
     onRemove,
     onChange,
     onOverlay,
+    centerControls,
     isDragging,
     attributes,
     listeners,
@@ -280,7 +282,12 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
 
         {/* Skills & Module controls */}
         {info && (
-          <div className="mt-2 ml-5 select-none shrink-0">
+          <div
+            className={clsx(
+              'mt-2 select-none shrink-0',
+              centerControls ? 'self-center' : 'ml-5',
+            )}
+          >
             <ul className="w-[23ch]">
               {/* 攻击力/生命值（置于命盘上方） */}
               {controlsEnabled && (
