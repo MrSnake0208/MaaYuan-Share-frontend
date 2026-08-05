@@ -1,16 +1,16 @@
-const STORAGE_VERSION = 1
+const STORAGE_VERSION = 2
 const STORAGE_KEY_PREFIX = 'maa-copilot-operator-recorder'
 
-interface StoredOperatorSelection {
+interface StoredOperatorRecorderState {
+  activeBoxId: string
   version: typeof STORAGE_VERSION
-  operatorNames: string[]
 }
 
 export function getOperatorRecorderStorageKey(userId: string) {
   return `${STORAGE_KEY_PREFIX}:${encodeURIComponent(userId)}`
 }
 
-export function loadOperatorRecorderSelection(
+export function loadOperatorRecorderActiveBoxId(
   userId: string,
   storage: Pick<Storage, 'getItem'> = window.localStorage,
 ) {
@@ -23,33 +23,25 @@ export function loadOperatorRecorderSelection(
       typeof parsed !== 'object' ||
       !('version' in parsed) ||
       parsed.version !== STORAGE_VERSION ||
-      !('operatorNames' in parsed) ||
-      !Array.isArray(parsed.operatorNames)
+      !('activeBoxId' in parsed) ||
+      typeof parsed.activeBoxId !== 'string'
     ) {
-      return []
+      return ''
     }
-
-    return Array.from(
-      new Set(
-        parsed.operatorNames.filter(
-          (name): name is string =>
-            typeof name === 'string' && name.length > 0,
-        ),
-      ),
-    )
+    return parsed.activeBoxId
   } catch {
-    return []
+    return ''
   }
 }
 
-export function saveOperatorRecorderSelection(
+export function saveOperatorRecorderActiveBoxId(
   userId: string,
-  operatorNames: string[],
+  activeBoxId: string,
   storage: Pick<Storage, 'setItem'> = window.localStorage,
 ) {
-  const value: StoredOperatorSelection = {
+  const value: StoredOperatorRecorderState = {
+    activeBoxId,
     version: STORAGE_VERSION,
-    operatorNames: Array.from(new Set(operatorNames)),
   }
 
   try {

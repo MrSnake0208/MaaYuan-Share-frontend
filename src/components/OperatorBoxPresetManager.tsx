@@ -13,6 +13,7 @@ import {
 import type { OperatorBoxPresetRes } from 'maa-copilot-client'
 import { FormEvent, useMemo, useState } from 'react'
 
+import { saveOperatorBoxTrainingConfigs } from '../apis/operator-box-training-config'
 import {
   createOperatorBoxPreset,
   deleteOperatorBoxPreset,
@@ -21,35 +22,36 @@ import {
 } from '../apis/operator-box-preset'
 import { useTranslation } from '../i18n/i18n'
 import {
-  getOperatorBoxKeys,
   toOperatorBoxMembers,
 } from '../models/operator-box-preset'
 import { formatError } from '../utils/error'
 import { Confirm } from './Confirm'
 import type { EditorOperator } from './editor2/types'
+import { toOperatorTrainingConfig } from './editor2/operator/operatorTrainingConfigModel'
 import { AppToaster } from './Toaster'
 
 interface OperatorBoxPresetManagerProps {
+  activePresetId: string
   operators: EditorOperator[]
-  onApply: (operatorKeys: string[]) => void
+  onSelect: (preset?: OperatorBoxPresetRes) => void
 }
 
 type DialogMode = 'create' | 'rename'
 
 export function OperatorBoxPresetManager({
+  activePresetId,
   operators,
-  onApply,
+  onSelect,
 }: OperatorBoxPresetManagerProps) {
   const t = useTranslation()
   const { data: presets = [], error, isLoading, mutate } =
     useOperatorBoxPresets()
-  const [selectedId, setSelectedId] = useState('')
   const [dialogMode, setDialogMode] = useState<DialogMode>()
   const [presetName, setPresetName] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const selectedPreset = useMemo(
-    () => presets.find((preset) => preset.id === selectedId),
-    [presets, selectedId],
+    () => presets.find((preset) => preset.id === activePresetId),
+    [activePresetId, presets],
   )
   const members = toOperatorBoxMembers(
     operators.map((operator) => operator.name),
@@ -70,9 +72,8 @@ export function OperatorBoxPresetManager({
   }
 
   const applyPreset = (id: string) => {
-    setSelectedId(id)
     const preset = presets.find((candidate) => candidate.id === id)
-    if (preset) onApply(getOperatorBoxKeys(preset))
+    onSelect(preset)
   }
 
   const saveCurrent = async () => {
@@ -112,7 +113,13 @@ export function OperatorBoxPresetManager({
             })
           : await createOperatorBoxPreset({ label, members })
       await updateCache(saved)
-      setSelectedId(saved.id)
+      if (dialogMode !== 'rename') {
+        await saveOperatorBoxTrainingConfigs({
+          boxId: saved.id,
+          configs: operators.map(toOperatorTrainingConfig),
+        })
+        onSelect(saved)
+      }
       setDialogMode(undefined)
     } catch (caught) {
       showError(caught)
@@ -133,7 +140,7 @@ export function OperatorBoxPresetManager({
           current.filter((preset) => preset.id !== selectedPreset.id),
         { revalidate: false },
       )
-      setSelectedId('')
+      onSelect(undefined)
     } catch (caught) {
       showError(caught)
     }
@@ -145,7 +152,7 @@ export function OperatorBoxPresetManager({
         <HTMLSelect
           aria-label={t.pages.operator_recorder.select_preset}
           disabled={isLoading}
-          value={selectedId}
+          value={activePresetId}
           onChange={(event) => applyPreset(event.currentTarget.value)}
         >
           <option value="">

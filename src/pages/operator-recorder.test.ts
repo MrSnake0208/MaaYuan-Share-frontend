@@ -17,6 +17,12 @@ import { getOperatorRecorderStorageKey } from './operator-recorder-storage'
 const mocks = vi.hoisted(() => ({
   applyConfig: vi.fn(),
   auth: {} as { userId?: string },
+  boxPresets: [] as Array<{
+    id: string
+    label: string
+    members: Array<{ operatorKey: string; order: number }>
+  }>,
+  hookScopes: [] as string[],
   scheduleSave: vi.fn(),
 }))
 
@@ -25,12 +31,47 @@ vi.mock('../apis/operator-box-preset', () => ({
   deleteOperatorBoxPreset: vi.fn(),
   updateOperatorBoxPreset: vi.fn(),
   useOperatorBoxPresets: () => ({
-    data: [],
+    data: mocks.boxPresets,
     error: undefined,
     isLoading: false,
     mutate: vi.fn(),
   }),
 }))
+
+vi.mock('../components/OperatorBoxPresetManager', async () => {
+  const { createElement } = await vi.importActual<typeof import('react')>(
+    'react',
+  )
+  return {
+    OperatorBoxPresetManager: ({
+      onSelect,
+    }: {
+      onSelect: (preset?: (typeof mocks.boxPresets)[number]) => void
+    }) =>
+      createElement('div', {}, [
+        ...mocks.boxPresets.map((preset) =>
+          createElement(
+            'button',
+            {
+              key: preset.id,
+              'data-testid': `select-${preset.id}`,
+              onClick: () => onSelect(preset),
+            },
+            preset.label,
+          ),
+        ),
+        createElement(
+          'button',
+          {
+            key: 'draft',
+            'data-testid': 'select-draft',
+            onClick: () => onSelect(undefined),
+          },
+          '草稿',
+        ),
+      ]),
+  }
+})
 
 vi.mock('jotai', () => ({
   useAtomValue: () => mocks.auth,
@@ -96,12 +137,16 @@ vi.mock('../components/editor2/operator/sheet/SheetList', () => ({
 }))
 
 vi.mock('../components/editor2/operator/useOperatorTrainingConfigSync', () => ({
-  useOperatorTrainingConfigSync: () => ({
-    applyConfig: mocks.applyConfig,
-    error: undefined,
-    isLoading: false,
-    scheduleSave: mocks.scheduleSave,
-  }),
+  useOperatorTrainingConfigSync: (boxId?: string) => {
+    mocks.hookScopes.push(boxId ?? '')
+    return {
+      applyConfig: (operator: { name: string }) =>
+        mocks.applyConfig(operator, boxId),
+      error: undefined,
+      isLoading: false,
+      scheduleSave: mocks.scheduleSave,
+    }
+  },
 }))
 
 vi.mock('../components/editor2/reconciliation', () => ({
@@ -171,6 +216,8 @@ describe('OperatorRecorderPage', () => {
 
   beforeEach(() => {
     mocks.auth = {}
+    mocks.boxPresets = []
+    mocks.hookScopes = []
     mocks.applyConfig.mockImplementation((operator) => operator)
     mocks.scheduleSave.mockReset()
     localStorage.clear()
@@ -192,7 +239,7 @@ describe('OperatorRecorderPage', () => {
     expect(container.querySelector('[data-testid="operator-item"]')).toBeNull()
   })
 
-  it('loads multiple selected operators into the editor', async () => {
+  it('edits operators in draft mode without an active Box', async () => {
     mocks.auth = { userId: 'user-1' }
     await act(async () => root.render(createElement(OperatorRecorderPage)))
 
@@ -217,29 +264,36 @@ describe('OperatorRecorderPage', () => {
       ),
     ).toEqual(['测试密探甲', '测试密探乙'])
 
-    expect(
-      JSON.parse(
-        localStorage.getItem(getOperatorRecorderStorageKey('user-1')) ?? '',
-      ),
-    ).toEqual({
-      version: 1,
-      operatorNames: ['测试密探甲', '测试密探乙'],
-    })
+    expect(mocks.hookScopes).not.toContain('box-a')
+    expect(JSON.parse(localStorage.getItem(
+      getOperatorRecorderStorageKey('user-1'),
+    ) ?? '')).toEqual({ activeBoxId: '', version: 2 })
   })
 
-  it('restores locally selected operators for the current account', async () => {
+  it('restores the active Box and hydrates its ordered operators', async () => {
+    mocks.boxPresets = [
+      {
+        id: 'box-a',
+        label: 'Box A',
+        members: [
+          { operatorKey: '测试密探乙', order: 2 },
+          { operatorKey: '测试密探甲', order: 1 },
+        ],
+      },
+    ]
     localStorage.setItem(
       getOperatorRecorderStorageKey('user-1'),
-      JSON.stringify({
-        version: 1,
-        operatorNames: ['测试密探甲', '测试密探乙', '测试密探甲'],
-      }),
+      JSON.stringify({ activeBoxId: 'box-a', version: 2 }),
     )
     mocks.auth = { userId: 'user-1' }
 
     await act(async () => root.render(createElement(OperatorRecorderPage)))
 
     expect(mocks.applyConfig).toHaveBeenCalledTimes(2)
+    expect(mocks.applyConfig).toHaveBeenCalledWith(
+      expect.objectContaining({ name: '测试密探甲' }),
+      'box-a',
+    )
     expect(
       Array.from(container.querySelectorAll('[data-testid="operator-item"]')).map(
         (item) => item.textContent,
@@ -247,10 +301,47 @@ describe('OperatorRecorderPage', () => {
     ).toEqual(['测试密探甲', '测试密探乙'])
   })
 
-  it('ignores invalid local selections', async () => {
+  it('switches Boxes without reusing the previous Box profile', async () => {
+    mocks.boxPresets = [
+      {
+        id: 'box-a',
+        label: 'Box A',
+        members: [{ operatorKey: '测试密探甲', order: 1 }],
+      },
+      {
+        id: 'box-b',
+        label: 'Box B',
+        members: [{ operatorKey: '测试密探乙', order: 1 }],
+      },
+    ]
+    mocks.auth = { userId: 'user-1' }
+
+    await act(async () => root.render(createElement(OperatorRecorderPage)))
+    await act(async () => {
+      container.querySelector<HTMLElement>('[data-testid="select-box-a"]')?.click()
+    })
+    expect(container.querySelector('[data-testid="operator-item"]')?.textContent)
+      .toBe('测试密探甲')
+
+    await act(async () => {
+      container.querySelector<HTMLElement>('[data-testid="select-box-b"]')?.click()
+    })
+
+    expect(container.querySelector('[data-testid="operator-item"]')?.textContent)
+      .toBe('测试密探乙')
+    expect(mocks.applyConfig).toHaveBeenLastCalledWith(
+      expect.objectContaining({ name: '测试密探乙' }),
+      'box-b',
+    )
+    expect(JSON.parse(localStorage.getItem(
+      getOperatorRecorderStorageKey('user-1'),
+    ) ?? '')).toEqual({ activeBoxId: 'box-b', version: 2 })
+  })
+
+  it('ignores the legacy local selection schema', async () => {
     localStorage.setItem(
       getOperatorRecorderStorageKey('user-1'),
-      JSON.stringify({ version: 0, operatorNames: ['测试密探甲'] }),
+      JSON.stringify({ version: 1, operatorNames: ['测试密探甲'] }),
     )
     mocks.auth = { userId: 'user-1' }
 

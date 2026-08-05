@@ -1,13 +1,16 @@
 import type {
+  OperatorBoxTrainingConfigRes,
   OperatorTrainingConfigSaveReq,
 } from 'maa-copilot-client'
 import { useAtomValue } from 'jotai'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { mutate as mutateCache } from 'swr'
 
 import {
-  saveOperatorTrainingConfig,
-  useOperatorTrainingConfigs,
-} from '../../../apis/operator-training-config'
+  getOperatorBoxTrainingConfigCacheKey,
+  saveOperatorBoxTrainingConfig,
+  useOperatorBoxTrainingConfigs,
+} from '../../../apis/operator-box-training-config'
 import { authAtom } from '../../../store/auth'
 import { formatError } from '../../../utils/error'
 import { AppToaster } from '../../Toaster'
@@ -20,16 +23,26 @@ import {
 
 const SAVE_DELAY_MS = 500
 
-export function useOperatorTrainingConfigSync() {
+interface PendingSave {
+  boxId: string
+  config: OperatorTrainingConfigSaveReq
+  userId: string
+}
+
+function getScopeKey(pending: PendingSave) {
+  return `${pending.userId}:${pending.boxId}:${pending.config.operatorId}`
+}
+
+export function useOperatorTrainingConfigSync(boxId?: string) {
   const auth = useAtomValue(authAtom)
-  const { data, error, isLoading, mutate } = useOperatorTrainingConfigs()
+  const { data, error, isLoading } = useOperatorBoxTrainingConfigs(boxId)
   const timersRef = useRef(
     new Map<string, ReturnType<typeof setTimeout>>(),
   )
-  const pendingRef = useRef(
-    new Map<string, OperatorTrainingConfigSaveReq>(),
-  )
+  const pendingRef = useRef(new Map<string, PendingSave>())
   const saveChainsRef = useRef(new Map<string, Promise<void>>())
+  const activeScopeRef = useRef({ boxId, userId: auth.userId })
+  activeScopeRef.current = { boxId, userId: auth.userId }
 
   const configsByOperatorId = useMemo(
     () => new Map(data?.map((config) => [config.operatorId, config]) ?? []),
@@ -46,54 +59,60 @@ export function useOperatorTrainingConfigSync() {
     [data],
   )
 
-  const persist = useCallback(
-    (req: OperatorTrainingConfigSaveReq) => {
-      const previous = saveChainsRef.current.get(req.operatorId)
-      const next = (previous ?? Promise.resolve()).then(async () => {
-        try {
-          const saved = await saveOperatorTrainingConfig(req)
-          await mutate(
-            (current) => {
-              const configs = current ?? []
-              const index = configs.findIndex(
-                (config) => config.operatorId === saved.operatorId,
-              )
-              if (index === -1) return [...configs, saved]
-              return configs.map((config, currentIndex) =>
-                currentIndex === index ? saved : config,
-              )
-            },
-            { revalidate: false },
-          )
-        } catch (error) {
-          AppToaster.show({ intent: 'danger', message: formatError(error) })
-        }
-      })
-      saveChainsRef.current.set(req.operatorId, next)
-      void next.finally(() => {
-        if (saveChainsRef.current.get(req.operatorId) === next) {
-          saveChainsRef.current.delete(req.operatorId)
-        }
-      })
-      return next
-    },
-    [mutate],
-  )
-  const persistRef = useRef(persist)
-  persistRef.current = persist
+  const persist = useCallback((pending: PendingSave) => {
+    const scopeKey = getScopeKey(pending)
+    const previous = saveChainsRef.current.get(scopeKey)
+    const next = (previous ?? Promise.resolve()).then(async () => {
+      try {
+        const saved = await saveOperatorBoxTrainingConfig({
+          boxId: pending.boxId,
+          config: pending.config,
+        })
+        await mutateCache(
+          getOperatorBoxTrainingConfigCacheKey(
+            pending.userId,
+            pending.boxId,
+          ),
+          (current: OperatorBoxTrainingConfigRes[] | undefined) => {
+            const configs = current ?? []
+            const index = configs.findIndex(
+              (config) => config.operatorId === saved.operatorId,
+            )
+            if (index === -1) return [...configs, saved]
+            return configs.map((config, currentIndex) =>
+              currentIndex === index ? saved : config,
+            )
+          },
+          { revalidate: false },
+        )
+      } catch (caught) {
+        AppToaster.show({
+          intent: 'danger',
+          message: formatError(caught),
+        })
+      }
+    })
+    saveChainsRef.current.set(scopeKey, next)
+    void next.finally(() => {
+      if (saveChainsRef.current.get(scopeKey) === next) {
+        saveChainsRef.current.delete(scopeKey)
+      }
+    })
+    return next
+  }, [])
 
   useEffect(
     () => () => {
-      for (const timer of timersRef.current.values()) {
-        clearTimeout(timer)
-      }
-      for (const req of pendingRef.current.values()) {
-        void persistRef.current(req)
+      for (const timer of timersRef.current.values()) clearTimeout(timer)
+      for (const pending of pendingRef.current.values()) {
+        if (activeScopeRef.current.userId === pending.userId) {
+          void persist(pending)
+        }
       }
       timersRef.current.clear()
       pendingRef.current.clear()
     },
-    [],
+    [persist],
   )
 
   const applyConfig = useCallback(
@@ -108,37 +127,41 @@ export function useOperatorTrainingConfigSync() {
 
   const scheduleSave = useCallback(
     (operator: EditorOperator) => {
-      if (!auth.userId) return
+      if (!auth.userId || !boxId) return
 
-      const req = toOperatorTrainingConfig(operator)
-      const existingTimer = timersRef.current.get(req.operatorId)
+      const config = toOperatorTrainingConfig(operator)
+      const pending = { boxId, config, userId: auth.userId }
+      const scopeKey = getScopeKey(pending)
+      const existingTimer = timersRef.current.get(scopeKey)
       if (existingTimer !== undefined) {
         clearTimeout(existingTimer)
-        timersRef.current.delete(req.operatorId)
-        pendingRef.current.delete(req.operatorId)
+        timersRef.current.delete(scopeKey)
+        pendingRef.current.delete(scopeKey)
       }
       if (
-        serverFingerprints.get(req.operatorId) ===
-        operatorTrainingConfigFingerprint(req)
+        serverFingerprints.get(config.operatorId) ===
+        operatorTrainingConfigFingerprint(config)
       ) {
         return
       }
 
-      pendingRef.current.set(req.operatorId, req)
+      pendingRef.current.set(scopeKey, pending)
       const timer = setTimeout(() => {
-        timersRef.current.delete(req.operatorId)
-        pendingRef.current.delete(req.operatorId)
-        void persist(req)
+        timersRef.current.delete(scopeKey)
+        pendingRef.current.delete(scopeKey)
+        if (activeScopeRef.current.userId === pending.userId) {
+          void persist(pending)
+        }
       }, SAVE_DELAY_MS)
-      timersRef.current.set(req.operatorId, timer)
+      timersRef.current.set(scopeKey, timer)
     },
-    [auth.userId, persist, serverFingerprints],
+    [auth.userId, boxId, persist, serverFingerprints],
   )
 
   return {
     applyConfig,
     error,
-    isLoading: Boolean(auth.userId && isLoading),
+    isLoading: Boolean(auth.userId && boxId && isLoading),
     scheduleSave,
   }
 }

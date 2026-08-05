@@ -9,6 +9,7 @@ import {
   CopilotUserApi,
   JSONApiResponse,
   OperatorBoxPresetApi as GeneratedOperatorBoxPresetApi,
+  OperatorBoxTrainingConfigApi as GeneratedOperatorBoxTrainingConfigApi,
   OperatorDiscPresetApi as GeneratedOperatorDiscPresetApi,
   OperatorStarStonePresetApi as GeneratedOperatorStarStonePresetApi,
   OperatorTrainingConfigApi as GeneratedOperatorTrainingConfigApi,
@@ -125,6 +126,13 @@ export class OperatorStarStonePresetApi<
 export class OperatorBoxPresetApi<
   T extends ApiOptions,
 > extends (GeneratedOperatorBoxPresetApi as WithOptions<GeneratedOperatorBoxPresetApi>)<T> {
+  constructor(options?: ValidateOptions<T>) {
+    super(createConfiguration(options as T))
+  }
+}
+export class OperatorBoxTrainingConfigApi<
+  T extends ApiOptions,
+> extends (GeneratedOperatorBoxTrainingConfigApi as WithOptions<GeneratedOperatorBoxTrainingConfigApi>)<T> {
   constructor(options?: ValidateOptions<T>) {
     super(createConfiguration(options as T))
   }

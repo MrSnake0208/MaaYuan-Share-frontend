@@ -8,7 +8,9 @@ import {
 
 import { useAtomValue } from 'jotai'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { OperatorBoxPresetRes } from 'maa-copilot-client'
 
+import { useOperatorBoxPresets } from '../apis/operator-box-preset'
 import { AccountAuthDialog } from '../components/AccountManager'
 import { OperatorBoxPresetManager } from '../components/OperatorBoxPresetManager'
 import { SheetProvider } from '../components/editor/operator/sheet/SheetProvider'
@@ -22,57 +24,95 @@ import { useTranslation } from '../i18n/i18n'
 import { authAtom } from '../store/auth'
 import { formatError } from '../utils/error'
 import {
-  loadOperatorRecorderSelection,
-  saveOperatorRecorderSelection,
+  loadOperatorRecorderActiveBoxId,
+  saveOperatorRecorderActiveBoxId,
 } from './operator-recorder-storage'
 
 export const OperatorRecorderPage = () => {
   const t = useTranslation()
   const auth = useAtomValue(authAtom)
+  const [activeBoxId, setActiveBoxId] = useState('')
   const { applyConfig, error, isLoading, scheduleSave } =
-    useOperatorTrainingConfigSync()
+    useOperatorTrainingConfigSync(activeBoxId)
+  const {
+    data: boxPresets = [],
+    error: boxPresetsError,
+    isLoading: boxPresetsLoading,
+  } = useOperatorBoxPresets()
   const [authDialogOpen, setAuthDialogOpen] = useState(false)
   const [operators, setOperators] = useState<EditorOperator[]>([])
   const [restoredUserId, setRestoredUserId] = useState<string>()
-  const persistedSelectionRef = useRef<{
-    userId: string
-    fingerprint: string
-  }>()
+  const hydratedScopeRef = useRef('')
 
   useEffect(() => {
     const userId = auth.userId
     if (!userId) {
+      setActiveBoxId('')
       setOperators([])
       setRestoredUserId(undefined)
-      persistedSelectionRef.current = undefined
+      hydratedScopeRef.current = ''
       return
     }
-    if (isLoading || error || restoredUserId === userId) return
+    if (restoredUserId === userId) return
 
-    const operatorNames = loadOperatorRecorderSelection(userId)
-    setOperators(
-      operatorNames.map((name) => applyConfig(createOperator({ name }))),
-    )
+    setActiveBoxId(loadOperatorRecorderActiveBoxId(userId))
+    setOperators([])
     setRestoredUserId(userId)
-    persistedSelectionRef.current = undefined
-  }, [applyConfig, auth.userId, error, isLoading, restoredUserId])
+    hydratedScopeRef.current = ''
+  }, [auth.userId, restoredUserId])
 
   useEffect(() => {
     const userId = auth.userId
     if (!userId || restoredUserId !== userId) return
 
-    const operatorNames = operators.map((operator) => operator.name)
-    const fingerprint = JSON.stringify(operatorNames)
+    saveOperatorRecorderActiveBoxId(userId, activeBoxId)
+  }, [activeBoxId, auth.userId, restoredUserId])
+
+  useEffect(() => {
+    const userId = auth.userId
     if (
-      persistedSelectionRef.current?.userId === userId &&
-      persistedSelectionRef.current.fingerprint === fingerprint
+      !userId ||
+      !activeBoxId ||
+      restoredUserId !== userId ||
+      boxPresetsLoading ||
+      isLoading ||
+      boxPresetsError ||
+      error
     ) {
       return
     }
 
-    saveOperatorRecorderSelection(userId, operatorNames)
-    persistedSelectionRef.current = { userId, fingerprint }
-  }, [auth.userId, operators, restoredUserId])
+    const scopeKey = `${userId}:${activeBoxId}`
+    if (hydratedScopeRef.current === scopeKey) return
+
+    const preset = boxPresets.find((candidate) => candidate.id === activeBoxId)
+    if (!preset) {
+      setActiveBoxId('')
+      setOperators([])
+      hydratedScopeRef.current = ''
+      return
+    }
+
+    setOperators(
+      preset.members
+        .slice()
+        .sort((left, right) => left.order - right.order)
+        .map((member) =>
+          applyConfig(createOperator({ name: member.operatorKey })),
+        ),
+    )
+    hydratedScopeRef.current = scopeKey
+  }, [
+    activeBoxId,
+    applyConfig,
+    auth.userId,
+    boxPresets,
+    boxPresetsError,
+    boxPresetsLoading,
+    error,
+    isLoading,
+    restoredUserId,
+  ])
 
   const selectOperator = useCallback(
     (selected: { name: string }) => {
@@ -116,14 +156,14 @@ export const OperatorRecorderPage = () => {
     )
   }, [])
 
-  const applyBoxPreset = useCallback(
-    (operatorKeys: string[]) => {
-      setOperators(
-        operatorKeys.map((name) => applyConfig(createOperator({ name }))),
-      )
-    },
-    [applyConfig],
-  )
+  const selectBoxPreset = useCallback((preset?: OperatorBoxPresetRes) => {
+    hydratedScopeRef.current = ''
+    setOperators([])
+    setActiveBoxId(preset?.id ?? '')
+  }, [])
+
+  const loadError = boxPresetsError ?? error
+  const loading = boxPresetsLoading || isLoading
 
   return (
     <main className="mx-auto w-full max-w-screen-lg px-4 py-8 md:px-8">
@@ -161,21 +201,22 @@ export const OperatorRecorderPage = () => {
             </Button>
           }
         />
-      ) : error ? (
+      ) : loadError ? (
         <Callout className="mt-6" intent="danger" icon="error">
           {t.pages.operator_recorder.load_failed({
-            error: formatError(error),
+            error: formatError(loadError),
           })}
         </Callout>
-      ) : isLoading ? (
+      ) : loading ? (
         <div className="flex min-h-[28rem] items-center justify-center">
           <Spinner />
         </div>
       ) : (
         <>
           <OperatorBoxPresetManager
+            activePresetId={activeBoxId}
             operators={operators}
-            onApply={applyBoxPreset}
+            onSelect={selectBoxPreset}
           />
           <SheetProvider
             submitOperator={selectOperator}
