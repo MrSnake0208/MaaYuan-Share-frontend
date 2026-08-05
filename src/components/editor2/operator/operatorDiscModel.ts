@@ -30,7 +30,7 @@ export function getDiscSlots(operator: EditorOperator): DiscSlot[] {
         disc,
         discConfirmed:
           extensionSlot?.discConfirmed ??
-          (disc === 0 && Boolean(starStone.trim())),
+          (disc !== 0 || Boolean(starStone.trim())),
         starStone,
         assistStar: assistStars[index] ?? '',
       }

@@ -100,6 +100,16 @@ describe('operatorDiscModel', () => {
     })
   })
 
+  it('treats a positive parallel-array disc as confirmed', () => {
+    expect(
+      getDiscSlots({
+        id: 'operator-3',
+        name: '测试密探',
+        discsSelected: [2, 0, 0],
+      })[0],
+    ).toMatchObject({ disc: 2, discConfirmed: true })
+  })
+
   it('falls back to extension slots when parallel arrays are absent', () => {
     const slots = getDiscSlots({
       id: 'operator-2',

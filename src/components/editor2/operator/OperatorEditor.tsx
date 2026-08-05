@@ -26,6 +26,7 @@ import { EntityIssue } from "../validation/validation";
 import { OperatorItem } from "./OperatorItem";
 import { OperatorSelect } from "./OperatorSelect";
 import { useAddOperator } from "./useAddOperator";
+import { useOperatorTrainingConfigSync } from "./useOperatorTrainingConfigSync";
 
 const globalContainerId = "global";
 
@@ -48,6 +49,7 @@ export const OperatorEditor: FC = memo(() => {
     }),
   );
   const [operatorAtoms, dispatchOperators] = useAtom(editorAtoms.operatorAtoms);
+  const { scheduleSave } = useOperatorTrainingConfigSync();
 
   const handleDragEnd = useAtomCallback(
     useCallback(
@@ -112,7 +114,10 @@ export const OperatorEditor: FC = memo(() => {
                           {(attrs) => (
                             <OperatorItem
                               operator={operator}
-                              onChange={onChange}
+                              onChange={(next) => {
+                                onChange(next);
+                                scheduleSave(next);
+                              }}
                               onRemove={() =>
                                 edit(() => {
                                   dispatchOperators({
@@ -146,15 +151,22 @@ OperatorEditor.displayName = "OperatorPanel";
 
 const CreateOperatorButton: FC<{}> = () => {
   const addOperator = useAddOperator();
+  const { applyConfig, isLoading } = useOperatorTrainingConfigSync();
   const t = useTranslation();
   return (
     <OperatorSelect
       markPicked
       onSelect={(name) => {
-        addOperator(createOperator({ name }));
+        addOperator(applyConfig(createOperator({ name })));
       }}
     >
-      <Button minimal intent="primary" className="!py-1.5" icon="plus">
+      <Button
+        minimal
+        intent="primary"
+        className="!py-1.5"
+        icon="plus"
+        loading={isLoading}
+      >
         {t.components.editor2.OperatorEditor.add_operator}
       </Button>
     </OperatorSelect>

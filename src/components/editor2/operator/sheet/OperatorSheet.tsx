@@ -11,6 +11,7 @@ import { OperatorFilterProvider } from "../../../editor/operator/sheet/sheetOper
 import { EditorOperation, EditorOperator, editorAtoms, useEdit } from "../../editor-state";
 import { createOperator } from "../../reconciliation";
 import { MAX_ACTIVE_OPERATORS } from "../constants";
+import { useOperatorTrainingConfigSync } from "../useOperatorTrainingConfigSync";
 import { SheetList } from "./SheetList";
 
 // TODO: 兼容旧数据，目前仍保留重建逻辑
@@ -32,6 +33,7 @@ const ensureEditorOperator = (
 export const OperatorSheet = () => {
   const [operators] = useAtom(editorAtoms.operators);
   const edit = useEdit();
+  const { applyConfig } = useOperatorTrainingConfigSync();
 
   const submitOperator = (_operator: CopilotDocV1.Operator) => {
     edit((get, set, skip) => {
@@ -59,7 +61,7 @@ export const OperatorSheet = () => {
             desc: i18n.actions.editor2.update_operator,
           };
         } else {
-          draft.opers.push(createOperator(operator));
+          draft.opers.push(applyConfig(createOperator(operator)));
           checkpoint = {
             action: "add-operator",
             desc: i18n.actions.editor2.add_operator,
