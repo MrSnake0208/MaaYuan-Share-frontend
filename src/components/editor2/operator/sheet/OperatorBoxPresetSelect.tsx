@@ -11,15 +11,18 @@ import { useTranslation } from "../../../../i18n/i18n";
 import { getOperatorBoxKeys } from "../../../../models/operator-box-preset";
 import { formatError } from "../../../../utils/error";
 import { createOperator } from "../../reconciliation";
+import type { EditorOperator } from "../../editor-state";
 import { MAX_ACTIVE_OPERATORS } from "../constants";
 import { applyOperatorTrainingConfig } from "../operatorTrainingConfigModel";
 
 interface OperatorBoxPresetSelectProps {
   maxSelected?: number;
+  onApplyOperators?: (operators: EditorOperator[]) => void;
 }
 
 export function OperatorBoxPresetSelect({
   maxSelected = MAX_ACTIVE_OPERATORS,
+  onApplyOperators,
 }: OperatorBoxPresetSelectProps) {
   const t = useTranslation();
   const { data: presets = [], error, isLoading } = useOperatorBoxPresets();
@@ -40,13 +43,8 @@ export function OperatorBoxPresetSelect({
         configs.map((config) => [config.operatorId, config]),
       );
 
-      // A preset represents a complete lineup. Clear the current selection
-      // before applying it so old operators do not consume preset slots.
-      if (existedOperators.length > 0) {
-        removeOperator(existedOperators.map((_, index) => index));
-      }
-
       let remainingSlots = maxSelected;
+      const presetOperators: EditorOperator[] = [];
 
       for (const name of getOperatorBoxKeys(preset)) {
         if (remainingSlots <= 0) break;
@@ -56,9 +54,22 @@ export function OperatorBoxPresetSelect({
         const operator = config
           ? applyOperatorTrainingConfig(baseOperator, config)
           : baseOperator;
-        if (submitOperatorInSheet(operator)) {
-          remainingSlots -= 1;
-        }
+        presetOperators.push(operator);
+        remainingSlots -= 1;
+      }
+
+      if (onApplyOperators) {
+        onApplyOperators(presetOperators);
+        return;
+      }
+
+      // A preset represents a complete lineup. Clear the current selection
+      // before applying it so old operators do not consume preset slots.
+      if (existedOperators.length > 0) {
+        removeOperator(existedOperators.map((_, index) => index));
+      }
+      for (const operator of presetOperators) {
+        submitOperatorInSheet(operator);
       }
     } catch (caught) {
       AppToaster.show({ intent: "danger", message: formatError(caught) });
@@ -98,7 +109,9 @@ export function OperatorBoxPresetSelect({
         icon="people"
         loading={Boolean(applyingId)}
         title={t.components.OperatorFilter.box_presets}
-      />
+      >
+        {t.components.OperatorFilter.box_presets}
+      </Button>
     </Popover2>
   );
 }

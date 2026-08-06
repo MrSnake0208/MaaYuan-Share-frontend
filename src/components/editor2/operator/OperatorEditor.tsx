@@ -25,6 +25,7 @@ import { createOperator } from "../reconciliation";
 import { EntityIssue } from "../validation/validation";
 import { OperatorItem } from "./OperatorItem";
 import { OperatorSelect } from "./OperatorSelect";
+import { OperatorBoxPresetSelect } from "./sheet/OperatorBoxPresetSelect";
 import { useAddOperator } from "./useAddOperator";
 
 const globalContainerId = "global";
@@ -48,6 +49,20 @@ export const OperatorEditor: FC = memo(() => {
     }),
   );
   const [operatorAtoms, dispatchOperators] = useAtom(editorAtoms.operatorAtoms);
+
+  const replaceOperators = useCallback(
+    (nextOperators: EditorOperator[]) => {
+      edit((get, set) => {
+        const operation = get(editorAtoms.operation);
+        set(editorAtoms.operation, { ...operation, opers: nextOperators });
+        return {
+          action: "add-operator",
+          desc: i18n.actions.editor2.add_operator,
+        };
+      });
+    },
+    [edit],
+  );
 
   const handleDragEnd = useAtomCallback(
     useCallback(
@@ -81,8 +96,9 @@ export const OperatorEditor: FC = memo(() => {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center border-b border-gray-200 dark:border-gray-600">
+      <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-600">
         <CreateOperatorButton />
+        <OperatorBoxPresetSelect onApplyOperators={replaceOperators} />
       </div>
       <div className="grow md:overflow-auto px-4 pt-4">
         <OperatorError />
@@ -144,7 +160,7 @@ export const OperatorEditor: FC = memo(() => {
 });
 OperatorEditor.displayName = "OperatorPanel";
 
-const CreateOperatorButton: FC<{}> = () => {
+const CreateOperatorButton: FC = () => {
   const addOperator = useAddOperator();
   const t = useTranslation();
   return (

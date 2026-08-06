@@ -15,15 +15,12 @@ import {
 import { SheetOperatorItem } from "../../../editor/operator/sheet/sheetOperator/SheetOperatorItem";
 import { ShowMore } from "../../../editor/operator/sheet/sheetOperator/ShowMore";
 import { ProfClassification } from "./ProfClassification";
-import { OperatorBoxPresetSelect } from "./OperatorBoxPresetSelect";
 
 interface SheetListProps {
-  enableBoxPresetSelect?: boolean;
   maxSelectedOperators?: number;
 }
 
 export const SheetList: FC<SheetListProps> = ({
-  enableBoxPresetSelect = false,
   maxSelectedOperators,
 }) => {
   const operatorScrollRef = useRef<HTMLDivElement>(null);
@@ -86,9 +83,6 @@ export const SheetList: FC<SheetListProps> = ({
           >
             <Button minimal icon="filter-list" />
           </Popover2>
-          {enableBoxPresetSelect ? (
-            <OperatorBoxPresetSelect maxSelected={maxSelectedOperators} />
-          ) : null}
           <OperatorMutipleSelect maxSelected={maxSelectedOperators} />
           <OperatorBackToTop {...{ toTop }} />
         </div>

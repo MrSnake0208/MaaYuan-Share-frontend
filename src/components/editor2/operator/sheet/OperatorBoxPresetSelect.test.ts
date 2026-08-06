@@ -156,4 +156,36 @@ describe("OperatorBoxPresetSelect", () => {
       expect.objectContaining({ name: "密探乙" }),
     );
   });
+
+  it("uses the editor callback when rendered outside the sheet provider", async () => {
+    const applyOperators = vi.fn();
+    await act(async () =>
+      root.render(
+        createElement(OperatorBoxPresetSelect, {
+          maxSelected: 3,
+          onApplyOperators: applyOperators,
+        }),
+      ),
+    );
+
+    await act(async () => {
+      container.querySelector<HTMLButtonElement>('button[title="阵容预设"]')?.click();
+    });
+    const boxItem = Array.from(document.querySelectorAll<HTMLElement>("[role=menuitem]"))
+      .find((item) => item.textContent?.includes("Box A"));
+    await act(async () => {
+      boxItem?.click();
+      await Promise.resolve();
+    });
+
+    expect(applyOperators).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "密探甲" }),
+        expect.objectContaining({ name: "密探乙" }),
+        expect.objectContaining({ name: "密探丙" }),
+      ]),
+    );
+    expect(mocks.removeOperator).not.toHaveBeenCalled();
+    expect(mocks.submitOperator).not.toHaveBeenCalled();
+  });
 });
