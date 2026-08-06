@@ -23,7 +23,7 @@ export function OperatorBoxPresetSelect({
 }: OperatorBoxPresetSelectProps) {
   const t = useTranslation();
   const { data: presets = [], error, isLoading } = useOperatorBoxPresets();
-  const { existedOperators, submitOperatorInSheet } = useSheet();
+  const { existedOperators, removeOperator, submitOperatorInSheet } = useSheet();
   const [applyingId, setApplyingId] = useState<string>();
 
   if (!isLoading && !error && presets.length === 0) return null;
@@ -39,13 +39,16 @@ export function OperatorBoxPresetSelect({
       const configsByOperatorId = new Map(
         configs.map((config) => [config.operatorId, config]),
       );
-      const existingNames = new Set(
-        existedOperators.map((operator) => operator.name),
-      );
-      let remainingSlots = maxSelected - existedOperators.length;
+
+      // A preset represents a complete lineup. Clear the current selection
+      // before applying it so old operators do not consume preset slots.
+      if (existedOperators.length > 0) {
+        removeOperator(existedOperators.map((_, index) => index));
+      }
+
+      let remainingSlots = maxSelected;
 
       for (const name of getOperatorBoxKeys(preset)) {
-        if (existingNames.has(name)) continue;
         if (remainingSlots <= 0) break;
 
         const baseOperator = createOperator({ name });
@@ -54,7 +57,6 @@ export function OperatorBoxPresetSelect({
           ? applyOperatorTrainingConfig(baseOperator, config)
           : baseOperator;
         if (submitOperatorInSheet(operator)) {
-          existingNames.add(name);
           remainingSlots -= 1;
         }
       }

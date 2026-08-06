@@ -30,6 +30,7 @@ const mocks = vi.hoisted(() => ({
   submitOperator: vi.fn(
     (_operator: { name: string; requirements: { level?: number } }) => true,
   ),
+  removeOperator: vi.fn(),
   toasterShow: vi.fn(),
 }));
 
@@ -48,6 +49,7 @@ vi.mock("../../../../apis/operator-box-preset", () => ({
 vi.mock("../../../editor/operator/sheet/SheetProvider", () => ({
   useSheet: () => ({
     existedOperators: mocks.existedOperators,
+    removeOperator: mocks.removeOperator,
     submitOperatorInSheet: mocks.submitOperator,
   }),
 }));
@@ -93,6 +95,7 @@ describe("OperatorBoxPresetSelect", () => {
     ]);
     mocks.submitOperator.mockReset();
     mocks.submitOperator.mockReturnValue(true);
+    mocks.removeOperator.mockReset();
     mocks.toasterShow.mockReset();
     container = document.createElement("div");
     document.body.append(container);
@@ -106,7 +109,7 @@ describe("OperatorBoxPresetSelect", () => {
     vi.clearAllMocks();
   });
 
-  it("adds ordered Box members with their Box-scoped training snapshot", async () => {
+  it("replaces the current selection with ordered Box members", async () => {
     await act(async () =>
       root.render(createElement(OperatorBoxPresetSelect, { maxSelected: 3 })),
     );
@@ -122,15 +125,17 @@ describe("OperatorBoxPresetSelect", () => {
     });
 
     expect(mocks.loadConfigs).toHaveBeenCalledWith("box-a");
-    expect(mocks.submitOperator).toHaveBeenCalledTimes(2);
+    expect(mocks.removeOperator).toHaveBeenCalledWith([0]);
+    expect(mocks.submitOperator).toHaveBeenCalledTimes(3);
     expect(mocks.submitOperator.mock.calls.map(([operator]) => operator.name)).toEqual([
+      "密探甲",
       "密探乙",
       "密探丙",
     ]);
-    expect(mocks.submitOperator.mock.calls.at(0)?.[0].requirements.level).toBe(50);
+    expect(mocks.submitOperator.mock.calls.at(1)?.[0].requirements.level).toBe(50);
   });
 
-  it("stops when the editor has no remaining operator slots", async () => {
+  it("stops when the preset exceeds the editor's operator limit", async () => {
     await act(async () =>
       root.render(createElement(OperatorBoxPresetSelect, { maxSelected: 2 })),
     );
@@ -145,7 +150,8 @@ describe("OperatorBoxPresetSelect", () => {
       await Promise.resolve();
     });
 
-    expect(mocks.submitOperator).toHaveBeenCalledTimes(1);
+    expect(mocks.removeOperator).toHaveBeenCalledWith([0]);
+    expect(mocks.submitOperator).toHaveBeenCalledTimes(2);
     expect(mocks.submitOperator).toHaveBeenCalledWith(
       expect.objectContaining({ name: "密探乙" }),
     );
