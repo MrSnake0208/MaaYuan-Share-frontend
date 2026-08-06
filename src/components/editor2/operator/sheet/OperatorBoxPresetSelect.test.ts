@@ -31,6 +31,7 @@ const mocks = vi.hoisted(() => ({
     (_operator: { name: string; requirements: { level?: number } }) => true,
   ),
   removeOperator: vi.fn(),
+  navigate: vi.fn(),
   toasterShow: vi.fn(),
 }));
 
@@ -56,6 +57,10 @@ vi.mock("../../../editor/operator/sheet/SheetProvider", () => ({
 
 vi.mock("../../../Toaster", () => ({
   AppToaster: { show: mocks.toasterShow },
+}));
+
+vi.mock("react-router-dom", () => ({
+  useNavigate: () => mocks.navigate,
 }));
 
 vi.mock("../../../../i18n/i18n", async (importOriginal) => ({
@@ -96,6 +101,7 @@ describe("OperatorBoxPresetSelect", () => {
     mocks.submitOperator.mockReset();
     mocks.submitOperator.mockReturnValue(true);
     mocks.removeOperator.mockReset();
+    mocks.navigate.mockReset();
     mocks.toasterShow.mockReset();
     container = document.createElement("div");
     document.body.append(container);
@@ -115,12 +121,9 @@ describe("OperatorBoxPresetSelect", () => {
     );
 
     await act(async () => {
-      container.querySelector<HTMLButtonElement>('button[title="阵容预设"]')?.click();
+      container.querySelector<HTMLButtonElement>('button[title="Box A"]')?.click();
     });
-    const boxItem = Array.from(document.querySelectorAll<HTMLElement>("[role=menuitem]"))
-      .find((item) => item.textContent?.includes("Box A"));
     await act(async () => {
-      boxItem?.click();
       await Promise.resolve();
     });
 
@@ -141,12 +144,9 @@ describe("OperatorBoxPresetSelect", () => {
     );
 
     await act(async () => {
-      container.querySelector<HTMLButtonElement>('button[title="阵容预设"]')?.click();
+      container.querySelector<HTMLButtonElement>('button[title="Box A"]')?.click();
     });
-    const boxItem = Array.from(document.querySelectorAll<HTMLElement>("[role=menuitem]"))
-      .find((item) => item.textContent?.includes("Box A"));
     await act(async () => {
-      boxItem?.click();
       await Promise.resolve();
     });
 
@@ -169,12 +169,9 @@ describe("OperatorBoxPresetSelect", () => {
     );
 
     await act(async () => {
-      container.querySelector<HTMLButtonElement>('button[title="阵容预设"]')?.click();
+      container.querySelector<HTMLButtonElement>('button[title="Box A"]')?.click();
     });
-    const boxItem = Array.from(document.querySelectorAll<HTMLElement>("[role=menuitem]"))
-      .find((item) => item.textContent?.includes("Box A"));
     await act(async () => {
-      boxItem?.click();
       await Promise.resolve();
     });
 
@@ -187,5 +184,19 @@ describe("OperatorBoxPresetSelect", () => {
     );
     expect(mocks.removeOperator).not.toHaveBeenCalled();
     expect(mocks.submitOperator).not.toHaveBeenCalled();
+  });
+
+  it("links to the operator recorder when no presets exist", async () => {
+    mocks.presets = [];
+    await act(async () => root.render(createElement(OperatorBoxPresetSelect)));
+
+    const createPresetButton = container.querySelector<HTMLButtonElement>(
+      'button[title="没有阵容预设？快去创建一个吧"]',
+    );
+    expect(createPresetButton?.textContent).toContain("没有阵容预设？快去创建一个吧");
+
+    await act(async () => createPresetButton?.click());
+
+    expect(mocks.navigate).toHaveBeenCalledWith("/operator-recorder");
   });
 });

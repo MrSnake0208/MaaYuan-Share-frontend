@@ -1,5 +1,5 @@
-import { Button, Menu, MenuItem } from "@blueprintjs/core";
-import { Popover2 } from "@blueprintjs/popover2";
+import { Button } from "@blueprintjs/core";
+import { useNavigate } from "react-router-dom";
 
 import { useState } from "react";
 
@@ -25,11 +25,10 @@ export function OperatorBoxPresetSelect({
   onApplyOperators,
 }: OperatorBoxPresetSelectProps) {
   const t = useTranslation();
+  const navigate = useNavigate();
   const { data: presets = [], error, isLoading } = useOperatorBoxPresets();
   const { existedOperators, removeOperator, submitOperatorInSheet } = useSheet();
   const [applyingId, setApplyingId] = useState<string>();
-
-  if (!isLoading && !error && presets.length === 0) return null;
 
   const applyPreset = async (presetId: string) => {
     if (applyingId) return;
@@ -79,39 +78,46 @@ export function OperatorBoxPresetSelect({
   };
 
   return (
-    <Popover2
-      captureDismiss
-      usePortal
-      popoverClassName="z-[1600]"
-      portalClassName="z-[1600]"
-      content={
-        <Menu>
-          {isLoading ? (
-            <MenuItem disabled text={t.common.loading} />
-          ) : error ? (
-            <MenuItem disabled intent="danger" text={formatError(error)} />
-          ) : (
-            presets.map((preset) => (
-              <MenuItem
-                key={preset.id}
-                icon="people"
-                disabled={Boolean(applyingId)}
-                text={preset.label}
-                onClick={() => void applyPreset(preset.id)}
-              />
-            ))
-          )}
-        </Menu>
-      }
+    <div
+      className="flex flex-wrap items-center gap-1"
+      aria-label={t.components.OperatorFilter.box_presets}
     >
-      <Button
-        minimal
-        icon="people"
-        loading={Boolean(applyingId)}
-        title={t.components.OperatorFilter.box_presets}
-      >
-        {t.components.OperatorFilter.box_presets}
-      </Button>
-    </Popover2>
+      {isLoading ? (
+        <Button minimal disabled loading className="!py-1.5">
+          {t.common.loading}
+        </Button>
+      ) : !error && presets.length === 0 ? (
+        <Button
+          minimal
+          intent="primary"
+          icon="plus"
+          className="!py-1.5"
+          title="没有阵容预设？快去创建一个吧"
+          onClick={() => navigate("/operator-recorder")}
+        >
+          没有阵容预设？快去创建一个吧
+        </Button>
+      ) : error ? (
+        <Button minimal disabled intent="danger" title={formatError(error)} className="!py-1.5">
+          {formatError(error)}
+        </Button>
+      ) : (
+        presets.map((preset) => (
+          <Button
+            key={preset.id}
+            minimal
+            intent="primary"
+            icon="people"
+            disabled={Boolean(applyingId)}
+            loading={applyingId === preset.id}
+            title={preset.label}
+            className="!py-1.5"
+            onClick={() => void applyPreset(preset.id)}
+          >
+            {preset.label}
+          </Button>
+        ))
+      )}
+    </div>
   );
 }
