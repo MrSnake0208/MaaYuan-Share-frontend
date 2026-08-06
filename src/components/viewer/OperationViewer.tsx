@@ -73,6 +73,10 @@ import { ReLinkRenderer } from "../ReLink";
 import { UserName } from "../UserName";
 import { ActionSequenceViewer } from "./ActionSequenceViewer";
 import {
+  buildOperationDiscDisplay,
+  type OperationDiscSlot,
+} from "./operationDiscDisplay";
+import {
   AuthorOperationShareImage,
   AuthorOperationShareImages,
   useAuthorOperationShareImage,
@@ -405,40 +409,44 @@ const OperatorCard: FC<{
   const { module } = withDefaultRequirements(operator.requirements, info?.rarity);
 
   // —— 属性拓展读取（extensions）+ 兼容旧字段 ——
-  type DiscSlot = {
-    index: number;
-    disc: number;
-    starStone?: string;
-    assistStar?: string;
-  };
-  const getDiscSlots = (op: CopilotDocV1.Operator): DiscSlot[] => {
+  const getDiscSlots = (op: CopilotDocV1.Operator): OperationDiscSlot[] => {
     // 原方案优先：并行数组（camelCase）；viewer 接口层已 camel 化
     const ds = (op as any).discsSelected ?? [];
     const ss = (op as any).discStarStones ?? [];
     const as = (op as any).discAssistStars ?? [];
-    const hasLegacy = ds.length > 0 || ss.length > 0 || as.length > 0;
-    if (hasLegacy) {
-      return [0, 1, 2].map((i) => ({
-        index: i,
-        disc: ds[i] ?? 0,
-        starStone: ss[i] ?? "",
-        assistStar: as[i] ?? "",
-      }));
-    }
-    // 回退：extensions.slots
     const ext = (op as any).extensions as
       | {
-          discs?: { slots?: DiscSlot[] };
+          discs?: { slots?: OperationDiscSlot[] };
           stats?: { starLevel?: number; attack?: number; hp?: number };
         }
       | undefined;
-    const slots = ext?.discs?.slots;
+    const extensionSlots = ext?.discs?.slots;
+    const hasLegacy = ds.length > 0 || ss.length > 0 || as.length > 0;
+    if (hasLegacy) {
+      return [0, 1, 2].map((i) => {
+        const disc = ds[i] ?? 0;
+        const starStone = ss[i] ?? "";
+        const extensionSlot = extensionSlots?.find((slot) => slot.index === i);
+        return {
+          index: i,
+          disc,
+          discConfirmed:
+            extensionSlot?.discConfirmed ??
+            (disc !== 0 || Boolean(starStone.trim())),
+          starStone,
+          assistStar: as[i] ?? "",
+        };
+      });
+    }
+    // 回退：extensions.slots
+    const slots = extensionSlots;
     if (slots && slots.length > 0) {
       const norm = [...slots]
         .filter((s) => s && typeof s.index === "number")
         .map((s, i) => ({
           index: s.index ?? i,
           disc: s.disc ?? 0,
+          discConfirmed: s.discConfirmed ?? (s.disc ?? 0) !== 0,
           starStone: s.starStone ?? "",
           assistStar: s.assistStar ?? "",
         }))
@@ -447,6 +455,7 @@ const OperatorCard: FC<{
         norm.push({
           index: norm.length,
           disc: 0,
+          discConfirmed: false,
           starStone: "",
           assistStar: "",
         });
@@ -455,6 +464,7 @@ const OperatorCard: FC<{
     return [0, 1, 2].map((i) => ({
       index: i,
       disc: 0,
+      discConfirmed: false,
       starStone: "",
       assistStar: "",
     }));
@@ -462,23 +472,10 @@ const OperatorCard: FC<{
   // 读取命盘集合与选中结果（优先 extensions.slots；回退 discsSelected）
   const discList = (info as any)?.discs ?? [];
   const slots = getDiscSlots(operator);
-  const selectedDiscs = slots.filter((s) => s.disc !== 0).map((s) => s);
-  type SelectedDiscDisplay = { _slot: number; item: any; forbidden: boolean };
-  const selectedDiscsDisplay = selectedDiscs
-    .map((s): SelectedDiscDisplay | null => {
-      if (typeof s.disc === "number" && s.disc < 0) {
-        const discIndex1 = -s.disc;
-        if (discIndex1 > 0 && discIndex1 <= discList.length) {
-          return { _slot: s.index, item: discList[discIndex1 - 1], forbidden: true };
-        }
-        return null;
-      }
-      if (typeof s.disc === "number" && s.disc > 0 && s.disc <= discList.length) {
-        return { _slot: s.index, item: discList[s.disc - 1], forbidden: false };
-      }
-      return null;
-    })
-    .filter(Boolean) as SelectedDiscDisplay[];
+  const discDisplays = buildOperationDiscDisplay(slots, discList);
+  const visibleDiscDisplays = showExtras
+    ? discDisplays
+    : discDisplays.filter((display) => display.item);
 
   const discColorClasses = (color?: string) => {
     switch (color) {
@@ -563,62 +560,67 @@ const OperatorCard: FC<{
             </div>
           );
         })()}
-        {selectedDiscs?.length > 0 && (
+        {visibleDiscDisplays.length > 0 && (
           <div className="mt-1 mx-[-4px] grid gap-1">
-            {selectedDiscsDisplay.map(({ item: d, _slot, forbidden }, i: number) => {
-              const star = slots.find((s) => s.index === _slot)?.starStone;
-              return (
-                <div key={i} className={clsx("flex gap-1", !showExtras && "justify-center")}>
-                  {/* 提升命盘描述 Tooltip 的层级，避免被 Drawer 内容遮挡 */}
-                  <Tooltip2
-                    content={forbidden ? `不能有：${d.desp}` : d.desp}
-                    usePortal={true}
-                    portalClassName="operation-viewer-portal"
-                  >
-                    <div
-                      className={clsx(
-                        "bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current relative",
-                        discColorClasses(d.color),
-                        forbidden && "!border-red-600 dark:!border-red-400",
-                      )}
-                    >
-                      <span className="bp4-button-text inline-flex w-full min-w-0 items-center justify-center gap-1 overflow-hidden">
-                        {forbidden ? (
-                          <span className="w-4 h-4 shrink-0 rounded-full bg-red-600 text-white border border-white/80 text-[12px] leading-[14px] inline-flex items-center justify-center">
-                            ×
+            {visibleDiscDisplays.map(
+              ({ item: d, _slot, forbidden, starStone, assistStar }) => {
+                return (
+                  <div key={_slot} className={clsx("flex gap-1", !showExtras && "justify-center")}>
+                    {/* 提升命盘描述 Tooltip 的层级，避免被 Drawer 内容遮挡 */}
+                    {d ? (
+                      <Tooltip2
+                        content={forbidden ? `不能有：${d.desp}` : d.desp}
+                        usePortal={true}
+                        portalClassName="operation-viewer-portal"
+                      >
+                        <div
+                          className={clsx(
+                            "bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current relative",
+                            discColorClasses(d.color),
+                            forbidden && "!border-red-600 dark:!border-red-400",
+                          )}
+                        >
+                          <span className="bp4-button-text inline-flex w-full min-w-0 items-center justify-center gap-1 overflow-hidden">
+                            {forbidden ? (
+                              <span className="w-4 h-4 shrink-0 rounded-full bg-red-600 text-white border border-white/80 text-[12px] leading-[14px] inline-flex items-center justify-center">
+                                ×
+                              </span>
+                            ) : null}
+                            <span
+                              className={clsx(
+                                "min-w-0",
+                                d.multiline
+                                  ? "whitespace-normal text-center leading-3"
+                                  : "truncate",
+                                forbidden && "opacity-60",
+                              )}
+                            >
+                              {d.abbreviation}
+                            </span>
                           </span>
-                        ) : null}
-                        <span className={clsx("min-w-0 truncate", forbidden && "opacity-60")}>
-                          {d.abbreviation as string}
-                        </span>
-                      </span>
-                    </div>
-                  </Tooltip2>
-                  {showExtras && (
-                    <>
+                        </div>
+                      </Tooltip2>
+                    ) : null}
+                    {showExtras && starStone ? (
                       <div
-                        className={clsx(
-                          "bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600",
-                        )}
-                        title={star || "主星"}
+                        className="bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600"
+                        title={starStone}
                       >
-                        <span className="bp4-button-text">{star || "主星"}</span>
+                        <span className="bp4-button-text">{starStone}</span>
                       </div>
+                    ) : null}
+                    {showExtras && assistStar ? (
                       <div
-                        className={clsx(
-                          "bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600",
-                        )}
-                        title={slots.find((s) => s.index === _slot)?.assistStar || "辅星"}
+                        className="bp4-button bp4-minimal bp4-small w-[7ch] shrink-0 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600"
+                        title={assistStar}
                       >
-                        <span className="bp4-button-text">
-                          {slots.find((s) => s.index === _slot)?.assistStar || "辅星"}
-                        </span>
+                        <span className="bp4-button-text">{assistStar}</span>
                       </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
+                    ) : null}
+                  </div>
+                );
+              },
+            )}
           </div>
         )}
         {/* prof icon moved into avatar container to stick to avatar corner */}
