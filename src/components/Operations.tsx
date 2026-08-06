@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Card, Divider, H6, InputGroup, Tab, Tabs } from "@blueprintjs/core";
+import { Button, ButtonGroup, Card, Divider, H6, Tab, Tabs } from "@blueprintjs/core";
 import { IconNames } from "@blueprintjs/icons";
 
 import { UseOperationsParams, useRefreshOperations } from "apis/operation";
@@ -10,6 +10,7 @@ import { ComponentType, useMemo, useState } from "react";
 
 import { CardTitle } from "components/CardTitle";
 import { OperationList } from "components/OperationList";
+import { OperationSearchInput } from "components/OperationSearchInput";
 import { OperationSetList } from "components/OperationSetList";
 import { neoLayoutAtom } from "store/pref";
 import { sunkOperationIdsAtom } from "store/sunkOperations";
@@ -31,6 +32,24 @@ export const Operations: ComponentType = withSuspensable(() => {
     orderBy: "hot",
   });
   const debouncedSetQueryParams = useMemo(() => debounce(setQueryParams, 500), []);
+  const [searchKeyword, setSearchKeyword] = useState("");
+
+  const handleSearchKeywordChange = (keyword: string) => {
+    setSearchKeyword(keyword);
+    debouncedSetQueryParams((old) => ({
+      ...old,
+      keyword: keyword.trim(),
+    }));
+  };
+
+  const handleShortCodeSelect = (shortCode: string) => {
+    debouncedSetQueryParams.cancel();
+    setSearchKeyword(shortCode);
+    setQueryParams((old) => ({
+      ...old,
+      keyword: shortCode,
+    }));
+  };
 
   const { operatorFilter, setOperatorFilter } = useOperatorFilter();
   const [selectedUser, setSelectedUser] = useState<MaaUserInfo>();
@@ -82,22 +101,12 @@ export const Operations: ComponentType = withSuspensable(() => {
         {tab === "operation" && (
           <>
             <div className="flex flex-wrap items-center gap-2">
-              <InputGroup
-                className="max-w-md [&>input]:!rounded-md"
-                placeholder={t.components.Operations.search_placeholder}
-                leftIcon="search"
+              <OperationSearchInput
+                value={searchKeyword}
                 size={32}
-                large
-                type="search"
-                enterKeyHint="search"
-                defaultValue={queryParams.keyword}
-                onChange={(e) =>
-                  debouncedSetQueryParams((old) => ({
-                    ...old,
-                    keyword: e.target.value.trim(),
-                  }))
-                }
+                onChange={handleSearchKeywordChange}
                 onBlur={() => debouncedSetQueryParams.flush()}
+                onShortCodeSelect={handleShortCodeSelect}
               />
               <div className="flex flex-wrap gap-1 items-end">
                 <LevelSelectButton
@@ -220,22 +229,12 @@ export const Operations: ComponentType = withSuspensable(() => {
 
         {tab === "operationSet" && (
           <div className="flex flex-wrap items-center gap-2">
-            <InputGroup
-              className="max-w-md [&>input]:!rounded-md"
-              placeholder={t.components.Operations.search_placeholder}
-              leftIcon="search"
+            <OperationSearchInput
+              value={searchKeyword}
               size={64}
-              large
-              type="search"
-              enterKeyHint="search"
-              defaultValue={queryParams.keyword}
-              onChange={(e) =>
-                debouncedSetQueryParams((old) => ({
-                  ...old,
-                  keyword: e.target.value.trim(),
-                }))
-              }
+              onChange={handleSearchKeywordChange}
               onBlur={() => debouncedSetQueryParams.flush()}
+              onShortCodeSelect={handleShortCodeSelect}
             />
             <UserFilter
               user={selectedUser}
