@@ -148,9 +148,10 @@ export function OperatorBoxPresetManager({
 
   return (
     <>
-      <div className="mt-5 flex flex-wrap items-center gap-2 border-b border-gray-200 pb-4 dark:border-gray-700">
+      <div className="flex flex-col gap-3 rounded-md border border-gray-200 bg-white/80 p-3 shadow-sm dark:border-gray-700 dark:bg-slate-900/80">
         <HTMLSelect
           aria-label={t.pages.operator_recorder.select_preset}
+          fill
           disabled={isLoading}
           value={activePresetId}
           onChange={(event) => applyPreset(event.currentTarget.value)}
@@ -166,7 +167,7 @@ export function OperatorBoxPresetManager({
             </option>
           ))}
         </HTMLSelect>
-        <ButtonGroup>
+        <ButtonGroup vertical fill>
           <Button
             icon="floppy-disk"
             disabled={members.length === 0}
@@ -187,7 +188,9 @@ export function OperatorBoxPresetManager({
             title={t.pages.operator_recorder.rename_preset}
             disabled={!selectedPreset}
             onClick={() => openDialog('rename')}
-          />
+          >
+            {t.pages.operator_recorder.rename_preset}
+          </Button>
           <Confirm
             intent="danger"
             confirmButtonText={t.common.delete}
@@ -199,7 +202,9 @@ export function OperatorBoxPresetManager({
                 title={t.pages.operator_recorder.delete_preset}
                 disabled={!selectedPreset}
                 onClick={handleClick}
-              />
+              >
+                {t.pages.operator_recorder.delete_preset}
+              </Button>
             )}
           >
             {t.pages.operator_recorder.delete_preset_confirm}

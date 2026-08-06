@@ -166,13 +166,13 @@ export const OperatorRecorderPage = () => {
   const loading = boxPresetsLoading || isLoading
 
   return (
-    <main className="mx-auto w-full max-w-screen-lg px-4 py-8 md:px-8">
+    <main className="mx-auto w-full max-w-[81rem] px-4 py-8 md:px-8">
       <AccountAuthDialog
         open={authDialogOpen}
         onClose={() => setAuthDialogOpen(false)}
       />
 
-      <header className="border-b border-gray-200 pb-5 dark:border-gray-700">
+      <header className="max-w-[60rem] border-b border-gray-200 pb-5 dark:border-gray-700">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <Icon icon="people" size={22} className="text-sky-600" />
@@ -212,12 +212,7 @@ export const OperatorRecorderPage = () => {
           <Spinner />
         </div>
       ) : (
-        <>
-          <OperatorBoxPresetManager
-            activePresetId={activeBoxId}
-            operators={operators}
-            onSelect={selectBoxPreset}
-          />
+        <div className="mt-5 min-w-0 max-w-[60rem] 2xl:max-w-none">
           <SheetProvider
             submitOperator={selectOperator}
             submitGroup={() => false}
@@ -227,50 +222,56 @@ export const OperatorRecorderPage = () => {
             removeGroup={() => {}}
           >
             <OperatorFilterProvider>
-            <div className="mt-5 flex min-h-0 flex-col overflow-hidden border border-gray-200 bg-white/80 dark:border-gray-700 dark:bg-slate-900/80">
-              <section
-                className="h-[min(52vh,34rem)] min-h-[22rem] overflow-hidden"
-                aria-label={t.pages.operator_recorder.subtitle}
-              >
-                <SheetList maxSelectedOperators={Number.POSITIVE_INFINITY} />
-              </section>
-              <div className="h-px shrink-0 bg-gray-200 dark:bg-gray-700" />
-              <section
-                className="min-h-[28rem] overflow-auto px-4 py-7"
-                aria-label={t.pages.operator_recorder.subtitle}
-              >
-                {operators.length ? (
-                  <ul className="m-0 grid list-none grid-cols-1 gap-7 p-0 sm:grid-cols-2 xl:grid-cols-3">
-                    {operators.map((operator) => (
-                      <li
-                        key={operator.id}
-                        className="min-w-0 border-b border-gray-200 pb-7 dark:border-gray-700"
-                        style={{
-                          contentVisibility: 'auto',
-                          containIntrinsicSize: '360px 620px',
-                        }}
-                      >
-                        <OperatorItem
-                          centerControls
-                          operator={operator}
-                          onChange={updateOperator}
-                          onRemove={() => removeOperatorById(operator.id)}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <NonIdealState
-                    className="min-h-[24rem]"
-                    icon="people"
-                    title={t.pages.operator_recorder.no_operator}
+              <div className="grid min-h-0 min-w-0 gap-4 2xl:grid-cols-[60rem_16rem] 2xl:items-start">
+                <section
+                  className="order-1 h-[min(52vh,34rem)] min-h-[22rem] overflow-hidden border border-gray-200 bg-white/80 dark:border-gray-700 dark:bg-slate-900/80 2xl:col-start-1 2xl:row-start-1"
+                  aria-label={t.pages.operator_recorder.subtitle}
+                >
+                  <SheetList maxSelectedOperators={Number.POSITIVE_INFINITY} />
+                </section>
+                <section
+                  className="order-3 min-h-[28rem] overflow-auto border border-gray-200 bg-white/80 px-4 py-7 dark:border-gray-700 dark:bg-slate-900/80 2xl:col-start-1 2xl:row-start-2"
+                  aria-label={t.pages.operator_recorder.subtitle}
+                >
+                  {operators.length ? (
+                    <ul className="m-0 grid list-none grid-cols-1 gap-7 p-0 sm:grid-cols-2 xl:grid-cols-3">
+                      {operators.map((operator) => (
+                        <li
+                          key={operator.id}
+                          className="min-w-0 border-b border-gray-200 pb-7 dark:border-gray-700"
+                          style={{
+                            contentVisibility: 'auto',
+                            containIntrinsicSize: '360px 620px',
+                          }}
+                        >
+                          <OperatorItem
+                            centerControls
+                            operator={operator}
+                            onChange={updateOperator}
+                            onRemove={() => removeOperatorById(operator.id)}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <NonIdealState
+                      className="min-h-[24rem]"
+                      icon="people"
+                      title={t.pages.operator_recorder.no_operator}
+                    />
+                  )}
+                </section>
+                <aside className="order-2 min-w-0 2xl:col-start-2 2xl:row-start-2">
+                  <OperatorBoxPresetManager
+                    activePresetId={activeBoxId}
+                    operators={operators}
+                    onSelect={selectBoxPreset}
                   />
-                )}
-              </section>
-            </div>
+                </aside>
+              </div>
             </OperatorFilterProvider>
           </SheetProvider>
-        </>
+        </div>
       )}
     </main>
   )
