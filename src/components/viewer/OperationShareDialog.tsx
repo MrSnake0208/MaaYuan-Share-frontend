@@ -1,4 +1,11 @@
-import { Button, Callout, Checkbox, Dialog, Spinner } from '@blueprintjs/core'
+import {
+  Button,
+  Callout,
+  Checkbox,
+  Dialog,
+  Spinner,
+  Switch,
+} from '@blueprintjs/core'
 
 import { useAtomValue } from 'jotai'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -96,6 +103,7 @@ export default function OperationShareDialog({
   const generationRef = useRef(0)
   const generatingRef = useRef(false)
   const [cardKind, setCardKind] = useState<OperationShareCardKind>('actions')
+  const [hideQrCode, setHideQrCode] = useState(true)
   const [status, setStatus] = useState<GenerationStatus>('idle')
   const [previewUrl, setPreviewUrl] = useState<string>()
   const [blob, setBlob] = useState<Blob>()
@@ -208,6 +216,11 @@ export default function OperationShareDialog({
     invalidatePreview()
     setSelectedCellKeys(new Set())
     setCardKind(nextKind)
+  }
+
+  const updateQrCodeVisibility = (hidden: boolean) => {
+    invalidatePreview()
+    setHideQrCode(hidden)
   }
 
   const updateRoundNote = (round: number, note: string) => {
@@ -444,6 +457,18 @@ export default function OperationShareDialog({
             当前页面版本无法编辑这份作者配置，请刷新或升级后重试。
           </Callout>
         ) : null}
+
+        <div className="mb-3 flex justify-end">
+          <Switch
+            checked={hideQrCode}
+            className="m-0"
+            disabled={status === 'generating'}
+            label="隐藏二维码"
+            onChange={(event) =>
+              updateQrCodeVisibility(event.currentTarget.checked)
+            }
+          />
+        </div>
 
         {cardKind === 'actions' ? (
           <fieldset
@@ -864,6 +889,7 @@ export default function OperationShareDialog({
             <OperationShareCard
               cardRef={setCardNode}
               config={cardConfig}
+              hideQrCode={hideQrCode}
               model={model}
               qrDataUrl={qrDataUrl}
             />
@@ -871,6 +897,7 @@ export default function OperationShareDialog({
             <DeployedOperatorsShareCard
               cardRef={setCardNode}
               config={cardConfig}
+              hideQrCode={hideQrCode}
               model={model}
               qrDataUrl={qrDataUrl}
             />

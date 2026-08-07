@@ -59,6 +59,25 @@ const model: OperationShareModel = {
 }
 
 describe('deployed operators share card', () => {
+  it('hides the QR code by default and can show it', () => {
+    const defaultMarkup = renderToStaticMarkup(
+      createElement(DeployedOperatorsShareCard, {
+        model,
+        qrDataUrl: 'data:image/png;base64,qr-code',
+      }),
+    )
+    const visibleMarkup = renderToStaticMarkup(
+      createElement(DeployedOperatorsShareCard, {
+        hideQrCode: false,
+        model,
+        qrDataUrl: 'data:image/png;base64,qr-code',
+      }),
+    )
+
+    expect(defaultMarkup).not.toContain(model.qrLabel)
+    expect(visibleMarkup).toContain(model.qrLabel)
+  })
+
   it('orders required discs before forbidden and unmarked discs', () => {
     const unmarkedDisc = model.operators[0].discs[0]
     const forbiddenDisc = {

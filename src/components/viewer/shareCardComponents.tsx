@@ -99,12 +99,14 @@ export function ShareCardFrame({
   cardRef,
   children,
   eyebrow,
+  hideQrCode,
   model,
   qrDataUrl,
 }: {
   cardRef?: Ref<HTMLDivElement>
   children: ReactNode
   eyebrow: string
+  hideQrCode: boolean
   model: OperationShareModel
   qrDataUrl: string
 }) {
@@ -175,21 +177,23 @@ export function ShareCardFrame({
               </div>
             ) : null}
           </div>
-          <div className="w-[104px] shrink-0 text-center">
-            <img
-              alt={model.qrLabel}
-              className="h-[104px] w-[104px] bg-white object-contain"
-              height={104}
-              src={qrDataUrl}
-              width={104}
-            />
-            <div
-              className="mt-2 text-xs font-semibold leading-4"
-              style={{ color: shareCardPalette.muted }}
-            >
-              {model.qrLabel}
+          {hideQrCode ? null : (
+            <div className="w-[104px] shrink-0 text-center">
+              <img
+                alt={model.qrLabel}
+                className="h-[104px] w-[104px] bg-white object-contain"
+                height={104}
+                src={qrDataUrl}
+                width={104}
+              />
+              <div
+                className="mt-2 text-xs font-semibold leading-4"
+                style={{ color: shareCardPalette.muted }}
+              >
+                {model.qrLabel}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </header>
 

@@ -1,15 +1,55 @@
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import {
+  OperationShareCard,
   getOperationShareActionCellBackground,
   getOperationShareActionLabel,
   getOperationShareActionStyle,
   getOperationShareOperatorStarLabel,
   getOperationShareRoundDisplay,
 } from './OperationShareCard'
-import { OPERATION_SHARE_CELL_COLORS } from './operationShareModel'
+import {
+  OPERATION_SHARE_CELL_COLORS,
+  type OperationShareModel,
+} from './operationShareModel'
+
+const model: OperationShareModel = {
+  title: '测试作业',
+  stage: '测试关卡',
+  author: '攻略作者',
+  source: { type: 'original', strategyAuthor: '攻略作者' },
+  shortCode: '12345',
+  maayuanUrl: 'https://example.com/?op=12345',
+  qrTargetUrl: 'https://example.com/?op=12345',
+  qrLabel: '扫码查看 MaaYuan 作业',
+  operators: [],
+  groups: [],
+  actionSlots: [],
+  rounds: [],
+}
 
 describe('operation share card styles', () => {
+  it('hides the QR code by default and can show it', () => {
+    const defaultMarkup = renderToStaticMarkup(
+      createElement(OperationShareCard, {
+        model,
+        qrDataUrl: 'data:image/png;base64,qr-code',
+      }),
+    )
+    const visibleMarkup = renderToStaticMarkup(
+      createElement(OperationShareCard, {
+        hideQrCode: false,
+        model,
+        qrDataUrl: 'data:image/png;base64,qr-code',
+      }),
+    )
+
+    expect(defaultMarkup).not.toContain(model.qrLabel)
+    expect(visibleMarkup).toContain(model.qrLabel)
+  })
+
   it('alternates the deployed-operator palette for uncolored action cells', () => {
     expect(getOperationShareActionCellBackground({}, 1, 1)).toBe('#f3e3c9')
     expect(getOperationShareActionCellBackground({}, 2, 1)).toBe('#ddc09e')

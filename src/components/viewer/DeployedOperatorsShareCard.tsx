@@ -285,17 +285,20 @@ export function DeployedOperatorsShareCard({
   model,
   cardRef,
   qrDataUrl,
+  hideQrCode = true,
   config = defaultCardConfig,
 }: {
   model: OperationShareModel
   cardRef?: Ref<HTMLDivElement>
   qrDataUrl: string
+  hideQrCode?: boolean
   config?: OperationShareCardConfig
 }) {
   return (
     <ShareCardFrame
       cardRef={cardRef}
       eyebrow="MaaYuan · 上阵密探"
+      hideQrCode={hideQrCode}
       model={model}
       qrDataUrl={qrDataUrl}
     >

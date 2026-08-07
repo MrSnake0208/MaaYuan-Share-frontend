@@ -225,17 +225,20 @@ export function OperationShareCard({
   model,
   cardRef,
   qrDataUrl,
+  hideQrCode = true,
   config = defaultCardConfig,
 }: {
   model: OperationShareModel
   cardRef?: Ref<HTMLDivElement>
   qrDataUrl: string
+  hideQrCode?: boolean
   config?: OperationShareCardConfig
 }) {
   return (
     <ShareCardFrame
       cardRef={cardRef}
       eyebrow="MaaYuan · 作业分享"
+      hideQrCode={hideQrCode}
       model={model}
       qrDataUrl={qrDataUrl}
     >
