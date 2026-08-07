@@ -24,7 +24,7 @@ const DISC_TONES: Record<string, string> = {
   橙: '#9a4d16',
 }
 
-const rowBackgrounds = ['#f3e3c9', '#ddc09e'] as const
+const rowBackground = '#f3e3c9'
 const DISC_SLOTS = [1, 2, 3] as const
 const DISC_FIELDS = [
   { field: 'disc', label: '命盘' },
@@ -77,8 +77,8 @@ function DiscAbbreviation({
         className="inline-flex max-w-full items-center justify-center gap-1"
         style={{ color: '#8f2117' }}
       >
-        <span aria-hidden className="text-[17px] leading-none"></span>
-        <span className="whitespace-nowrap text-[17px] font-black leading-snug line-through decoration-2">
+        <span aria-hidden className="text-[19px] leading-none"></span>
+        <span className="whitespace-nowrap text-[19px] font-black leading-snug line-through decoration-2">
           {disc.abbreviation}
         </span>
       </span>
@@ -91,9 +91,9 @@ function DiscAbbreviation({
         aria-label={`核心命盘：${disc.abbreviation}`}
         className="inline-flex max-w-full items-center justify-center gap-1"
       >
-        <span aria-hidden className="text-[17px] leading-none"></span>
+        <span aria-hidden className="text-[19px] leading-none"></span>
         <span
-          className="whitespace-nowrap text-[17px] font-black leading-snug"
+          className="whitespace-nowrap text-[19px] font-black leading-snug"
           style={{ color }}
         >
           {disc.abbreviation}
@@ -104,7 +104,7 @@ function DiscAbbreviation({
 
   return (
     <span
-      className="break-words text-[17px] font-bold leading-snug"
+      className="break-words text-[19px] font-bold leading-snug"
       style={{ color }}
     >
       {disc.abbreviation}
@@ -122,7 +122,7 @@ function DiscStoneValue({
   if (!value) return <span style={{ color: '#9a856d' }}>—</span>
 
   return (
-    <span className="break-words text-[15px] font-semibold leading-5">
+    <span className="break-words text-[17px] font-semibold leading-5">
       {field === 'starStone' ? '⭐ 主星' : '✨ 辅星'} · {value}
     </span>
   )
@@ -140,7 +140,7 @@ function AscensionLevel({ value }: { value?: number }) {
         <span
           key={level}
           aria-hidden
-          className="text-[22px] leading-none"
+          className="text-[24px] leading-none"
           style={{ color: level <= value ? '#e96913' : '#cdb89e' }}
         >
           ◆
@@ -176,7 +176,7 @@ function AttributeRow({
   return (
     <tr style={{ background, height: minHeight }}>
       <th
-        className="w-[108px] border px-3 text-[21px] font-bold"
+        className="w-[108px] border px-3 text-[23px] font-bold"
         scope="row"
         style={{ borderColor: '#78501f' }}
       >
@@ -185,7 +185,7 @@ function AttributeRow({
       {operators.map((operator, index) => (
         <td
           key={`${label}-${operator.rawName}-${index}`}
-          className="border px-3 py-4 text-center text-[21px] font-semibold align-middle"
+          className="border px-3 py-4 text-center text-[23px] font-semibold align-middle"
           style={{ borderColor: '#78501f' }}
         >
           {children(operator)}
@@ -220,17 +220,13 @@ function DiscRows({
 
   return (
     <>
-      {DISC_FIELDS.map(({ field, label }, fieldIndex) => (
+      {DISC_FIELDS.map(({ field, label }) => (
         <tr
           key={field}
-          style={{
-            background:
-              rowBackgrounds[(fieldIndex + 1) % rowBackgrounds.length],
-            height: 126,
-          }}
+          style={{ background: rowBackground, height: 126 }}
         >
           <th
-            className="w-[108px] border px-3 text-[20px] font-bold leading-snug"
+            className="w-[108px] border px-3 text-[22px] font-bold leading-snug"
             scope="row"
             style={{ borderColor: '#78501f' }}
           >
@@ -327,7 +323,7 @@ export function DeployedOperatorsShareCard({
               </tr>
               <tr aria-label="列标题" style={{ background: '#f0dec1' }}>
                 <th
-                  className="border px-3 py-3 text-[20px] font-bold"
+                  className="border px-3 py-3 text-[22px] font-bold"
                   scope="col"
                   style={{ borderColor: '#78501f' }}
                 >
@@ -336,7 +332,7 @@ export function DeployedOperatorsShareCard({
                 {model.operators.map((operator, index) => (
                   <th
                     key={`${operator.rawName}-${index}`}
-                    className="break-words border px-2 py-3 text-center text-[20px] font-bold leading-tight"
+                    className="break-words border px-2 py-3 text-center text-[22px] font-bold leading-tight"
                     scope="col"
                     style={{ borderColor: '#78501f' }}
                   >
@@ -347,7 +343,7 @@ export function DeployedOperatorsShareCard({
             </thead>
             <tbody>
               <AttributeRow
-                background={rowBackgrounds[0]}
+                background={rowBackground}
                 label="生命"
                 minHeight={72}
                 operators={model.operators}
@@ -355,7 +351,7 @@ export function DeployedOperatorsShareCard({
                 {(operator) => operator.hp ?? '—'}
               </AttributeRow>
               <AttributeRow
-                background={rowBackgrounds[1]}
+                background={rowBackground}
                 label="攻击"
                 minHeight={72}
                 operators={model.operators}
@@ -363,7 +359,7 @@ export function DeployedOperatorsShareCard({
                 {(operator) => operator.attack ?? '—'}
               </AttributeRow>
               <AttributeRow
-                background={rowBackgrounds[0]}
+                background={rowBackground}
                 label="等级"
                 minHeight={68}
                 operators={model.operators}
@@ -371,7 +367,7 @@ export function DeployedOperatorsShareCard({
                 {(operator) => operator.level}
               </AttributeRow>
               <AttributeRow
-                background={rowBackgrounds[1]}
+                background={rowBackground}
                 label="修为"
                 minHeight={68}
                 operators={model.operators}
@@ -379,7 +375,7 @@ export function DeployedOperatorsShareCard({
                 {(operator) => operator.elite}
               </AttributeRow>
               <AttributeRow
-                background={rowBackgrounds[0]}
+                background={rowBackground}
                 label="化极"
                 minHeight={76}
                 operators={model.operators}
