@@ -73,15 +73,12 @@ function DiscAbbreviation({
   if (disc.forbidden) {
     return (
       <span
-        aria-label={`绝对不能有命盘：${disc.abbreviation}`}
-        className="inline-flex max-w-full flex-col items-center justify-center gap-1 rounded-md border-2 px-2.5 py-1.5"
-        style={{
-          background: '#fde7e2',
-          borderColor: '#a92f24',
-          color: '#8f2117',
-        }}
+        aria-label={`禁用命盘：${disc.abbreviation}`}
+        className="inline-flex max-w-full items-center justify-center gap-1"
+        style={{ color: '#8f2117' }}
       >
-        <span className="break-words text-[17px] font-black leading-snug line-through decoration-2">
+        <span aria-hidden className="text-[17px] leading-none"></span>
+        <span className="whitespace-nowrap text-[17px] font-black leading-snug line-through decoration-2">
           {disc.abbreviation}
         </span>
       </span>
@@ -91,16 +88,12 @@ function DiscAbbreviation({
   if (required) {
     return (
       <span
-        aria-label={`必须携带命盘：${disc.abbreviation}`}
-        className="inline-flex max-w-full flex-col items-center justify-center gap-1 rounded-md border px-2 py-1.5"
-        style={{
-          background: '#fff2cf',
-          borderColor: '#c88a25',
-          color: '#75450e',
-        }}
+        aria-label={`核心命盘：${disc.abbreviation}`}
+        className="inline-flex max-w-full items-center justify-center gap-1"
       >
+        <span aria-hidden className="text-[17px] leading-none"></span>
         <span
-          className="break-words text-[17px] font-black leading-snug"
+          className="whitespace-nowrap text-[17px] font-black leading-snug"
           style={{ color }}
         >
           {disc.abbreviation}
@@ -115,6 +108,22 @@ function DiscAbbreviation({
       style={{ color }}
     >
       {disc.abbreviation}
+    </span>
+  )
+}
+
+function DiscStoneValue({
+  field,
+  value,
+}: {
+  field: 'starStone' | 'assistStar'
+  value?: string
+}) {
+  if (!value) return <span style={{ color: '#9a856d' }}>—</span>
+
+  return (
+    <span className="break-words text-[15px] font-semibold leading-5">
+      {field === 'starStone' ? '⭐ 主星' : '✨ 辅星'} · {value}
     </span>
   )
 }
@@ -255,9 +264,7 @@ function DiscRows({
                             }
                           />
                         ) : (
-                          <span className="break-words text-[15px] leading-5">
-                            {disc[field] ?? '—'}
-                          </span>
+                          <DiscStoneValue field={field} value={disc[field]} />
                         )
                       ) : (
                         <span style={{ color: '#9a856d' }}>—</span>

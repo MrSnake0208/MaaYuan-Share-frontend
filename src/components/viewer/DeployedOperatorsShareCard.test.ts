@@ -159,8 +159,8 @@ describe('deployed operators share card', () => {
     expect(markup).toContain('1234')
     expect(markup).toContain('5678')
     expect(markup).toContain('技伤大幅')
-    expect(markup).toContain('攻击提升')
-    expect(markup).toContain('生命提升')
+    expect(markup).toContain('⭐ 主星 · 攻击提升')
+    expect(markup).toContain('✨ 辅星 · 生命提升')
     expect(markup.match(/<tr/g)).toHaveLength(10)
     expect(markup).toContain('<tr aria-label="密探头像"')
     expect(markup).toContain('<tr aria-label="列标题"')
@@ -188,8 +188,12 @@ describe('deployed operators share card', () => {
       }),
     )
 
-    expect(markup).toContain('必须携带')
-    expect(markup).toContain('必须携带命盘：技伤大幅')
+    expect(markup).toContain('✅')
+    expect(markup).toContain('核心命盘：技伤大幅')
+    expect(markup).not.toContain('>核心<')
+    expect(markup).toMatch(
+      /aria-label="核心命盘：技伤大幅" class="inline-flex max-w-full items-center justify-center gap-1">/,
+    )
     expect(markup).toContain('技伤大幅')
   })
 
@@ -215,8 +219,15 @@ describe('deployed operators share card', () => {
       }),
     )
 
-    expect(markup).toContain('绝对不能有')
-    expect(markup).toContain('绝对不能有命盘：技伤大幅')
-    expect(markup).not.toContain('必须携带命盘')
+    expect(markup).toContain('🚫')
+    expect(markup).toContain('禁用命盘：技伤大幅')
+    expect(markup).not.toContain('>禁用<')
+    expect(markup).toMatch(
+      /aria-label="禁用命盘：技伤大幅" class="inline-flex max-w-full items-center justify-center gap-1" style="color:#8f2117">/,
+    )
+    expect(markup).toContain(
+      'font-black leading-snug line-through decoration-2',
+    )
+    expect(markup).not.toContain('核心命盘')
   })
 })
