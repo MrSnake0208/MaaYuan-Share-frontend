@@ -549,7 +549,8 @@ describe('share image utilities', () => {
             '2:notes': '#f2dfb9',
             'bad-key': '#ffffff',
             '3:slot-1': '#D8E9E4',
-            '4:slot-2': '#abcdef',
+            '4:slot-2': '#AECBD4',
+            '5:slot-3': '#abcdef',
           },
           requiredDiscs: {
             '1:1': true,
@@ -565,7 +566,10 @@ describe('share image utilities', () => {
       showOtherActions: false,
       showNotes: true,
       notes: { 1: 'x'.repeat(160) },
-      cellColors: { '3:slot-1': '#d8e9e4' },
+      cellColors: {
+        '3:slot-1': OPERATION_SHARE_CELL_COLORS[3],
+        '4:slot-2': OPERATION_SHARE_CELL_COLORS[2],
+      },
       requiredDiscs: { '1:1': true },
     })
   })

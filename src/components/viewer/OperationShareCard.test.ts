@@ -6,7 +6,7 @@ import {
   OperationShareCard,
   getOperationShareActionCellBackground,
   getOperationShareActionLabel,
-  getOperationShareActionStyle,
+  getOperationShareCellVisualStyle,
   getOperationShareOperatorStarLabel,
   getOperationShareRoundDisplay,
 } from './OperationShareCard'
@@ -101,8 +101,46 @@ describe('operation share card styles', () => {
     ).toBe(color)
   })
 
-  it('uses one text color without a background for every action label', () => {
-    expect(getOperationShareActionStyle()).toEqual({ color: '#624015' })
+  it('uses distinct colors, patterns, and accessible text contrast', () => {
+    const styles = OPERATION_SHARE_CELL_COLORS.map((color) =>
+      getOperationShareCellVisualStyle(color),
+    )
+
+    expect(styles.map((style) => style.backgroundColor)).toEqual([
+      ...OPERATION_SHARE_CELL_COLORS,
+    ])
+    expect(
+      new Set(styles.map((style) => style.backgroundImage ?? 'solid')).size,
+    ).toBe(OPERATION_SHARE_CELL_COLORS.length)
+    expect(styles.map((style) => style.color)).toEqual([
+      '#231f20',
+      '#231f20',
+      '#231f20',
+      '#231f20',
+      '#231f20',
+    ])
+  })
+
+  it('renders the accessible pattern in the generated card', () => {
+    const config = createOperationShareCardConfig()
+    config.cellColors['1:slot-1'] = OPERATION_SHARE_CELL_COLORS[4]
+    const cardModel: OperationShareModel = {
+      ...model,
+      actionSlots: [1],
+      rounds: [{ round: 1, slots: { 1: [] }, others: [] }],
+    }
+
+    const markup = renderToStaticMarkup(
+      createElement(OperationShareCard, {
+        config,
+        model: cardModel,
+        qrDataUrl: 'data:image/png;base64,qr-code',
+      }),
+    )
+
+    expect(markup).toContain('background-color:#edf8ff')
+    expect(markup).toContain('background-image:radial-gradient')
+    expect(markup).toContain('color:#231f20')
   })
 
   it('uses the operator star level for the avatar badge', () => {

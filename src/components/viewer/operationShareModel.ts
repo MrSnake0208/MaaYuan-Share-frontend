@@ -63,13 +63,39 @@ export interface OperationShareCardConfig {
 }
 
 export const OPERATION_SHARE_CELL_COLORS = [
-  '#f4ecdf',
-  '#f2dfb9',
-  '#d8e9e4',
-  '#dbe7ea',
-  '#f4d9d1',
-  '#dfe4e2',
+  '#fff3c9',
+  '#ffe3ed',
+  '#c3e8ff',
+  '#e1edc1',
+  '#edf8ff',
 ] as const
+
+const LEGACY_OPERATION_SHARE_CELL_COLORS: Record<string, string> = {
+  '#f4ecdf': OPERATION_SHARE_CELL_COLORS[4],
+  '#f2dfb9': OPERATION_SHARE_CELL_COLORS[0],
+  '#d8e9e4': OPERATION_SHARE_CELL_COLORS[3],
+  '#dbe7ea': OPERATION_SHARE_CELL_COLORS[2],
+  '#f4d9d1': OPERATION_SHARE_CELL_COLORS[1],
+  '#dfe4e2': OPERATION_SHARE_CELL_COLORS[4],
+  '#e7cfaa': OPERATION_SHARE_CELL_COLORS[0],
+  '#e8bd68': OPERATION_SHARE_CELL_COLORS[0],
+  '#afd0c4': OPERATION_SHARE_CELL_COLORS[3],
+  '#aecbd4': OPERATION_SHARE_CELL_COLORS[2],
+  '#e5afa1': OPERATION_SHARE_CELL_COLORS[1],
+  '#becbc7': OPERATION_SHARE_CELL_COLORS[4],
+  '#e89b91': OPERATION_SHARE_CELL_COLORS[1],
+  '#e8bd5f': OPERATION_SHARE_CELL_COLORS[0],
+  '#a1c77f': OPERATION_SHARE_CELL_COLORS[3],
+  '#79c3b6': OPERATION_SHARE_CELL_COLORS[2],
+  '#82add5': OPERATION_SHARE_CELL_COLORS[2],
+  '#bd9bcc': OPERATION_SHARE_CELL_COLORS[1],
+  '#e69f00': OPERATION_SHARE_CELL_COLORS[0],
+  '#56b4e9': OPERATION_SHARE_CELL_COLORS[2],
+  '#009e73': OPERATION_SHARE_CELL_COLORS[3],
+  '#f0e442': OPERATION_SHARE_CELL_COLORS[0],
+  '#0072b2': OPERATION_SHARE_CELL_COLORS[2],
+  '#cc79a7': OPERATION_SHARE_CELL_COLORS[1],
+}
 
 const OPERATION_SHARE_CARD_CONFIG_STORAGE_VERSION = 1
 const OPERATION_SHARE_CARD_CONFIG_STORAGE_PREFIX =
@@ -159,12 +185,15 @@ export function normalizeOperationShareCardConfig(
   const cellColors: Record<string, string> = {}
   if (isRecord(value.cellColors)) {
     Object.entries(value.cellColors).forEach(([key, color]) => {
-      if (
-        SHARE_CELL_KEY_PATTERN.test(key) &&
-        typeof color === 'string' &&
-        OPERATION_SHARE_CELL_COLOR_SET.has(color.toLowerCase())
-      ) {
-        cellColors[key] = color.toLowerCase()
+      if (SHARE_CELL_KEY_PATTERN.test(key) && typeof color === 'string') {
+        const normalizedColor = color.toLowerCase()
+        const supportedColor = OPERATION_SHARE_CELL_COLOR_SET.has(
+          normalizedColor,
+        )
+          ? normalizedColor
+          : LEGACY_OPERATION_SHARE_CELL_COLORS[normalizedColor]
+
+        if (supportedColor) cellColors[key] = supportedColor
       }
     })
   }

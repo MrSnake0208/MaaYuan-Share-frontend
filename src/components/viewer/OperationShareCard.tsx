@@ -10,6 +10,7 @@ import type {
   OperationShareRound,
 } from './operationShareModel'
 import {
+  OPERATION_SHARE_CELL_COLORS,
   buildOperationShareCellKey,
   createOperationShareCardConfig,
   filterOperationShareActions,
@@ -27,6 +28,61 @@ const tableHeaderBackground = '#f0dec1'
 const tableBodyBackgrounds = ['#f3e3c9', '#ddc09e'] as const
 const operationShareTextColor = '#624015'
 const operationShareMutedTextColor = '#9a856d'
+const accessibleDarkTextColor = '#231f20'
+
+const operationShareCellVisualStyles: Record<string, CSSProperties> = {
+  [tableBodyBackgrounds[0]]: {
+    backgroundColor: tableBodyBackgrounds[0],
+    color: operationShareTextColor,
+  },
+  [tableBodyBackgrounds[1]]: {
+    backgroundColor: tableBodyBackgrounds[1],
+    color: operationShareTextColor,
+  },
+  [OPERATION_SHARE_CELL_COLORS[0]]: {
+    backgroundColor: OPERATION_SHARE_CELL_COLORS[0],
+    color: accessibleDarkTextColor,
+  },
+  [OPERATION_SHARE_CELL_COLORS[1]]: {
+    backgroundColor: OPERATION_SHARE_CELL_COLORS[1],
+    backgroundImage:
+      'repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.2) 0 3px, transparent 3px 11px)',
+    color: accessibleDarkTextColor,
+  },
+  [OPERATION_SHARE_CELL_COLORS[2]]: {
+    backgroundColor: OPERATION_SHARE_CELL_COLORS[2],
+    backgroundImage:
+      'repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0 3px, transparent 3px 11px)',
+    color: accessibleDarkTextColor,
+  },
+  [OPERATION_SHARE_CELL_COLORS[3]]: {
+    backgroundColor: OPERATION_SHARE_CELL_COLORS[3],
+    backgroundImage:
+      'repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.18) 0 3px, transparent 3px 11px)',
+    color: accessibleDarkTextColor,
+  },
+  [OPERATION_SHARE_CELL_COLORS[4]]: {
+    backgroundColor: OPERATION_SHARE_CELL_COLORS[4],
+    backgroundImage:
+      'radial-gradient(circle at 3px 3px, rgba(0, 0, 0, 0.16) 0 2px, transparent 2.25px)',
+    backgroundSize: '10px 10px',
+    color: accessibleDarkTextColor,
+  },
+}
+
+const emptyOperationShareCellVisualStyle: CSSProperties = {}
+
+export function getOperationShareCellVisualStyle(
+  backgroundColor?: string,
+): CSSProperties {
+  if (!backgroundColor) return emptyOperationShareCellVisualStyle
+  return (
+    operationShareCellVisualStyles[backgroundColor] ?? {
+      backgroundColor,
+      color: operationShareTextColor,
+    }
+  )
+}
 
 function getOperationShareRoundBackground(round: number) {
   return tableBodyBackgrounds[(round - 1) % tableBodyBackgrounds.length]
@@ -185,14 +241,6 @@ function SubstituteOperator({
   )
 }
 
-const operationShareActionStyle: CSSProperties = {
-  color: operationShareTextColor,
-}
-
-export function getOperationShareActionStyle(): CSSProperties {
-  return operationShareActionStyle
-}
-
 function ActionList({
   actions,
   displayOrderByActionOrder,
@@ -201,18 +249,11 @@ function ActionList({
   displayOrderByActionOrder: ReadonlyMap<number, number>
 }) {
   if (actions.length === 0) {
-    return (
-      <span className="text-lg" style={{ color: operationShareMutedTextColor }}>
-        —
-      </span>
-    )
+    return <span className="text-lg opacity-70">—</span>
   }
 
   return (
-    <div
-      className="text-center text-[22px] font-bold leading-[1.25]"
-      style={operationShareActionStyle}
-    >
+    <div className="text-center text-[22px] font-bold leading-[1.25]">
       {actions.map((action, index) => (
         <span key={`${action.raw}-${index}`}>
           {getOperationShareActionLabel(
@@ -365,10 +406,12 @@ export function OperationShareCard({
                         className="border-2 px-1.5 py-2 align-middle"
                         style={{
                           borderColor: tableBorderColor,
-                          background: getOperationShareActionCellBackground(
-                            config.cellColors,
-                            round.round,
-                            slot,
+                          ...getOperationShareCellVisualStyle(
+                            getOperationShareActionCellBackground(
+                              config.cellColors,
+                              round.round,
+                              slot,
+                            ),
                           ),
                         }}
                       >

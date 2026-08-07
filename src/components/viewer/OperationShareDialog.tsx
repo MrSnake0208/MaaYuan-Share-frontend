@@ -19,7 +19,10 @@ import type { Operation } from '../../models/operation'
 import { formatError } from '../../utils/error'
 import { AppToaster } from '../Toaster'
 import { DeployedOperatorsShareCard } from './DeployedOperatorsShareCard'
-import { OperationShareCard } from './OperationShareCard'
+import {
+  OperationShareCard,
+  getOperationShareCellVisualStyle,
+} from './OperationShareCard'
 import {
   createOperationShareQrDataUrl,
   renderOperationShareCardBlob,
@@ -52,12 +55,11 @@ import {
 type GenerationStatus = 'idle' | 'generating' | 'ready' | 'error'
 
 const CELL_COLOR_OPTIONS = [
-  { color: OPERATION_SHARE_CELL_COLORS[0], label: '暖米色' },
-  { color: OPERATION_SHARE_CELL_COLORS[1], label: '浅金色' },
-  { color: OPERATION_SHARE_CELL_COLORS[2], label: '鼠尾草绿' },
-  { color: OPERATION_SHARE_CELL_COLORS[3], label: '雾蓝灰' },
-  { color: OPERATION_SHARE_CELL_COLORS[4], label: '柔粉色' },
-  { color: OPERATION_SHARE_CELL_COLORS[5], label: '浅灰色' },
+  { color: OPERATION_SHARE_CELL_COLORS[0], label: '黄色纯色' },
+  { color: OPERATION_SHARE_CELL_COLORS[1], label: '粉色竖纹' },
+  { color: OPERATION_SHARE_CELL_COLORS[2], label: '蓝色横纹' },
+  { color: OPERATION_SHARE_CELL_COLORS[3], label: '绿色斜纹' },
+  { color: OPERATION_SHARE_CELL_COLORS[4], label: '冰灰圆点' },
 ] as const
 
 export default function OperationShareDialog({
@@ -591,7 +593,7 @@ export default function OperationShareDialog({
                           className="h-8 w-8 rounded border border-slate-300 transition-transform enabled:hover:scale-105 enabled:focus:outline-none enabled:focus:ring-2 enabled:focus:ring-sky-500 enabled:focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-40"
                           disabled={selectedCellKeys.size === 0}
                           onClick={() => applyCellColor(option.color)}
-                          style={{ backgroundColor: option.color }}
+                          style={getOperationShareCellVisualStyle(option.color)}
                           title={`应用${option.label}`}
                           type="button"
                         />
@@ -680,10 +682,9 @@ export default function OperationShareDialog({
                                 <td
                                   key={column.key}
                                   className="border-b border-r border-slate-200 px-2 py-2 last:border-r-0"
-                                  style={{
-                                    backgroundColor:
-                                      cardConfig.cellColors[key] ?? undefined,
-                                  }}
+                                  style={getOperationShareCellVisualStyle(
+                                    cardConfig.cellColors[key],
+                                  )}
                                 >
                                   <Checkbox
                                     aria-label={`${round.round} 回合 ${column.label}`}
