@@ -141,20 +141,13 @@ function AscensionLevel({ value }: { value?: number }) {
   )
 }
 
-function OperatorHeader({ operator }: { operator: OperationShareOperator }) {
+function OperatorAvatar({ operator }: { operator: OperationShareOperator }) {
   return (
-    <div className="flex min-h-[212px] flex-col items-center justify-end px-2 pb-4 pt-5">
-      <div>
-        <ShareOperatorAvatar
-          className="h-[132px] w-[132px] border-[3px] border-white bg-white object-cover shadow-sm"
-          operator={operator}
-          size={132}
-        />
-      </div>
-      <div className="mt-3 break-words text-center text-[20px] font-bold leading-tight">
-        {operator.name}
-      </div>
-    </div>
+    <ShareOperatorAvatar
+      className="block aspect-square h-auto w-full bg-white object-cover"
+      operator={operator}
+      size={180}
+    />
   )
 }
 
@@ -310,20 +303,37 @@ export function DeployedOperatorsShareCard({
             style={{ borderColor: '#78501f', color: '#624015' }}
           >
             <thead>
-              <tr style={{ background: '#f0dec1' }}>
-                <th
-                  aria-label="属性"
-                  className="w-[108px] border"
+              <tr aria-label="密探头像" style={{ background: '#f0dec1' }}>
+                <td
+                  className="w-[108px] border p-0"
                   style={{ borderColor: '#78501f' }}
                 />
                 {model.operators.map((operator, index) => (
+                  <td
+                    key={`${operator.rawName}-${index}`}
+                    className="border p-0 align-middle"
+                    style={{ borderColor: '#78501f' }}
+                  >
+                    <OperatorAvatar operator={operator} />
+                  </td>
+                ))}
+              </tr>
+              <tr aria-label="列标题" style={{ background: '#f0dec1' }}>
+                <th
+                  className="border px-3 py-3 text-[20px] font-bold"
+                  scope="col"
+                  style={{ borderColor: '#78501f' }}
+                >
+                  属性
+                </th>
+                {model.operators.map((operator, index) => (
                   <th
                     key={`${operator.rawName}-${index}`}
-                    className="border p-0 align-bottom"
+                    className="break-words border px-2 py-3 text-center text-[20px] font-bold leading-tight"
                     scope="col"
                     style={{ borderColor: '#78501f' }}
                   >
-                    <OperatorHeader operator={operator} />
+                    {operator.name}
                   </th>
                 ))}
               </tr>

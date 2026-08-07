@@ -94,7 +94,7 @@ export function getOperationShareOperatorStarLabel(
     : `${operator.starLevel} 星`
 }
 
-function OperatorColumn({
+function OperatorAvatar({
   operator,
   slot,
 }: {
@@ -103,55 +103,60 @@ function OperatorColumn({
 }) {
   if (!operator) {
     return (
-      <div className="flex min-h-[238px] flex-col items-center justify-center px-2 text-center">
-        <div
-          className="flex h-[118px] w-[118px] items-center justify-center border-2 border-dashed text-lg font-semibold"
-          style={{
-            borderColor: '#9aaba5',
-            color: operationShareMutedTextColor,
-          }}
-        >
-          {slot} 号位
-        </div>
-        <div
-          className="mt-4 text-base font-semibold"
-          style={{ color: operationShareMutedTextColor }}
-        >
-          未配置密探
-        </div>
+      <div
+        className="flex aspect-square w-full items-center justify-center border-2 border-dashed text-lg font-semibold"
+        style={{
+          borderColor: '#9aaba5',
+          color: operationShareMutedTextColor,
+        }}
+      >
+        {slot} 号位
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-[238px] flex-col items-center px-2 pb-4 pt-5 text-center">
-      <div className="relative">
-        <ShareOperatorAvatar
-          className="h-[118px] w-[118px] border-[3px] border-white bg-white object-cover shadow-sm"
-          operator={operator}
-          size={118}
-        />
-        {operator.starLevel !== undefined ? (
-          <span
-            aria-label={getOperationShareOperatorStarLabel(operator)}
-            className="absolute -right-2 -top-2 flex h-8 min-w-10 items-center justify-center gap-1 rounded-sm border-2 border-white px-1.5 text-sm font-bold text-white"
-            style={{ background: '#e96913' }}
-          >
-            <Icon aria-hidden icon="star" iconSize={14} />
-            <span>{operator.starLevel}</span>
-          </span>
-        ) : null}
-      </div>
-      <div className="mt-3 text-[21px] font-bold leading-tight">
+    <div className="relative w-full overflow-hidden">
+      <ShareOperatorAvatar
+        className="block aspect-square h-auto w-full bg-white object-cover"
+        operator={operator}
+        size={180}
+      />
+      {operator.starLevel !== undefined ? (
+        <span
+          aria-label={getOperationShareOperatorStarLabel(operator)}
+          className="absolute right-2 top-2 flex h-8 min-w-10 items-center justify-center gap-1 rounded-sm border-2 border-white px-1.5 text-sm font-bold text-white"
+          style={{ background: '#e96913' }}
+        >
+          <Icon aria-hidden icon="star" iconSize={14} />
+          <span>{operator.starLevel}</span>
+        </span>
+      ) : null}
+    </div>
+  )
+}
+
+function OperatorLabel({ operator }: { operator?: OperationShareOperator }) {
+  if (!operator) {
+    return (
+      <span style={{ color: operationShareMutedTextColor }}>未配置密探</span>
+    )
+  }
+
+  return (
+    <div className="px-1 py-2 text-center">
+      <div className="break-words text-[20px] font-bold leading-tight">
         {operator.name}
       </div>
-      <div
-        className="mt-2 min-h-10 text-[13px] font-medium leading-5"
-        style={{ color: operationShareMutedTextColor }}
-      >
-        {operator.skill ? <div>技能 {operator.skill}</div> : null}
-        {operator.module ? <div>{operator.module}模组</div> : null}
-      </div>
+      {operator.skill || operator.module ? (
+        <div
+          className="mt-1 text-[12px] font-medium leading-4"
+          style={{ color: operationShareMutedTextColor }}
+        >
+          {operator.skill ? <div>技能 {operator.skill}</div> : null}
+          {operator.module ? <div>{operator.module}模组</div> : null}
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -252,49 +257,80 @@ export function OperationShareCard({
           }}
         >
           <thead>
-            <tr>
-              <th
-                className="w-[110px] border-2 px-3 text-[21px] font-bold"
+            <tr aria-label="密探头像">
+              <td
+                className="w-[110px] border-2 p-0"
                 style={{
                   borderColor: tableBorderColor,
                   background: tableHeaderBackground,
                 }}
+              />
+              {model.actionSlots.map((slot) => (
+                <td
+                  key={slot}
+                  className="border-2 p-0 align-middle"
+                  style={{
+                    borderColor: tableBorderColor,
+                    background: tableHeaderBackground,
+                  }}
+                >
+                  <OperatorAvatar
+                    operator={model.operators[slot - 1]}
+                    slot={slot}
+                  />
+                </td>
+              ))}
+              {config.showOtherActions ? (
+                <td
+                  className="w-[118px] border-2 p-0"
+                  style={{
+                    borderColor: tableBorderColor,
+                    background: tableHeaderBackground,
+                  }}
+                />
+              ) : null}
+              {config.showNotes ? (
+                <td
+                  className="w-[168px] border-2 p-0"
+                  style={{
+                    borderColor: tableBorderColor,
+                    background: tableHeaderBackground,
+                  }}
+                />
+              ) : null}
+            </tr>
+            <tr aria-label="列标题" style={{ background: tableHeaderBackground }}>
+              <th
+                className="border-2 px-3 py-3 text-[21px] font-bold"
+                scope="col"
+                style={{ borderColor: tableBorderColor }}
               >
                 回合
               </th>
               {model.actionSlots.map((slot) => (
                 <th
                   key={slot}
-                  className="border-2 p-0 align-top"
-                  style={{
-                    borderColor: tableBorderColor,
-                    background: tableHeaderBackground,
-                  }}
+                  className="border-2 px-1 py-2 align-middle"
+                  scope="col"
+                  style={{ borderColor: tableBorderColor }}
                 >
-                  <OperatorColumn
-                    operator={model.operators[slot - 1]}
-                    slot={slot}
-                  />
+                  <OperatorLabel operator={model.operators[slot - 1]} />
                 </th>
               ))}
               {config.showOtherActions ? (
                 <th
-                  className="w-[118px] border-2 px-3 text-lg font-bold"
-                  style={{
-                    borderColor: tableBorderColor,
-                    background: tableHeaderBackground,
-                  }}
+                  className="border-2 px-3 py-3 text-lg font-bold"
+                  scope="col"
+                  style={{ borderColor: tableBorderColor }}
                 >
                   其他动作
                 </th>
               ) : null}
               {config.showNotes ? (
                 <th
-                  className="w-[168px] border-2 px-3 text-lg font-bold"
-                  style={{
-                    borderColor: tableBorderColor,
-                    background: tableHeaderBackground,
-                  }}
+                  className="border-2 px-3 py-3 text-lg font-bold"
+                  scope="col"
+                  style={{ borderColor: tableBorderColor }}
                 >
                   备注
                 </th>

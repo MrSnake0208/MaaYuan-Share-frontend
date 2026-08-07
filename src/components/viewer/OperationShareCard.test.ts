@@ -11,6 +11,7 @@ import {
   getOperationShareRoundDisplay,
 } from './OperationShareCard'
 import {
+  createOperationShareCardConfig,
   OPERATION_SHARE_CELL_COLORS,
   type OperationShareModel,
 } from './operationShareModel'
@@ -48,6 +49,42 @@ describe('operation share card styles', () => {
 
     expect(defaultMarkup).not.toContain(model.qrLabel)
     expect(visibleMarkup).toContain(model.qrLabel)
+  })
+
+  it('renders full-cell avatars above a separate column-label row', () => {
+    const config = createOperationShareCardConfig()
+    const cardModel: OperationShareModel = {
+      ...model,
+      actionSlots: [1],
+      operators: [
+        {
+          slot: 1,
+          name: '测试密探',
+          rawName: 'test-operator',
+          avatarId: 'test-operator',
+          level: 60,
+          elite: 2,
+          skillLevel: 10,
+          potentiality: 1,
+          discs: [],
+        },
+      ],
+    }
+
+    const markup = renderToStaticMarkup(
+      createElement(OperationShareCard, {
+        config,
+        model: cardModel,
+        qrDataUrl: 'data:image/png;base64,qr-code',
+      }),
+    )
+
+    expect(markup).toContain('<tr aria-label="密探头像"')
+    expect(markup).toContain('<tr aria-label="列标题"')
+    expect(markup.indexOf('aria-label="密探头像"')).toBeLessThan(
+      markup.indexOf('aria-label="列标题"'),
+    )
+    expect(markup).toContain('aspect-square h-auto w-full')
   })
 
   it('alternates the deployed-operator palette for uncolored action cells', () => {

@@ -161,7 +161,13 @@ describe('deployed operators share card', () => {
     expect(markup).toContain('技伤大幅')
     expect(markup).toContain('攻击提升')
     expect(markup).toContain('生命提升')
-    expect(markup.match(/<tr/g)).toHaveLength(9)
+    expect(markup.match(/<tr/g)).toHaveLength(10)
+    expect(markup).toContain('<tr aria-label="密探头像"')
+    expect(markup).toContain('<tr aria-label="列标题"')
+    expect(markup.indexOf('aria-label="密探头像"')).toBeLessThan(
+      markup.indexOf('aria-label="列标题"'),
+    )
+    expect(markup).toContain('aspect-square h-auto w-full')
     expect(markup).not.toContain('命盘一')
     expect(markup).not.toContain('命盘二')
     expect(markup).not.toContain('命盘三')
