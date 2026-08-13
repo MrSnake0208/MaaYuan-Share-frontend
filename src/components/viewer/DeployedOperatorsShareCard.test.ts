@@ -139,6 +139,31 @@ describe('deployed operators share card', () => {
     expect(markup.indexOf('禁止命盘')).toBeLessThan(markup.indexOf('技伤大幅'))
   })
 
+  it('hides the unselected disc label while retaining its stones', () => {
+    const unselectedDiscModel: OperationShareModel = {
+      ...model,
+      operators: model.operators.map((operator) => ({
+        ...operator,
+        discs: operator.discs.map((disc) => ({
+          ...disc,
+          abbreviation: '未选择命盘',
+        })),
+      })),
+    }
+    const markup = renderToStaticMarkup(
+      createElement(DeployedOperatorsShareCard, {
+        model: unselectedDiscModel,
+        qrDataUrl: 'data:image/png;base64,qr-code',
+      }),
+    )
+
+    expect(markup).not.toContain('未选择命盘')
+    expect(markup).toContain('攻击提升')
+    expect(markup).toContain('生命提升')
+    expect(markup).not.toContain('⭐ 主星 ·')
+    expect(markup).not.toContain('✨ 辅星 ·')
+  })
+
   it('renders only deployed operators with stats, discs, and stones', () => {
     const markup = renderToStaticMarkup(
       createElement(DeployedOperatorsShareCard, {
@@ -159,8 +184,10 @@ describe('deployed operators share card', () => {
     expect(markup).toContain('1234')
     expect(markup).toContain('5678')
     expect(markup).toContain('技伤大幅')
-    expect(markup).toContain('⭐ 主星 · 攻击提升')
-    expect(markup).toContain('✨ 辅星 · 生命提升')
+    expect(markup).toContain('攻击提升')
+    expect(markup).toContain('生命提升')
+    expect(markup).not.toContain('⭐ 主星 ·')
+    expect(markup).not.toContain('✨ 辅星 ·')
     expect(markup).toContain('text-[23px]')
     expect(markup).toContain('text-[22px]')
     expect(markup).toContain('text-[19px]')

@@ -68,6 +68,8 @@ function DiscAbbreviation({
   disc: OperationShareDisc
   required: boolean
 }) {
+  if (disc.abbreviation === '未选择命盘') return null
+
   const color = DISC_TONES[disc.color ?? ''] ?? '#5f4a31'
 
   if (disc.forbidden) {
@@ -77,8 +79,8 @@ function DiscAbbreviation({
         className="inline-flex max-w-full items-center justify-center gap-1"
         style={{ color: '#8f2117' }}
       >
-        <span aria-hidden className="text-[19px] leading-none"></span>
-        <span className="whitespace-nowrap text-[19px] font-black leading-snug line-through decoration-2">
+        <span aria-hidden className="text-[24px] leading-none"></span>
+        <span className="whitespace-nowrap text-[24px] font-black leading-snug line-through decoration-2">
           {disc.abbreviation}
         </span>
       </span>
@@ -91,9 +93,9 @@ function DiscAbbreviation({
         aria-label={`核心命盘：${disc.abbreviation}`}
         className="inline-flex max-w-full items-center justify-center gap-1"
       >
-        <span aria-hidden className="text-[19px] leading-none"></span>
+        <span aria-hidden className="text-[24px] leading-none"></span>
         <span
-          className="whitespace-nowrap text-[19px] font-black leading-snug"
+          className="whitespace-nowrap text-[24px] font-black leading-snug"
           style={{ color }}
         >
           {disc.abbreviation}
@@ -104,7 +106,7 @@ function DiscAbbreviation({
 
   return (
     <span
-      className="break-words text-[19px] font-bold leading-snug"
+      className="break-words text-[24px] font-bold leading-snug"
       style={{ color }}
     >
       {disc.abbreviation}
@@ -112,18 +114,12 @@ function DiscAbbreviation({
   )
 }
 
-function DiscStoneValue({
-  field,
-  value,
-}: {
-  field: 'starStone' | 'assistStar'
-  value?: string
-}) {
+function DiscStoneValue({ value }: { value?: string }) {
   if (!value) return <span style={{ color: '#9a856d' }}>—</span>
 
   return (
-    <span className="break-words text-[17px] font-semibold leading-5">
-      {field === 'starStone' ? '⭐ 主星' : '✨ 辅星'} · {value}
+    <span className="break-words text-[24px] font-semibold leading-5">
+      {value}
     </span>
   )
 }
@@ -140,7 +136,7 @@ function AscensionLevel({ value }: { value?: number }) {
         <span
           key={level}
           aria-hidden
-          className="text-[24px] leading-none"
+          className="text-[30px] leading-none"
           style={{ color: level <= value ? '#e96913' : '#cdb89e' }}
         >
           ◆
@@ -176,7 +172,7 @@ function AttributeRow({
   return (
     <tr style={{ background, height: minHeight }}>
       <th
-        className="w-[108px] border px-3 text-[23px] font-bold"
+        className="w-[108px] border px-3 text-[27px] font-bold"
         scope="row"
         style={{ borderColor: '#78501f' }}
       >
@@ -185,7 +181,7 @@ function AttributeRow({
       {operators.map((operator, index) => (
         <td
           key={`${label}-${operator.rawName}-${index}`}
-          className="border px-3 py-4 text-center text-[23px] font-semibold align-middle"
+          className="border px-3 py-4 text-center text-[27px] font-semibold align-middle"
           style={{ borderColor: '#78501f' }}
         >
           {children(operator)}
@@ -221,10 +217,7 @@ function DiscRows({
   return (
     <>
       {DISC_FIELDS.map(({ field, label }) => (
-        <tr
-          key={field}
-          style={{ background: rowBackground, height: 126 }}
-        >
+        <tr key={field} style={{ background: rowBackground, height: 126 }}>
           <th
             className="w-[108px] border px-3 text-[22px] font-bold leading-snug"
             scope="row"
@@ -260,7 +253,7 @@ function DiscRows({
                             }
                           />
                         ) : (
-                          <DiscStoneValue field={field} value={disc[field]} />
+                          <DiscStoneValue value={disc[field]} />
                         )
                       ) : (
                         <span style={{ color: '#9a856d' }}>—</span>
