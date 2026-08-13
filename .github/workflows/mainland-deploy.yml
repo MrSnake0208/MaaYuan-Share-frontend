@@ -52,11 +52,4 @@ jobs:
           port: ${{ secrets.MAINLAND_VPS_PORT }}
           script: |
             set -eu
-            sudo mkdir -p /var/www
-            sudo rm -rf /var/www/myshare_old
-            if [ -d /var/www/myshare ]; then
-              sudo mv /var/www/myshare /var/www/myshare_old
-            fi
-            sudo mv /tmp/myshare-frontend-mainland-tmp /var/www/myshare
-            sudo rm -rf /var/www/myshare_old
-
+            sudo -n /usr/local/sbin/deploy-myshare-frontend
