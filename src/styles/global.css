@@ -1,18 +1,8 @@
 body {
   margin: 0;
   font-family:
-    'Noto Sans SC',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    'Roboto',
-    'Oxygen',
-    'Ubuntu',
-    'Cantarell',
-    'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
-    sans-serif;
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei',
+    'PingFang SC', 'Hiragino Sans GB', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -469,9 +459,27 @@ body.theme-maayuan {
 
   background-color: var(--maayuan-bg);
   color: var(--maayuan-text);
-  background-image: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.24), transparent 28%),
-    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.2), transparent 20%),
+  background-image:
+    url('/maayuan/maayuan-pattern.webp'),
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(255, 255, 255, 0.24),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 80% 10%,
+      rgba(255, 255, 255, 0.2),
+      transparent 20%
+    ),
     linear-gradient(135deg, #f6edd0 0%, #fff8ec 65%, #f6edd0 100%);
+  background-attachment: fixed;
+  background-position: 0 0;
+  background-repeat: repeat;
+  background-size:
+    2400px 2400px,
+    auto,
+    auto,
+    auto;
 }
 
 body.theme-maayuan a {
@@ -479,11 +487,20 @@ body.theme-maayuan a {
 }
 
 body.theme-maayuan .bp4-navbar,
-body.theme-maayuan .docs-content-wrapper,
 body.theme-maayuan .bp4-card,
 body.theme-maayuan .panel-shadow,
 body.theme-maayuan .card-shadow-subtle {
   background-color: var(--maayuan-surface);
+  color: var(--maayuan-text);
+}
+
+body.theme-maayuan .docs-content-wrapper {
+  background-color: var(--maayuan-surface);
+  background-image: url('/maayuan/maayuan-pattern.webp');
+  background-attachment: fixed;
+  background-position: 0 0;
+  background-repeat: repeat;
+  background-size: 2400px 2400px;
   color: var(--maayuan-text);
 }
 
@@ -515,7 +532,9 @@ body.theme-maayuan .bp4-button-group.bp4-minimal .bp4-button {
   color: var(--maayuan-text);
 }
 
-body.theme-maayuan .bp4-button-group.bp4-minimal .bp4-button.bp4-intent-primary {
+body.theme-maayuan
+  .bp4-button-group.bp4-minimal
+  .bp4-button.bp4-intent-primary {
   color: var(--maayuan-accent-strong);
 }
 
@@ -536,12 +555,14 @@ body.theme-maayuan .bp4-tag {
   color: var(--maayuan-text-strong);
 }
 
-body.theme-maayuan .editor-preset-tag-active.bp4-tag.bp4-intent-primary.bp4-interactive:hover {
+body.theme-maayuan
+  .editor-preset-tag-active.bp4-tag.bp4-intent-primary.bp4-interactive:hover {
   background-color: #c9b691;
   color: var(--maayuan-text-strong);
 }
 
-body.theme-maayuan .editor-preset-tag-active.bp4-tag.bp4-intent-primary.bp4-interactive:active {
+body.theme-maayuan
+  .editor-preset-tag-active.bp4-tag.bp4-intent-primary.bp4-interactive:active {
   background-color: #bca47a;
   color: var(--maayuan-text-strong);
 }

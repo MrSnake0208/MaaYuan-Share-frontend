@@ -2,11 +2,10 @@ import { Button, Drawer, DrawerSize } from '@blueprintjs/core'
 
 import { useTranslation } from 'i18n/i18n'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { SyntheticEvent } from 'react'
+import { SyntheticEvent, lazy } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-import { OperationSetViewer } from 'components/viewer/OperationSetViewer'
-import { OperationViewer } from 'components/viewer/OperationViewer'
+import { withSuspensable } from 'components/Suspensable'
 import {
   readOperationIdsAtom,
   toggleReadOperationAtom,
@@ -15,6 +14,22 @@ import {
   sunkOperationIdsAtom,
   toggleSunkOperationAtom,
 } from 'store/sunkOperations'
+
+const OperationViewer = withSuspensable(
+  lazy(() =>
+    import('components/viewer/OperationViewer').then((module) => ({
+      default: module.OperationViewer,
+    })),
+  ),
+)
+
+const OperationSetViewer = withSuspensable(
+  lazy(() =>
+    import('components/viewer/OperationSetViewer').then((module) => ({
+      default: module.OperationSetViewer,
+    })),
+  ),
+)
 
 const ReadOperationButton = ({ operationId }: { operationId: number }) => {
   const t = useTranslation()
@@ -120,7 +135,9 @@ export function OperationDrawer() {
             <OperationViewer
               operationId={operationId}
               onCloseDrawer={closeOperation}
-              headerActions={<OperationStatusButtons operationId={operationId} />}
+              headerActions={
+                <OperationStatusButtons operationId={operationId} />
+              }
             />
           )}
         </Drawer>

@@ -1,9 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="MAA Yuan作业站 — 为MAA Yuan用户提供JSON作业" />
+    <meta
+      name="description"
+      content="MAA Yuan作业站 — 为MAA Yuan用户提供JSON作业"
+    />
     <meta name="keywords" content="代号鸢,作业站,自动刷图,代号鸢作业站" />
     <title>MaaYuan Share</title>
 
@@ -29,15 +32,30 @@
     <link rel="shortcut icon" href="/favicon.ico?v=1" />
     <meta name="msapplication-TileColor" content="#101010" />
     <meta name="theme-color" content="#101010" />
-
-    <!-- Fonts: Noto Sans SC -->
-    <link rel="preconnect" href="https://fonts.loli.net">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@600&display=swap" rel="stylesheet">
   </head>
   <body>
     <main id="root"></main>
     <script type="module" src="/src/main.tsx"></script>
-    <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/github-markdown-css/5.1.0/github-markdown-light.min.css" integrity="sha512-zb2pp+R+czM7GAemdSUQt6jFmr3qCo6ikvBgVU6F5GvwEDR0C2sefFiPEJ9QUpmAKdD5EqDUdNRtbOYnbF/eyQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link
+      rel="preload"
+      as="style"
+      href="https://cdnjs.loli.net/ajax/libs/github-markdown-css/5.1.0/github-markdown-light.min.css"
+      integrity="sha512-zb2pp+R+czM7GAemdSUQt6jFmr3qCo6ikvBgVU6F5GvwEDR0C2sefFiPEJ9QUpmAKdD5EqDUdNRtbOYnbF/eyQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+      onload="
+        this.onload = null
+        this.rel = 'stylesheet'
+      "
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://cdnjs.loli.net/ajax/libs/github-markdown-css/5.1.0/github-markdown-light.min.css"
+        integrity="sha512-zb2pp+R+czM7GAemdSUQt6jFmr3qCo6ikvBgVU6F5GvwEDR0C2sefFiPEJ9QUpmAKdD5EqDUdNRtbOYnbF/eyQ=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+      />
+    </noscript>
   </body>
 </html>

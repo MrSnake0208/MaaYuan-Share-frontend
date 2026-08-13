@@ -31,11 +31,21 @@ export const AdBannerCarousel: FC<AdBannerCarouselProps> = ({
   const validItems = useMemo(() => items.filter(Boolean), [items]);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [loadedIndexes, setLoadedIndexes] = useState(() => new Set([0, 1]));
 
   useEffect(() => {
     if (!autoplay || paused || validItems.length <= 1) return;
     const id = setInterval(() => {
-      setIndex((i) => (i + 1) % validItems.length);
+      setIndex((currentIndex) => {
+        const nextIndex = (currentIndex + 1) % validItems.length;
+        setLoadedIndexes((current) => {
+          const next = new Set(current);
+          next.add(nextIndex);
+          next.add((nextIndex + 1) % validItems.length);
+          return next;
+        });
+        return nextIndex;
+      });
     }, interval);
     return () => clearInterval(id);
   }, [autoplay, paused, interval, validItems.length]);
@@ -43,6 +53,12 @@ export const AdBannerCarousel: FC<AdBannerCarouselProps> = ({
   const goTo = (i: number) => {
     if (!validItems.length) return;
     const n = ((i % validItems.length) + validItems.length) % validItems.length;
+    setLoadedIndexes((current) => {
+      const next = new Set(current);
+      next.add(n);
+      next.add((n + 1) % validItems.length);
+      return next;
+    });
     setIndex(n);
   };
 
@@ -74,10 +90,16 @@ export const AdBannerCarousel: FC<AdBannerCarouselProps> = ({
             aria-label={item.alt || "ad-banner"}
           >
             <img
-              src={item.image}
+              src={loadedIndexes.has(idx) ? item.image : undefined}
+              data-src={loadedIndexes.has(idx) ? undefined : item.image}
               alt={item.alt || "ad"}
               className="w-full h-full object-contain"
               draggable={false}
+              width={width}
+              height={height}
+              loading={idx === 0 ? "eager" : "lazy"}
+              decoding="async"
+              fetchPriority={idx === 0 ? "high" : "low"}
             />
           </a>
         ))}

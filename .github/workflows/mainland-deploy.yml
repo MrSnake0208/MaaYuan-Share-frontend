@@ -1,0 +1,62 @@
+name: Build and Deploy to Mainland Server
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+concurrency:
+  group: mainland-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".node-version"
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build mainland version
+        run: yarn build:mainland
+
+      - name: Upload new version to temporary directory
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.MAINLAND_VPS_HOST }}
+          username: ${{ secrets.MAINLAND_VPS_USER }}
+          key: ${{ secrets.MAINLAND_VPS_SSH_KEY }}
+          port: ${{ secrets.MAINLAND_VPS_PORT }}
+          source: "./dist/*"
+          target: "/tmp/myshare-frontend-mainland-tmp/"
+          overwrite: true
+          strip_components: 1
+
+      - name: Atomically switch release
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.MAINLAND_VPS_HOST }}
+          username: ${{ secrets.MAINLAND_VPS_USER }}
+          key: ${{ secrets.MAINLAND_VPS_SSH_KEY }}
+          port: ${{ secrets.MAINLAND_VPS_PORT }}
+          script: |
+            set -eu
+            sudo mkdir -p /var/www
+            sudo rm -rf /var/www/myshare_old
+            if [ -d /var/www/myshare ]; then
+              sudo mv /var/www/myshare /var/www/myshare_old
+            fi
+            sudo mv /tmp/myshare-frontend-mainland-tmp /var/www/myshare
+            sudo rm -rf /var/www/myshare_old
+

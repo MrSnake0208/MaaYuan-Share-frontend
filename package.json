@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:mainland": "vite build --mode mainland",
     "build:skiptsc": "vite build",
     "build:azure": "yarn build:skiptsc && node post-build.mjs",
     "preview": "vite preview",
@@ -20,6 +21,8 @@
     "scripts:update-operator-avatars": "esno scripts/update-operator-avatars.ts",
     "scripts:update-prof-icons": "yarn install && esno scripts/update-prof-icons.ts",
     "avatars:convert": "node tools/convert-operator-avatars.mjs",
+    "assets:build-maayuan-pattern": "node tools/build-maayuan-pattern.mjs",
+    "assets:optimize-images": "node tools/optimize-public-images.mjs",
     "scripts:verify-editor-import": "esno scripts/verify-editorv2-import.ts"
   },
   "dependencies": {
@@ -59,7 +62,6 @@
     "qrcode": "^1.5.4",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-ga-neo": "^2.2.0",
     "react-hook-form": "^7.33.1",
     "react-markdown": "^8.0.5",
     "react-rating": "^2.0.5",

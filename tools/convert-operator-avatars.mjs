@@ -2,14 +2,16 @@ import { mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
-
 import sharp from "sharp";
 
 const toolDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(toolDir, "..");
 const avatarsDir = path.join(repoRoot, "public/assets/operator-avatars");
-const operatorsPath = path.join(repoRoot, "src/models/generated/operators.json");
-const outputDirs = ["webp32", "webp96"];
+const operatorsPath = path.join(
+  repoRoot,
+  "src/models/generated/operators.json",
+);
+const outputSizes = [32, 96];
 const defaultQuality = 80;
 let operators = [];
 
@@ -38,7 +40,9 @@ function getOperatorNameFromFile(filePath) {
 function findOperator(filePath) {
   const name = getOperatorNameFromFile(filePath);
 
-  return operators.find((operator) => operator.id === name || operator.name === name);
+  return operators.find(
+    (operator) => operator.id === name || operator.name === name,
+  );
 }
 
 function getQuality() {
@@ -69,19 +73,24 @@ async function convertOne(input, quality) {
 
   if (metadata.width !== 228 || metadata.height !== 366) {
     console.warn(
-      `${operator.name}: source is ${metadata.width}x${metadata.height}, output will keep the same pixel size.`,
+      `${operator.name}: source is ${metadata.width}x${metadata.height}, output will be center-cropped.`,
     );
   }
 
-  for (const dir of outputDirs) {
-    const outputDir = path.join(avatarsDir, dir);
+  for (const size of outputSizes) {
+    const outputDir = path.join(avatarsDir, `webp${size}`);
     const outputPath = path.join(outputDir, `${operator.id}.webp`);
 
     await mkdir(outputDir, { recursive: true });
-    await sharp(sourcePath).webp({ quality, effort: 6 }).toFile(outputPath);
+    await sharp(sourcePath)
+      .resize(size, size, { fit: "cover", position: "centre" })
+      .webp({ quality, alphaQuality: 90, effort: 6 })
+      .toFile(outputPath);
 
     const outputMetadata = await sharp(outputPath).metadata();
-    console.log(`${operator.name}: ${path.relative(repoRoot, outputPath)} ${outputMetadata.width}x${outputMetadata.height}`);
+    console.log(
+      `${operator.name}: ${path.relative(repoRoot, outputPath)} ${outputMetadata.width}x${outputMetadata.height}`,
+    );
   }
 }
 
@@ -92,7 +101,9 @@ async function main() {
   operators = operatorsData.OPERATORS;
 
   if (inputs.length === 0) {
-    console.error("Usage: node tools/convert-operator-avatars.mjs [--quality=80] <png...>");
+    console.error(
+      "Usage: node tools/convert-operator-avatars.mjs [--quality=80] <png...>",
+    );
     process.exit(1);
   }
 

@@ -54,6 +54,12 @@ yarn dev
 yarn build
 ```
 
+构建大陆服务器版本（API 使用当前域名下的 `/api`）
+
+```bash
+yarn build:mainland
+```
+
 Lint fix
 
 ```bash
