@@ -30,6 +30,9 @@ ZOOT Plus 前端！
 - `VITE_THERESA_SERVER`：地图站地址
 - `VITE_SIMING_BASE_URL`：MaaYuan-SiMing 生成器服务地址
 - `VITE_USE_REG_CODE`：是否启用“注册码注册”模式（`true`/`false`，默认 `false`）。启用后注册页将显示“注册码”输入框并隐藏“发送验证码”按钮，注册请求体将携带 `registrationCode` 字段；关闭时沿用邮箱验证码流程，注册请求体携带 `registrationToken` 字段。
+- `VITE_SITE_RETIRE_HOST`：域名迁移一次性提示弹窗的触发域名（如 `share.maayuan.fun:16666`）。仅当访问 host 命中时弹出；留空则关闭该提示。同一份代码部署到其他域名（新地址）不会弹出。
+- `VITE_SITE_RETIRE_DATE`：上述提示中展示的保留截止日期文案（如 `2025年12月31日`）。
+- `VITE_SITE_RETIRE_TARGET`：上述提示中建议用户使用的新地址（如 `https://maayuan.top`），按钮点击后直接跳转。
 
 ## 命令
 

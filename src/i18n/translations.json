@@ -3825,6 +3825,24 @@
         "zh_tw": "沒有匹配的密探"
       }
     },
+    "SiteRetireDialog": {
+      "title": {
+        "cn": "域名迁移通知",
+        "zh_tw": "域名遷移通知"
+      },
+      "body": {
+        "cn": "本域名（{{host}}）将保留至 {{date}}，之后将无法访问，请尽快使用新地址：{{target}}",
+        "zh_tw": "本域名（{{host}}）將保留至 {{date}}，之後將無法訪問，請盡快使用新地址：{{target}}"
+      },
+      "close": {
+        "cn": "我知道了",
+        "zh_tw": "我知道了"
+      },
+      "go_to_target": {
+        "cn": "前往新地址",
+        "zh_tw": "前往新地址"
+      }
+    },
     "Suspensable": {
       "loading": {
         "cn": "加载中",

@@ -12,6 +12,7 @@ import { NavExpandButton } from "components/NavExpandButton";
 import { ServerSwitchButton } from "components/ServerSwitchButton";
 import { ThemeSwitchButton } from "components/ThemeSwitchButton";
 import { NavAside } from "components/drawer/NavAside";
+import { SiteRetireDialog } from "components/SiteRetireDialog";
 
 export const AppLayout: FCC = ({ children }) => {
   const { NAV_LINKS } = useLinks();
@@ -58,6 +59,7 @@ export const AppLayout: FCC = ({ children }) => {
         </div>
       </Navbar>
       <NavAside />
+      <SiteRetireDialog />
 
       {isHomePage && (
         <div className="px-4 pt-3 pb-0 mt-14 mb-[-12px]">
