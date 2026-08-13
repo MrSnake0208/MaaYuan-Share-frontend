@@ -1,5 +1,6 @@
 import { mkdir, writeFile } from "fs/promises";
 
+import { PROF_ICON_FILENAMES } from "../src/utils/profIcon";
 import { fileExists, getOperators } from "./shared";
 
 const outDir = "public/assets/prof-icons";
@@ -33,7 +34,12 @@ async function main() {
       console.error(`${name}: cannot found icon`);
       continue;
     }
-    const expectFileAt = `${outDir}/${id}.png`;
+    const filename = PROF_ICON_FILENAMES[id];
+    if (!filename) {
+      console.error(`${id}: safe icon filename is not configured`);
+      continue;
+    }
+    const expectFileAt = `${outDir}/${filename}.png`;
     if (await fileExists(expectFileAt)) {
       console.log(`${name}: already exists`);
       continue;

@@ -12,7 +12,7 @@ export const defaultAdBanners: AdBannerConfigItem[] = [
   //   alt: '雷电模拟器',
   // },
   {
-    image: "/麻圆MuMu合作-560x320.jpg",
+    image: "/mumu-560x320.jpg",
     link: "https://adl.netease.com/d/g/a11/c/maayuan",
     alt: "MuMu",
   },
@@ -27,7 +27,7 @@ export const defaultAdBanners: AdBannerConfigItem[] = [
     alt: "Mirror",
   },
   {
-    image: "/辟雍.png",
+    image: "/biyong.png",
     link: "",
     alt: "辟雍",
   },

@@ -52,6 +52,7 @@ import { EDifficultyLevel } from "components/entity/ELevel";
 import { OpRatingType, Operation } from "models/operation";
 import { toShortCode } from "models/shortCode";
 import { authAtom, isAdmin } from "store/auth";
+import { getProfIconPath } from "utils/profIcon";
 import { wrapErrorMessage } from "utils/wrapErrorMessage";
 
 import { useLevels } from "../../apis/level";
@@ -506,7 +507,7 @@ const OperatorCard: FC<{
           {info && info.prof !== "TOKEN" && (
             <img
               className="absolute top-0 right-0 w-5 h-5 p-px bg-gray-600 rounded-tr-md"
-              src={"/assets/prof-icons/" + info.prof + ".png"}
+              src={getProfIconPath(info.prof)}
               alt={info.prof}
             />
           )}

@@ -11,6 +11,7 @@ import {
   useOperatorFilterProvider,
 } from "components/editor/operator/sheet/sheetOperator/SheetOperatorFilterProvider";
 import { PROFESSIONS } from "models/operator";
+import { getProfIconPath } from "utils/profIcon";
 
 export interface ProfClassification {}
 
@@ -158,7 +159,7 @@ const ProfIcon: FC<ProfIconProp> = ({ name, profId, selected, onProfClick, ...re
         <img
           {...restImgProps}
           className={clsx("w-8 h-6 object-contain dark:invert-0", restImgProps.className)}
-          src={"/assets/prof-icons/" + profId + ".png"}
+          src={getProfIconPath(profId)}
           alt=""
           title={name}
         />

@@ -3721,8 +3721,8 @@
         "zh_tw": "標題、描述、神秘代碼"
       },
       "short_code_search_suggestion": {
-        "cn": "您是否想要搜索{{shortCode}}",
-        "zh_tw": "您是否想要搜尋{{shortCode}}"
+        "cn": "您是否想要查看作业{{shortCode}}",
+        "zh_tw": "您是否想要查看作業{{shortCode}}"
       },
       "sort_by": {
         "cn": "排序:",

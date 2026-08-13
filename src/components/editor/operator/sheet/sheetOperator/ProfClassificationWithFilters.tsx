@@ -6,6 +6,7 @@ import { useAtomValue } from "jotai";
 import { FC, ImgHTMLAttributes, useEffect, useMemo } from "react";
 
 import { PROFESSIONS } from "models/operator";
+import { getProfIconPath } from "utils/profIcon";
 
 import { languageAtom, useTranslation } from "../../../../../i18n/i18n";
 import {
@@ -172,7 +173,7 @@ const ProfIcon: FC<ProfIconProp> = ({ name, profId, selected, onProfClick, ...re
         <img
           {...restImgProps}
           className="dark:invert-0"
-          src={"/assets/prof-icons/" + profId + ".png"}
+          src={getProfIconPath(profId)}
           alt=""
           title={name}
         />

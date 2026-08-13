@@ -25,6 +25,7 @@ import {
   useLocalizedOperatorName,
   withDefaultRequirements,
 } from '../../../models/operator'
+import { getProfIconPath } from '../../../utils/profIcon'
 import { MasteryIcon } from '../../MasteryIcon'
 import { OperatorAvatar } from '../../OperatorAvatar'
 import { Select } from '../../Select'
@@ -231,7 +232,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
               {info && info.prof !== 'TOKEN' && (
                 <img
                   className="absolute top-0 right-0 w-5 h-5 p-px bg-gray-600 pointer-events-none"
-                  src={'/assets/prof-icons/' + info.prof + '.png'}
+                  src={getProfIconPath(info.prof)}
                   alt={info.prof}
                 />
               )}
