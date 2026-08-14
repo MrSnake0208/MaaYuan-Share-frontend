@@ -5,6 +5,7 @@ import { UseOperationsParams, useOperations } from 'apis/operation'
 import { useAtomValue } from 'jotai'
 import { ComponentType, ReactNode, useEffect, useState } from 'react'
 
+import { sunkEnabledAtom } from 'store/operationPrefs'
 import { neoLayoutAtom } from 'store/pref'
 import { moveSunkOperationsToBottom } from 'store/sunkOperations'
 
@@ -46,6 +47,7 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
   }) => {
     const t = useTranslation()
     const neoLayout = useAtomValue(neoLayoutAtom)
+    const sunkEnabled = useAtomValue(sunkEnabledAtom)
 
     const { operations, total, setSize, isValidating, isReachingEnd } =
       useOperations({
@@ -97,10 +99,9 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
       return normalized.every((t) => itemTags.includes(t))
     })
 
-    const orderedOperations = moveSunkOperationsToBottom(
-      displayedOperations,
-      sunkOperationIds ?? [],
-    )
+    const orderedOperations = sunkEnabled
+      ? moveSunkOperationsToBottom(displayedOperations, sunkOperationIds ?? [])
+      : displayedOperations
 
     const items: ReactNode = neoLayout ? (
       <ul

@@ -20,6 +20,7 @@ import { CardTitle } from 'components/CardTitle'
 import { OperationList } from 'components/OperationList'
 import { OperationSearchInput } from 'components/OperationSearchInput'
 import { OperationSetList } from 'components/OperationSetList'
+import { sunkEnabledAtom } from 'store/operationPrefs'
 import { neoLayoutAtom } from 'store/pref'
 import { sunkOperationIdsAtom } from 'store/sunkOperations'
 
@@ -67,6 +68,7 @@ export const Operations: ComponentType = withSuspensable(() => {
   const { operatorFilter, setOperatorFilter } = useOperatorFilter()
   const [selectedUser, setSelectedUser] = useState<MaaUserInfo>()
   const [neoLayout, setNeoLayout] = useAtom(neoLayoutAtom)
+  const sunkEnabled = useAtomValue(sunkEnabledAtom)
   const sunkOperationIds = useAtomValue(sunkOperationIdsAtom)
   const [tab, setTab] = useState<'operation' | 'operationSet'>('operation')
   const [multiselect, setMultiselect] = useState(false)
@@ -307,7 +309,7 @@ export const Operations: ComponentType = withSuspensable(() => {
             tags={tags}
             multiselect={multiselect}
             showReadStatus
-            sunkOperationIds={sunkOperationIds}
+            sunkOperationIds={sunkEnabled ? sunkOperationIds : []}
             operator={operatorFilter.enabled ? operatorFilter : undefined}
             // 按热度排序时列表前几页的变化不会太频繁，可以不刷新第一页，节省点流量
             revalidateFirstPage={queryParams.orderBy !== 'hot'}

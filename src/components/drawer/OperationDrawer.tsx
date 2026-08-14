@@ -6,6 +6,7 @@ import { SyntheticEvent, lazy } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { withSuspensable } from 'components/Suspensable'
+import { readEnabledAtom, sunkEnabledAtom } from 'store/operationPrefs'
 import {
   readOperationIdsAtom,
   toggleReadOperationAtom,
@@ -34,9 +35,14 @@ const OperationSetViewer = withSuspensable(
 
 const ReadOperationButton = ({ operationId }: { operationId: number }) => {
   const t = useTranslation()
+  const readEnabled = useAtomValue(readEnabledAtom)
   const readOperationIds = useAtomValue(readOperationIdsAtom)
   const toggleReadOperation = useSetAtom(toggleReadOperationAtom)
   const isRead = readOperationIds.includes(operationId)
+
+  if (!readEnabled) {
+    return null
+  }
 
   return (
     <Button
@@ -56,9 +62,14 @@ const ReadOperationButton = ({ operationId }: { operationId: number }) => {
 
 const SunkOperationButton = ({ operationId }: { operationId: number }) => {
   const t = useTranslation()
+  const sunkEnabled = useAtomValue(sunkEnabledAtom)
   const sunkOperationIds = useAtomValue(sunkOperationIdsAtom)
   const toggleSunkOperation = useSetAtom(toggleSunkOperationAtom)
   const isSunk = sunkOperationIds.includes(operationId)
+
+  if (!sunkEnabled) {
+    return null
+  }
 
   return (
     <Button

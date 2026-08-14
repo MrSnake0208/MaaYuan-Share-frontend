@@ -3839,6 +3839,62 @@
         "zh_tw": "沒有匹配的密探"
       }
     },
+    "OnboardingDialog": {
+      "title": {
+        "cn": "欢迎使用 MaaYuan",
+        "zh_tw": "歡迎使用 MaaYuan"
+      },
+      "subtitle": {
+        "cn": "快速了解三个实用功能，按需开启，可在个人信息-偏好设置中随时更改",
+        "zh_tw": "快速了解三個實用功能，按需開啟，可在個人資訊-偏好設定中隨時更改"
+      },
+      "read_title": {
+        "cn": "已读标记",
+        "zh_tw": "已讀標記"
+      },
+      "read_desc": {
+        "cn": "标记已看过的作业，一眼识别新内容",
+        "zh_tw": "標記已看過的作業，一眼識別新內容"
+      },
+      "sink_title": {
+        "cn": "作业沉底",
+        "zh_tw": "作業沉底"
+      },
+      "sink_desc": {
+        "cn": "将不感兴趣的作业沉到列表底部，减少干扰",
+        "zh_tw": "將不感興趣的作業沉到列表底部，減少干擾"
+      },
+      "download_json_title": {
+        "cn": "下载 JSON",
+        "zh_tw": "下載 JSON"
+      },
+      "download_json_desc": {
+        "cn": "一键下载作业 JSON 文件，导入 MAA 使用",
+        "zh_tw": "一鍵下載作業 JSON 檔案，匯入 MAA 使用"
+      },
+      "start": {
+        "cn": "开始使用",
+        "zh_tw": "開始使用"
+      }
+    },
+    "ProfilePreferences": {
+      "title": {
+        "cn": "偏好设置",
+        "zh_tw": "偏好設定"
+      },
+      "read_enabled": {
+        "cn": "已读标记",
+        "zh_tw": "已讀標記"
+      },
+      "sink_enabled": {
+        "cn": "作业沉底",
+        "zh_tw": "作業沉底"
+      },
+      "download_json_enabled": {
+        "cn": "下载 JSON",
+        "zh_tw": "下載 JSON"
+      }
+    },
     "ServerSwitchButton": {
       "switch_site": {
         "cn": "切换站点",

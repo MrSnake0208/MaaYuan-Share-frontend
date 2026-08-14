@@ -9,6 +9,7 @@ import { AccountManager } from 'components/AccountManager'
 import { BackToTop } from 'components/BackToTop'
 import { LanguageSwitcher } from 'components/LanguageSwitcher'
 import { NavExpandButton } from 'components/NavExpandButton'
+import { OnboardingDialog } from 'components/OnboardingDialog'
 import { ServerSwitchButton } from 'components/ServerSwitchButton'
 import { SiteRetireDialog } from 'components/SiteRetireDialog'
 import { ThemeSwitchButton } from 'components/ThemeSwitchButton'
@@ -67,6 +68,7 @@ export const AppLayout: FCC = ({ children }) => {
       </Navbar>
       <NavAside />
       <SiteRetireDialog />
+      <OnboardingDialog />
 
       {isHomePage && (
         <div className="hidden md:block px-4 pt-3 pb-0 mt-14 mb-[-12px]">

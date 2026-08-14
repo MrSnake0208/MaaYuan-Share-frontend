@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Card } from '@blueprintjs/core'
+import { Button, ButtonGroup, Card, Switch } from '@blueprintjs/core'
 
 import { useAtom } from 'jotai'
 import { ComponentType, useState } from 'react'
@@ -8,6 +8,11 @@ import { OperationList } from 'components/OperationList'
 import { OperationSetList } from 'components/OperationSetList'
 import { OperationDrawer } from 'components/drawer/OperationDrawer'
 import { authAtom } from 'store/auth'
+import {
+  downloadJsonEnabledAtom,
+  readEnabledAtom,
+  sunkEnabledAtom,
+} from 'store/operationPrefs'
 
 import { useUserInfo } from '../apis/user'
 import { CardTitle } from '../components/CardTitle'
@@ -26,6 +31,13 @@ const _ProfilePage: ComponentType = () => {
   const { data: userInfo } = useUserInfo({ userId: id, suspense: true })
 
   const [authState, _setAuthState] = useAtom(authAtom)
+  const [readEnabled, setReadEnabled] = useAtom(readEnabledAtom)
+  const [sunkEnabled, setSunkEnabled] = useAtom(sunkEnabledAtom)
+  const [downloadJsonEnabled, setDownloadJsonEnabled] = useAtom(
+    downloadJsonEnabledAtom,
+  )
+
+  const isSelf = authState.userId === id
 
   const [listMode, setListMode] = useState<'operation' | 'operationSet'>(
     'operation',
@@ -79,6 +91,30 @@ const _ProfilePage: ComponentType = () => {
           <Card className="flex flex-col mb-4 space-y-2">
             <CardTitle icon="user">{userInfo?.userName}</CardTitle>
           </Card>
+          {isSelf && (
+            <Card className="flex flex-col mb-4 space-y-2">
+              <CardTitle icon="cog">
+                {t.components.ProfilePreferences.title}
+              </CardTitle>
+              <Switch
+                checked={readEnabled}
+                label={t.components.ProfilePreferences.read_enabled}
+                onChange={(e) => setReadEnabled(e.currentTarget.checked)}
+              />
+              <Switch
+                checked={sunkEnabled}
+                label={t.components.ProfilePreferences.sink_enabled}
+                onChange={(e) => setSunkEnabled(e.currentTarget.checked)}
+              />
+              <Switch
+                checked={downloadJsonEnabled}
+                label={t.components.ProfilePreferences.download_json_enabled}
+                onChange={(e) =>
+                  setDownloadJsonEnabled(e.currentTarget.checked)
+                }
+              />
+            </Card>
+          )}
         </div>
       </div>
 

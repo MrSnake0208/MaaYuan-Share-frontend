@@ -59,6 +59,7 @@ import { EDifficultyLevel } from 'components/entity/ELevel'
 import { OpRatingType, Operation } from 'models/operation'
 import { toShortCode } from 'models/shortCode'
 import { authAtom, isAdmin } from 'store/auth'
+import { downloadJsonEnabledAtom } from 'store/operationPrefs'
 import { getProfIconPath } from 'utils/profIcon'
 import { useCurrentSize } from 'utils/useCurrenSize'
 import { wrapErrorMessage } from 'utils/wrapErrorMessage'
@@ -264,6 +265,7 @@ export const OperationViewer: ComponentType<{
 
     const [auth] = useAtom(authAtom)
     const [shareDialogOpen, setShareDialogOpen] = useState(false)
+    const [downloadJsonEnabled] = useAtom(downloadJsonEnabledAtom)
 
     // make eslint happy: we got Suspense out there
     if (!operation) throw new Error('unreachable')
@@ -347,24 +349,28 @@ export const OperationViewer: ComponentType<{
                   </Popover2>
                 )}
 
-                <Button
-                  icon="download"
-                  text={
-                    isSM
-                      ? undefined
-                      : t.components.viewer.OperationViewer.download_json
-                  }
-                  aria-label={t.components.viewer.OperationViewer.download_json}
-                  onClick={() =>
-                    handleLazyDownloadJSON(
-                      operation.id,
-                      operation.parsedContent.doc.title,
-                      Array.isArray(operation.metadata?.tags)
-                        ? (operation.metadata?.tags as string[])
-                        : undefined,
-                    )
-                  }
-                />
+                {downloadJsonEnabled && (
+                  <Button
+                    icon="download"
+                    text={
+                      isSM
+                        ? undefined
+                        : t.components.viewer.OperationViewer.download_json
+                    }
+                    aria-label={
+                      t.components.viewer.OperationViewer.download_json
+                    }
+                    onClick={() =>
+                      handleLazyDownloadJSON(
+                        operation.id,
+                        operation.parsedContent.doc.title,
+                        Array.isArray(operation.metadata?.tags)
+                          ? (operation.metadata?.tags as string[])
+                          : undefined,
+                      )
+                    }
+                  />
+                )}
 
                 <Button
                   icon="media"

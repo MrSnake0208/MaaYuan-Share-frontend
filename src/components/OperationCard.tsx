@@ -9,6 +9,7 @@ import { copyShortCode, handleLazyDownloadJSON } from 'services/operation'
 import { RelativeTime } from 'components/RelativeTime'
 import { AddToOperationSetButton } from 'components/operation-set/AddToOperationSet'
 import { OpDifficulty, Operation } from 'models/operation'
+import { downloadJsonEnabledAtom, readEnabledAtom } from 'store/operationPrefs'
 import { readOperationIdsAtom } from 'store/readOperations'
 
 import { useLevels } from '../apis/level'
@@ -25,7 +26,12 @@ import { EDifficultyLevel, NeoELevel } from './entity/ELevel'
 
 const ReadOperationTag = ({ operationId }: { operationId: number }) => {
   const t = useTranslation()
+  const readEnabled = useAtomValue(readEnabledAtom)
   const readOperationIds = useAtomValue(readOperationIdsAtom)
+
+  if (!readEnabled) {
+    return null
+  }
 
   return readOperationIds.includes(operationId) ? (
     <Tag minimal intent="success" className="ml-2 shrink-0 font-normal">
@@ -560,6 +566,7 @@ const CardActions = ({
   onSelect?: (operation: Operation, selected: boolean) => void
 }) => {
   const t = useTranslation()
+  const downloadJsonEnabled = useAtomValue(downloadJsonEnabledAtom)
   return selectable ? (
     <Button
       small
@@ -572,29 +579,31 @@ const CardActions = ({
     />
   ) : (
     <div className={clsx('flex gap-1', className)}>
-      <Tooltip2
-        placement="bottom"
-        content={
-          <div className="max-w-sm dark:text-slate-900">
-            {t.components.OperationCard.download_json}
-          </div>
-        }
-      >
-        <Button
-          small
-          icon="download"
-          aria-label={t.components.OperationCard.download_json}
-          onClick={() =>
-            handleLazyDownloadJSON(
-              operation.id,
-              operation.parsedContent.doc.title,
-              Array.isArray(operation.metadata?.tags)
-                ? (operation.metadata?.tags as string[])
-                : undefined,
-            )
+      {downloadJsonEnabled && (
+        <Tooltip2
+          placement="bottom"
+          content={
+            <div className="max-w-sm dark:text-slate-900">
+              {t.components.OperationCard.download_json}
+            </div>
           }
-        />
-      </Tooltip2>
+        >
+          <Button
+            small
+            icon="download"
+            aria-label={t.components.OperationCard.download_json}
+            onClick={() =>
+              handleLazyDownloadJSON(
+                operation.id,
+                operation.parsedContent.doc.title,
+                Array.isArray(operation.metadata?.tags)
+                  ? (operation.metadata?.tags as string[])
+                  : undefined,
+              )
+            }
+          />
+        </Tooltip2>
+      )}
       {/* <Tooltip2
         placement="bottom"
         content={
