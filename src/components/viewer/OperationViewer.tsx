@@ -552,8 +552,8 @@ const OperatorCard: FC<{
   }
 
   return (
-    <div className="relative flex items-start min-w-0">
-      <div className="relative w-[18ch] min-w-0 sm:w-[23ch]">
+    <div className="relative flex items-start justify-center min-w-0 w-[calc(50%_-_1rem)] sm:w-auto">
+      <div className="relative w-[18ch] min-w-0 max-w-full sm:w-[23ch]">
         <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shadow-md mx-auto">
           <OperatorAvatar
             id={info?.id}
