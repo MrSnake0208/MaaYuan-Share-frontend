@@ -729,15 +729,37 @@ export function OperationViewerInner({
   handleRating: (decision: OpRatingType) => Promise<void>
 }) {
   const t = useTranslation()
+
+  // 优先使用后端直出字段；回退到本地映射
+  const levelFromBackend =
+    operation.preLevel ||
+    findLevelByStageName(levels, operation.parsedContent.stageName) ||
+    createCustomLevel(operation.parsedContent.stageName)
+  // 标签显示规则：{catOne} | {name}
+  const displayLevel = {
+    ...levelFromBackend,
+    // 与 OperationCard 保持一致：使用 name 渲染第二部分
+    catTwo: levelFromBackend.name,
+  }
+
   return (
     <div className="h-full overflow-auto p-4 md:p-8">
       <H3>
         {operation.parsedContent.doc.title}
         {operation.status === CopilotInfoStatusEnum.Private && (
-          <Tag minimal className="ml-2 font-normal opacity-75">
+          <Tag minimal className="ml-2 align-middle font-normal opacity-75">
             {t.components.viewer.OperationViewer.private}
           </Tag>
         )}
+        {/* 关卡与难度标签：紧跟作业标题展示；行内流布局避免 flex 换行算法提前折行 */}
+        <span className="ml-2 inline-flex items-center align-middle">
+          <NeoELevel level={displayLevel} />
+          <EDifficulty
+            difficulty={
+              operation.parsedContent.difficulty ?? OpDifficulty.UNKNOWN
+            }
+          />
+        </span>
       </H3>
 
       <div className="flex flex-col-reverse md:grid grid-rows-1 grid-cols-3 gap-2 md:gap-8">
@@ -746,40 +768,16 @@ export function OperationViewerInner({
         </div>
 
         <div className="flex flex-col">
-          <FactItem title={t.components.viewer.OperationViewer.stage}>
-            <div className="flex flex-wrap items-center">
-              <NeoELevel
-                level={(() => {
-                  // 优先使用后端直出字段；回退到本地映射
-                  const levelFromBackend =
-                    operation.preLevel ||
-                    findLevelByStageName(
-                      levels,
-                      operation.parsedContent.stageName,
-                    ) ||
-                    createCustomLevel(operation.parsedContent.stageName)
-                  // 标签显示规则：{catOne} | {name}
-                  const displayLevel = {
-                    ...levelFromBackend,
-                    // 与 OperationCard 保持一致：使用 name 渲染第二部分
-                    catTwo: levelFromBackend.name,
-                  }
-                  return displayLevel
-                })()}
-              />
-              <EDifficulty
-                difficulty={
-                  operation.parsedContent.difficulty ?? OpDifficulty.UNKNOWN
-                }
-              />
-            </div>
-          </FactItem>
-
-          <FactItem className="items-center" title={'作业点赞数'}>
+          <FactItem
+            className="items-center"
+            icon="thumbs-up"
+            title={'作业点赞数'}
+          >
             <Tooltip2 content="o(*≧▽≦)ツ" placement="bottom">
               <Button
                 icon="thumbs-up"
                 text={operation.like}
+                small
                 intent={
                   operation.ratingType === OpRatingType.Like
                     ? 'success'
