@@ -1,31 +1,26 @@
-import { Card } from "@blueprintjs/core";
+import { Card } from '@blueprintjs/core'
 
-import { useLinks } from "hooks/useLinks";
-import { ComponentType } from "react";
+import { useLinks } from 'hooks/useLinks'
+import { ComponentType } from 'react'
 
-import { CardTitle } from "components/CardTitle";
-import { withGlobalErrorBoundary } from "components/GlobalErrorBoundary";
-import { Operations } from "components/Operations";
-import { OperationDrawer } from "components/drawer/OperationDrawer";
-import { OperationEditorLauncher } from "components/editor/OperationEditorLauncher";
-import { OperationSetEditorLauncher } from "components/operation-set/OperationSetEditor";
+import { CardTitle } from 'components/CardTitle'
+import { withGlobalErrorBoundary } from 'components/GlobalErrorBoundary'
+import { Operations } from 'components/Operations'
+import { OperationDrawer } from 'components/drawer/OperationDrawer'
+import { OperationEditorLauncher } from 'components/editor/OperationEditorLauncher'
+import { OperationSetEditorLauncher } from 'components/operation-set/OperationSetEditor'
 
-import AdBannerCarousel from "../components/AdBannerCarousel";
-import { defaultAdBanners } from "../data/ad-banners";
-import { useTranslation } from "../i18n/i18n";
-import { useCurrentSize } from "../utils/useCurrenSize";
+import AdBannerCarousel from '../components/AdBannerCarousel'
+import { defaultAdBanners } from '../data/ad-banners'
+import { useTranslation } from '../i18n/i18n'
+import { useCurrentSize } from '../utils/useCurrenSize'
 
 export const IndexPage: ComponentType = withGlobalErrorBoundary(() => {
-  const { isMD } = useCurrentSize();
-  const t = useTranslation();
-  const { SOCIAL_LINKS } = useLinks();
+  const { isMD } = useCurrentSize()
+  const t = useTranslation()
+  const { SOCIAL_LINKS } = useLinks()
   return (
     <div className="flex flex-col md:flex-row px-4 pb-16 mt-4 md:px-8 md:mt-8 max-w-[96rem] mx-auto">
-      {isMD && (
-        <div className="md:mr-8 mb-4 md:mb-0">
-          <AdBannerCarousel items={defaultAdBanners} />
-        </div>
-      )}
       <div className="md:w-2/3 order-2 md:order-1 mr-0 md:mr-8 mt-4 md:mt-0">
         <Operations />
       </div>
@@ -69,5 +64,5 @@ export const IndexPage: ComponentType = withGlobalErrorBoundary(() => {
 
       <OperationDrawer />
     </div>
-  );
-});
+  )
+})
