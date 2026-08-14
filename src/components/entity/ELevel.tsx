@@ -17,7 +17,8 @@ export const NeoELevel: FC<{
 
   if (isCustomLevel(level)) {
     catOne = t.components.entity.ELevel.custom_level;
-    catTwo = "";
+    // 自定义关卡保留名称（如「自定义关卡 | 任意」），符合调用方的 {catOne} | {name} 显示规则
+    catTwo = level.name;
   }
 
   return (

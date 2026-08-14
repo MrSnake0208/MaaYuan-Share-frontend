@@ -55,8 +55,9 @@ import { RelativeTime } from 'components/RelativeTime'
 import { withSuspensable } from 'components/Suspensable'
 import { AppToaster } from 'components/Toaster'
 import { DrawerLayout } from 'components/drawer/DrawerLayout'
-import { EDifficultyLevel } from 'components/entity/ELevel'
-import { OpRatingType, Operation } from 'models/operation'
+import { EDifficulty } from 'components/entity/EDifficulty'
+import { NeoELevel } from 'components/entity/ELevel'
+import { OpDifficulty, OpRatingType, Operation } from 'models/operation'
 import { toShortCode } from 'models/shortCode'
 import { authAtom, isAdmin } from 'store/auth'
 import { downloadJsonEnabledAtom } from 'store/operationPrefs'
@@ -746,26 +747,32 @@ export function OperationViewerInner({
 
         <div className="flex flex-col">
           <FactItem title={t.components.viewer.OperationViewer.stage}>
-            <EDifficultyLevel
-              level={(() => {
-                // 优先使用后端直出字段；回退到本地映射
-                const levelFromBackend =
-                  operation.preLevel ||
-                  findLevelByStageName(
-                    levels,
-                    operation.parsedContent.stageName,
-                  ) ||
-                  createCustomLevel(operation.parsedContent.stageName)
-                // 标签显示规则：{catOne} | {name}
-                const displayLevel = {
-                  ...levelFromBackend,
-                  // 与 OperationCard 保持一致：使用 name 渲染第二部分
-                  catTwo: levelFromBackend.name,
+            <div className="flex flex-wrap items-center">
+              <NeoELevel
+                level={(() => {
+                  // 优先使用后端直出字段；回退到本地映射
+                  const levelFromBackend =
+                    operation.preLevel ||
+                    findLevelByStageName(
+                      levels,
+                      operation.parsedContent.stageName,
+                    ) ||
+                    createCustomLevel(operation.parsedContent.stageName)
+                  // 标签显示规则：{catOne} | {name}
+                  const displayLevel = {
+                    ...levelFromBackend,
+                    // 与 OperationCard 保持一致：使用 name 渲染第二部分
+                    catTwo: levelFromBackend.name,
+                  }
+                  return displayLevel
+                })()}
+              />
+              <EDifficulty
+                difficulty={
+                  operation.parsedContent.difficulty ?? OpDifficulty.UNKNOWN
                 }
-                return displayLevel
-              })()}
-              difficulty={operation.parsedContent.difficulty}
-            />
+              />
+            </div>
           </FactItem>
 
           <FactItem className="items-center" title={'作业点赞数'}>
