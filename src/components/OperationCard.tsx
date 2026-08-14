@@ -478,7 +478,7 @@ const OperatorTags = ({ operation }: { operation: Operation }) => {
   }
 
   return (
-    <div className="flex flex-nowrap items-start overflow-x-auto">
+    <div className="flex flex-wrap items-start overflow-x-auto">
       {opers?.map((operator, index) => {
         const operatorName = operator.name
         const displayName = getLocalizedOperatorName(operatorName, language)
@@ -494,7 +494,7 @@ const OperatorTags = ({ operation }: { operation: Operation }) => {
           <Tag
             key={`${operatorName}-${index}`}
             minimal
-            className="op-avatar-tag mr-2 last:mr-0 mb-1.5 last:mb-0 inline-flex flex-col items-center gap-1 py-2 px-2"
+            className="op-avatar-tag mr-2 last:mr-0 mb-1.5 last:mb-0 inline-flex shrink-0 flex-col items-center gap-1 py-2 px-2"
           >
             <OperatorAvatar
               name={operatorName}
@@ -545,7 +545,9 @@ const OperatorTags = ({ operation }: { operation: Operation }) => {
               .join(', ') || t.components.OperationCard.no_operators
           }
         >
-          <Tag minimal>[{groupName}]</Tag>
+          <Tag minimal className="shrink-0">
+            [{groupName}]
+          </Tag>
         </Tooltip2>
       ))}
     </div>
