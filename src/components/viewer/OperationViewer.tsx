@@ -768,41 +768,20 @@ export function OperationViewerInner({
             />
           </FactItem>
 
-          <FactItem relaxed className="items-start" title={'作业点赞数'}>
-            <div className="flex items-center mr-2">
-              <Icon icon="thumbs-up" className="mr-1.5" />
-              <span className="tabular-nums text-gray-800 dark:text-slate-100 font-bold">
-                {operation.like}
-              </span>
-            </div>
-
-            <ButtonGroup className="flex items-center ml-2">
-              <Tooltip2 content="o(*≧▽≦)ツ" placement="bottom">
-                <Button
-                  icon="thumbs-up"
-                  intent={
-                    operation.ratingType === OpRatingType.Like
-                      ? 'success'
-                      : 'none'
-                  }
-                  className="mr-2"
-                  active={operation.ratingType === OpRatingType.Like}
-                  onClick={() => handleRating(OpRatingType.Like)}
-                />
-              </Tooltip2>
-              <Tooltip2 content=" ヽ(。>д<)ｐ" placement="bottom">
-                <Button
-                  icon="thumbs-down"
-                  intent={
-                    operation.ratingType === OpRatingType.Dislike
-                      ? 'danger'
-                      : 'none'
-                  }
-                  active={operation.ratingType === OpRatingType.Dislike}
-                  onClick={() => handleRating(OpRatingType.Dislike)}
-                />
-              </Tooltip2>
-            </ButtonGroup>
+          <FactItem className="items-center" title={'作业点赞数'}>
+            <Tooltip2 content="o(*≧▽≦)ツ" placement="bottom">
+              <Button
+                icon="thumbs-up"
+                text={operation.like}
+                intent={
+                  operation.ratingType === OpRatingType.Like
+                    ? 'success'
+                    : 'none'
+                }
+                active={operation.ratingType === OpRatingType.Like}
+                onClick={() => handleRating(OpRatingType.Like)}
+              />
+            </Tooltip2>
           </FactItem>
         </div>
 
