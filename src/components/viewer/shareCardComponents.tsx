@@ -31,7 +31,7 @@ const STAR_LEVELS = [1, 2, 3, 4, 5] as const
 
 function operatorAvatar(operator: OperationShareOperator) {
   return operator.avatarId
-    ? `/assets/operator-avatars/webp96/${operator.avatarId}.webp`
+    ? `/assets/operator-avatars/webp192/${operator.avatarId}.webp`
     : '/assets/operator-avatars/404.webp'
 }
 

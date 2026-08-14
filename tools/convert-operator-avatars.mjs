@@ -1,118 +1,149 @@
-import { mkdir, readFile } from "node:fs/promises";
-import path from "node:path";
-import process from "node:process";
-import { fileURLToPath } from "node:url";
-import sharp from "sharp";
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import process from 'node:process'
+import { fileURLToPath } from 'node:url'
+import sharp from 'sharp'
 
-const toolDir = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(toolDir, "..");
-const avatarsDir = path.join(repoRoot, "public/assets/operator-avatars");
-const operatorsPath = path.join(
+const toolDir = path.dirname(fileURLToPath(import.meta.url))
+const repoRoot = path.resolve(toolDir, '..')
+const avatarsDir = path.join(repoRoot, 'public/assets/operator-avatars')
+const sourceAvatarsDir = path.join(
   repoRoot,
-  "src/models/generated/operators.json",
-);
-const outputSizes = [32, 96];
-const defaultQuality = 80;
-let operators = [];
+  'assets-src/operator-avatars/original',
+)
+const operatorsPath = path.join(repoRoot, 'src/models/generated/operators.json')
+const defaultQuality = 80
+let operators = []
 
 function resolveSourcePath(input) {
-  const normalized = input.replace(/^"(.*)"$/, "$1");
-  const windowsPath = normalized.match(/^([A-Za-z]):[\\/](.*)$/);
+  const normalized = input.replace(/^"(.*)"$/, '$1')
+  const windowsPath = normalized.match(/^([A-Za-z]):[\\/](.*)$/)
 
-  if (process.platform === "linux" && windowsPath) {
+  if (process.platform === 'linux' && windowsPath) {
     return path.posix.join(
-      "/mnt",
+      '/mnt',
       windowsPath[1].toLowerCase(),
-      windowsPath[2].replaceAll("\\", "/"),
-    );
+      windowsPath[2].replaceAll('\\', '/'),
+    )
   }
 
-  return path.resolve(normalized);
+  return path.resolve(normalized)
 }
 
 function getOperatorNameFromFile(filePath) {
   return path
     .basename(filePath, path.extname(filePath))
-    .replace(/^小头像[-_]/, "")
-    .replace(/^头像[-_]/, "");
+    .replace(/^小头像[-_]/, '')
+    .replace(/^头像[-_]/, '')
 }
 
 function findOperator(filePath) {
-  const name = getOperatorNameFromFile(filePath);
+  const name = getOperatorNameFromFile(filePath)
 
   return operators.find(
     (operator) => operator.id === name || operator.name === name,
-  );
+  )
 }
 
 function getQuality() {
-  const qualityArg = process.argv.find((arg) => arg.startsWith("--quality="));
+  const qualityArg = process.argv.find((arg) => arg.startsWith('--quality='))
 
   if (!qualityArg) {
-    return defaultQuality;
+    return defaultQuality
   }
 
-  const quality = Number(qualityArg.split("=")[1]);
+  const quality = Number(qualityArg.split('=')[1])
 
   if (!Number.isInteger(quality) || quality < 1 || quality > 100) {
-    throw new Error("--quality must be an integer from 1 to 100");
+    throw new Error('--quality must be an integer from 1 to 100')
   }
 
-  return quality;
+  return quality
 }
 
 async function convertOne(input, quality) {
-  const sourcePath = resolveSourcePath(input);
-  const operator = findOperator(sourcePath);
+  const sourcePath = resolveSourcePath(input)
+  const operator = findOperator(sourcePath)
 
   if (!operator) {
-    throw new Error(`${input}: cannot match operator from file name`);
+    throw new Error(`${input}: cannot match operator from file name`)
   }
 
-  const metadata = await sharp(sourcePath).metadata();
+  const metadata = await sharp(sourcePath).metadata()
 
   if (metadata.width !== 228 || metadata.height !== 366) {
     console.warn(
       `${operator.name}: source is ${metadata.width}x${metadata.height}, output will be center-cropped.`,
-    );
+    )
   }
 
-  for (const size of outputSizes) {
-    const outputDir = path.join(avatarsDir, `webp${size}`);
-    const outputPath = path.join(outputDir, `${operator.id}.webp`);
+  const preservedSourcePath = path.join(sourceAvatarsDir, `${operator.id}.webp`)
+  await mkdir(sourceAvatarsDir, { recursive: true })
+  await sharp(sourcePath)
+    .webp({ quality: Math.max(90, quality), alphaQuality: 95, effort: 6 })
+    .toFile(preservedSourcePath)
 
-    await mkdir(outputDir, { recursive: true });
-    await sharp(sourcePath)
-      .resize(size, size, { fit: "cover", position: "centre" })
-      .webp({ quality, alphaQuality: 90, effort: 6 })
-      .toFile(outputPath);
+  const outputs = [
+    {
+      size: 96,
+      data: await sharp(preservedSourcePath)
+        .resize(96, 96, { fit: 'cover', position: 'centre' })
+        .webp({ quality, alphaQuality: 90, effort: 6 })
+        .toBuffer(),
+    },
+    {
+      size: 192,
+      data: await sharp(preservedSourcePath)
+        .resize(192, 192, { fit: 'cover', position: 'centre' })
+        .webp({ quality: Math.max(84, quality), alphaQuality: 92, effort: 6 })
+        .toBuffer(),
+    },
+  ]
+  outputs.unshift({
+    size: 32,
+    data: await sharp(outputs[0].data)
+      .resize(32, 32)
+      .webp({
+        quality: Math.max(1, quality - 2),
+        alphaQuality: 88,
+        effort: 6,
+      })
+      .toBuffer(),
+  })
 
-    const outputMetadata = await sharp(outputPath).metadata();
+  for (const { data, size } of outputs) {
+    const outputDir = path.join(avatarsDir, `webp${size}`)
+    const outputPath = path.join(outputDir, `${operator.id}.webp`)
+
+    await mkdir(outputDir, { recursive: true })
+    await writeFile(outputPath, data)
+
+    const outputMetadata = await sharp(outputPath).metadata()
     console.log(
       `${operator.name}: ${path.relative(repoRoot, outputPath)} ${outputMetadata.width}x${outputMetadata.height}`,
-    );
+    )
   }
 }
 
 async function main() {
-  const inputs = process.argv.slice(2).filter((arg) => !arg.startsWith("--"));
-  const quality = getQuality();
-  const operatorsData = JSON.parse(await readFile(operatorsPath, "utf8"));
-  operators = operatorsData.OPERATORS;
+  const inputs = process.argv.slice(2).filter((arg) => !arg.startsWith('--'))
+  const quality = getQuality()
+  const operatorsData = JSON.parse(await readFile(operatorsPath, 'utf8'))
+  operators = operatorsData.OPERATORS
 
   if (inputs.length === 0) {
     console.error(
-      "Usage: node tools/convert-operator-avatars.mjs [--quality=80] <png...>",
-    );
-    process.exit(1);
+      'Usage: node tools/convert-operator-avatars.mjs [--quality=80] <png...>',
+    )
+    process.exit(1)
   }
 
   for (const input of inputs) {
-    await convertOne(input, quality);
+    await convertOne(input, quality)
   }
 }
 
 main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
-  process.exit(1);
-});
+  console.error(error instanceof Error ? error.message : error)
+  process.exit(1)
+})

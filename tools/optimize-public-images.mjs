@@ -27,23 +27,22 @@ const optimizeBanners = async () => {
 
 const optimizeAvatars = async () => {
   const avatarRoot = join(publicRoot, 'assets', 'operator-avatars')
-  const sourceDir = join(avatarRoot, 'webp96')
+  const sourceDir = join(sourceRoot, 'operator-avatars', 'original')
   const output32Dir = join(avatarRoot, 'webp32')
+  const output96Dir = join(avatarRoot, 'webp96')
+  const output192Dir = join(avatarRoot, 'webp192')
   const names = (await readdir(sourceDir)).filter((name) =>
     name.endsWith('.webp'),
   )
 
-  await mkdir(output32Dir, { recursive: true })
+  await Promise.all(
+    [output32Dir, output96Dir, output192Dir].map((directory) =>
+      mkdir(directory, { recursive: true }),
+    ),
+  )
 
   for (const name of names) {
     const sourcePath = join(sourceDir, name)
-    const sourceMetadata = await sharp(sourcePath).metadata()
-    const output32Path = join(output32Dir, name)
-
-    if (sourceMetadata.width === 96 && sourceMetadata.height === 96) {
-      continue
-    }
-
     const output96 = await sharp(sourcePath)
       .resize(96, 96, { fit: 'cover', position: 'centre' })
       .webp({ quality: 80, alphaQuality: 90, effort: 6 })
@@ -54,14 +53,18 @@ const optimizeAvatars = async () => {
       .toBuffer()
 
     await Promise.all([
-      writeFile(sourcePath, output96),
-      writeFile(output32Path, output32),
+      writeFile(join(output32Dir, name), output32),
+      writeFile(join(output96Dir, name), output96),
+      sharp(sourcePath)
+        .resize(192, 192, { fit: 'cover', position: 'centre' })
+        .webp({ quality: 84, alphaQuality: 92, effort: 6 })
+        .toFile(join(output192Dir, name)),
     ])
   }
 
   await sharp(join(sourceRoot, 'operator-avatars', '404.webp'))
-    .resize(96, 96, { fit: 'cover', position: 'centre' })
-    .webp({ quality: 80, alphaQuality: 90, effort: 6 })
+    .resize(192, 192, { fit: 'cover', position: 'centre' })
+    .webp({ quality: 84, alphaQuality: 92, effort: 6 })
     .toFile(join(avatarRoot, '404.webp'))
 }
 
