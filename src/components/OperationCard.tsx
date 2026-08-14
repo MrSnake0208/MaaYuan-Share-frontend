@@ -1,38 +1,38 @@
-import { Button, Card, Elevation, H4, H5, Icon, Tag } from "@blueprintjs/core";
-import { Tooltip2 } from "@blueprintjs/popover2";
+import { Button, Card, Elevation, H4, H5, Icon, Tag } from '@blueprintjs/core'
+import { Tooltip2 } from '@blueprintjs/popover2'
 
-import clsx from "clsx";
-import { useAtomValue } from "jotai";
-import { CopilotInfoStatusEnum } from "maa-copilot-client";
-import { copyShortCode, handleLazyDownloadJSON } from "services/operation";
+import clsx from 'clsx'
+import { useAtomValue } from 'jotai'
+import { CopilotInfoStatusEnum } from 'maa-copilot-client'
+import { copyShortCode, handleLazyDownloadJSON } from 'services/operation'
 
-import { RelativeTime } from "components/RelativeTime";
-import { AddToOperationSetButton } from "components/operation-set/AddToOperationSet";
-import { OpDifficulty, Operation } from "models/operation";
-import { readOperationIdsAtom } from "store/readOperations";
+import { RelativeTime } from 'components/RelativeTime'
+import { AddToOperationSetButton } from 'components/operation-set/AddToOperationSet'
+import { OpDifficulty, Operation } from 'models/operation'
+import { readOperationIdsAtom } from 'store/readOperations'
 
-import { useLevels } from "../apis/level";
-import { languageAtom, useTranslation } from "../i18n/i18n";
-import { createCustomLevel, findLevelByStageName } from "../models/level";
-import { getLocalizedOperatorName } from "../models/operator";
-import { readOperatorStats } from "../utils/operatorStats";
-import { OperatorAvatar } from "./OperatorAvatar";
-import { Paragraphs } from "./Paragraphs";
-import { ReLinkRenderer } from "./ReLink";
-import { UserName } from "./UserName";
-import { EDifficulty } from "./entity/EDifficulty";
-import { EDifficultyLevel, NeoELevel } from "./entity/ELevel";
+import { useLevels } from '../apis/level'
+import { languageAtom, useTranslation } from '../i18n/i18n'
+import { createCustomLevel, findLevelByStageName } from '../models/level'
+import { getLocalizedOperatorName } from '../models/operator'
+import { readOperatorStats } from '../utils/operatorStats'
+import { OperatorAvatar } from './OperatorAvatar'
+import { Paragraphs } from './Paragraphs'
+import { ReLinkRenderer } from './ReLink'
+import { UserName } from './UserName'
+import { EDifficulty } from './entity/EDifficulty'
+import { EDifficultyLevel, NeoELevel } from './entity/ELevel'
 
 const ReadOperationTag = ({ operationId }: { operationId: number }) => {
-  const t = useTranslation();
-  const readOperationIds = useAtomValue(readOperationIdsAtom);
+  const t = useTranslation()
+  const readOperationIds = useAtomValue(readOperationIdsAtom)
 
   return readOperationIds.includes(operationId) ? (
     <Tag minimal intent="success" className="ml-2 shrink-0 font-normal">
       {t.components.OperationCard.read}
     </Tag>
-  ) : null;
-};
+  ) : null
+}
 
 export const NeoOperationCard = ({
   operation,
@@ -41,43 +41,47 @@ export const NeoOperationCard = ({
   showReadStatus,
   onSelect,
 }: {
-  operation: Operation;
-  selectable?: boolean;
-  selected?: boolean;
-  showReadStatus?: boolean;
-  onSelect?: (operation: Operation, selected: boolean) => void;
+  operation: Operation
+  selectable?: boolean
+  selected?: boolean
+  showReadStatus?: boolean
+  onSelect?: (operation: Operation, selected: boolean) => void
 }) => {
-  const t = useTranslation();
-  const { data: levels } = useLevels();
+  const t = useTranslation()
+  const { data: levels } = useLevels()
   const itemTags: string[] = Array.isArray(operation.metadata?.tags)
     ? (operation.metadata?.tags as string[])
-    : [];
-  const hasTag = (name: string) => itemTags.includes(name);
+    : []
+  const hasTag = (name: string) => itemTags.includes(name)
   const sourceType =
     operation.metadata?.sourceType ??
     // 兼容后端 snake_case 字段
-    (operation.metadata as any)?.source_type;
+    (operation.metadata as any)?.source_type
   const sourceLabel =
-    sourceType === "original" ? "【原创】" : sourceType === "repost" ? "【搬运】" : "";
+    sourceType === 'original'
+      ? '【原创】'
+      : sourceType === 'repost'
+        ? '【搬运】'
+        : ''
   const sourceTag =
-    sourceType === "original"
-      ? { label: "原创", color: "#0ca678", marquee: true }
-      : sourceType === "repost"
-        ? { label: "搬运", color: "#0ca678" }
-        : null;
+    sourceType === 'original'
+      ? { label: '原创', color: '#0ca678', marquee: true }
+      : sourceType === 'repost'
+        ? { label: '搬运', color: '#0ca678' }
+        : null
 
   try {
     // 诊断：输出元数据形态与映射结果
     // 注意：临时日志，确认首页列表数据结构
     // eslint-disable-next-line no-console
-    console.debug("[NeoOperationCard]", {
+    console.debug('[NeoOperationCard]', {
       id: operation.id,
       metadata: operation.metadata,
       sourceType,
       sourceLabel,
-    });
+    })
   } catch (error) {
-    void error;
+    void error
   }
 
   return (
@@ -106,7 +110,9 @@ export const NeoOperationCard = ({
                     {t.components.OperationCard.private}
                   </Tag>
                 )}
-                {showReadStatus && <ReadOperationTag operationId={operation.id} />}
+                {showReadStatus && (
+                  <ReadOperationTag operationId={operation.id} />
+                )}
               </H4>
             </Tooltip2>
 
@@ -115,26 +121,31 @@ export const NeoOperationCard = ({
                 // 优先使用后端直出字段（data.cat_one / data.name / ...）
                 const levelFromBackend =
                   operation.preLevel ||
-                  findLevelByStageName(levels, operation.parsedContent.stageName) ||
-                  createCustomLevel(operation.parsedContent.stageName);
+                  findLevelByStageName(
+                    levels,
+                    operation.parsedContent.stageName,
+                  ) ||
+                  createCustomLevel(operation.parsedContent.stageName)
                 // 标签显示规则：{catOne} | {name}
                 const displayLevel = {
                   ...levelFromBackend,
                   // 将原先显示的 catTwo 改为使用 name 字段渲染
                   catTwo: levelFromBackend.name,
-                };
-                return <NeoELevel level={displayLevel} />;
+                }
+                return <NeoELevel level={displayLevel} />
               })()}
 
               <EDifficulty
-                difficulty={operation.parsedContent.difficulty ?? OpDifficulty.UNKNOWN}
+                difficulty={
+                  operation.parsedContent.difficulty ?? OpDifficulty.UNKNOWN
+                }
               />
               {/* 平台标签：仅在拥有对应标签时显示；复用现有标签结构/类名，仅覆盖颜色 */}
               <span className="ml-1 inline-flex items-center gap-1 operation-card-tags">
-                {hasTag("代号鸢") && (
+                {hasTag('代号鸢') && (
                   <Tag
                     className="transition border border-solid !text-xs tracking-tight !px-2 !py-1 !my-1 leading-none !min-h-0 bg-slate-200 border-slate-300 text-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                    style={{ backgroundColor: "#d20f39", color: "#fff" }}
+                    style={{ backgroundColor: '#d20f39', color: '#fff' }}
                   >
                     <div className="flex items-center">
                       <div className="flex whitespace-pre">
@@ -143,10 +154,10 @@ export const NeoOperationCard = ({
                     </div>
                   </Tag>
                 )}
-                {hasTag("如鸢") && (
+                {hasTag('如鸢') && (
                   <Tag
                     className="transition border border-solid !text-xs tracking-tight !px-2 !py-1 !my-1 leading-none !min-h-0 bg-slate-200 border-slate-300 text-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                    style={{ backgroundColor: "#1e66f5", color: "#fff" }}
+                    style={{ backgroundColor: '#1e66f5', color: '#fff' }}
                   >
                     <div className="flex items-center">
                       <div className="flex whitespace-pre">
@@ -158,13 +169,13 @@ export const NeoOperationCard = ({
                 {sourceTag && (
                   <Tag
                     className={clsx(
-                      "transition border border-solid !text-xs tracking-tight !px-2 !py-1 !my-1 leading-none !min-h-0 bg-slate-200 border-slate-300 text-slate-700 dark:bg-slate-900 dark:text-slate-100",
-                      sourceTag.marquee && "operation-tag-gold-marquee",
+                      'transition border border-solid !text-xs tracking-tight !px-2 !py-1 !my-1 leading-none !min-h-0 bg-slate-200 border-slate-300 text-slate-700 dark:bg-slate-900 dark:text-slate-100',
+                      sourceTag.marquee && 'operation-tag-gold-marquee',
                     )}
                     style={
                       sourceTag.marquee
-                        ? { color: "#fff" }
-                        : { backgroundColor: sourceTag.color, color: "#fff" }
+                        ? { color: '#fff' }
+                        : { backgroundColor: sourceTag.color, color: '#fff' }
                     }
                   >
                     <div className="flex items-center">
@@ -211,12 +222,17 @@ export const NeoOperationCard = ({
             <div className="flex">
               <div>
                 <Icon icon="time" className="mr-1.5" />
-                <RelativeTime Tooltip2Props={{ placement: "top" }} moment={operation.uploadTime} />
+                <RelativeTime
+                  Tooltip2Props={{ placement: 'top' }}
+                  moment={operation.uploadTime}
+                />
               </div>
               <div className="flex-1" />
               <div className="text-zinc-500">
                 <Icon icon="user" className="mr-1.5" />
-                <UserName userId={operation.uploaderId}>{operation.uploader}</UserName>
+                <UserName userId={operation.uploaderId}>
+                  {operation.uploader}
+                </UserName>
               </div>
             </div>
           </Card>
@@ -231,46 +247,50 @@ export const NeoOperationCard = ({
         onSelect={onSelect}
       />
     </li>
-  );
-};
+  )
+}
 
 export const OperationCard = ({
   operation,
   showReadStatus,
 }: {
-  operation: Operation;
-  showReadStatus?: boolean;
+  operation: Operation
+  showReadStatus?: boolean
 }) => {
-  const t = useTranslation();
-  const { data: levels } = useLevels();
+  const t = useTranslation()
+  const { data: levels } = useLevels()
   const itemTags: string[] = Array.isArray(operation.metadata?.tags)
     ? (operation.metadata?.tags as string[])
-    : [];
-  const hasTag = (name: string) => itemTags.includes(name);
+    : []
+  const hasTag = (name: string) => itemTags.includes(name)
   const sourceType =
     operation.metadata?.sourceType ??
     // 兼容后端 snake_case 字段
-    (operation.metadata as any)?.source_type;
+    (operation.metadata as any)?.source_type
   const sourceLabel =
-    sourceType === "original" ? "【原创】" : sourceType === "repost" ? "【搬运】" : "";
+    sourceType === 'original'
+      ? '【原创】'
+      : sourceType === 'repost'
+        ? '【搬运】'
+        : ''
   const sourceTag =
-    sourceType === "original"
-      ? { label: "原创", color: "#0ca678", marquee: true }
-      : sourceType === "repost"
-        ? { label: "搬运", color: "#0ca678" }
-        : null;
+    sourceType === 'original'
+      ? { label: '原创', color: '#0ca678', marquee: true }
+      : sourceType === 'repost'
+        ? { label: '搬运', color: '#0ca678' }
+        : null
 
   try {
     // 诊断：输出元数据形态与映射结果
     // eslint-disable-next-line no-console
-    console.debug("[OperationCard]", {
+    console.debug('[OperationCard]', {
       id: operation.id,
       metadata: operation.metadata,
       sourceType,
       sourceLabel,
-    });
+    })
   } catch (error) {
-    void error;
+    void error
   }
 
   return (
@@ -297,7 +317,9 @@ export const OperationCard = ({
                         {t.components.OperationCard.private}
                       </Tag>
                     )}
-                    {showReadStatus && <ReadOperationTag operationId={operation.id} />}
+                    {showReadStatus && (
+                      <ReadOperationTag operationId={operation.id} />
+                    )}
                   </H4>
                 </div>
                 <H5 className="flex items-center text-slate-900 -mt-3">
@@ -305,26 +327,29 @@ export const OperationCard = ({
                     // 优先使用后端直出字段
                     const levelFromBackend =
                       operation.preLevel ||
-                      findLevelByStageName(levels, operation.parsedContent.stageName) ||
-                      createCustomLevel(operation.parsedContent.stageName);
+                      findLevelByStageName(
+                        levels,
+                        operation.parsedContent.stageName,
+                      ) ||
+                      createCustomLevel(operation.parsedContent.stageName)
                     // 标签显示规则：{catOne} | {name}
                     const displayLevel = {
                       ...levelFromBackend,
                       catTwo: levelFromBackend.name,
-                    };
+                    }
                     return (
                       <EDifficultyLevel
                         level={displayLevel}
                         difficulty={operation.parsedContent.difficulty}
                       />
-                    );
+                    )
                   })()}
                   {/* 平台标签：仅在拥有对应标签时显示；复用现有标签结构/类名，仅覆盖颜色 */}
                   <span className="ml-1 inline-flex items-center gap-2 operation-card-tags">
-                    {hasTag("代号鸢") && (
+                    {hasTag('代号鸢') && (
                       <Tag
                         className="transition border border-solid !text-xs tracking-tight !p-1 leading-none !min-h-0 dark:bg-slate-900 dark:text-slate-100"
-                        style={{ backgroundColor: "#d20f39", color: "#fff" }}
+                        style={{ backgroundColor: '#d20f39', color: '#fff' }}
                       >
                         <div className="flex items-center">
                           <div className="flex whitespace-pre">
@@ -333,10 +358,10 @@ export const OperationCard = ({
                         </div>
                       </Tag>
                     )}
-                    {hasTag("如鸢") && (
+                    {hasTag('如鸢') && (
                       <Tag
                         className="transition border border-solid !text-xs tracking-tight !p-1 leading-none !min-h-0 dark:bg-slate-900 dark:text-slate-100"
-                        style={{ backgroundColor: "#1e66f5", color: "#fff" }}
+                        style={{ backgroundColor: '#1e66f5', color: '#fff' }}
                       >
                         <div className="flex items-center">
                           <div className="flex whitespace-pre">
@@ -348,13 +373,16 @@ export const OperationCard = ({
                     {sourceTag && (
                       <Tag
                         className={clsx(
-                          "transition border border-solid !text-xs tracking-tight !p-1 leading-none !min-h-0 dark:bg-slate-900 dark:text-slate-100",
-                          sourceTag.marquee && "operation-tag-gold-marquee",
+                          'transition border border-solid !text-xs tracking-tight !p-1 leading-none !min-h-0 dark:bg-slate-900 dark:text-slate-100',
+                          sourceTag.marquee && 'operation-tag-gold-marquee',
                         )}
                         style={
                           sourceTag.marquee
-                            ? { color: "#fff" }
-                            : { backgroundColor: sourceTag.color, color: "#fff" }
+                            ? { color: '#fff' }
+                            : {
+                                backgroundColor: sourceTag.color,
+                                color: '#fff',
+                              }
                         }
                       >
                         <div className="flex items-center">
@@ -392,14 +420,16 @@ export const OperationCard = ({
                 <div>
                   <Icon icon="time" className="mr-1.5" />
                   <RelativeTime
-                    Tooltip2Props={{ placement: "top" }}
+                    Tooltip2Props={{ placement: 'top' }}
                     moment={operation.uploadTime}
                   />
                 </div>
 
                 <div>
                   <Icon icon="user" className="mr-1.5" />
-                  <UserName userId={operation.uploaderId}>{operation.uploader}</UserName>
+                  <UserName userId={operation.uploaderId}>
+                    {operation.uploader}
+                  </UserName>
                 </div>
               </div>
             </div>
@@ -420,32 +450,39 @@ export const OperationCard = ({
           </Card>
         )}
       />
-      <CardActions className="absolute top-4 xl:top-12 right-[18px]" operation={operation} />
+      <CardActions
+        className="absolute top-4 xl:top-12 right-[18px]"
+        operation={operation}
+      />
     </li>
-  );
-};
+  )
+}
 
 const OperatorTags = ({ operation }: { operation: Operation }) => {
-  const t = useTranslation();
-  const language = useAtomValue(languageAtom);
-  const { opers, groups } = operation.parsedContent;
+  const t = useTranslation()
+  const language = useAtomValue(languageAtom)
+  const { opers, groups } = operation.parsedContent
 
   if (!(opers?.length || groups?.length)) {
-    return <div className="text-gray-500">{t.components.OperationCard.no_records}</div>;
+    return (
+      <div className="text-gray-500">
+        {t.components.OperationCard.no_records}
+      </div>
+    )
   }
 
   return (
     <div className="flex flex-nowrap items-start overflow-x-auto">
       {opers?.map((operator, index) => {
-        const operatorName = operator.name;
-        const displayName = getLocalizedOperatorName(operatorName, language);
-        const stats = readOperatorStats(operator);
-        const starLevel = Math.min(5, Math.max(0, stats.starLevel));
-        const showStar = stats.hasStar;
+        const operatorName = operator.name
+        const displayName = getLocalizedOperatorName(operatorName, language)
+        const stats = readOperatorStats(operator)
+        const starLevel = Math.min(5, Math.max(0, stats.starLevel))
+        const showStar = stats.hasStar
         const baseStatTexts = [
           stats.hasHp ? `血: ${Math.max(0, stats.hp)}` : null,
           stats.hasAttack ? `攻: ${Math.max(0, stats.attack)}` : null,
-        ].filter((text): text is string => Boolean(text));
+        ].filter((text): text is string => Boolean(text))
 
         return (
           <Tag
@@ -453,7 +490,11 @@ const OperatorTags = ({ operation }: { operation: Operation }) => {
             minimal
             className="op-avatar-tag mr-2 last:mr-0 mb-1.5 last:mb-0 inline-flex flex-col items-center gap-1 py-2 px-2"
           >
-            <OperatorAvatar name={operatorName} size="verylarge" className="shrink-0" />
+            <OperatorAvatar
+              name={operatorName}
+              size="verylarge"
+              className="shrink-0"
+            />
             {showStar && (
               <div className="flex items-center justify-center gap-0.5 mb-1.5">
                 {Array.from({ length: 5 }, (_, i) => i + 1).map((n) => (
@@ -463,8 +504,8 @@ const OperatorTags = ({ operation }: { operation: Operation }) => {
                     iconSize={12}
                     className={clsx(
                       n <= starLevel
-                        ? "text-yellow-500 opacity-100"
-                        : "text-gray-500 opacity-40 dark:opacity-30",
+                        ? 'text-yellow-500 opacity-100'
+                        : 'text-gray-500 opacity-40 dark:opacity-30',
                     )}
                   />
                 ))}
@@ -483,7 +524,7 @@ const OperatorTags = ({ operation }: { operation: Operation }) => {
               </div>
             )}
           </Tag>
-        );
+        )
       })}
       {groups?.map(({ name: groupName, opers: groupOpers }, index) => (
         <Tooltip2
@@ -492,16 +533,18 @@ const OperatorTags = ({ operation }: { operation: Operation }) => {
           placement="top"
           content={
             groupOpers
-              ?.map(({ name: operatorName }) => getLocalizedOperatorName(operatorName, language))
-              .join(", ") || t.components.OperationCard.no_operators
+              ?.map(({ name: operatorName }) =>
+                getLocalizedOperatorName(operatorName, language),
+              )
+              .join(', ') || t.components.OperationCard.no_operators
           }
         >
           <Tag minimal>[{groupName}]</Tag>
         </Tooltip2>
       ))}
     </div>
-  );
-};
+  )
+}
 
 const CardActions = ({
   className,
@@ -510,13 +553,13 @@ const CardActions = ({
   selectable,
   onSelect,
 }: {
-  className?: string;
-  operation: Operation;
-  selectable?: boolean;
-  selected?: boolean;
-  onSelect?: (operation: Operation, selected: boolean) => void;
+  className?: string
+  operation: Operation
+  selectable?: boolean
+  selected?: boolean
+  onSelect?: (operation: Operation, selected: boolean) => void
 }) => {
-  const t = useTranslation();
+  const t = useTranslation()
   return selectable ? (
     <Button
       small
@@ -524,11 +567,11 @@ const CardActions = ({
       outlined={!selected}
       intent="primary"
       className="absolute top-4 right-4"
-      icon={selected ? "tick" : "blank"}
+      icon={selected ? 'tick' : 'blank'}
       onClick={() => onSelect?.(operation, !selected)}
     />
   ) : (
-    <div className={clsx("flex gap-1", className)}>
+    <div className={clsx('flex gap-1', className)}>
       <Tooltip2
         placement="bottom"
         content={
@@ -540,6 +583,7 @@ const CardActions = ({
         <Button
           small
           icon="download"
+          aria-label={t.components.OperationCard.download_json}
           onClick={() =>
             handleLazyDownloadJSON(
               operation.id,
@@ -578,7 +622,12 @@ const CardActions = ({
           </div>
         }
       >
-        <Button small icon="clipboard" onClick={() => copyShortCode(operation)} />
+        <Button
+          small
+          icon="clipboard"
+          aria-label={t.components.OperationCard.copy_secret_code}
+          onClick={() => copyShortCode(operation)}
+        />
       </Tooltip2>
       <Tooltip2
         placement="bottom"
@@ -588,8 +637,13 @@ const CardActions = ({
           </div>
         }
       >
-        <AddToOperationSetButton small icon="plus" operationIds={[operation.id]} />
+        <AddToOperationSetButton
+          small
+          icon="plus"
+          aria-label={t.components.OperationCard.add_to_job_set}
+          operationIds={[operation.id]}
+        />
       </Tooltip2>
     </div>
-  );
-};
+  )
+}

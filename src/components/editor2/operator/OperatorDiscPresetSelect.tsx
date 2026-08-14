@@ -108,7 +108,7 @@ function PresetControl({
       popoverProps={{
         placement: 'top',
         popoverClassName:
-          '!rounded-none [&_.bp4-popover2-content]:!p-0 [&_.bp4-menu]:min-w-36 [&_li]:!mb-0',
+          'max-w-[90vw] !rounded-none [&_.bp4-popover2-content]:!p-0 [&_.bp4-menu]:min-w-36 [&_li]:!mb-0',
       }}
     >
       <Button
@@ -128,11 +128,7 @@ export const OperatorDiscPresetSelect: FC<OperatorDiscPresetSelectProps> = memo(
     const t = useTranslation()
     const edit = useEdit()
     const auth = useAtomValue(authAtom)
-    const {
-      data: remotePresets,
-      error,
-      isLoading,
-    } = useOperatorDiscPresets()
+    const { data: remotePresets, error, isLoading } = useOperatorDiscPresets()
     const refreshPresets = useRefreshOperatorDiscPresets()
     const [dialogState, setDialogState] = useState<PresetDialogState>()
     const [presetName, setPresetName] = useState('')
@@ -146,7 +142,9 @@ export const OperatorDiscPresetSelect: FC<OperatorDiscPresetSelectProps> = memo(
       operatorProfile.discs.length,
     )
     const slots = getDiscSlots(operator)
-    const selected = slots.map((slot) => slot.disc) as unknown as DiscPresetSelected
+    const selected = slots.map(
+      (slot) => slot.disc,
+    ) as unknown as DiscPresetSelected
     const confirmed = slots.map((slot) =>
       Boolean(slot.discConfirmed),
     ) as unknown as DiscPresetConfirmed
@@ -181,9 +179,7 @@ export const OperatorDiscPresetSelect: FC<OperatorDiscPresetSelectProps> = memo(
 
     const applyPreset = (preset: UserOperatorDiscPreset) => {
       edit(() => {
-        onChange?.(
-          applyDiscPreset(operator, preset.selected, preset.confirmed),
-        )
+        onChange?.(applyDiscPreset(operator, preset.selected, preset.confirmed))
         return {
           action: 'apply-operator-disc-preset',
           desc: `应用命盘预设：${preset.label}`,
@@ -242,8 +238,7 @@ export const OperatorDiscPresetSelect: FC<OperatorDiscPresetSelectProps> = memo(
         setDeletingPreset(undefined)
         AppToaster.show({
           intent: 'success',
-          message:
-            t.components.editor2.OperatorDiscPresetSelect.delete_success,
+          message: t.components.editor2.OperatorDiscPresetSelect.delete_success,
         })
       } catch (deleteError) {
         AppToaster.show({
@@ -272,13 +267,12 @@ export const OperatorDiscPresetSelect: FC<OperatorDiscPresetSelectProps> = memo(
               placement="top-end"
               usePortal
               content={
-                <Menu className="min-w-48">
+                <Menu className="min-w-48 max-w-[90vw]">
                   <MenuItem
                     icon="floppy-disk"
                     disabled={!canSave}
                     text={
-                      t.components.editor2.OperatorDiscPresetSelect
-                        .save_current
+                      t.components.editor2.OperatorDiscPresetSelect.save_current
                     }
                     onClick={openCreateDialog}
                   />
@@ -343,6 +337,7 @@ export const OperatorDiscPresetSelect: FC<OperatorDiscPresetSelectProps> = memo(
               : t.components.editor2.OperatorDiscPresetSelect.create_title
           }
           onClose={closeDialog}
+          className="!w-[92vw] sm:!w-[500px]"
         >
           <form onSubmit={submitPreset}>
             <DialogBody>
@@ -389,6 +384,7 @@ export const OperatorDiscPresetSelect: FC<OperatorDiscPresetSelectProps> = memo(
           loading={submitting}
           onCancel={() => !submitting && setDeletingPreset(undefined)}
           onConfirm={confirmDeletePreset}
+          className="max-w-[92vw]"
         >
           {t.components.editor2.OperatorDiscPresetSelect.delete_confirm({
             name: deletingPreset?.label ?? '',

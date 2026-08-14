@@ -1,48 +1,56 @@
-import { Button, Card, Icon, Intent } from "@blueprintjs/core";
-import { Popover2 } from "@blueprintjs/popover2";
+import { Button, Card, Icon, Intent } from '@blueprintjs/core'
+import { Popover2 } from '@blueprintjs/popover2'
 
-import clsx from "clsx";
-import { useAtom } from "jotai";
-import { isEqual, omit } from "lodash-es";
-import { FC } from "react";
+import clsx from 'clsx'
+import { useAtom } from 'jotai'
+import { isEqual, omit } from 'lodash-es'
+import { FC } from 'react'
 
-import { AppToaster } from "components/Toaster";
-import { CopilotDocV1 } from "models/copilot.schema";
-import { useLocalizedOperatorName } from "models/operator";
-import { ignoreKeyDic } from "store/useFavGroups";
-import { favOperatorAtom } from "store/useFavOperators";
+import { AppToaster } from 'components/Toaster'
+import { CopilotDocV1 } from 'models/copilot.schema'
+import { useLocalizedOperatorName } from 'models/operator'
+import { ignoreKeyDic } from 'store/useFavGroups'
+import { favOperatorAtom } from 'store/useFavOperators'
 
-import { useTranslation } from "../../../../../i18n/i18n";
-import { OperatorAvatar } from "../../../../OperatorAvatar";
-import { SkillAboutTrigger } from "../SheetOperatorSkillAbout";
-import { useSheet } from "../SheetProvider";
+import { useTranslation } from '../../../../../i18n/i18n'
+import { OperatorAvatar } from '../../../../OperatorAvatar'
+import { SkillAboutTrigger } from '../SheetOperatorSkillAbout'
+import { useSheet } from '../SheetProvider'
 
 export interface SheetOperatorItemProp {
-  name: string;
-  showSkillTrigger?: boolean;
+  name: string
+  showSkillTrigger?: boolean
 }
 
-export const SheetOperatorItem: FC<SheetOperatorItemProp> = ({ name, showSkillTrigger = true }) => {
-  const t = useTranslation();
-  const { existedOperators, existedGroups, submitOperatorInSheet, removeOperator } = useSheet();
-  const [favOperators, setFavOperators] = useAtom(favOperatorAtom);
+export const SheetOperatorItem: FC<SheetOperatorItemProp> = ({
+  name,
+  showSkillTrigger = true,
+}) => {
+  const t = useTranslation()
+  const {
+    existedOperators,
+    existedGroups,
+    submitOperatorInSheet,
+    removeOperator,
+  } = useSheet()
+  const [favOperators, setFavOperators] = useAtom(favOperatorAtom)
 
   const operatorNoneGroupedIndex = existedOperators.findIndex(
     ({ name: existedName }) => existedName === name,
-  );
+  )
   const operatorInGroup = existedGroups
     .map(({ opers }) => opers)
     .flat()
     .filter((item) => !!item)
-    .find(({ name: existedName }) => existedName === name);
-  const selected = operatorNoneGroupedIndex !== -1;
-  const grouped = !!operatorInGroup;
+    .find(({ name: existedName }) => existedName === name)
+  const selected = operatorNoneGroupedIndex !== -1
+  const grouped = !!operatorInGroup
   const operator = existedOperators?.[operatorNoneGroupedIndex] ||
     operatorInGroup ||
     favOperators.find(({ name: exsitedName }) => exsitedName === name) || {
       name,
-    };
-  const selectedInView = selected || grouped;
+    }
+  const selectedInView = selected || grouped
 
   const pinned = isEqual(
     omit(operator, [...ignoreKeyDic]),
@@ -50,60 +58,75 @@ export const SheetOperatorItem: FC<SheetOperatorItemProp> = ({ name, showSkillTr
       favOperators.find(({ name: exsitedName }) => exsitedName === name),
       [...ignoreKeyDic],
     ),
-  );
+  )
 
   const onOperatorSelect = () => {
     if (grouped)
       AppToaster.show({
         message:
-          t.components.editor.operator.sheet.sheetOperator.SheetOperatorItem.operator_in_group({
-            name,
-          }),
+          t.components.editor.operator.sheet.sheetOperator.SheetOperatorItem.operator_in_group(
+            {
+              name,
+            },
+          ),
         intent: Intent.DANGER,
-      });
+      })
     else {
       if (selected) {
-        removeOperator(operatorNoneGroupedIndex);
-      } else submitOperatorInSheet(operator);
+        removeOperator(operatorNoneGroupedIndex)
+      } else submitOperatorInSheet(operator)
     }
-  };
+  }
 
   const updateFavOperator = () => {
-    const { skill, skillUsage, skillTimes, ...rest } = operator;
+    const { skill, skillUsage, skillTimes, ...rest } = operator
     const formattedValue = {
       ...rest,
       skill: skill || 1,
       skillUsage: skillUsage || 0,
       skillTimes:
-        skillUsage === CopilotDocV1.SkillUsageType.ReadyToUseTimes ? skillTimes || 1 : undefined,
-    };
+        skillUsage === CopilotDocV1.SkillUsageType.ReadyToUseTimes
+          ? skillTimes || 1
+          : undefined,
+    }
     setFavOperators([
       ...[...favOperators].filter(({ name }) => name !== formattedValue.name),
       { ...formattedValue },
-    ]);
-    submitOperatorInSheet(formattedValue);
-  };
+    ])
+    submitOperatorInSheet(formattedValue)
+  }
 
   const onPinnedChange = () => {
     if (pinned)
-      setFavOperators([...favOperators].filter(({ name: existedName }) => existedName !== name));
-    else updateFavOperator();
-  };
+      setFavOperators(
+        [...favOperators].filter(
+          ({ name: existedName }) => existedName !== name,
+        ),
+      )
+    else updateFavOperator()
+  }
 
   return (
     <Card
       className={clsx(
-        "flex flex-col items-center justify-start w-full h-full relative cursor-pointer rounded-xl p-2 gap-1 transition-transform duration-150",
-        selectedInView && "scale-[0.96] bg-gray-200",
+        'flex flex-col items-center justify-start w-full h-full relative cursor-pointer rounded-xl p-2 gap-1 transition-transform duration-150',
+        selectedInView && 'scale-[0.96] bg-gray-200',
       )}
       elevation={grouped ? 0 : 2}
       interactive={!selectedInView}
       onClick={onOperatorSelect}
     >
       <>
-        <OperatorAvatar className="mt-1" name={name} size="verylarge" sourceSize={96} />
+        <OperatorAvatar
+          className="mt-1"
+          name={name}
+          size="verylarge"
+          sourceSize={96}
+        />
         <p
-          className={clsx("font-semibold leading-tight text-center text-xs sm:text-sm break-words")}
+          className={clsx(
+            'font-semibold leading-tight text-center text-xs sm:text-sm break-words',
+          )}
         >
           {useLocalizedOperatorName(name)}
         </p>
@@ -117,37 +140,41 @@ export const SheetOperatorItem: FC<SheetOperatorItemProp> = ({ name, showSkillTr
             {(() => {
               const isFavDuplicate = favOperators.find(
                 ({ name: existedName }) => existedName === name,
-              );
+              )
               return (
                 <Popover2
                   // 通过 Portal 渲染并提升层级，保证在浮层灰幕上方
                   usePortal={true}
+                  // 触屏无 hover，改为 click 触发收藏/替换入口，桌面点击同样生效
+                  interactionKind="click"
                   popoverClassName="z-[1600]"
                   portalClassName="z-[1600]"
                   content={
                     <Button minimal onClick={onPinnedChange}>
                       <Icon
-                        icon={pinned ? "pin" : "warning-sign"}
-                        className={clsx(pinned && "-rotate-45")}
+                        icon={pinned ? 'pin' : 'warning-sign'}
+                        className={clsx(pinned && '-rotate-45')}
                       />
                       <span>
                         {pinned
-                          ? t.components.editor.operator.sheet.sheetOperator.SheetOperatorItem
-                              .remove_from_favorites
-                          : t.components.editor.operator.sheet.sheetOperator.SheetOperatorItem
-                              .will_replace_operator}
+                          ? t.components.editor.operator.sheet.sheetOperator
+                              .SheetOperatorItem.remove_from_favorites
+                          : t.components.editor.operator.sheet.sheetOperator
+                              .SheetOperatorItem.will_replace_operator}
                       </span>
                     </Button>
                   }
                   disabled={!pinned && !isFavDuplicate}
                 >
                   <Icon
-                    icon={pinned ? "pin" : "unpin"}
-                    className={clsx(pinned && "-rotate-45")}
-                    onClick={!pinned && !isFavDuplicate ? onPinnedChange : undefined}
+                    icon={pinned ? 'pin' : 'unpin'}
+                    className={clsx(pinned && '-rotate-45')}
+                    onClick={
+                      !pinned && !isFavDuplicate ? onPinnedChange : undefined
+                    }
                   />
                 </Popover2>
-              );
+              )
             })()}
           </div>
         )}
@@ -162,13 +189,20 @@ export const SheetOperatorItem: FC<SheetOperatorItemProp> = ({ name, showSkillTr
         />
       )}
       {grouped && (
-        <div className={clsx("flex mt-1 text-gray-500 items-center text-xs")}>
-          <Icon icon="warning-sign" size={12} className="flex items-center mr-1" />
+        <div className={clsx('flex mt-1 text-gray-500 items-center text-xs')}>
+          <Icon
+            icon="warning-sign"
+            size={12}
+            className="flex items-center mr-1"
+          />
           <p className="font-semibold">
-            {t.components.editor.operator.sheet.sheetOperator.SheetOperatorItem.in_group}
+            {
+              t.components.editor.operator.sheet.sheetOperator.SheetOperatorItem
+                .in_group
+            }
           </p>
         </div>
       )}
     </Card>
-  );
-};
+  )
+}

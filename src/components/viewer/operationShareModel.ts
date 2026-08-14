@@ -730,9 +730,14 @@ export function buildOperationShareUrl(operationId: number, origin: string) {
   return url.toString()
 }
 
+// 浏览器 canvas 导出位图的像素高度上限，超出后部分浏览器（尤其 iOS Safari）会生成失败或空白。
+// 分享图按 1080px 定宽生成（见 shareCardComponents.tsx），长图（多回合/多密探）会很高，
+// 因此按「上限 / 卡片高度」动态降低导出像素比，把最终位图高度压回该阈值以内。
+const MAX_CANVAS_HEIGHT_PX = 16000
+
 export function calculateSharePixelRatio(cardHeight: number) {
   if (!Number.isFinite(cardHeight) || cardHeight <= 0) return 2
-  return Math.max(1, Math.min(2, 16000 / cardHeight))
+  return Math.max(1, Math.min(2, MAX_CANVAS_HEIGHT_PX / cardHeight))
 }
 
 export class ObjectUrlStore {

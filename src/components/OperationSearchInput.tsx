@@ -1,15 +1,15 @@
-import { Button, InputGroup } from "@blueprintjs/core";
+import { Button, InputGroup } from '@blueprintjs/core'
 
-import { useTranslation } from "../i18n/i18n";
+import { useTranslation } from '../i18n/i18n'
 
-const shortCodeCandidatePattern = /^\d{5,6}$/;
+const shortCodeCandidatePattern = /^\d{5,6}$/
 
 interface OperationSearchInputProps {
-  value: string;
-  size: number;
-  onChange: (value: string) => void;
-  onBlur: () => void;
-  onShortCodeSelect: (shortCode: string) => void;
+  value: string
+  size: number
+  onChange: (value: string) => void
+  onBlur: () => void
+  onShortCodeSelect: (shortCode: string) => void
 }
 
 export const OperationSearchInput = ({
@@ -19,13 +19,15 @@ export const OperationSearchInput = ({
   onBlur,
   onShortCodeSelect,
 }: OperationSearchInputProps) => {
-  const t = useTranslation();
-  const shortCodeCandidate = shortCodeCandidatePattern.test(value) ? `maay://${value}` : null;
+  const t = useTranslation()
+  const shortCodeCandidate = shortCodeCandidatePattern.test(value)
+    ? `maay://${value}`
+    : null
 
   return (
     <>
       <InputGroup
-        className="max-w-md [&>input]:!rounded-md"
+        className="w-full sm:max-w-md [&>input]:!rounded-md"
         placeholder={t.components.Operations.search_placeholder}
         leftIcon="search"
         size={size}
@@ -51,5 +53,5 @@ export const OperationSearchInput = ({
         </Button>
       ) : null}
     </>
-  );
-};
+  )
+}

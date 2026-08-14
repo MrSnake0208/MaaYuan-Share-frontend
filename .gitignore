@@ -46,3 +46,5 @@ CLAUDE.md
 .mi.json
 AGENTS.md
 .env.development
+.agent-teams
+docs

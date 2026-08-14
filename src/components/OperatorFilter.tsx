@@ -151,8 +151,10 @@ export const OperatorFilter: FC<OperatorFilterProps> = ({ className, filter, onC
         isOpen={dialogOpen}
         onClose={() => setDialogOpen(false)}
         title={t.components.OperatorFilter.select_operators}
+        className="!w-[92vw] sm:!w-[500px]"
+        style={{ maxHeight: "90vh" }}
       >
-        <DialogBody>
+        <DialogBody className="max-h-[70vh] overflow-y-auto">
           {boxPresetsLoading || boxPresets.length > 0 ? (
             <div className="mb-6 border-b border-gray-200 pb-5 dark:border-gray-700">
               <H6 className="mb-3">{t.components.OperatorFilter.box_presets}</H6>

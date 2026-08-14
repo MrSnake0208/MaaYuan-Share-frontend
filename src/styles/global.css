@@ -7,6 +7,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 全局横向溢出兜底：用小屏编辑器/列表等固定宽控件溢出时阻止整页横向滚动。
+   使用 `clip` 而非 `hidden`：`hidden` 会创建新的滚动容器并破坏 position:sticky
+   （NavAside、首页侧栏等依赖 sticky），`clip` 仅裁剪溢出内容、不建立滚动上下文。 */
+html {
+  overflow-x: clip;
+}
+
 html,
 body,
 #root {

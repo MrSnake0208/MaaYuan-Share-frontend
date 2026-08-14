@@ -26,6 +26,7 @@ import {
   withDefaultRequirements,
 } from '../../../models/operator'
 import { getProfIconPath } from '../../../utils/profIcon'
+import { useCurrentSize } from '../../../utils/useCurrenSize'
 import { MasteryIcon } from '../../MasteryIcon'
 import { OperatorAvatar } from '../../OperatorAvatar'
 import { Select } from '../../Select'
@@ -129,6 +130,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
     listeners,
   }) => {
     const t = useTranslation()
+    const { isMD } = useCurrentSize()
     const displayName = useLocalizedOperatorName(operator.name)
     const setFavOperators = useSetAtom(editorFavOperatorsAtom)
     const info = findOperatorByName(operator.name)
@@ -253,7 +255,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                   type="button"
                   title={`星级 ${n}`}
                   className={clsx(
-                    'w-4 h-4 p-0 inline-flex items-center justify-center',
+                    'w-7 h-7 min-w-7 min-h-7 p-0 inline-flex items-center justify-center',
                     'transition-opacity',
                     filled
                       ? 'opacity-100 text-yellow-500'
@@ -289,7 +291,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
               centerControls ? 'self-center' : 'ml-5',
             )}
           >
-            <ul className="w-[23ch]">
+            <ul className="w-full min-w-0 sm:w-[23ch]">
               {/* 攻击力/生命值（置于命盘上方） */}
               {controlsEnabled && (
                 <li className="flex flex-col gap-1">
@@ -298,7 +300,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                     <NumericInput2
                       intOnly
                       min={0}
-                      buttonPosition="none"
+                      buttonPosition={isMD ? 'right' : 'none'}
                       title={'生命值'}
                       value={Math.max(0, getStats(operator, info?.rarity).hp)}
                       containerClassName="flex-1 min-w-0"
@@ -335,7 +337,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                     <NumericInput2
                       intOnly
                       min={0}
-                      buttonPosition="none"
+                      buttonPosition={isMD ? 'right' : 'none'}
                       title={'攻击力'}
                       value={Math.max(
                         0,
@@ -380,7 +382,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                       intOnly
                       min={OPERATOR_LEVEL_MIN}
                       max={OPERATOR_LEVEL_MAX}
-                      buttonPosition="none"
+                      buttonPosition={isMD ? 'right' : 'none'}
                       title="密探等级"
                       value={clamp(
                         requirements.level ?? OPERATOR_LEVEL_MIN,
@@ -432,7 +434,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                           requirements.level ?? OPERATOR_LEVEL_MIN,
                         ),
                       )}
-                      buttonPosition="none"
+                      buttonPosition={isMD ? 'right' : 'none'}
                       title="密探修为"
                       value={clamp(
                         requirements.elite ?? OPERATOR_ELITE_MIN,
@@ -592,7 +594,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                           popoverProps={{
                             placement: 'top',
                             popoverClassName:
-                              '!rounded-none [&_.bp4-popover2-content]:!p-0 [&_.bp4-menu]:min-w-40 [&_li]:!mb-0',
+                              'max-w-[90vw] !rounded-none [&_.bp4-popover2-content]:!p-0 [&_.bp4-menu]:min-w-40 [&_li]:!mb-0',
                           }}
                         >
                           <Button
@@ -734,14 +736,14 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                           popoverProps={{
                             placement: 'top',
                             popoverClassName:
-                              '!rounded-none [&_.bp4-popover2-content]:!p-0 [&_.bp4-menu]:min-w-20 [&_li]:!mb-0',
+                              'max-w-[90vw] !rounded-none [&_.bp4-popover2-content]:!p-0 [&_.bp4-menu]:min-w-20 [&_li]:!mb-0',
                           }}
                         >
                           <Button
                             small
                             minimal
                             title={discSlots[slot]?.starStone || '选择星石'}
-                            className="w-[4ch] whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600"
+                            className="w-[4ch] min-w-8 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600"
                           >
                             {discSlots[slot]?.starStone || '星石'}
                           </Button>
@@ -804,14 +806,14 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                           popoverProps={{
                             placement: 'top',
                             popoverClassName:
-                              '!rounded-none [&_.bp4-popover2-content]:!p-0 [&_.bp4-menu]:min-w-20 [&_li]:!mb-0',
+                              'max-w-[90vw] !rounded-none [&_.bp4-popover2-content]:!p-0 [&_.bp4-menu]:min-w-20 [&_li]:!mb-0',
                           }}
                         >
                           <Button
                             small
                             minimal
                             title={discSlots[slot]?.assistStar || '选择辅星'}
-                            className="w-[4ch] whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600"
+                            className="w-[4ch] min-w-8 whitespace-nowrap !p-0 px-1 flex items-center justify-center font-serif !font-bold !text-sm !rounded-md !border-2 !border-current bg-slate-200 dark:bg-slate-600"
                           >
                             {discSlots[slot]?.assistStar || '辅星'}
                           </Button>
@@ -1052,7 +1054,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                         })
                       }
                       className={clsx(
-                        'w-4 h-4 !p-0 flex items-center justify-center font-serif !font-bold !text-base !rounded-none !border-2 !border-current',
+                        'w-7 h-7 min-w-7 min-h-7 !p-0 flex items-center justify-center font-serif !font-bold !text-base !rounded-none !border-2 !border-current',
                         (requirements.module ?? CopilotDocV1.Module.Default) !==
                           CopilotDocV1.Module.Default
                           ? '!bg-purple-100 dark:!bg-purple-900 dark:!text-purple-200 !text-purple-800'

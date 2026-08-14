@@ -21,7 +21,7 @@ export const AppLayout: FCC = ({ children }) => {
 
   return (
     <div className="flex flex-col h-full w-full bg-zinc-50 dark:bg-[#2f343c]">
-      <Navbar className="flex w-full px-8 py-2 items-center bg-zinc-100 shadow fixed h-14 z-20 whitespace-nowrap overflow-x-none overflow-y-hidden">
+      <Navbar className="flex w-full px-8 py-2 items-center bg-zinc-100 shadow fixed h-14 z-20 whitespace-nowrap overflow-x-hidden overflow-y-hidden">
         <Link to="/" className="flex items-center hover:no-underline ">
           <div className="select-none text-lg font-bold leading-none">
             MaaYuan Share
@@ -52,12 +52,14 @@ export const AppLayout: FCC = ({ children }) => {
 
         <div className="flex-1" />
 
-        <div className="flex md:gap-4 gap-3">
+        <div className="flex flex-wrap md:gap-4 gap-3 shrink">
           <NavExpandButton />
           <LanguageSwitcher />
+          <div className="md:order-last">
+            <AccountManager />
+          </div>
           <ThemeSwitchButton />
           <ServerSwitchButton />
-          <AccountManager />
         </div>
       </Navbar>
       <NavAside />

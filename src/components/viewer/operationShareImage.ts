@@ -51,6 +51,7 @@ export async function renderOperationShareCardBlob(
     cacheBust: true,
     pixelRatio,
     skipFonts: true,
+    // 与 shareCardComponents.tsx 的 shareCardStyle.width:1080 固定定宽保持一致
     width: 1080,
   })
   if (!blob) throw new Error('图片转换未返回有效内容')

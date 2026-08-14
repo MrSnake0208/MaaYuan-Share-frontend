@@ -18,6 +18,10 @@ export const shareCardPalette = {
   stripe: '#ebe1d2',
 }
 
+// 分享图固定 1080px 定宽：这是生成位图（html-to-image 导出 PNG）的标准做法，
+// 保证主/辅星石、命盘、二维码等内容的字号与列宽按桌面比例稳定渲染，
+// 无移动端断点/双布局。预览与生成共用同一 DOM，宽度必须与
+// operationShareImage.ts 中 toBlob 的 width:1080 保持一致。
 const shareCardStyle: CSSProperties = {
   width: 1080,
   boxSizing: 'border-box',

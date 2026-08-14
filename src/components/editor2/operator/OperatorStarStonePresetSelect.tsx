@@ -134,7 +134,7 @@ function PresetControl<T extends string>({
       popoverProps={{
         placement: 'top',
         popoverClassName:
-          '!rounded-none [&_.bp4-popover2-content]:!p-0 [&_.bp4-menu]:min-w-36 [&_li]:!mb-0',
+          'max-w-[90vw] !rounded-none [&_.bp4-popover2-content]:!p-0 [&_.bp4-menu]:min-w-36 [&_li]:!mb-0',
       }}
     >
       <Button
@@ -389,7 +389,7 @@ export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProp
               placement="top-end"
               usePortal
               content={
-                <Menu className="min-w-48">
+                <Menu className="min-w-48 max-w-[90vw]">
                   <MenuItem
                     icon="floppy-disk"
                     disabled={!canSaveMain}
@@ -452,6 +452,7 @@ export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProp
               : t.components.editor2.OperatorStarStonePresetSelect.create_title
           }
           onClose={closeDialog}
+          className="!w-[92vw] sm:!w-[500px]"
         >
           <form onSubmit={submitPreset}>
             <DialogBody>
@@ -498,6 +499,7 @@ export const OperatorStarStonePresetSelect: FC<OperatorStarStonePresetSelectProp
           confirmButtonText={t.common.delete}
           onCancel={() => setDeletingPreset(undefined)}
           onConfirm={confirmDeletePreset}
+          className="max-w-[92vw]"
         >
           <p>
             {t.components.editor2.OperatorStarStonePresetSelect.delete_confirm({

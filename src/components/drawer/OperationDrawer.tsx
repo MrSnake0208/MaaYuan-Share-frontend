@@ -14,6 +14,7 @@ import {
   sunkOperationIdsAtom,
   toggleSunkOperationAtom,
 } from 'store/sunkOperations'
+import { useCurrentSize } from 'utils/useCurrenSize'
 
 const OperationViewer = withSuspensable(
   lazy(() =>
@@ -83,6 +84,7 @@ const OperationStatusButtons = ({ operationId }: { operationId: number }) => (
 )
 
 export function OperationDrawer() {
+  const { isMD } = useCurrentSize()
   const [searchParams, setSearchParams] = useSearchParams()
   const operationId = +(searchParams.get('op') || NaN) || undefined
   const operationSetId = +(searchParams.get('opset') || NaN) || undefined
@@ -114,7 +116,7 @@ export function OperationDrawer() {
   if (operationSetId) {
     return (
       <Drawer
-        size={DrawerSize.LARGE}
+        size={isMD ? '100%' : DrawerSize.LARGE}
         isOpen={!!operationSetId}
         onClose={closeOperationSet}
       >
@@ -127,7 +129,7 @@ export function OperationDrawer() {
 
         <Drawer
           usePortal={false} // 嵌套 Drawer 时需要关闭 Portal
-          size={DrawerSize.LARGE}
+          size={isMD ? '100%' : DrawerSize.LARGE}
           isOpen={!!operationId}
           onClose={closeOperation}
         >
@@ -147,7 +149,7 @@ export function OperationDrawer() {
 
   return (
     <Drawer
-      size={DrawerSize.LARGE}
+      size={isMD ? '100%' : DrawerSize.LARGE}
       isOpen={!!operationId}
       onClose={closeOperation}
     >

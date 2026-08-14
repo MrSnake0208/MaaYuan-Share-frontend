@@ -238,6 +238,8 @@ body {
 
   .bp4-toast {
     @apply ~'rounded border-none';
+    // 窄屏下限制 Toast 宽度，避免超出视口；触屏上为底部手势区留出边距
+    max-width: calc(100vw - 2rem);
     &.bp4-intent-success {
       @apply ~'bg-emerald-500';
       .bp4-button {

@@ -1,26 +1,35 @@
-import { Button, Tooltip } from "@blueprintjs/core";
-import { useMemo } from "react";
+import { Button, Tooltip } from '@blueprintjs/core'
 
-import { getSiteSwitchInfo } from "../utils/serverSwitch";
+import { useMemo } from 'react'
+
+import { useTranslation } from '../i18n/i18n'
+import { getSiteSwitchInfo } from '../utils/serverSwitch'
+import { useCurrentSize } from '../utils/useCurrenSize'
 
 export const ServerSwitchButton = () => {
-  const { targetSite } = useMemo(() => getSiteSwitchInfo(), []);
+  const { isMD } = useCurrentSize()
+  const t = useTranslation()
+  const { targetSite } = useMemo(() => getSiteSwitchInfo(), [])
 
   if (!targetSite) {
-    return null;
+    return null
   }
 
-  const tooltip = `当前站点不可用时可跳转至：${targetSite}`;
-
   const handleClick = () => {
-    window.location.href = targetSite;
-  };
+    window.location.href = targetSite
+  }
 
   return (
-    <Tooltip content={tooltip}>
-      <Button minimal icon="exchange" onClick={handleClick}>
-        切换站点
-      </Button>
+    <Tooltip
+      content={t.components.ServerSwitchButton.tooltip({ target: targetSite })}
+    >
+      <Button
+        minimal
+        icon="exchange"
+        text={!isMD && t.components.ServerSwitchButton.switch_site}
+        aria-label={t.components.ServerSwitchButton.switch_site}
+        onClick={handleClick}
+      />
     </Tooltip>
-  );
-};
+  )
+}
