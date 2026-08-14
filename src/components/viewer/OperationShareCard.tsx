@@ -114,6 +114,11 @@ export function getOperationShareActionLabel(
     return `${fallenSlot}号位阵亡就重开`
   }
 
+  const birdSlot = action.raw.match(/^重开:检测(\d+)号位鹦鹉$/)?.[1]
+  if (birdSlot) {
+    return `${birdSlot}号位鹦鹉未被复制就重开`
+  }
+
   return `${displayOrder}${action.label}`
 }
 

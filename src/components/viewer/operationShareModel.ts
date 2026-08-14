@@ -447,7 +447,9 @@ function isTargetSwitchAction(raw: string) {
 }
 
 function belongsToOtherShareColumn(raw: string) {
-  return isTargetSwitchAction(raw) || /^重开:检测[1-5]号位阵亡$/.test(raw)
+  return (
+    isTargetSwitchAction(raw) || /^重开:检测[1-5]号位(阵亡|鹦鹉)$/.test(raw)
+  )
 }
 
 export function filterOperationShareActions(

@@ -170,6 +170,16 @@ describe('operation share card styles', () => {
     ).toBe('3号位阵亡就重开')
   })
 
+  it('shows the slot and replication condition in parrot restart labels', () => {
+    expect(
+      getOperationShareActionLabel({
+        raw: '重开:检测2号位鹦鹉',
+        order: 5,
+        label: '检测2号位鹦鹉',
+      }),
+    ).toBe('2号位鹦鹉未被复制就重开')
+  })
+
   it('renumbers visible actions after target switches are hidden', () => {
     const attack = { raw: '1普', order: 2, label: 'A' }
     const round = {
