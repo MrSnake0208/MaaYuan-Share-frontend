@@ -861,22 +861,39 @@ export function OperationViewerInner({
                   operation.metadata?.repostPlatform && (
                     <div className="text-sm">
                       {t.components.editor2.InfoEditor.repost_platform}:{' '}
-                      {operation.metadata.repostPlatform}
+                      {operation.metadata.repostUrl ? (
+                        <a
+                          className="underline hover:no-underline"
+                          href={operation.metadata.repostUrl}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          title={operation.metadata.repostUrl}
+                        >
+                          {operation.metadata.repostPlatform}
+                        </a>
+                      ) : (
+                        operation.metadata.repostPlatform
+                      )}
                     </div>
                   )}
-                {operation.metadata?.repostUrl && (
-                  <div className="text-sm break-all">
-                    {t.components.editor2.InfoEditor.repost_link}:
-                    <a
-                      className="underline hover:no-underline"
-                      href={operation.metadata.repostUrl}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                    >
-                      {operation.metadata.repostUrl}
-                    </a>
-                  </div>
-                )}
+                {/* 平台名已作为链接展示时隐藏长链接行；其余情况（原创来源或旧数据）保留原链接行 */}
+                {operation.metadata?.repostUrl &&
+                  !(
+                    operation.metadata?.sourceType === 'repost' &&
+                    operation.metadata?.repostPlatform
+                  ) && (
+                    <div className="text-sm break-all">
+                      {t.components.editor2.InfoEditor.repost_link}:{' '}
+                      <a
+                        className="underline hover:no-underline"
+                        href={operation.metadata.repostUrl}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
+                        {operation.metadata.repostUrl}
+                      </a>
+                    </div>
+                  )}
               </div>
             </FactItem>
           )}
