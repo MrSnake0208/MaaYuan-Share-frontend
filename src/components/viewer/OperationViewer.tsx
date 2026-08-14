@@ -704,6 +704,20 @@ const OperatorCard: FC<{
   )
 }
 
+// 搬运平台徽章品牌色（Tailwind class 须为字面量，便于 JIT 收录）
+const REPOST_PLATFORM_BADGE: Record<string, string> = {
+  小红书:
+    'border-red-500/40 bg-red-500/10 text-red-600 dark:border-red-400/40 dark:bg-red-400/20 dark:text-red-300',
+  B站: 'border-pink-500/40 bg-pink-500/10 text-pink-600 dark:border-pink-400/40 dark:bg-pink-400/20 dark:text-pink-300',
+  微博: 'border-orange-500/40 bg-orange-500/10 text-orange-600 dark:border-orange-400/40 dark:bg-orange-400/20 dark:text-orange-300',
+  抖音: 'border-slate-500/40 bg-slate-500/10 text-slate-600 dark:border-slate-400/40 dark:bg-slate-400/20 dark:text-slate-200',
+  作业站:
+    'border-teal-500/40 bg-teal-500/10 text-teal-600 dark:border-teal-400/40 dark:bg-teal-400/20 dark:text-teal-300',
+}
+
+const REPOST_PLATFORM_BADGE_DEFAULT =
+  'border-slate-400/40 bg-slate-400/10 text-slate-600 dark:border-slate-500/40 dark:bg-slate-500/20 dark:text-slate-300'
+
 export function OperationViewerInner({
   levels,
   operation,
@@ -826,7 +840,7 @@ export function OperationViewerInner({
             </UserName>
           </FactItem>
 
-          {/* 搬运信息或原创作者填写的来源链接 */}
+          {/* 打法来源：搬运作业仅显示 平台徽章 + 原作者名(链接)；原创作业保留标签与来源链接 */}
           {(operation.metadata?.sourceType === 'repost' ||
             operation.metadata?.repostUrl) && (
             <FactItem
@@ -836,51 +850,84 @@ export function OperationViewerInner({
               icon="share"
             >
               <div className="flex flex-col gap-1 text-gray-800 dark:text-slate-100">
-                <div className="flex items-center gap-2">
-                  <Tag
-                    minimal
-                    intent={
-                      operation.metadata?.sourceType === 'repost'
-                        ? 'warning'
-                        : 'success'
-                    }
-                  >
-                    {operation.metadata?.sourceType === 'repost'
-                      ? t.components.editor2.InfoEditor.source_repost
-                      : t.components.editor2.InfoEditor.source_original}
-                  </Tag>
-                </div>
+                {operation.metadata?.sourceType !== 'repost' && (
+                  <div className="flex items-center gap-2">
+                    <Tag minimal intent="success">
+                      {t.components.editor2.InfoEditor.source_original}
+                    </Tag>
+                  </div>
+                )}
                 {operation.metadata?.sourceType === 'repost' &&
-                  operation.metadata?.repostAuthor && (
-                    <div className="text-sm">
-                      {t.components.editor2.InfoEditor.repost_author}:{' '}
-                      {operation.metadata.repostAuthor}
+                  (operation.metadata?.repostPlatform ||
+                    operation.metadata?.repostAuthor) && (
+                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                      {operation.metadata?.repostPlatform &&
+                        (operation.metadata.repostUrl &&
+                        !operation.metadata?.repostAuthor ? (
+                          <Tooltip2 content={operation.metadata.repostUrl}>
+                            <a
+                              className={clsx(
+                                'inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-xs font-medium leading-none no-underline hover:underline',
+                                REPOST_PLATFORM_BADGE[
+                                  operation.metadata.repostPlatform
+                                ] ?? REPOST_PLATFORM_BADGE_DEFAULT,
+                              )}
+                              href={operation.metadata.repostUrl}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              referrerPolicy="no-referrer"
+                            >
+                              {operation.metadata.repostPlatform}
+                              <Icon
+                                icon="arrow-top-right"
+                                size={10}
+                                className="opacity-80"
+                              />
+                            </a>
+                          </Tooltip2>
+                        ) : (
+                          <span
+                            className={clsx(
+                              'inline-flex items-center rounded border px-1.5 py-0.5 text-xs font-medium leading-none',
+                              REPOST_PLATFORM_BADGE[
+                                operation.metadata.repostPlatform
+                              ] ?? REPOST_PLATFORM_BADGE_DEFAULT,
+                            )}
+                          >
+                            {operation.metadata.repostPlatform}
+                          </span>
+                        ))}
+                      {operation.metadata?.repostAuthor &&
+                        (operation.metadata.repostUrl ? (
+                          <Tooltip2 content={operation.metadata.repostUrl}>
+                            <a
+                              className="inline-flex items-center gap-1 font-medium no-underline hover:underline"
+                              href={operation.metadata.repostUrl}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              referrerPolicy="no-referrer"
+                            >
+                              {operation.metadata.repostAuthor}
+                              <Icon
+                                icon="arrow-top-right"
+                                size={10}
+                                className="opacity-80"
+                              />
+                            </a>
+                          </Tooltip2>
+                        ) : (
+                          <span className="font-medium">
+                            {operation.metadata.repostAuthor}
+                          </span>
+                        ))}
                     </div>
                   )}
-                {operation.metadata?.sourceType === 'repost' &&
-                  operation.metadata?.repostPlatform && (
-                    <div className="text-sm">
-                      {t.components.editor2.InfoEditor.repost_platform}:{' '}
-                      {operation.metadata.repostUrl ? (
-                        <a
-                          className="underline hover:no-underline"
-                          href={operation.metadata.repostUrl}
-                          target="_blank"
-                          rel="noreferrer noopener"
-                          title={operation.metadata.repostUrl}
-                        >
-                          {operation.metadata.repostPlatform}
-                        </a>
-                      ) : (
-                        operation.metadata.repostPlatform
-                      )}
-                    </div>
-                  )}
-                {/* 平台名已作为链接展示时隐藏长链接行；其余情况（原创来源或旧数据）保留原链接行 */}
+                {/* 作者名（或平台徽章）已承载链接时隐藏长链接行；其余情况（原创来源或旧数据）保留原链接行 */}
                 {operation.metadata?.repostUrl &&
                   !(
                     operation.metadata?.sourceType === 'repost' &&
-                    operation.metadata?.repostPlatform
+                    (operation.metadata?.repostPlatform ||
+                      operation.metadata?.repostAuthor)
                   ) && (
                     <div className="text-sm break-all">
                       {t.components.editor2.InfoEditor.repost_link}:{' '}
@@ -889,6 +936,7 @@ export function OperationViewerInner({
                         href={operation.metadata.repostUrl}
                         target="_blank"
                         rel="noreferrer noopener"
+                        referrerPolicy="no-referrer"
                       >
                         {operation.metadata.repostUrl}
                       </a>
