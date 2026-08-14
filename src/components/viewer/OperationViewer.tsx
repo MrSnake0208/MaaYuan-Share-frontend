@@ -762,7 +762,7 @@ export function OperationViewerInner({
         </span>
       </H3>
 
-      <div className="flex flex-col-reverse md:grid grid-rows-1 grid-cols-3 gap-2 md:gap-8">
+      <div className="flex flex-col-reverse md:grid grid-rows-1 grid-cols-3 gap-4 md:gap-8">
         <div className="flex flex-col">
           <Paragraphs content={operation.parsedContent.doc.details} linkify />
         </div>
@@ -790,7 +790,7 @@ export function OperationViewerInner({
           </FactItem>
         </div>
 
-        <div className="flex flex-wrap md:flex-col items-start select-none tabular-nums gap-4">
+        <div className="flex flex-col items-start select-none tabular-nums gap-4">
           <FactItem
             dense
             title={t.components.viewer.OperationViewer.views}
