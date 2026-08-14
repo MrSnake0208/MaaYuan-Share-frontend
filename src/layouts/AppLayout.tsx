@@ -21,18 +21,18 @@ export const AppLayout: FCC = ({ children }) => {
 
   return (
     <div className="flex flex-col h-full w-full bg-zinc-50 dark:bg-[#2f343c]">
-      <Navbar className="flex w-full px-8 py-2 items-center bg-zinc-100 shadow fixed h-14 z-20 whitespace-nowrap overflow-x-hidden overflow-y-hidden">
+      <Navbar className="flex w-full px-4 md:px-8 py-2 items-center bg-zinc-100 shadow fixed h-14 z-20 whitespace-nowrap overflow-x-hidden overflow-y-hidden">
         <Link to="/" className="flex items-center hover:no-underline ">
-          <div className="select-none text-lg font-bold leading-none">
+          <div className="select-none text-base sm:text-lg font-bold leading-none">
             MaaYuan Share
           </div>
 
-          <Tag minimal className="ml-1" intent="warning">
+          <Tag minimal className="ml-1 hidden sm:inline-flex" intent="warning">
             Beta
           </Tag>
         </Link>
 
-        <div className="w-[1px] bg-gray-200 ml-4 mr-2 my-0.5 flex self-stretch" />
+        <div className="w-[1px] bg-gray-200 ml-4 mr-2 my-0.5 hidden sm:flex self-stretch" />
 
         <div className="md:flex items-center hidden">
           {NAV_LINKS.map((link) => (
@@ -52,14 +52,17 @@ export const AppLayout: FCC = ({ children }) => {
 
         <div className="flex-1" />
 
-        <div className="flex flex-wrap md:gap-4 gap-3 shrink">
+        <div className="flex gap-1 sm:gap-3 md:gap-4 shrink-0">
           <NavExpandButton />
           <LanguageSwitcher />
-          <div className="md:order-last">
+          <ThemeSwitchButton />
+          {/* 站点切换仅桌面端显示（移动端可从其他途径使用站点能力，导航保持精简） */}
+          <div className="hidden md:flex">
+            <ServerSwitchButton />
+          </div>
+          <div className="ml-auto">
             <AccountManager />
           </div>
-          <ThemeSwitchButton />
-          <ServerSwitchButton />
         </div>
       </Navbar>
       <NavAside />
