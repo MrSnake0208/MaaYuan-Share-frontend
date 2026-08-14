@@ -107,8 +107,10 @@ export const AccountAuthDialog: ComponentType<{
       icon="user"
       isOpen={open}
       onClose={onClose}
+      className="w-[92vw] max-w-[440px]"
+      style={{ maxHeight: "90vh" }}
     >
-      <div className="flex flex-col p-4 pt-2">
+      <div className="flex max-h-[70vh] flex-col overflow-y-auto p-4 pt-2">
         <GlobalErrorBoundary>
           <Tabs
             // renderActiveTabPanelOnly: avoid autocomplete on inactive panel

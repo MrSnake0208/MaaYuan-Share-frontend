@@ -65,12 +65,13 @@ export const AnnDialog: FC<AnnDialogProps> = ({ sections, ...dialogProps }) => {
 
   return (
     <Dialog
-      className=""
+      className="w-[92vw] max-w-[640px]"
       title={t.components.announcement.AnnDialog.title}
       icon="info-sign"
+      style={{ maxHeight: "90vh" }}
       {...dialogProps}
     >
-      <DialogBody className="">
+      <DialogBody className="max-h-[70vh] overflow-y-auto">
         {content ? (
           <Markdown
             rehypePlugins={[attachMetaPlugin]}

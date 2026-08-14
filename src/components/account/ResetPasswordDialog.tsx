@@ -63,8 +63,10 @@ export const ResetPasswordDialog: FC<ResetPasswordDialogProps> = ({ isOpen, onCl
       icon="key"
       isOpen={isOpen}
       onClose={onClose}
+      className="w-[92vw] max-w-[440px]"
+      style={{ maxHeight: "90vh" }}
     >
-      <div className="p-4 pt-2">
+      <div className="max-h-[70vh] overflow-y-auto p-4 pt-2">
         <GlobalErrorBoundary>
           <form>
             {globalError && (

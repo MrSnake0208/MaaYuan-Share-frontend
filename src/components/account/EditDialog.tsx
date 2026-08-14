@@ -30,8 +30,10 @@ export const EditDialog: FC<EditDialogProps> = ({ isOpen, onClose }) => {
       icon="user"
       isOpen={isOpen}
       onClose={onClose}
+      className="w-[92vw] max-w-[440px]"
+      style={{ maxHeight: "90vh" }}
     >
-      <div className="p-4 pt-2">
+      <div className="max-h-[70vh] overflow-y-auto p-4 pt-2">
         <GlobalErrorBoundary>
           <Tabs
             // renderActiveTabPanelOnly: avoid autocomplete on inactive panel

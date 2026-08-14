@@ -45,6 +45,14 @@
     "close": {
       "cn": "关闭",
       "zh_tw": "關閉"
+    },
+    "filter": {
+      "cn": "筛选",
+      "zh_tw": "篩選"
+    },
+    "collapse": {
+      "cn": "收起",
+      "zh_tw": "收起"
     }
   },
   "apis": {
