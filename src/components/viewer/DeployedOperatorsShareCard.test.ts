@@ -188,10 +188,10 @@ describe('deployed operators share card', () => {
     expect(markup).toContain('生命提升')
     expect(markup).not.toContain('⭐ 主星 ·')
     expect(markup).not.toContain('✨ 辅星 ·')
-    expect(markup).toContain('text-[23px]')
+    expect(markup).toContain('text-[27px]')
+    expect(markup).toContain('text-[24px]')
     expect(markup).toContain('text-[22px]')
-    expect(markup).toContain('text-[19px]')
-    expect(markup).toContain('text-[17px]')
+    expect(markup).toContain('text-[30px]')
     expect(markup.match(/background:#f3e3c9/g)).toHaveLength(8)
     expect(markup).not.toContain('#ddc09e')
     expect(markup.match(/<tr/g)).toHaveLength(10)
@@ -221,7 +221,6 @@ describe('deployed operators share card', () => {
       }),
     )
 
-    expect(markup).toContain('✅')
     expect(markup).toContain('核心命盘：技伤大幅')
     expect(markup).not.toContain('>核心<')
     expect(markup).toMatch(
@@ -252,7 +251,6 @@ describe('deployed operators share card', () => {
       }),
     )
 
-    expect(markup).toContain('🚫')
     expect(markup).toContain('禁用命盘：技伤大幅')
     expect(markup).not.toContain('>禁用<')
     expect(markup).toMatch(

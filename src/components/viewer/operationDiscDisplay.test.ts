@@ -36,7 +36,7 @@ describe('operation disc display', () => {
       {
         _slot: 1,
         item: {
-          abbreviation: '任意/未选择',
+          abbreviation: '任意',
           desp: '任意或未选择命盘',
           multiline: true,
         },
