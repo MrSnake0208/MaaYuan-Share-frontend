@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev
+  workflow_call:
   workflow_dispatch:
 
 concurrency:

@@ -71,3 +71,8 @@ jobs:
     needs: sync-operators
     uses: ./.github/workflows/gce_deploy.yml
     secrets: inherit
+
+  deploy-to-mainland:
+    needs: sync-operators
+    uses: ./.github/workflows/mainland-deploy.yml
+    secrets: inherit
