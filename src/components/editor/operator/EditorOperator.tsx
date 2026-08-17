@@ -27,6 +27,7 @@ const createArbitraryOperator = (name: string): OperatorInfo => ({
   name_en: "",
   prof: "",
   rarity: 0,
+  games: [],
   discs: [],
 });
 

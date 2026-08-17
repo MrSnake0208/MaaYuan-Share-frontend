@@ -16,6 +16,9 @@ ID_OVERRIDES: dict[str, str] = {
     "char_085_shizimiao·fuzhu": "char_085_shizimiaosp",
 }
 
+# 所属游戏选项，必须与前端 src/constants/tags.ts 的 TAGS 词表保持一致
+GAME_OPTIONS = ["如鸢", "代号鸢"]
+
 # 固定职业/子职业枚举，保持与前端 operators.json 结构一致
 PROFESSIONS = [
     {
@@ -128,6 +131,27 @@ def _get_single(value: Any) -> str:
     return text
 
 
+def _get_list(value: Any) -> list[str]:
+    """
+    宽松获取多选字段的全部文本列表，兼容 list[dict[text]] / list[str] / str / None。
+    """
+    if isinstance(value, list):
+        texts = [
+            str(v.get("text", "")).strip()
+            for v in value
+            if isinstance(v, dict) and v.get("text")
+        ]
+        if texts:
+            return texts
+        return [str(v).strip() for v in value if v is not None and str(v).strip()]
+    if isinstance(value, str):
+        return [v.strip() for v in value.split(",") if v.strip()]
+    if isinstance(value, dict):
+        text = str(value.get("text", "")).strip()
+        return [text] if text else []
+    return []
+
+
 def _to_int(value: Any) -> int:
     try:
         return int(str(value).strip())
@@ -177,6 +201,10 @@ def transform_operators(records: list, token: str) -> list:
         prof = _get_single(f.get("属性"))
         sub_prof = _get_single(f.get("职业"))
 
+        # 所属游戏：飞书多选列「所属游戏」，缺省视为两服都有
+        raw_games = _get_list(f.get("所属游戏"))
+        games = [g for g in GAME_OPTIONS if g in raw_games] or list(GAME_OPTIONS)
+
         discs = []
         for i in range(1, 19):
             disc = {}
@@ -216,6 +244,7 @@ def transform_operators(records: list, token: str) -> list:
                 "rarity": rarity,
                 "prof": prof,
                 "subProf": sub_prof,
+                "games": games,
                 "discs": discs,
             }
         )
