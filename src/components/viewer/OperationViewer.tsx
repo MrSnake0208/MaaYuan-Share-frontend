@@ -563,11 +563,11 @@ const OperatorCard: FC<{
             fallback={displayName}
             sourceSize={96}
           />
-          {info && info.prof !== 'TOKEN' && (
+          {info && !info.prof.includes('TOKEN') && (
             <img
               className="absolute top-0 right-0 w-5 h-5 p-px bg-gray-600 rounded-tr-md"
-              src={getProfIconPath(info.prof)}
-              alt={info.prof}
+              src={getProfIconPath(info.prof[0])}
+              alt={info.prof[0]}
             />
           )}
           {module !== CopilotDocV1.Module.Default && (

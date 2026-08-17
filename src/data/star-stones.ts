@@ -79,8 +79,8 @@ export const ASSIST_STAR_DESCRIPTIONS: Record<AssistStarName, string> = {
 }
 
 export interface StarStoneOperatorProfile {
-  prof?: string
-  subProf?: string
+  prof?: string[]
+  subProf?: string[]
 }
 
 export interface StarStoneAvailability {
@@ -136,10 +136,10 @@ const ASSIST_STAR_PROF_RESTRICTIONS: Partial<
 }
 
 function checkRestriction(
-  value: string | undefined,
+  values: string[] | undefined,
   rule: RestrictionRule | undefined,
 ): StarStoneAvailability {
-  if (!rule || (value && rule.allowed.includes(value))) {
+  if (!rule || (values && values.some((value) => rule.allowed.includes(value)))) {
     return AVAILABLE
   }
   return { available: false, reason: rule.reason }

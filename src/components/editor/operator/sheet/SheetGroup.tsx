@@ -78,10 +78,11 @@ const SheetGroup: FC<SheetGroupProps> = () => {
       Object.entries(
         existedOperators.reduce(
           (acc, { name, ...rest }) => {
-            const { prof = "", subProf = "" } =
+            const { prof = [], subProf = [] } =
               OPERATORS.find(({ name: OPERName }) => OPERName === name) || {};
-            const profInfo = PROFESSIONS.find(({ id }) => id === prof);
-            const subProfName = profInfo?.sub?.find(({ id }) => id === subProf)?.name;
+            // 属性/职业已数组化：取第一个命中的属性与职业作为分组依据（双属性取主属性）
+            const profInfo = PROFESSIONS.find(({ id }) => prof.includes(id));
+            const subProfName = profInfo?.sub?.find(({ id }) => subProf.includes(id))?.name;
             const key =
               (profInfo?.name || "其它") + (profInfo?.name ? "-" : "") + (subProfName || "");
             if (!acc[key]) acc[key] = [];

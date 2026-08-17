@@ -19,7 +19,7 @@ describe('star-stone availability rules', () => {
     for (const [star, allowed] of rules) {
       for (const subProf of subProfessions) {
         expect(
-          getMainStarAvailability(star, { subProf }).available,
+          getMainStarAvailability(star, { subProf: [subProf] }).available,
           `${star} availability for ${subProf}`,
         ).toBe(allowed.includes(subProf))
       }
@@ -28,10 +28,10 @@ describe('star-stone availability rules', () => {
 
   it('limits 文昌 by sub-profession and damage stars by profession', () => {
     expect(
-      getAssistStarAvailability('文昌', { subProf: 'qihuang' }).available,
+      getAssistStarAvailability('文昌', { subProf: ['qihuang'] }).available,
     ).toBe(true)
     expect(
-      getAssistStarAvailability('文昌', { subProf: 'shenji' }).available,
+      getAssistStarAvailability('文昌', { subProf: ['shenji'] }).available,
     ).toBe(false)
     const professions = ['地', '水', '火', '风', '阴', '阳', '混沌']
     const rules: Array<[AssistStarName, string[]]> = [
@@ -49,7 +49,7 @@ describe('star-stone availability rules', () => {
     for (const [star, allowed] of rules) {
       for (const prof of professions) {
         expect(
-          getAssistStarAvailability(star, { prof }).available,
+          getAssistStarAvailability(star, { prof: [prof] }).available,
           `${star} availability for ${prof}`,
         ).toBe(allowed.includes(prof))
       }
@@ -77,7 +77,7 @@ describe('star-stone availability rules', () => {
 
     for (const star of unrestricted) {
       expect(
-        getAssistStarAvailability(star, { prof: '混沌' }).available,
+        getAssistStarAvailability(star, { prof: ['混沌'] }).available,
         `${star} should not be limited by profession`,
       ).toBe(true)
     }

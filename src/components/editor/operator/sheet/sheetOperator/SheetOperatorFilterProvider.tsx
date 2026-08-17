@@ -101,8 +101,8 @@ export const useOperatorFilterProvider = () => useContext(OperatorFilterContext)
 const generateCustomizedOperInfo = (name: string): OperatorInfo => ({
   id: "customized-" + name,
   name,
-  prof: "TOKEN",
-  subProf: "customized",
+  prof: ["TOKEN"],
+  subProf: ["customized"],
   name_en: "",
   alias: "customized-operator",
   rarity: 0,
@@ -178,13 +178,15 @@ const useProfFilterHandle = (
       break;
     }
     case DEFAULTPROFID.OTHERS: {
-      operatorsFilteredByProf = OPERATORSWITHINCUSTOMIZED.filter(({ prof }) => prof === "TOKEN");
+      operatorsFilteredByProf = OPERATORSWITHINCUSTOMIZED.filter(({ prof }) =>
+        prof.includes("TOKEN"),
+      );
       break;
     }
 
     default: {
       operatorsFilteredByProf = OPERATORSWITHINCUSTOMIZED.filter(
-        ({ prof: OPERProf }) => OPERProf === prof,
+        ({ prof: OPERProf }) => OPERProf.includes(prof),
       );
       break;
     }
@@ -200,8 +202,8 @@ const useProfFilterHandle = (
       );
     }
     default: {
-      return operatorsFilteredByProf.filter(
-        ({ subProf: operatorSubProf }) => operatorSubProf === subProf,
+      return operatorsFilteredByProf.filter(({ subProf: operatorSubProf }) =>
+        operatorSubProf.includes(subProf),
       );
     }
   }

@@ -198,8 +198,9 @@ def transform_operators(records: list, token: str) -> list:
 
         name = _get_text(f.get("密探名"))
         rarity = _to_int(_get_single(f.get("稀有度")))
-        prof = _get_single(f.get("属性"))
-        sub_prof = _get_single(f.get("职业"))
+        # 属性/职业支持多选（双属性密探，如赵云 = 风+火），输出数组
+        prof = _get_list(f.get("属性"))
+        sub_prof = _get_list(f.get("职业"))
 
         # 所属游戏：飞书多选列「所属游戏」，缺省视为两服都有
         raw_games = _get_list(f.get("所属游戏"))

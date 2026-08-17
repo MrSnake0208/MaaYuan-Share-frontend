@@ -612,7 +612,7 @@ const ActionTarget: FC<{
 
     const operatorInfo = findOperatorByName(name);
     subtitle = operatorInfo
-      ? operatorInfo.prof === "TOKEN"
+      ? operatorInfo.prof.includes("TOKEN")
         ? t.components.editor2.ActionItem.token
         : t.components.editor2.label.opers._item
       : t.components.editor2.ActionItem.unknown_target;

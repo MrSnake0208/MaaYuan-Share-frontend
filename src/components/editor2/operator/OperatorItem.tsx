@@ -231,11 +231,11 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
               >
                 {displayName}
               </h4>
-              {info && info.prof !== 'TOKEN' && (
+              {info && !info.prof.includes('TOKEN') && (
                 <img
                   className="absolute top-0 right-0 w-5 h-5 p-px bg-gray-600 pointer-events-none"
-                  src={getProfIconPath(info.prof)}
-                  alt={info.prof}
+                  src={getProfIconPath(info.prof[0])}
+                  alt={info.prof[0]}
                 />
               )}
             </Card>
