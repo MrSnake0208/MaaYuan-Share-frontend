@@ -9,6 +9,10 @@
       "rarity": 5,
       "prof": "阳",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -82,8 +86,7 @@
           "color": "蓝",
           "desp": "防御时额外使自身防御系数提升10"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_002_jiaxu",
@@ -94,6 +97,10 @@
       "rarity": 5,
       "prof": "阴",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "技能伤害大幅增加",
@@ -167,8 +174,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_003_sunshangxiang",
@@ -179,6 +185,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "全队可以暴击",
@@ -252,8 +262,7 @@
           "color": "蓝",
           "desp": "防御时额外使自身防御系数提升10"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_004_guojia",
@@ -264,6 +273,10 @@
       "rarity": 5,
       "prof": "风",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "普攻变为群体攻击",
@@ -337,8 +350,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_005_lusu",
@@ -349,6 +361,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "普攻伤害大幅增加",
@@ -422,8 +438,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_006_eshi",
@@ -434,6 +449,10 @@
       "rarity": 3,
       "prof": "地",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -507,8 +526,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_007_lvmeng",
@@ -519,6 +537,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -592,8 +614,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_008_huatuo",
@@ -604,6 +625,10 @@
       "rarity": 5,
       "prof": "阳",
       "subProf": "qihuang",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "悬壶济世",
@@ -677,8 +702,7 @@
           "color": "蓝",
           "desp": "防御时额外使自身防御系数提升10"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_009_yanbaihu",
@@ -689,6 +713,10 @@
       "rarity": 4,
       "prof": "阴",
       "subProf": "longdun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "普攻伤害大幅增加",
@@ -762,8 +790,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_010_xuyou",
@@ -774,6 +801,10 @@
       "rarity": 4,
       "prof": "地",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "普攻伤害大幅增加",
@@ -847,8 +878,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_011_wenchou",
@@ -859,6 +889,10 @@
       "rarity": 4,
       "prof": "火",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "普攻伤害大幅增加",
@@ -932,8 +966,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_012_yanliang",
@@ -944,6 +977,10 @@
       "rarity": 4,
       "prof": "水",
       "subProf": "longdun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "最大生命大幅提升",
@@ -1017,8 +1054,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_013_chendeng",
@@ -1029,6 +1065,10 @@
       "rarity": 4,
       "prof": "风",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "最大生命大幅提升",
@@ -1102,8 +1142,7 @@
           "color": "蓝",
           "desp": "防御时额外使自身防御系数提升10"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_014_achan",
@@ -1114,6 +1153,10 @@
       "rarity": 4,
       "prof": "地",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "追击伤害提升",
@@ -1187,8 +1230,7 @@
           "color": "蓝",
           "desp": "防御时额外使自身防御系数提升10"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_015_yanyan",
@@ -1199,6 +1241,10 @@
       "rarity": 3,
       "prof": "地",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -1272,8 +1318,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_016_guanjing",
@@ -1284,6 +1329,10 @@
       "rarity": 3,
       "prof": "水",
       "subProf": "qihuang",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -1357,8 +1406,7 @@
           "color": "蓝",
           "desp": "防御时额外使自身防御系数提升10"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_017_ganti",
@@ -1369,6 +1417,10 @@
       "rarity": 3,
       "prof": "水",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -1442,8 +1494,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_018_yuanshi",
@@ -1454,6 +1505,10 @@
       "rarity": 3,
       "prof": "风",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -1527,8 +1582,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_019_cuilie",
@@ -1539,6 +1593,10 @@
       "rarity": 3,
       "prof": "地",
       "subProf": "longdun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -1612,8 +1670,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加8%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_020_wudan",
@@ -1624,6 +1681,10 @@
       "rarity": 3,
       "prof": "地",
       "subProf": "qihuang",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -1697,8 +1758,7 @@
           "color": "蓝",
           "desp": "防御时额外使自身防御系数提升10"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_021_gaolan",
@@ -1709,6 +1769,10 @@
       "rarity": 3,
       "prof": "风",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -1782,8 +1846,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_022_shanjiu",
@@ -1794,6 +1857,10 @@
       "rarity": 3,
       "prof": "风",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -1867,8 +1934,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_023_shizimiao",
@@ -1879,6 +1945,10 @@
       "rarity": 4,
       "prof": "风",
       "subProf": "qihuang",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "治疗效果大幅提升",
@@ -1952,8 +2022,7 @@
           "color": "蓝",
           "desp": "防御时额外使自身防御系数提升10"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_024_ganji",
@@ -1964,6 +2033,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "攻击力大幅提升",
@@ -2037,8 +2110,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_025_queshi",
@@ -2049,6 +2121,10 @@
       "rarity": 3,
       "prof": "风",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -2122,8 +2198,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_026_suigu",
@@ -2134,6 +2209,10 @@
       "rarity": 3,
       "prof": "风",
       "subProf": "longdun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -2207,8 +2286,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_027_diwutian",
@@ -2219,6 +2297,10 @@
       "rarity": 3,
       "prof": "阳",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -2292,8 +2374,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_028_zhouqun",
@@ -2304,6 +2385,10 @@
       "rarity": 3,
       "prof": "火",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -2377,8 +2462,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_029_xiuqiu",
@@ -2389,6 +2473,10 @@
       "rarity": 3,
       "prof": "风",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -2462,8 +2550,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_030_feiyun",
@@ -2474,6 +2561,10 @@
       "rarity": 3,
       "prof": "火",
       "subProf": "longdun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -2547,8 +2638,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_031_maojie",
@@ -2559,6 +2649,10 @@
       "rarity": 3,
       "prof": "火",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -2632,8 +2726,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_032_lituo",
@@ -2644,6 +2737,10 @@
       "rarity": 3,
       "prof": "地",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -2717,8 +2814,7 @@
           "color": "蓝",
           "desp": "最大生命提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_033_louban",
@@ -2729,6 +2825,10 @@
       "rarity": 3,
       "prof": "风",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -2802,8 +2902,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_034_xuzhi",
@@ -2814,6 +2913,10 @@
       "rarity": 3,
       "prof": "水",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -2887,8 +2990,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加6%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_035_lizhen",
@@ -2899,6 +3001,10 @@
       "rarity": 3,
       "prof": "水",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -2972,8 +3078,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_036_yangfu",
@@ -2984,6 +3089,10 @@
       "rarity": 3,
       "prof": "风",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -3057,8 +3166,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_037_fengshi",
@@ -3069,6 +3177,10 @@
       "rarity": 3,
       "prof": "风",
       "subProf": "longdun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -3142,8 +3254,7 @@
           "color": "蓝",
           "desp": "防御时额外使自身防御系数提升10"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_038_luxun",
@@ -3154,6 +3265,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "敌人较少时提升能力",
@@ -3227,8 +3342,7 @@
           "color": "蓝",
           "desp": "防御时额外使自身防御系数提升10"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_039_guojie",
@@ -3239,6 +3353,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "longdun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "变阵",
@@ -3312,8 +3430,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加8%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_040_sunquan",
@@ -3324,6 +3441,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "longdun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "受击时获得减伤",
@@ -3397,8 +3518,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_041_zhangxiu",
@@ -3409,6 +3529,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "敌人死亡提升攻击",
@@ -3482,8 +3606,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加2%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_042_wangcan",
@@ -3494,6 +3617,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "【同生共死】回合增加",
@@ -3567,8 +3694,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_043_xiaoqiao",
@@ -3579,6 +3705,10 @@
       "rarity": 4,
       "prof": "水",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+2",
@@ -3652,8 +3782,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_044_zhangliao",
@@ -3664,6 +3793,10 @@
       "rarity": 5,
       "prof": "地",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "无路可退",
@@ -3737,8 +3870,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_045_zhangzhongjing",
@@ -3749,6 +3881,10 @@
       "rarity": 5,
       "prof": "地",
       "subProf": "qihuang",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "额外附加济世",
@@ -3822,8 +3958,7 @@
           "color": "蓝",
           "desp": "防御时额外使自身防御系数提升10"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_046_zhouyu",
@@ -3834,6 +3969,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "轻微淡远",
@@ -3907,8 +4046,7 @@
           "color": "蓝",
           "desp": "防御时额外使自身防御系数提升10"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_047_gehong",
@@ -3919,6 +4057,10 @@
       "rarity": 5,
       "prof": "阴",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "技能后防御并回复",
@@ -3992,8 +4134,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_048_xuman",
@@ -4004,6 +4145,10 @@
       "rarity": 4,
       "prof": "阳",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "普攻伤害大幅增加",
@@ -4077,8 +4222,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_049_luji",
@@ -4089,6 +4233,10 @@
       "rarity": 4,
       "prof": "水",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "普攻伤害大幅增加",
@@ -4162,8 +4310,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加18%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_050_xunyu",
@@ -4174,6 +4321,10 @@
       "rarity": 5,
       "prof": "风",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "辟雍三贤",
@@ -4247,8 +4398,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加6%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_051_pangtong",
@@ -4259,6 +4409,10 @@
       "rarity": 5,
       "prof": "阳",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "雅兴内融",
@@ -4332,8 +4486,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_052_caiyan",
@@ -4344,6 +4497,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "【记录】效果延长",
@@ -4417,8 +4574,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_053_zhangfei",
@@ -4429,6 +4585,10 @@
       "rarity": 5,
       "prof": "风",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "断桥横矛",
@@ -4502,8 +4662,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加14%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_054_wangyi",
@@ -4514,6 +4673,10 @@
       "rarity": 4,
       "prof": "风",
       "subProf": "longdun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "普攻伤害大幅增加",
@@ -4587,8 +4750,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_055_xiahoudun",
@@ -4599,6 +4761,10 @@
       "rarity": 5,
       "prof": "地",
       "subProf": "longdun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "拔失啖睛",
@@ -4672,8 +4838,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_056_zhangjiao",
@@ -4684,6 +4849,10 @@
       "rarity": 5,
       "prof": "阴",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "天宫",
@@ -4757,8 +4926,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_057_chengyu",
@@ -4769,6 +4937,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "明哲保身",
@@ -4842,8 +5014,7 @@
           "color": "蓝",
           "desp": "防御时额外使自身防御系数提升10"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_058_machao",
@@ -4854,6 +5025,10 @@
       "rarity": 5,
       "prof": "地",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "【嘲讽】回合提升",
@@ -4927,8 +5102,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_059_taishici",
@@ -4939,6 +5113,10 @@
       "rarity": 5,
       "prof": "风",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "新订单-合力攻击",
@@ -5012,8 +5190,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_060_zhangkai",
@@ -5024,6 +5201,10 @@
       "rarity": 5,
       "prof": "阴",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "技能触发持续伤害",
@@ -5097,8 +5278,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_061_gongsunshan",
@@ -5109,6 +5289,10 @@
       "rarity": 4,
       "prof": "火",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "普攻伤害大幅增加",
@@ -5182,8 +5366,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_062_zhanghe",
@@ -5194,6 +5377,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "火属性密探回复生命",
@@ -5267,8 +5454,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_063_xushu",
@@ -5279,6 +5465,10 @@
       "rarity": 5,
       "prof": "阳",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "谋无遗策",
@@ -5352,8 +5542,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_064_ganning",
@@ -5364,6 +5553,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "掠夺攻击力",
@@ -5437,8 +5630,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_065_zhenfu",
@@ -5449,6 +5641,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "暗线",
@@ -5522,8 +5718,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_066_zhanglu",
@@ -5534,6 +5729,10 @@
       "rarity": 5,
       "prof": "阴",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "斩灭尸",
@@ -5607,8 +5806,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_067_kongrong",
@@ -5619,6 +5817,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "普攻伤害大幅增加",
@@ -5692,8 +5894,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_068_huangyueying",
@@ -5704,6 +5905,10 @@
       "rarity": 5,
       "prof": "阳",
       "subProf": "longdun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "山川妈妈",
@@ -5777,8 +5982,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_069_zhangmiao",
@@ -5789,6 +5993,10 @@
       "rarity": 5,
       "prof": "风",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "风属性密探强化",
@@ -5862,8 +6070,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_070_dongfeng",
@@ -5874,6 +6081,10 @@
       "rarity": 5,
       "prof": "阳",
       "subProf": "qihuang",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "植杏成丛",
@@ -5947,8 +6158,7 @@
           "color": "蓝",
           "desp": "最大生命提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_071_caozhi",
@@ -5959,6 +6169,10 @@
       "rarity": 5,
       "prof": "风",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "技能伤害大幅增加",
@@ -6032,8 +6246,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_072_zhugejin",
@@ -6044,6 +6257,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "深沉穆远",
@@ -6117,8 +6334,7 @@
           "color": "蓝",
           "desp": "技能的伤害系数增加18%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_073_zhugedan",
@@ -6129,6 +6345,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "吹火吐焰",
@@ -6202,8 +6422,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_074_xunyou",
@@ -6214,6 +6433,10 @@
       "rarity": 5,
       "prof": "地",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "于无声处",
@@ -6286,8 +6509,7 @@
           "abbreviation": "血低攻高",
           "color": "蓝"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_075_manchong",
@@ -6298,6 +6520,10 @@
       "rarity": 5,
       "prof": "阴",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "幽明参半",
@@ -6371,8 +6597,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_076_lingtong",
@@ -6383,6 +6608,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+3",
@@ -6456,8 +6685,7 @@
           "color": "蓝",
           "desp": "最大生命提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_077_anqi",
@@ -6468,6 +6696,10 @@
       "rarity": 5,
       "prof": "地",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "我独若遗",
@@ -6541,8 +6773,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_078_xixue",
@@ -6553,6 +6784,10 @@
       "rarity": 5,
       "prof": "地",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+4",
@@ -6626,8 +6861,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_079_liuyao",
@@ -6638,6 +6872,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "兔死狗烹",
@@ -6711,8 +6949,7 @@
           "color": "蓝",
           "desp": "最大生命提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_080_mateng",
@@ -6723,6 +6960,10 @@
       "rarity": 5,
       "prof": "地",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+3",
@@ -6796,8 +7037,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_081_linghumao",
@@ -6808,6 +7048,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "长生亦苦",
@@ -6881,8 +7125,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_082_huanggai",
@@ -6893,6 +7136,10 @@
       "rarity": 5,
       "prof": "阴",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "攻击力大幅提升",
@@ -6966,8 +7213,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_083_zhuran",
@@ -6978,6 +7224,10 @@
       "rarity": 5,
       "prof": "阳",
       "subProf": "longdun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "汤池之固",
@@ -7051,8 +7301,7 @@
           "color": "蓝",
           "desp": "最大生命提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_084_chendengsp",
@@ -7063,6 +7312,10 @@
       "rarity": 5,
       "prof": "阳",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "雨顺物康",
@@ -7136,8 +7389,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_085_shizimiaosp",
@@ -7148,6 +7400,10 @@
       "rarity": 5,
       "prof": "混沌",
       "subProf": "qihuang",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+3",
@@ -7221,8 +7477,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_086_kuaiyue",
@@ -7233,6 +7488,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+3",
@@ -7306,8 +7565,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_087_miheng",
@@ -7318,6 +7576,10 @@
       "rarity": 5,
       "prof": "阳",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+4",
@@ -7391,8 +7653,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_088_liubao",
@@ -7403,6 +7664,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "铁骑",
@@ -7476,8 +7741,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_089_zhangxiu",
@@ -7488,6 +7752,10 @@
       "rarity": 5,
       "prof": "阴",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "攻击力大幅提升",
@@ -7561,8 +7829,7 @@
           "color": "蓝",
           "desp": "普攻的伤害系数增加5%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_090_dongbai",
@@ -7573,6 +7840,10 @@
       "rarity": 5,
       "prof": "地",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "观衅而动",
@@ -7646,8 +7917,7 @@
           "color": "蓝",
           "desp": "最大生命提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_091_zhangzhao",
@@ -7658,6 +7928,10 @@
       "rarity": 5,
       "prof": "风",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+3",
@@ -7731,8 +8005,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_092_chengpu",
@@ -7743,6 +8016,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "幽州肉搏战",
@@ -7816,8 +8093,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_093_shixie",
@@ -7828,6 +8104,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "吃早茶",
@@ -7901,8 +8181,7 @@
           "color": "蓝",
           "desp": "生命値高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_094_yufan",
@@ -7913,6 +8192,10 @@
       "rarity": 5,
       "prof": "阴",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "紧带断腰",
@@ -7986,8 +8269,7 @@
           "color": "蓝",
           "desp": "最大生命提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_095_zhangyan",
@@ -7998,6 +8280,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "啊？",
@@ -8071,8 +8357,7 @@
           "color": "蓝",
           "desp": "最大生命提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_096_xiahouyuan",
@@ -8083,6 +8368,10 @@
       "rarity": 5,
       "prof": "阳",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "出敌不意",
@@ -8156,8 +8445,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_097_zhongyao",
@@ -8168,6 +8456,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "琴砚共依",
@@ -8241,8 +8533,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_098_liuzhang",
@@ -8253,6 +8544,10 @@
       "rarity": 5,
       "prof": "地",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "闭隘",
@@ -8326,8 +8621,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_099_pangxi",
@@ -8338,6 +8632,10 @@
       "rarity": 5,
       "prof": "风",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "羲和",
@@ -8411,8 +8709,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_100_zhouzhong",
@@ -8423,6 +8720,10 @@
       "rarity": 5,
       "prof": "阴",
       "subProf": "qihuang",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "孕蝶",
@@ -8496,8 +8797,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_101_lvbu",
@@ -8508,6 +8808,10 @@
       "rarity": 5,
       "prof": "地",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "辕门射戟",
@@ -8581,8 +8885,7 @@
           "color": "蓝",
           "desp": "攻击力提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_102_jianyong",
@@ -8593,6 +8896,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "普攻伤害中幅增加",
@@ -8666,8 +8973,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_103_caopi",
@@ -8678,6 +8984,10 @@
       "rarity": 5,
       "prof": "风",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "防御时恢复生命",
@@ -8751,8 +9061,7 @@
           "color": "金",
           "desp": "<收割>改为：对当前目标造成300%攻击力的触发伤害并施加1层【流血】（可叠加5层）。【流血】：普攻和触发伤害免伤降低5"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_104_zhugeliang",
@@ -8763,6 +9072,10 @@
       "rarity": 5,
       "prof": "阳",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "飞龙在天",
@@ -8836,8 +9149,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_105_simahui",
@@ -8848,6 +9160,10 @@
       "rarity": 5,
       "prof": "阴",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "皋涂山",
@@ -8921,8 +9237,7 @@
           "color": "蓝",
           "desp": "防御时额外使自身防御系数提升10"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_106_kuailiang",
@@ -8933,6 +9248,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+1",
@@ -9006,8 +9325,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_107_guonvwang",
@@ -9018,6 +9336,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+1",
@@ -9091,8 +9413,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_108_fazheng",
@@ -9103,6 +9424,10 @@
       "rarity": 5,
       "prof": "阴",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "防御时恢复生命",
@@ -9176,8 +9501,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_109_chenqun",
@@ -9188,6 +9512,10 @@
       "rarity": 5,
       "prof": "地",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+1",
@@ -9261,8 +9589,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_110_fenggongzhu",
@@ -9273,6 +9600,10 @@
       "rarity": 5,
       "prof": "阳",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "最大生命大幅提升",
@@ -9346,8 +9677,7 @@
           "color": "蓝",
           "desp": "最大生命提升3%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_111_fenggongjiu",
@@ -9358,6 +9688,10 @@
       "rarity": 5,
       "prof": "阳",
       "subProf": "shenji",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "攻击力大幅提升",
@@ -9431,8 +9765,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_112_pangde",
@@ -9443,6 +9776,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+1",
@@ -9516,8 +9853,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_113_luzhi",
@@ -9528,6 +9864,10 @@
       "rarity": 5,
       "prof": "地",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "防御时恢复生命",
@@ -9601,8 +9941,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_114_chenji",
@@ -9613,6 +9952,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "攻击力大幅提升",
@@ -9686,8 +10029,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_115_chenying",
@@ -9698,6 +10040,10 @@
       "rarity": 5,
       "prof": "风",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "攻击力大幅提升",
@@ -9771,8 +10117,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_119_sunjing",
@@ -9783,6 +10128,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "攻击力大幅提升",
@@ -9856,8 +10205,7 @@
           "color": "蓝",
           "desp": "生命值高于50%时，攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_121_menghuo",
@@ -9868,6 +10216,10 @@
       "rarity": 5,
       "prof": "火",
       "subProf": "qihuang",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "山神丰佑",
@@ -9941,8 +10293,7 @@
           "color": "蓝",
           "desp": "生命值低于50%时，自身攻击力提升10%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_122_zhangsong",
@@ -9953,6 +10304,10 @@
       "rarity": 5,
       "prof": "阳",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "拂秽",
@@ -10026,8 +10381,7 @@
           "color": "紫",
           "desp": "攻击力提升8%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_123_sunfu",
@@ -10038,6 +10392,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "guidao",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "防御时恢复生命",
@@ -10111,8 +10469,7 @@
           "color": "紫",
           "desp": "普攻的伤害系数增加15%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_124_simafu",
@@ -10123,6 +10480,10 @@
       "rarity": 5,
       "prof": "水",
       "subProf": "pojun",
+      "games": [
+        "如鸢",
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "普攻伤害中幅增加",
@@ -10196,8 +10557,7 @@
           "color": "金",
           "desp": "技能效果变更为：对当前目标造成500%攻击力的普攻伤害，并使自身下次普攻伤害必定触发<强刃>"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     },
     {
       "id": "char_125_zhaoyun",
@@ -10208,6 +10568,9 @@
       "rarity": 5,
       "prof": "风",
       "subProf": "pojun",
+      "games": [
+        "代号鸢"
+      ],
       "discs": [
         {
           "ot_name": "初始能量+1",
@@ -10281,8 +10644,7 @@
           "color": "金",
           "desp": "若我方仅有风、火属性密探。我方全体攻击力提升50%，最大生命提升50%"
         }
-      ],
-      "games": ["如鸢", "代号鸢"]
+      ]
     }
   ],
   "PROFESSIONS": [
