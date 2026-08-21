@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest'
 import type { EditorMetadata } from '../components/editor2/types'
 import {
   buildOperationMetadataPayload,
+  containsCJK,
+  removeCJK,
   validateEditorMetadata,
 } from './operationMetadata'
 
@@ -69,6 +71,35 @@ describe('operation metadata', () => {
         createMetadata({ repostUrl: 'https://example.com/profile' }),
       ),
     ).toEqual({ ok: true })
+  })
+
+  it('rejects any provided source URL that contains Chinese (CJK) characters', () => {
+    expect(
+      validateEditorMetadata(
+        createMetadata({ repostUrl: 'https://example.com/中文' }),
+      ),
+    ).toEqual({ ok: false, reason: 'contains-cjk' })
+    expect(
+      validateEditorMetadata(
+        createMetadata({ repostUrl: 'https://例子.com/profile' }),
+      ),
+    ).toEqual({ ok: false, reason: 'contains-cjk' })
+    // 百分号编码后的中文不算中文，应通过
+    expect(
+      validateEditorMetadata(
+        createMetadata({ repostUrl: 'https://example.com/%E4%B8%AD%E6%96%87' }),
+      ),
+    ).toEqual({ ok: true })
+  })
+
+  it('containsCJK / removeCJK treat Chinese characters correctly', () => {
+    expect(containsCJK('https://example.com/中文')).toBe(true)
+    expect(containsCJK('https://example.com/abc')).toBe(false)
+    expect(removeCJK('a中文b象c文')).toBe('abc')
+    // 全角标点不属于汉字（CJK 表意文字），不应被过滤
+    expect(removeCJK('https://example.com/）。。')).toBe(
+      'https://example.com/）。。',
+    )
   })
 
   it('requires the platform ID, platform and platform link for reposts', () => {

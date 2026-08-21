@@ -8,6 +8,17 @@ export type EditorMetadataValidationResult =
   | { ok: true }
   | { ok: false; reason: 'missing'; fields: EditorMetadataField[] }
   | { ok: false; reason: 'invalid-url' }
+  | { ok: false; reason: 'contains-cjk' }
+
+// 中文（CJK 汉字）字符区间：不允许出现在来源链接中
+const CJK_SINGLE = /[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]/
+const CJK_GLOBAL = /[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]/g
+
+export const containsCJK = (value?: string): boolean =>
+  typeof value === 'string' && CJK_SINGLE.test(value)
+
+export const removeCJK = (value: string): string =>
+  value.replace(CJK_GLOBAL, '')
 
 const tidy = (value?: string) => {
   const normalized = value?.trim()
@@ -57,6 +68,10 @@ export function validateEditorMetadata(
       }
     } catch {
       return { ok: false, reason: 'invalid-url' }
+    }
+    // 来源链接不允许包含中文
+    if (containsCJK(sourceUrl)) {
+      return { ok: false, reason: 'contains-cjk' }
     }
   }
 

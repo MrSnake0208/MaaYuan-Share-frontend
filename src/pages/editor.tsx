@@ -125,6 +125,12 @@ export const EditorPage = withSuspensable(() => {
           message: t.pages.editor.validation.metadata_invalid_url,
         };
       }
+      if (validation.reason === "contains-cjk") {
+        return {
+          ok: false as const,
+          message: t.pages.editor.validation.metadata_url_no_cjk,
+        };
+      }
 
       const labels = {
         tags: t.components.editor2.InfoEditor.tags,

@@ -17,6 +17,7 @@ import { Paths } from "type-fest";
 
 import { i18n, useTranslation } from "../../i18n/i18n";
 import { Level, OpDifficulty, Operation } from "../../models/operation";
+import { removeCJK } from "../../services/operationMetadata";
 import { OperatorAvatar } from "../OperatorAvatar";
 import { TagsFilter } from "../TagsFilter";
 import { NumericInput2 } from "../editor/NumericInput2";
@@ -622,6 +623,7 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
             contentClassName="grow"
             label={t.components.editor2.InfoEditor.repost_link}
             labelInfo={isRepost ? "*" : undefined}
+            helperText={t.components.editor2.InfoEditor.repost_link_no_cjk_hint}
           >
             <InputGroup
               large
@@ -631,7 +633,8 @@ export const InfoEditor = memo(({ className, preLevel }: InfoEditorProps) => {
               value={metadata.repostUrl ?? ""}
               disabled={metadataLocked}
               onChange={(e) => {
-                const value = e.target.value;
+                // 来源链接不允许填写中文：输入时直接过滤掉中文（含粘贴）
+                const value = removeCJK(e.target.value);
                 edit(() => {
                   setMetadata((prev) => {
                     prev.repostUrl = value;
