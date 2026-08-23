@@ -56,6 +56,27 @@ describe('operation share model', () => {
     expect(model.rounds).toEqual([])
   })
 
+  it('hides concrete requirements for unrestricted operators', () => {
+    const operation = createOperation()
+    const operator = operation.parsedContent.opers?.[0] as
+      (CopilotDocV1.Operator & { unrestricted?: boolean }) | undefined
+    if (!operator) throw new Error('测试密探不存在')
+    operator.unrestricted = true
+
+    const model = buildOperationShareModel(operation, 'cn')
+
+    expect(model.operators[0]).toMatchObject({
+      starLevel: undefined,
+      attack: undefined,
+      hp: undefined,
+      elite: undefined,
+      level: undefined,
+      skillLevel: undefined,
+      potentiality: undefined,
+      discs: [],
+    })
+  })
+
   it('reads star_level from operation content instead of static rarity', () => {
     const operation = createOperation()
     const operator = operation.parsedContent.opers?.[0] as

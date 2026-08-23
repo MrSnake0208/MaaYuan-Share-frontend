@@ -1041,6 +1041,10 @@
         "skill_not_available": {
           "cn": "当前等级未解锁该技能",
           "zh_tw": "當前等級未解鎖該技能"
+        },
+        "any_requirements": {
+          "cn": "一键任意",
+          "zh_tw": "一鍵任意"
         }
       },
       "OperatorStarStonePresetSelect": {

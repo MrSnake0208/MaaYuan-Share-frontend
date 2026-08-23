@@ -124,4 +124,22 @@ describe('editor source validation', () => {
       ),
     ).toEqual([])
   })
+
+  it('accepts original operators marked as unrestricted without requirement fields', () => {
+    expect(
+      validateOriginalOperatorRequirements(
+        metadata('original'),
+        operation([operator({ unrestricted: true })]),
+      ),
+    ).toEqual([])
+  })
+
+  it('accepts unrestricted operators inside groups', () => {
+    expect(
+      validateOriginalOperatorRequirements(
+        metadata('original'),
+        operation([], [operator({ unrestricted: true })]),
+      ),
+    ).toEqual([])
+  })
 })

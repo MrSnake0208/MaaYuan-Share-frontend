@@ -357,7 +357,7 @@ export function DeployedOperatorsShareCard({
                 minHeight={68}
                 operators={model.operators}
               >
-                {(operator) => operator.level}
+                {(operator) => operator.level ?? '—'}
               </AttributeRow>
               <AttributeRow
                 background={rowBackground}
@@ -365,7 +365,7 @@ export function DeployedOperatorsShareCard({
                 minHeight={68}
                 operators={model.operators}
               >
-                {(operator) => operator.elite}
+                {(operator) => operator.elite ?? '—'}
               </AttributeRow>
               <AttributeRow
                 background={rowBackground}

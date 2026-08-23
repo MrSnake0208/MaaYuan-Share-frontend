@@ -78,6 +78,11 @@ export type EditorOperator = Simplify<
       starLevel?: number;
       attack?: number;
       hp?: number;
+      /**
+       * 该密探不限制练度/命盘/星石。
+       * 用于原创作业校验豁免，并让分享图/查看器知道不应展示具体练度要求。
+       */
+      unrestricted?: boolean;
       // 统一扩展容器（v1）：承载命盘/星石/辅星与基础数值，Editor-only
       extensions?: EditorOperatorExtensionsV1;
     }

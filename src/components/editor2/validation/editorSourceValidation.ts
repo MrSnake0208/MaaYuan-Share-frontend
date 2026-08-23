@@ -23,6 +23,10 @@ export function validateOriginalOperatorRequirements(
   ]
 
   return operators.flatMap((operator) => {
+    if (operator.unrestricted) {
+      return []
+    }
+
     const fields: OriginalOperatorRequiredField[] = []
     const starLevel =
       operator.extensions?.stats?.starLevel ?? operator.starLevel ?? 0

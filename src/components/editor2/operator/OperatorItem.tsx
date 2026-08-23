@@ -43,6 +43,7 @@ import {
   OPERATOR_ELITE_MIN,
   OPERATOR_LEVEL_MAX,
   OPERATOR_LEVEL_MIN,
+  applyAnyRequirements,
   getMaxEliteForLevel,
 } from './operatorRequirementModel'
 
@@ -94,6 +95,7 @@ function setStats(
   const nextStats = { ...prevStats, ...updates }
   const next: EditorOperator = {
     ...operator,
+    unrestricted: false,
     // 同步原方案根级字段，便于回退与导出
     ...(updates.starLevel !== undefined
       ? { starLevel: updates.starLevel }
@@ -281,6 +283,25 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
               )
             })}
           </div>
+          <div className="mt-1 flex items-center justify-center">
+            <Button
+              small
+              minimal
+              onClick={() =>
+                edit(() => {
+                  const next = applyAnyRequirements(operator)
+                  onChange?.(next)
+                  return {
+                    action: 'apply-operator-any-requirements',
+                    desc: '设置密探任意练度/命盘/星石',
+                    squashBy: operator.id,
+                  }
+                })
+              }
+            >
+              {t.components.editor2.OperatorItem.any_requirements}
+            </Button>
+          </div>
         </div>
 
         {/* Skills & Module controls */}
@@ -407,6 +428,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                           )
                           const next: EditorOperator = {
                             ...operator,
+                            unrestricted: false,
                             requirements: {
                               ...operator.requirements,
                               level,
@@ -460,6 +482,7 @@ export const OperatorItem: FC<OperatorItemProps> = memo(
                           )
                           const next: EditorOperator = {
                             ...operator,
+                            unrestricted: false,
                             requirements: {
                               ...operator.requirements,
                               elite,

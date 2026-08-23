@@ -23,10 +23,10 @@ export interface OperationShareOperator {
   attack?: number
   hp?: number
   skill?: number
-  elite: number
-  level: number
-  skillLevel: number
-  potentiality: number
+  elite?: number
+  level?: number
+  skillLevel?: number
+  potentiality?: number
   module?: string
   discs: OperationShareDisc[]
 }
@@ -554,6 +554,30 @@ function mapOperator(
   slot?: number,
 ): OperationShareOperator {
   const info = OPERATORS.find((candidate) => candidate.name === operator.name)
+  const unrestricted = Boolean(
+    (operator as CopilotDocV1.Operator & { unrestricted?: unknown })
+      .unrestricted,
+  )
+
+  if (unrestricted) {
+    return {
+      slot,
+      name: getLocalizedOperatorName(operator.name, language),
+      rawName: operator.name,
+      avatarId: info?.id,
+      starLevel: undefined,
+      attack: undefined,
+      hp: undefined,
+      skill: operator.skill,
+      elite: undefined,
+      level: undefined,
+      skillLevel: undefined,
+      potentiality: undefined,
+      module: undefined,
+      discs: [],
+    }
+  }
+
   const requirements = withDefaultRequirements(
     operator.requirements,
     info?.rarity,

@@ -463,6 +463,9 @@ const OperatorCard: FC<{
   const t = useTranslation()
   const displayName = useLocalizedOperatorName(operator.name)
   const info = OPERATORS.find((o) => o.name === operator.name)
+  const unrestricted = Boolean(
+    (operator as { unrestricted?: unknown }).unrestricted,
+  )
   const { module } = withDefaultRequirements(
     operator.requirements,
     info?.rarity,
@@ -533,9 +536,11 @@ const OperatorCard: FC<{
   const discList = (info as any)?.discs ?? []
   const slots = getDiscSlots(operator)
   const discDisplays = buildOperationDiscDisplay(slots, discList)
-  const visibleDiscDisplays = showExtras
-    ? discDisplays
-    : discDisplays.filter((display) => display.item)
+  const visibleDiscDisplays = unrestricted
+    ? []
+    : showExtras
+      ? discDisplays
+      : discDisplays.filter((display) => display.item)
 
   const discColorClasses = (color?: string) => {
     switch (color) {
@@ -570,7 +575,7 @@ const OperatorCard: FC<{
               alt={info.prof[0]}
             />
           )}
-          {module !== CopilotDocV1.Module.Default && (
+          {!unrestricted && module !== CopilotDocV1.Module.Default && (
             <div
               title={t.components.viewer.OperationViewer.module_title({
                 count: module,
@@ -592,7 +597,8 @@ const OperatorCard: FC<{
         {/* 星级（展示 1..5）与基础数值（仅当作业有设置时显示） */}
         {(() => {
           const stats = readOperatorStats(operator)
-          const show = stats.hasStar || stats.hasAttack || stats.hasHp
+          const show =
+            !unrestricted && (stats.hasStar || stats.hasAttack || stats.hasHp)
           if (!show) return null
           const current = Math.min(5, Math.max(0, stats.starLevel))
           return (

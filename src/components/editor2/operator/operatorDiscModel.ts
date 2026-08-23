@@ -93,6 +93,7 @@ function withDiscSlots(
 
   return {
     ...operator,
+    unrestricted: false,
     discsSelected,
     discStarStones,
     discAssistStars,
