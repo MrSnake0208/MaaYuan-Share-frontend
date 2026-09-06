@@ -1,6 +1,7 @@
 import { Button, Callout, NonIdealState } from '@blueprintjs/core'
 import { Tooltip2 } from '@blueprintjs/popover2'
 
+import { useLevels } from 'apis/level'
 import { UseOperationsParams, useOperations } from 'apis/operation'
 import { useAtomValue } from 'jotai'
 import { ComponentType, ReactNode, useEffect, useState } from 'react'
@@ -10,6 +11,7 @@ import { neoLayoutAtom } from 'store/pref'
 import { moveSunkOperationsToBottom } from 'store/sunkOperations'
 
 import { useTranslation } from '../i18n/i18n'
+import { findLevelByStageName, isLevelWithinTimeRange } from '../models/level'
 import { Operation } from '../models/operation'
 import { NeoOperationCard, OperationCard } from './OperationCard'
 import { withSuspensable } from './Suspensable'
@@ -33,6 +35,10 @@ interface OperationListProps extends UseOperationsParams {
    * 若未指定则不过滤。
    */
   sourceTypeFilter?: 'original' | 'repost'
+  /**
+   * 首页按排序浏览时隐藏不在关卡时间范围内的作业。
+   */
+  hideInactiveLevels?: boolean
 }
 
 export const OperationList: ComponentType<OperationListProps> = withSuspensable(
@@ -43,11 +49,13 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
     onUpdate,
     renderMultiSelectActions,
     sourceTypeFilter,
+    hideInactiveLevels,
     ...params
   }) => {
     const t = useTranslation()
     const neoLayout = useAtomValue(neoLayoutAtom)
     const sunkEnabled = useAtomValue(sunkEnabledAtom)
+    const { data: levels, isLoading: levelsLoading } = useLevels()
 
     const { operations, total, setSize, isValidating, isReachingEnd } =
       useOperations({
@@ -81,6 +89,16 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
       }
     }
 
+    const shouldHideInactiveLevels =
+      !!hideInactiveLevels &&
+      !levelsLoading &&
+      !params.keyword?.trim() &&
+      !params.levelKeyword?.trim() &&
+      !params.uploaderId &&
+      !params.operationIds?.length &&
+      !params.tags?.length &&
+      !params.operator
+
     // 根据需要进行客户端过滤（例如按来源：原创/搬运）
     const displayedOperations = (
       sourceTypeFilter
@@ -89,6 +107,17 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
           )
         : operations
     ).filter((op) => {
+      if (shouldHideInactiveLevels) {
+        // ponytail: linear matching is enough for one page; use a stage map if level data grows.
+        const level = findLevelByStageName(
+          levels ?? [],
+          op.preLevel?.stageId ||
+            op.preLevel?.levelId ||
+            op.parsedContent.stageName,
+        )
+        if (level && !isLevelWithinTimeRange(level)) return false
+      }
+
       if (!params.tags?.length) return true
       const itemTags = Array.isArray(op.metadata?.tags)
         ? (op.metadata?.tags as string[])
@@ -136,7 +165,7 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
 
     useEffect(() => {
       const pageSize = params.limit ?? 50
-      if (!params.tags?.length) return
+      if (!params.tags?.length && !shouldHideInactiveLevels) return
       if (!pageSize || displayedOperations.length >= pageSize) return
       if (isReachingEnd || isValidating) return
       setSize((size) => size + 1)
@@ -147,6 +176,7 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
       isReachingEnd,
       isValidating,
       setSize,
+      shouldHideInactiveLevels,
     ])
 
     return (

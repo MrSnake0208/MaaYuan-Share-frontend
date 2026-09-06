@@ -307,6 +307,7 @@ export const Operations: ComponentType = withSuspensable(() => {
           <OperationList
             {...queryParams}
             tags={tags}
+            hideInactiveLevels
             multiselect={multiselect}
             showReadStatus
             sunkOperationIds={sunkEnabled ? sunkOperationIds : []}

@@ -29,6 +29,7 @@ async function fetchLevelsV2() {
     name: it.name ?? "",
     width: it.width ?? 0,
     height: it.height ?? 0,
+    endTime: it.endTime ?? it.end_time ?? undefined,
   }));
   return mapped;
 }

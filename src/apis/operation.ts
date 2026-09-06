@@ -181,6 +181,7 @@ export function useOperations({
                 name,
                 width: 0,
                 height: 0,
+                endTime: d.endTime ?? d.end_time ?? undefined,
               };
         return {
           ...baseInfo,
@@ -296,6 +297,7 @@ export async function getOperation(req: { id: number }): Promise<Operation> {
       name,
       width: 0,
       height: 0,
+      endTime: d.endTime ?? d.end_time ?? undefined,
     };
   })();
 
@@ -380,7 +382,7 @@ function mapResponseMetadata(raw: any | undefined): OperationMetadata {
 
   // 当后端未提供 metadata（null/undefined）时，不推断来源类型，
   // 保持为空以避免前端为标题加上前缀（例如“【原创】”）。
-  if (raw == null) {
+  if (raw === null || raw === undefined) {
     return {
       // 故意不设置 sourceType，以便 UI 判空时不显示前缀
       repostAuthor: undefined,
@@ -407,7 +409,6 @@ function mapResponseMetadata(raw: any | undefined): OperationMetadata {
       : undefined,
   };
 }
-
 export async function createOperation(req: {
   content: string;
   status: CopilotInfoStatusEnum;

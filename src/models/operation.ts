@@ -28,6 +28,7 @@ export type Level = {
   name: string;
   width: number;
   height: number;
+  endTime?: string;
 };
 
 export enum OpRatingType {
