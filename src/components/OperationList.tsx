@@ -11,7 +11,11 @@ import { neoLayoutAtom } from 'store/pref'
 import { moveSunkOperationsToBottom } from 'store/sunkOperations'
 
 import { useTranslation } from '../i18n/i18n'
-import { findLevelByStageName, isLevelWithinTimeRange } from '../models/level'
+import {
+  findLevelByStageName,
+  getNextLevelEndTime,
+  isLevelWithinTimeRange,
+} from '../models/level'
 import { Operation } from '../models/operation'
 import { NeoOperationCard, OperationCard } from './OperationCard'
 import { withSuspensable } from './Suspensable'
@@ -56,6 +60,7 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
     const neoLayout = useAtomValue(neoLayoutAtom)
     const sunkEnabled = useAtomValue(sunkEnabledAtom)
     const { data: levels, isLoading: levelsLoading } = useLevels()
+    const [levelTimeVersion, setLevelTimeVersion] = useState(0)
 
     const { operations, total, setSize, isValidating, isReachingEnd } =
       useOperations({
@@ -98,6 +103,23 @@ export const OperationList: ComponentType<OperationListProps> = withSuspensable(
       !params.operationIds?.length &&
       !params.tags?.length &&
       !params.operator
+
+    useEffect(() => {
+      if (!shouldHideInactiveLevels) return
+
+      const now = Date.now()
+      const nextEndTime = getNextLevelEndTime(levels ?? [], now)
+      if (nextEndTime === undefined) return
+
+      // 浏览器 setTimeout 的可靠上限约为 2^31-1 ms；更远的时间先低频唤醒再重排。
+      const maxDelay = 2_147_000_000
+      const delay = Math.min(Math.max(nextEndTime - now + 1, 1), maxDelay)
+      const timer = window.setTimeout(() => {
+        setLevelTimeVersion((version) => version + 1)
+      }, delay)
+
+      return () => window.clearTimeout(timer)
+    }, [levels, levelTimeVersion, shouldHideInactiveLevels])
 
     // 根据需要进行客户端过滤（例如按来源：原创/搬运）
     const displayedOperations = (

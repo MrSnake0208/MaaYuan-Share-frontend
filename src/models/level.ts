@@ -101,6 +101,23 @@ export function isLevelWithinTimeRange(
   return endTime === undefined || now <= endTime;
 }
 
+export function getNextLevelEndTime(
+  levels: Pick<Level, "endTime">[],
+  now = Date.now(),
+): number | undefined {
+  let nextEndTime: number | undefined;
+
+  for (const level of levels) {
+    const endTime = parseLevelTime(level.endTime);
+    if (endTime === null || endTime === undefined || endTime < now) continue;
+    if (nextEndTime === undefined || endTime < nextEndTime) {
+      nextEndTime = endTime;
+    }
+  }
+
+  return nextEndTime;
+}
+
 export function hasHardMode(levels: Level[], stageName: string) {
   if (isHardMode(stageName)) {
     return true;
